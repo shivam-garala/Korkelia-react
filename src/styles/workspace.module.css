@@ -1,0 +1,248 @@
+.page {
+  height: 100vh;
+  background: var(--background);
+  color: var(--foreground);
+  display: grid;
+  grid-template-columns: 250px 1fr;
+  overflow: hidden;
+}
+
+.main {
+  display: flex;
+  flex-direction: column;
+  height: 100vh;
+  min-height: 0;
+}
+
+.headerBar {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 18px 24px;
+  background: var(--color-surface);
+  border-bottom: 1px solid var(--color-line);
+  position: sticky;
+  top: 0;
+  z-index: 5;
+}
+
+.team {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
+
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border: 1px solid color-mix(in srgb, var(--color-line), transparent 45%);
+  padding: 8px 12px;
+  border-radius: 10px;
+  font-weight: 700;
+}
+
+.actionsRow {
+  display: flex;
+  align-items: stretch;
+  gap: 8px;
+}
+
+.iconBtn {
+  width: 36px;
+  height: 36px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: #f9fafb;
+  display: grid;
+  place-items: center;
+  color: var(--color-icon);
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.iconBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-soft);
+}
+
+.avatar {
+  width: 38px;
+  height: 38px;
+  border-radius: 50%;
+  background: linear-gradient(135deg, #10b981, #34d399);
+  border: 2px solid var(--color-border);
+}
+
+.avatarRing {
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  padding: 2px;
+  background: linear-gradient(135deg, #22c55e, #0ea5e9);
+  border: none;
+  display: grid;
+  place-items: center;
+}
+
+.avatarRingInner {
+  width: 100%;
+  height: 100%;
+  border-radius: 50%;
+  background: #fff;
+  display: grid;
+  place-items: center;
+  font-weight: 800;
+  color: var(--color-primary);
+}
+
+.chip {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  padding: 8px 12px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: #f9fafb;
+  font-weight: 600;
+  font-family: var(--font-heading);
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.chip:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-soft);
+}
+
+.flagBtn,
+.ghostIcon {
+  width: 38px;
+  height: 38px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: #f9fafb;
+  display: grid;
+  place-items: center;
+  color: var(--color-icon);
+  cursor: pointer;
+  transition: all 120ms ease;
+  font-family: var(--font-heading);
+}
+
+.flagBtn:hover,
+.ghostIcon:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-soft);
+}
+
+.dot {
+  width: 8px;
+  height: 8px;
+  border-radius: 999px;
+  background: #f97316;
+  position: absolute;
+  top: 6px;
+  right: 6px;
+}
+
+.content {
+  padding: 24px;
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+}
+
+.titleRow {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+  margin-bottom: 18px;
+}
+
+.pageTitle {
+  margin: 0;
+  font-size: 26px;
+  font-weight: 400;
+  color: var(--color-heading);
+  font-family: var(--font-heading);
+}
+
+.card {
+  background: var(--color-surface);
+  border: 1px dashed var(--color-border);
+  border-radius: 14px;
+  min-height: 260px;
+  padding: 20px;
+  box-shadow: var(--shadow-soft);
+}
+
+.pill {
+  background: var(--color-primary-soft);
+  color: var(--color-primary);
+  border: 1px solid #c7d2fe;
+  padding: 6px 10px;
+  border-radius: 8px;
+  font-weight: 700;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.subtitle {
+  color: var(--color-muted);
+  margin: 0;
+  line-height: 1.5;
+}
+
+.grid {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+  gap: 12px;
+  margin-top: 16px;
+}
+
+.tile {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  padding: 12px 14px;
+  border-radius: 12px;
+  display: grid;
+  gap: 6px;
+  transition: border-color 150ms ease, transform 150ms ease;
+}
+
+.tile:hover {
+  border-color: var(--color-primary);
+  transform: translateY(-1px);
+}
+
+.tileLabel {
+  margin: 0;
+  font-weight: 600;
+  font-family: var(--font-heading);
+}
+
+.tilePath {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+@media (max-width: 960px) {
+  .page {
+    grid-template-columns: 1fr;
+  }
+
+  .headerBar {
+    padding: 16px;
+  }
+
+  .content {
+    padding: 16px;
+  }
+}

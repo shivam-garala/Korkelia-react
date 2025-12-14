@@ -1,0 +1,122 @@
+.page {
+  min-height: 100vh;
+  background: var(--background);
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  padding: 48px 16px;
+  color: var(--foreground);
+}
+
+.card {
+  width: min(520px, 100%);
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 22px;
+  padding: 26px 26px 30px;
+  box-shadow: var(--shadow-soft);
+}
+
+.kicker {
+  text-transform: uppercase;
+  letter-spacing: 2px;
+  color: var(--color-line);
+  font-weight: 700;
+  font-size: 12px;
+  margin-bottom: 6px;
+}
+
+.title {
+  font-size: clamp(26px, 3vw, 32px);
+  margin: 0 0 6px;
+}
+
+.subtitle {
+  color: var(--color-muted);
+  max-width: 640px;
+  line-height: 1.6;
+}
+
+.form {
+  display: grid;
+  gap: 12px;
+  margin: 20px 0 10px;
+}
+
+.label {
+  display: grid;
+  gap: 6px;
+  font-size: 14px;
+  color: var(--foreground);
+}
+
+.input {
+  padding: 12px 12px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--foreground);
+}
+
+.input:focus {
+  outline: 2px solid color-mix(in srgb, var(--color-line), transparent 65%);
+  border-color: var(--color-line);
+}
+
+.primary {
+  margin-top: 8px;
+  border: 1px solid var(--color-line);
+  background: var(--color-line);
+  color: #fff;
+  padding: 12px 16px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 700;
+}
+
+.primary:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.actions {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 10px;
+  margin: 14px 0 6px;
+}
+
+.secondary {
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--foreground);
+  padding: 12px 14px;
+  border-radius: 10px;
+  cursor: pointer;
+  font-weight: 600;
+}
+
+.secondary:hover {
+  border-color: var(--color-line);
+}
+
+.meta {
+  background: color-mix(in srgb, var(--color-surface), var(--background) 40%);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 12px 14px;
+  margin-top: 12px;
+  color: var(--color-muted);
+  line-height: 1.6;
+}
+
+.message {
+  color: var(--color-line);
+  margin: 8px 0 0;
+}
+
+@media (max-width: 520px) {
+  .page {
+    padding: 24px 12px 36px;
+  }
+}

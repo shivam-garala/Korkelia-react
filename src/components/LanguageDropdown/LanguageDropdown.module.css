@@ -1,0 +1,77 @@
+.wrap {
+  position: relative;
+}
+
+.trigger {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid var(--color-border);
+  background: #f9fafb;
+  color: var(--color-menu-text);
+  padding: 8px 10px;
+  border-radius: 10px;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.trigger:hover {
+  border-color: var(--color-primary);
+  box-shadow: var(--shadow-soft);
+}
+
+.flag {
+  font-size: 18px;
+}
+
+.label {
+  font-weight: 700;
+  font-size: 14px;
+}
+
+.chevron {
+  color: var(--color-icon);
+  font-size: 12px;
+}
+
+.menu {
+  position: absolute;
+  top: calc(100% + 6px);
+  right: 0;
+  min-width: 160px;
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: 0 12px 40px rgba(0, 0, 0, 0.12);
+  padding: 6px;
+  display: grid;
+  gap: 4px;
+  z-index: 10;
+}
+
+.item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  width: 100%;
+  border: 1px solid transparent;
+  background: transparent;
+  color: var(--color-menu-text);
+  padding: 8px;
+  border-radius: 10px;
+  text-align: left;
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.item:hover {
+  background: var(--color-primary-soft);
+  border-color: color-mix(in srgb, var(--color-line), transparent 35%);
+}
+
+.active {
+  background: var(--color-primary-soft);
+  border-color: color-mix(in srgb, var(--color-line), transparent 35%);
+  color: var(--color-primary);
+  font-weight: 700;
+}

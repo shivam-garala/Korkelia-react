@@ -1,0 +1,89 @@
+.panel {
+  background: #fafbff;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  padding: 16px;
+  box-shadow: var(--shadow-soft);
+}
+
+.formRow {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+  gap: 12px;
+  align-items: end;
+  margin-bottom: 16px;
+}
+
+.field {
+  display: grid;
+  gap: 6px;
+  font-weight: 700;
+  color: var(--foreground);
+}
+
+.field input {
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+}
+
+.saveBtn {
+  align-self: flex-end;
+  padding: 12px;
+  border-radius: 10px;
+  border: 1px solid #fca5a5;
+  background: #f97316;
+  color: #fff;
+  font-weight: 800;
+  cursor: pointer;
+}
+
+.tableCard {
+  background: #fff;
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.tableHead,
+.dataRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 10px 12px;
+  align-items: center;
+}
+
+.tableHead {
+  background: #e5e7eb;
+  font-weight: 800;
+}
+
+.filterRow {
+  display: grid;
+  grid-template-columns: repeat(5, 1fr);
+  gap: 8px;
+  padding: 10px 12px;
+  background: #f3f4f6;
+}
+
+.filterRow input {
+  padding: 10px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+}
+
+.body {
+  display: grid;
+  gap: 2px;
+}
+
+.dataRow {
+  background: #fff;
+  border-top: 1px solid var(--color-border);
+}
+
+.dataRow:nth-child(odd) {
+  background: #f9fafb;
+}

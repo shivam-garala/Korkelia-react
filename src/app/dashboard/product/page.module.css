@@ -1,0 +1,135 @@
+.panel {
+  background: var(--color-surface);
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  box-shadow: var(--shadow-soft);
+  overflow: hidden;
+}
+
+.panelHeader {
+  padding: 14px 16px;
+  border-bottom: 1px solid var(--color-line);
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: 10px;
+}
+
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 800;
+  color: var(--color-heading);
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 13px;
+}
+
+.layout {
+  display: grid;
+  grid-template-columns: 260px 1fr;
+  min-height: 520px;
+}
+
+.categories {
+  border-right: 1px solid var(--color-line);
+  padding: 14px 16px;
+}
+
+.categoryHeading {
+  margin: 0 0 10px;
+  font-size: 14px;
+  font-weight: 800;
+  color: var(--color-heading);
+  font-family: var(--font-heading);
+}
+
+.categoryList {
+  list-style: none;
+  margin: 0;
+  padding: 0;
+  display: grid;
+}
+
+.categoryItem {
+  padding: 10px 0;
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-heading);
+  font-weight: 600;
+  font-family: var(--font-heading);
+}
+
+.categoryItem:last-child {
+  border-bottom: none;
+}
+
+.products {
+  padding: 14px 16px;
+}
+
+.productTable {
+  border: 1px solid var(--color-border);
+  border-radius: 12px;
+  overflow: hidden;
+}
+
+.productHead,
+.productRow {
+  display: grid;
+  grid-template-columns: 90px 1fr 140px;
+  gap: 10px;
+  padding: 12px;
+  align-items: center;
+}
+
+.productHead {
+  background: color-mix(in srgb, var(--color-border), #ffffff 40%);
+  font-weight: 800;
+  color: var(--color-menu-text);
+  border-bottom: 1px solid var(--color-line);
+}
+
+.productRow {
+  border-bottom: 1px solid var(--color-line);
+  color: var(--color-heading);
+}
+
+.productRow:last-child {
+  border-bottom: none;
+}
+
+.productLink {
+  color: var(--color-heading);
+  font-weight: 700;
+  text-decoration: none;
+  font-family: var(--font-heading);
+}
+
+.productLink:hover {
+  color: var(--color-line);
+  text-decoration: underline;
+}
+
+.status {
+  justify-self: end;
+  padding: 6px 10px;
+  border-radius: 999px;
+  border: 1px solid color-mix(in srgb, var(--color-line), transparent 35%);
+  color: var(--color-line);
+  font-weight: 800;
+  font-size: 12px;
+}
+
+@media (max-width: 960px) {
+  .layout {
+    grid-template-columns: 1fr;
+  }
+
+  .categories {
+    border-right: none;
+    border-bottom: 1px solid var(--color-line);
+  }
+}

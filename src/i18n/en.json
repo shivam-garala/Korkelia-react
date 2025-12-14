@@ -1,0 +1,30 @@
+{
+  "common": {
+    "language": "Language",
+    "currency": "Currency"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "CUSTOM RING AS A DREAM",
+      "title": "We are goldsmiths in Helsinki and we create everything from small to demanding custom work",
+      "subcopy": "We are a goldsmith shop in Helsinki and deliver both small and more demanding custom work.",
+      "ctaPrimary": "Read more",
+      "ctaSecondary": "Request a quote"
+    }
+  },
+  "footer": {
+    "brandTitle": "KORKEILA HELSINKI",
+    "brandCopyLine1": "Goldsmith shop in Helsinki. Custom work, gold and silver jewelry.",
+    "brandCopyLine2": "Lab-grown and natural diamonds.",
+    "infoTitle": "INFORMATION",
+    "links": {
+      "privacy": "Privacy Policy",
+      "shipping": "Shipping Policy",
+      "returns": "Returns",
+      "search": "Search the Site"
+    },
+    "copyrightLine1": "© Korkeila Helsinki.",
+    "copyrightLine2": "All rights reserved."
+  }
+}
+

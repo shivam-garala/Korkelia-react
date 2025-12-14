@@ -1,0 +1,30 @@
+{
+  "common": {
+    "language": "Kieli",
+    "currency": "Valuutta"
+  },
+  "home": {
+    "hero": {
+      "eyebrow": "UNELMIEN SORMUS TILAUSTYÖNÄ",
+      "title": "Olemme kultaseppiä Helsingissä ja toteutamme niin pienet kuin vaativammatkin tilaustyöt",
+      "subcopy": "Olemme kultaseppäliike Helsingissä ja toteutamme niin pienet kuin vaativammatkin tilaustyöt.",
+      "ctaPrimary": "Lue lisää",
+      "ctaSecondary": "Pyydä tarjous"
+    }
+  },
+  "footer": {
+    "brandTitle": "KORKEILA HELSINKI",
+    "brandCopyLine1": "Kultasepänliike Helsingissä. Tilaustyöt, kulta- ja hopeakorut.",
+    "brandCopyLine2": "Laboratorio- ja luonnontimantit.",
+    "infoTitle": "INFORMATION",
+    "links": {
+      "privacy": "Tietosuojakäytäntö",
+      "shipping": "Toimitusehdot",
+      "returns": "Palautukset",
+      "search": "Hae sivustolta"
+    },
+    "copyrightLine1": "© Korkeila Helsinki.",
+    "copyrightLine2": "Kaikki oikeudet pidätetään."
+  }
+}
+

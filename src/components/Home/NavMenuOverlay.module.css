@@ -1,0 +1,142 @@
+.overlay {
+  position: fixed;
+  inset: 0;
+  z-index: 60;
+  background: rgba(255, 255, 255, 0.92);
+  backdrop-filter: blur(14px);
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.top {
+  border-bottom: 1px solid var(--color-line);
+}
+
+.topInner {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 16px 16px 14px;
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: center;
+}
+
+.left {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+
+.right {
+  display: flex;
+  justify-content: flex-end;
+}
+
+.iconBtn {
+  width: 34px;
+  height: 34px;
+  border-radius: 999px;
+  border: 1px solid transparent;
+  background: transparent;
+  display: grid;
+  place-items: center;
+  color: var(--color-icon);
+  cursor: pointer;
+}
+
+.iconBtn:hover {
+  background: color-mix(in srgb, var(--color-border), transparent 70%);
+}
+
+.icon {
+  width: 18px;
+  height: 18px;
+}
+
+.brand {
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  text-decoration: none;
+  color: var(--color-menu-text);
+  font-family: var(--font-heading);
+}
+
+.brandLogo {
+  width: auto;
+  height: 64px;
+  display: block;
+}
+
+.brandName {
+  font-size: 34px;
+  letter-spacing: 3px;
+  font-weight: 500;
+  line-height: 1;
+}
+
+.brandCity {
+  font-size: 11px;
+  letter-spacing: 3px;
+  color: var(--color-muted);
+}
+
+.content {
+  max-width: 1180px;
+  margin: 0 auto;
+  padding: 34px 16px 40px;
+  width: 100%;
+}
+
+.menu {
+  list-style: none;
+  padding: 0;
+  margin: 0;
+  display: grid;
+  gap: 16px;
+  font-family: var(--font-heading);
+  color: var(--color-menu-text);
+  max-width: 520px;
+}
+
+.itemRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.link {
+  text-decoration: none;
+  color: var(--color-menu-text);
+  font-size: 18px;
+  font-weight: 600;
+}
+
+.link:hover {
+  color: var(--color-line);
+}
+
+.chev {
+  width: 14px;
+  height: 9px;
+  color: var(--color-line);
+}
+
+.subMenu {
+  margin-top: 10px;
+  padding-left: 18px;
+  display: grid;
+  gap: 10px;
+}
+
+.subLink {
+  text-decoration: none;
+  color: var(--color-muted);
+  font-weight: 600;
+  font-size: 14px;
+}
+
+.subLink:hover {
+  color: var(--color-line);
+}
