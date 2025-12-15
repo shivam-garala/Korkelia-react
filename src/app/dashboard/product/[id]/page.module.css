@@ -1,5 +1,7 @@
 .page {
   font-family: var(--font-nata-sans), sans-serif;
+  --font-heading: var(--font-nata-sans), sans-serif;
+  --font-body: var(--font-nata-sans), sans-serif;
 }
 
 .header {

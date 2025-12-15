@@ -1,0 +1,202 @@
+.panel {
+  padding: 0 0 6px;
+  font-family: var(--font-nata-sans), sans-serif;
+  color: var(--color-heading);
+}
+
+.title {
+  margin: 0 0 10px;
+  font-size: 18px;
+  font-weight: 500;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  font-family: var(--font-heading);
+}
+
+.copy {
+  margin: 0 0 18px;
+  color: var(--color-muted);
+  font-size: 12px;
+  line-height: 1.55;
+}
+
+.sectionTitle {
+  font-size: 12px;
+  letter-spacing: 1px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  padding: 12px 0 8px;
+  border-bottom: 1px solid var(--color-line);
+}
+
+.section {
+  padding-top: 8px;
+}
+
+.fieldTitle {
+  margin: 12px 0 6px;
+  font-size: 10px;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  color: color-mix(in srgb, var(--color-heading), #ffffff 25%);
+}
+
+.cuts {
+  display: grid;
+  grid-template-columns: repeat(4, minmax(0, 1fr));
+  gap: 10px 10px;
+  padding-top: 6px;
+}
+
+.cut {
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 6px 6px 8px;
+  display: grid;
+  justify-items: center;
+  gap: 6px;
+  cursor: pointer;
+  border-radius: 2px;
+}
+
+.cutActive {
+  border-color: color-mix(in srgb, var(--color-line), var(--color-border) 25%);
+}
+
+.cutIcon {
+  width: 36px;
+  height: 36px;
+  border: 1px solid color-mix(in srgb, var(--color-line), var(--color-border) 35%);
+  display: grid;
+  place-items: center;
+  border-radius: 2px;
+  background: #fff;
+}
+
+.cutLabel {
+  font-size: 9px;
+  letter-spacing: 0.8px;
+  color: var(--color-muted);
+}
+
+.gridFields {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 10px;
+}
+
+.select {
+  width: 100%;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--color-line), var(--color-border) 45%);
+  background: #fff;
+  color: var(--color-heading);
+  font-size: 11px;
+}
+
+.pills {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 8px;
+}
+
+.pill {
+  min-width: 38px;
+  height: 24px;
+  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--color-line), var(--color-border) 45%);
+  background: #fff;
+  color: var(--color-heading);
+  font-size: 10px;
+  cursor: pointer;
+}
+
+.pillActive {
+  background: color-mix(in srgb, var(--color-line), #ffffff 86%);
+}
+
+.metalRow {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+}
+
+.metal {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  border: 1px solid transparent;
+  background: transparent;
+  padding: 6px 8px;
+  border-radius: 2px;
+  cursor: pointer;
+  font-size: 10px;
+  color: var(--color-muted);
+}
+
+.metalActive {
+  border-color: color-mix(in srgb, var(--color-line), var(--color-border) 35%);
+  color: var(--color-heading);
+}
+
+.dot {
+  width: 14px;
+  height: 14px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+}
+
+.dotLabel {
+  letter-spacing: 0.8px;
+}
+
+.engraveRow {
+  display: grid;
+  grid-template-columns: 1fr auto;
+  gap: 10px;
+  align-items: center;
+}
+
+.input {
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 2px;
+  border: 1px solid var(--color-border);
+  font-size: 11px;
+}
+
+.submit {
+  height: 30px;
+  padding: 0 14px;
+  border-radius: 2px;
+  border: 1px solid var(--color-border);
+  background: #fff;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  font-size: 10px;
+  color: var(--color-heading);
+  cursor: pointer;
+}
+
+.enquire {
+  margin-top: 14px;
+  height: 32px;
+  width: 160px;
+  border-radius: 2px;
+  border: 1px solid var(--color-line);
+  background: var(--color-line);
+  color: #fff;
+  font-weight: 700;
+  letter-spacing: 1px;
+  font-size: 10px;
+  cursor: pointer;
+}
+
+@media (max-width: 980px) {
+  .cuts {
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+  }
+}
+

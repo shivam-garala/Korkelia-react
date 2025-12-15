@@ -78,12 +78,16 @@
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 10px 16px;
-  border-radius: 999px;
-  border: 1px solid currentColor;
+  padding: 0;
+  border-radius: 0;
+  border: none;
   text-decoration: none;
   font-weight: 800;
-  letter-spacing: 0.2px;
+  letter-spacing: 1.4px;
+  font-size: 11px;
+  text-transform: uppercase;
+  border-bottom: 1px solid currentColor;
+  padding-bottom: 2px;
 }
 
 .schemeLight {
@@ -99,6 +103,5 @@
 }
 
 .schemeLight .cta {
-  border-color: color-mix(in srgb, var(--color-line), transparent 15%);
   color: var(--color-line);
 }

@@ -8,7 +8,7 @@
 
 .panelHeader {
   padding: 14px 16px;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-category-line);
   display: flex;
   align-items: baseline;
   justify-content: space-between;
@@ -35,7 +35,7 @@
 }
 
 .categories {
-  border-right: 1px solid var(--color-line);
+  border-right: 1px solid var(--color-category-line);
   padding: 14px 16px;
 }
 
@@ -56,7 +56,7 @@
 
 .categoryItem {
   padding: 10px 0;
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-category-line);
   color: var(--color-heading);
   font-weight: 600;
   font-family: var(--font-heading);
@@ -88,12 +88,12 @@
 .productHead {
   background: color-mix(in srgb, var(--color-border), #ffffff 40%);
   font-weight: 800;
-  color: var(--color-menu-text);
-  border-bottom: 1px solid var(--color-line);
+  color: var(--color-heading);
+  border-bottom: 1px solid var(--color-category-line);
 }
 
 .productRow {
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: 1px solid var(--color-category-line);
   color: var(--color-heading);
 }
 
@@ -130,6 +130,6 @@
 
   .categories {
     border-right: none;
-    border-bottom: 1px solid var(--color-line);
+    border-bottom: 1px solid var(--color-category-line);
   }
 }

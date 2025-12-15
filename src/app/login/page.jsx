@@ -34,11 +34,28 @@ export default function LoginPage() {
     setMessage(null);
 
     try {
-      // Swap this mock with a real login call:
-      // const { data } = await axiosClient.post("/auth/login", { email, password });
-      // dispatch(setCredentials({ token: data.token, userName: data.name }));
+      const response = await fetch("/api/admin/login", {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json",
+          Accept: "application/json",
+        },
+        body: JSON.stringify({ email, password }),
+      });
 
-      const token = "demo-token";
+      const data = await response.json().catch(() => null);
+      const token = data?.token ?? data?.accessToken ?? data?.access_token ?? null;
+
+      if (!response.ok || !token) {
+        const errorMessage =
+          data?.message ??
+          data?.error ??
+          (typeof data === "string" ? data : null) ??
+          "Login failed. Please check your credentials.";
+        setMessage(errorMessage);
+        return;
+      }
+
       dispatch(setCredentials({ token, userName: email }));
       router.push("/dashboard");
     } catch (error) {
@@ -49,7 +66,12 @@ export default function LoginPage() {
     }
   };
 
-  const handleLogout = () => {
+  const handleLogout = async () => {
+    try {
+      await fetch("/api/admin/logout", { method: "POST" });
+    } catch (error) {
+      console.error("Logout error", error);
+    }
     dispatch(clearCredentials());
     setMessage("Signed out and cleared cookies.");
   };
@@ -94,7 +116,7 @@ export default function LoginPage() {
         </form>
 
         <div className={styles.actions}>
-          <button className={styles.secondary} type="button" onClick={handleLogout}>
+          <button className={styles.secondary} type="button" onClick={handleLogout} disabled={busy}>
             Sign out
           </button>
         </div>

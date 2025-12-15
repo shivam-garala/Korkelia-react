@@ -2,8 +2,7 @@
   position: relative;
   min-height: 560px;
   display: grid;
-  place-items: center;
-  background: #0b0f14;
+  background: #ffffff;
 }
 
 .media {
@@ -13,7 +12,7 @@
 
 .image {
   object-fit: cover;
-  filter: saturate(1.05) contrast(1.05);
+  filter: saturate(1.02) contrast(1.02);
 }
 
 .video {
@@ -21,79 +20,94 @@
   height: 100%;
   object-fit: cover;
   display: block;
+  filter: brightness(1.12) contrast(1.04);
 }
 
 .overlay {
   position: absolute;
   inset: 0;
-  background: linear-gradient(180deg, rgba(0, 0, 0, 0.05), rgba(0, 0, 0, 0.55));
+  /* Keep video clear; only darken behind left text area */
+  background: linear-gradient(
+    90deg,
+    rgba(0, 0, 0, 0.32) 0%,
+    rgba(0, 0, 0, 0.18) 28%,
+    rgba(0, 0, 0, 0.0) 62%,
+    rgba(0, 0, 0, 0.0) 100%
+  );
 }
 
 .content {
   position: relative;
   width: 100%;
   max-width: 1180px;
-  padding: 0 16px 56px;
+  margin: 0 auto;
+  padding: 0 16px 46px;
   color: #ffffff;
-  font-family: var(--font-heading);
-  display: flex;
-  align-items: flex-end;
+  font-family: var(--font-nata-sans), sans-serif;
+  display: grid;
+  align-content: end;
 }
 
 .contentInner {
-  max-width: 640px;
-  padding-left: 8px;
+  max-width: 560px;
+  text-shadow: 0 2px 18px rgba(0, 0, 0, 0.35);
 }
 
-.eyebrow {
+.headline {
   margin: 0 0 10px;
-  font-size: 16px;
-  letter-spacing: 1.2px;
+  font-size: clamp(26px, 3.2vw, 36px);
+  font-weight: 500;
+  letter-spacing: 1.8px;
   text-transform: uppercase;
   opacity: 0.92;
-  font-weight: 500;
+  font-family: var(--font-nata-sans), sans-serif;
 }
 
-.title {
+.copy {
   margin: 0 0 14px;
-  font-size: 12px;
-  font-weight: 500;
-  max-width: 560px;
-  line-height: 1.45;
+  font-size: 13px;
+  font-weight: 400;
+  max-width: 520px;
+  line-height: 1.6;
   opacity: 0.92;
 }
 
 .subcopy {
   margin: 0 0 18px;
-  max-width: 560px;
-  line-height: 1.55;
-  opacity: 0.9;
+  max-width: 520px;
+  line-height: 1.6;
+  opacity: 0.92;
   font-size: 12px;
 }
 
 .ctaRow {
   display: flex;
-  gap: 10px;
+  gap: 14px;
   flex-wrap: wrap;
+  margin-top: 6px;
 }
 
 .cta {
   display: inline-flex;
   align-items: center;
   justify-content: center;
-  padding: 8px 14px;
-  border-radius: 6px;
-  border: 1px solid rgba(255, 255, 255, 0.18);
-  background: rgba(255, 255, 255, 0.08);
+  padding: 12px 20px;
+  border-radius: 2px;
+  border: 1px solid transparent;
+  background: #7c5e4f;
   color: #ffffff;
-  font-weight: 600;
+  font-weight: 700;
   text-decoration: none;
-  letter-spacing: 0.2px;
+  letter-spacing: 0.4px;
   font-size: 12px;
 }
 
 .ctaSecondary {
-  background: rgba(255, 255, 255, 0.12);
+  background: color-mix(in srgb, #7c5e4f, #ffffff 12%);
+}
+
+.cta:hover {
+  background: color-mix(in srgb, #7c5e4f, #000000 10%);
 }
 
 @media (max-width: 720px) {
@@ -102,6 +116,6 @@
   }
 
   .content {
-    padding: 0 16px 40px;
+    padding: 0 16px 34px;
   }
 }

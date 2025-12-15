@@ -1,42 +1,43 @@
 #!/bin/bash
+set -e
 
-set -e  # stop on first error
-
-echo "🚀 Starting UAT deployment (Next.js static)..."
+echo "🚀 UAT Deploy Started"
 
 # ---------- CONFIG ----------
-BUCKET_NAME="uat-front-build"
-DISTRIBUTION_ID="E3GG33N359G9YA"   # <-- replace with real ID
-BUILD_DIR="out"
+BRANCH="main"
+ENV_BUCKET="uat-system-files"
+ENV_PREFIX="env/frontend"
+ENV_FILE=".env"
+PM2_APP="uat-front"
 
-# ---------- CLEAN ----------
-echo "🧹 Cleaning old build artifacts..."
-rm -rf .next out
+# ---------- GIT RESET ----------
+echo "🧹 Resetting local git state..."
+git fetch origin
+git reset --hard origin/$BRANCH
+git clean -fd
 
-# ---------- BUILD ----------
-echo "📦 Building Next.js app..."
-npm run build
+# ---------- FETCH ENV ----------
+echo "🔐 Fetching environment file from S3..."
+aws s3 cp "s3://$ENV_BUCKET/$ENV_PREFIX/$ENV_FILE" "$ENV_FILE"
 
-echo "📤 Exporting static site..."
-npm run export
-
-# ---------- SAFETY CHECK ----------
-if [ ! -d "$BUILD_DIR" ]; then
-  echo "❌ Build directory '$BUILD_DIR' not found. Aborting."
+if [ ! -s "$ENV_FILE" ]; then
+  echo "❌ .env file missing or empty"
   exit 1
 fi
 
-# ---------- DEPLOY ----------
-echo "☁️ Syncing to S3..."
-aws s3 sync $BUILD_DIR/ s3://$BUCKET_NAME \
-  --delete \
-  --exclude "*.save"
+# ---------- CLEAN BUILD ----------
+echo "🧹 Cleaning old build artifacts..."
+rm -rf .next node_modules/.cache
 
-# ---------- INVALIDATE ----------
-echo "🧹 Invalidating CloudFront cache..."
-aws cloudfront create-invalidation \
-  --distribution-id $DISTRIBUTION_ID \
-  --paths "/*" \
-  > /dev/null
+# ---------- BUILD ----------
+echo "📦 Installing dependencies..."
+npm ci
 
-echo "✅ UAT deployment complete!"
+echo "🏗️ Building Next.js (SSR)..."
+npm run build
+
+# ---------- PM2 ----------
+echo "♻️ Reloading PM2 app..."
+pm2 reload "$PM2_APP" || pm2 start npm --name "$PM2_APP" -- run start
+
+echo "✅ UAT Deploy Completed Successfully"

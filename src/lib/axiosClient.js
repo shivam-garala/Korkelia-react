@@ -3,8 +3,13 @@
 import axios from "axios";
 import Cookies from "js-cookie";
 
+console.log(process.env.NEXT_PUBLIC_API_URL);
+
 const axiosClient = axios.create({
-  baseURL: process.env.NEXT_PUBLIC_API_BASE_URL,
+  baseURL:
+    process.env.NEXT_PUBLIC_API_URL ??
+    process.env.NEXT_PUBLIC_BASE_API_URL ??
+    process.env.NEXT_BASE_API_URL,
   headers: {
     Accept: "application/json",
   },

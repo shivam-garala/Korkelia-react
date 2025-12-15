@@ -1,0 +1,31 @@
+.page {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-nata-sans), sans-serif;
+}
+
+.main {
+  padding: 10px 0 60px;
+}
+
+.topLine {
+  height: 1px;
+  background: var(--color-line);
+  opacity: 0.65;
+  margin: 18px 0 30px;
+}
+
+.heading {
+  margin: 0;
+  text-align: center;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: 2px;
+  color: var(--color-heading);
+  font-size: 16px;
+}
+
+.gridWrap {
+  margin-top: 56px;
+}
+

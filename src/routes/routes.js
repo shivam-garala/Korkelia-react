@@ -1,6 +1,7 @@
 // Referenced from the kohira-pos-react route map: keep a small Next.js-friendly manifest.
 export const publicRoutes = [
   { id: "LR1", name: "login", path: "/login", access: "public" },
+  { id: "PR1", name: "product", path: "/product", access: "public" },
 ];
 
 export const protectedRoutes = [

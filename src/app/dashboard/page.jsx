@@ -73,7 +73,12 @@ export default function DashboardPage() {
         open={profileOpen}
         onClose={() => setProfileOpen(false)}
         name={userName}
-        onLogout={() => {
+        onLogout={async () => {
+          try {
+            await fetch("/api/admin/logout", { method: "POST" });
+          } catch (error) {
+            console.error("Logout error", error);
+          }
           dispatch(clearCredentials());
           router.push("/login");
         }}

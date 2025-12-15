@@ -1,0 +1,28 @@
+.bar {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  align-items: center;
+  gap: 14px;
+  margin: 18px 0 0;
+}
+
+.slot {
+  justify-self: start;
+}
+
+.slotRight {
+  justify-self: end;
+}
+
+.select {
+  min-width: 170px;
+  height: 30px;
+  padding: 0 10px;
+  border-radius: 2px;
+  border: 1px solid color-mix(in srgb, var(--color-line), var(--color-border) 45%);
+  background: #fff;
+  color: var(--color-heading);
+  font-family: var(--font-nata-sans), sans-serif;
+  font-size: 11px;
+}
+
