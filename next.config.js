@@ -7,9 +7,6 @@ const nextConfig = {
       "@": path.resolve(__dirname, "src"),
     },
   },
-  images: {
-    unoptimized: true,
-  },
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias ?? {}),
@@ -17,7 +14,6 @@ const nextConfig = {
     };
     return config;
   },
-  output: "export",
 };
 
 module.exports = nextConfig;
