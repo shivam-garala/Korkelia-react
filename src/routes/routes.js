@@ -12,6 +12,10 @@ export const protectedRoutes = [
   { id: "DR5", name: "dashboard-user", path: "/dashboard/user", access: "protected" },
   { id: "DR6", name: "dashboard-user-role", path: "/dashboard/user-role", access: "protected" },
   { id: "DR7", name: "dashboard-product", path: "/dashboard/product", access: "protected" },
+  { id: "DR8", name: "diamond-master", path: "/dashboard/diamond-master", access: "protected" },
+  { id: "DR9", name: "cut-master", path: "/dashboard/cut-master", access: "protected" },
+  { id: "DR10", name: "category-master", path: "/dashboard/category-master", access: "protected" },
+  { id: "DR11", name: "style-master", path: "/dashboard/style-master", access: "protected" },
 ];
 
 export const allRoutes = [...publicRoutes, ...protectedRoutes];
