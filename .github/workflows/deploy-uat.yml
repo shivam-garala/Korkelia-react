@@ -51,7 +51,7 @@ jobs:
 
             # ---------- BUILD ----------
             echo "📦 Installing dependencies..."
-            npm install --omit=dev
+            npm install
 
             echo "🏗️ Building Next.js (SSR)..."
             npm run build
