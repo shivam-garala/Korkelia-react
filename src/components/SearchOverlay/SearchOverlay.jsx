@@ -14,6 +14,10 @@ const ITEMS = [
   { label: "Metal Rate", path: "/dashboard/gold-rate", tag: "Rates" },
   { label: "System Users", path: "/dashboard/user", tag: "Users" },
   { label: "User Roles", path: "/dashboard/user-role", tag: "Users" },
+  { label: "Diamond Master", path: "/dashboard/diamond-master", tag: "Masters" },
+  { label: "Cut Master", path: "/dashboard/cut-master", tag: "Masters" },
+  { label: "Category Master", path: "/dashboard/category-master", tag: "Masters" },
+  { label: "Style Master", path: "/dashboard/style-master", tag: "Masters" },
 ];
 
 export default function SearchOverlay({ open, onClose }) {

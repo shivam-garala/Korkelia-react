@@ -215,7 +215,6 @@ export default function GoldRatePage() {
               step="0.01"
               value={rate}
               onChange={(e) => setRate(e.target.value)}
-              placeholder="6000.00"
               required
               preventWheel
             />

@@ -3,6 +3,10 @@ import loginReducer from "./slices/loginSlice";
 import usersReducer from "./slices/userSlice";
 import adminRolesReducer from "./slices/adminRoleSlice";
 import metalRatesReducer from "./slices/metalRateSlice";
+import diamondMasterReducer from "./slices/diamondMasterSlice";
+import cutMasterReducer from "./slices/cutMasterSlice";
+import categoryMasterReducer from "./slices/categoryMasterSlice";
+import styleMasterReducer from "./slices/styleMasterSlice";
 
 export const store = configureStore({
   reducer: {
@@ -10,5 +14,9 @@ export const store = configureStore({
     users: usersReducer,
     adminRoles: adminRolesReducer,
     metalRates: metalRatesReducer,
+    diamondMaster: diamondMasterReducer,
+    cutMaster: cutMasterReducer,
+    categoryMaster: categoryMasterReducer,
+    styleMaster: styleMasterReducer,
   },
 });
