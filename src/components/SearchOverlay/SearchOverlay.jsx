@@ -11,7 +11,7 @@ const ITEMS = [
   { label: "Banking", path: "/dashboard/banking", tag: "Overview" },
   { label: "Booking", path: "/dashboard/booking", tag: "Overview" },
   { label: "File", path: "/dashboard/file", tag: "Overview" },
-  { label: "Today's Gold Rate", path: "/dashboard/gold-rate", tag: "Rates" },
+  { label: "Metal Rate", path: "/dashboard/gold-rate", tag: "Rates" },
   { label: "System Users", path: "/dashboard/user", tag: "Users" },
   { label: "User Roles", path: "/dashboard/user-role", tag: "Users" },
 ];

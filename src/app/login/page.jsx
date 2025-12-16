@@ -44,7 +44,14 @@ export default function LoginPage() {
       });
 
       const data = await response.json().catch(() => null);
-      const token = data?.token ?? data?.accessToken ?? data?.access_token ?? null;
+      const token =
+        data?.authToken ??
+        data?.token ??
+        data?.accessToken ??
+        data?.access_token ??
+        null;
+      const resolvedEmail = data?.email ?? email;
+      const resolvedUserName = data?.username ?? data?.userName ?? resolvedEmail;
 
       if (!response.ok || !token) {
         const errorMessage =
@@ -56,8 +63,14 @@ export default function LoginPage() {
         return;
       }
 
-      dispatch(setCredentials({ token, userName: email }));
-      router.push("/dashboard");
+      dispatch(
+        setCredentials({
+          token,
+          userName: resolvedUserName,
+          email: resolvedEmail,
+        })
+      );
+      router.push("/admin");
     } catch (error) {
       setMessage("Login failed. Check the console for details.");
       console.error("Login error", error);

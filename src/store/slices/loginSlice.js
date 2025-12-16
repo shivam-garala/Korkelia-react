@@ -4,6 +4,7 @@ import Cookies from "js-cookie";
 const initialState = {
   token: null,
   userName: null,
+  email: null,
 };
 
 const loginSlice = createSlice({
@@ -15,6 +16,7 @@ const loginSlice = createSlice({
       if (!payload) {
         state.token = null;
         state.userName = null;
+        state.email = null;
         return;
       }
 
@@ -25,21 +27,28 @@ const loginSlice = createSlice({
 
       state.token = payload.token ?? null;
       state.userName = payload.userName ?? null;
+      state.email = payload.email ?? null;
     },
     setCredentials(state, action) {
-      const { token, userName } = action.payload;
+      const { token, userName, email } = action.payload;
       state.token = token;
       state.userName = userName ?? null;
+      state.email = email ?? null;
       Cookies.set("authToken", token, { sameSite: "lax" });
       if (userName) {
         Cookies.set("userName", userName, { sameSite: "lax" });
+      }
+      if (email) {
+        Cookies.set("email", email, { sameSite: "lax" });
       }
     },
     clearCredentials(state) {
       state.token = null;
       state.userName = null;
+      state.email = null;
       Cookies.remove("authToken");
       Cookies.remove("userName");
+      Cookies.remove("email");
     },
   },
 });
@@ -48,6 +57,6 @@ export const { setCredentials, clearCredentials, hydrateFromCookie } = loginSlic
 
 export const selectIsAuthenticated = (state) => Boolean(state.auth.token);
 export const selectUserName = (state) => state.auth.userName;
+export const selectEmail = (state) => state.auth.email;
 
 export default loginSlice.reducer;
-

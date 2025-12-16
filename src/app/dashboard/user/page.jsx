@@ -6,6 +6,9 @@ import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import LanguageDropdown from "../../../components/LanguageDropdown/LanguageDropdown.jsx";
 import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
+import DataTable from "../../../components/ui/DataTable.jsx";
+import Modal from "../../../components/ui/Modal.jsx";
+import TextField from "../../../components/ui/TextField.jsx";
 import {
   createUser,
   deleteUser,
@@ -36,11 +39,12 @@ export default function UserPage() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
-  const [formOpen, setFormOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
-  const [name, setName] = useState("");
-  const [role, setRole] = useState("");
-  const [status, setStatus] = useState("Active");
+  const [email, setEmail] = useState("");
+  const [username, setUsername] = useState("");
+  const [password, setPassword] = useState("");
+  const [filters, setFilters] = useState({ no: "", email: "", username: "" });
 
   const rows = useMemo(() => (Array.isArray(users) ? users : []), [users]);
 
@@ -50,31 +54,35 @@ export default function UserPage() {
 
   const openCreate = () => {
     setEditingId(null);
-    setName("");
-    setRole("");
-    setStatus("Active");
-    setFormOpen(true);
+    setEmail("");
+    setUsername("");
+    setPassword("");
+    setModalOpen(true);
   };
 
   const openEdit = (user) => {
     const id = pickValue(user, ["id", "user_id", "userId"]);
     setEditingId(id);
-    setName(pickValue(user, ["name", "user_name", "username", "userName"]));
-    setRole(pickValue(user, ["role", "role_name", "roleName"]));
-    setStatus(pickValue(user, ["status", "is_active"]) || "Active");
-    setFormOpen(true);
+    setEmail(pickValue(user, ["email", "user_email", "userEmail"]));
+    setUsername(pickValue(user, ["username", "user_name", "userName", "name"]));
+    setPassword("");
+    setModalOpen(true);
   };
 
   const submitForm = async (event) => {
     event.preventDefault();
-    const payload = { name, role, status };
+    const payload = {
+      email,
+      username,
+      ...(password ? { password } : null),
+    };
 
     if (editingId) {
       await dispatch(updateUser({ id: editingId, payload }));
     } else {
       await dispatch(createUser(payload));
     }
-    setFormOpen(false);
+    setModalOpen(false);
     setEditingId(null);
   };
 
@@ -82,6 +90,56 @@ export default function UserPage() {
     if (!id) return;
     await dispatch(deleteUser(id));
   };
+
+  const tableRows = useMemo(() => {
+    return rows.map((user, index) => {
+      const rawId = pickValue(user, ["id", "user_id", "userId"]);
+      return {
+        no: index + 1,
+        id: rawId || index + 1,
+        email: pickValue(user, ["email", "user_email", "userEmail"]) || "-",
+        username: pickValue(user, ["username", "user_name", "userName", "name"]) || "-",
+        _raw: user,
+      };
+    });
+  }, [rows]);
+
+  const filteredRows = useMemo(() => {
+    const normalize = (value) => String(value ?? "").trim().toLowerCase();
+    const noQuery = normalize(filters.no);
+    const emailQuery = normalize(filters.email);
+    const usernameQuery = normalize(filters.username);
+
+    if (!noQuery && !emailQuery && !usernameQuery) return tableRows;
+
+    return tableRows.filter((row) => {
+      const noMatches = noQuery ? normalize(row.no).includes(noQuery) || normalize(row.id).includes(noQuery) : true;
+      const emailMatches = emailQuery ? normalize(row.email).includes(emailQuery) : true;
+      const usernameMatches = usernameQuery ? normalize(row.username).includes(usernameQuery) : true;
+      return noMatches && emailMatches && usernameMatches;
+    });
+  }, [filters.email, filters.no, filters.username, tableRows]);
+
+  const columns = [
+    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "email", header: "Email", filterable: true, filterPlaceholder: "Search Email" },
+    { key: "username", header: "Username", filterable: true, filterPlaceholder: "Search Username" },
+    {
+      key: "actions",
+      header: "Action",
+      filterable: false,
+      render: (row) => (
+        <div className={styles.actions}>
+          <button className={styles.iconBtn} type="button" onClick={() => openEdit(row._raw)}>
+            Edit
+          </button>
+          <button className={styles.iconBtn} type="button" onClick={() => handleDelete(row.id)}>
+            Delete
+          </button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className={layout.page}>
@@ -107,7 +165,7 @@ export default function UserPage() {
         </header>
 
         <main className={layout.content}>
-          <h1 className={layout.pageTitle}>System Users</h1>
+          {/* <h1 className={layout.pageTitle}>System Users</h1> */}
           <div className={styles.panel}>
             <div className={styles.headerRow}>
               <h2 className={styles.title}>System Users</h2>
@@ -128,105 +186,75 @@ export default function UserPage() {
 
             {error ? <div className={styles.error}>{String(error)}</div> : null}
 
-            {formOpen ? (
-              <form className={styles.form} onSubmit={submitForm}>
-                <div className={styles.formRow}>
-                  <label className={styles.formLabel}>
-                    Name
-                    <input value={name} onChange={(e) => setName(e.target.value)} required />
-                  </label>
-                  <label className={styles.formLabel}>
-                    Role
-                    <input value={role} onChange={(e) => setRole(e.target.value)} />
-                  </label>
-                  <label className={styles.formLabel}>
-                    Status
-                    <select value={status} onChange={(e) => setStatus(e.target.value)}>
-                      <option value="Active">Active</option>
-                      <option value="Inactive">Inactive</option>
-                    </select>
-                  </label>
-                </div>
-                <div className={styles.formActions}>
-                  <button className={styles.cta} type="submit" disabled={loading}>
-                    {editingId ? "Update" : "Create"}
-                  </button>
-                  <button
-                    className={styles.secondaryBtn}
-                    type="button"
-                    onClick={() => {
-                      setFormOpen(false);
-                      setEditingId(null);
-                    }}
-                  >
-                    Cancel
-                  </button>
-                </div>
-              </form>
-            ) : null}
-
-            <div className={styles.tableCard}>
-              <div className={styles.tableHead}>
-                <div>No.</div>
-                <div>User Name</div>
-                <div>Role</div>
-                <div>Status</div>
-                <div>Action</div>
-              </div>
-
-              <div className={styles.filterRow}>
-                <input type="text" placeholder="Search No." />
-                <input type="text" placeholder="Search User Name" />
-                <input type="text" placeholder="Search Role" />
-                <input type="text" placeholder="Search Status" />
-                <div />
-              </div>
-
-              <div className={styles.body}>
-                {rows.map((user, index) => {
-                  const id = pickValue(user, ["id", "user_id", "userId"]) || index + 1;
-                  const displayName =
-                    pickValue(user, ["name", "user_name", "username", "userName"]) || "-";
-                  const displayRole = pickValue(user, ["role", "role_name", "roleName"]) || "-";
-                  const displayStatus = pickValue(user, ["status", "is_active"]) || "-";
-                  const isActive =
-                    String(displayStatus).toLowerCase() === "active" ||
-                    displayStatus === 1 ||
-                    displayStatus === true;
-
-                  return (
-                    <div key={String(id)} className={styles.dataRow}>
-                      <div>{id}</div>
-                      <div>{displayName}</div>
-                      <div>{displayRole}</div>
-                      <div>
-                        <span
-                          className={`${styles.status} ${
-                            isActive ? styles.statusActive : styles.statusInactive
-                          }`}
-                        >
-                          {String(displayStatus)}
-                        </span>
-                      </div>
-                      <div className={styles.actions}>
-                        <button className={styles.iconBtn} type="button" onClick={() => openEdit(user)}>
-                          Edit
-                        </button>
-                        <button className={styles.iconBtn} type="button" onClick={() => handleDelete(id)}>
-                          Delete
-                        </button>
-                      </div>
-                    </div>
-                  );
-                })}
-              </div>
-            </div>
+            <DataTable
+              columns={columns}
+              rows={filteredRows}
+              getRowKey={(row) => row.id}
+              filters={filters}
+              onFiltersChange={setFilters}
+              emptyMessage={loading ? "Loading..." : "No users found"}
+            />
           </div>
         </main>
       </div>
 
       <ProfileDrawer open={profileOpen} onClose={() => setProfileOpen(false)} />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+
+      <Modal
+        open={modalOpen}
+        title={editingId ? "Update User" : "Create User"}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingId(null);
+        }}
+        footer={
+          <div className={styles.formActions}>
+            <button className={styles.cta} type="submit" form="user-modal-form" disabled={loading}>
+              {editingId ? "Update" : "Create"}
+            </button>
+            <button
+              className={styles.secondaryBtn}
+              type="button"
+              onClick={() => {
+                setModalOpen(false);
+                setEditingId(null);
+              }}
+            >
+              Cancel
+            </button>
+          </div>
+        }
+      >
+        <form id="user-modal-form" className={styles.form} onSubmit={submitForm}>
+          <div className={styles.formRow}>
+            <TextField
+              label="Email"
+              type="email"
+              value={email}
+              onChange={(e) => setEmail(e.target.value)}
+              required
+              autoComplete="email"
+            />
+            <TextField
+              label="Username"
+              value={username}
+              onChange={(e) => setUsername(e.target.value)}
+              required
+              placeholder="Enter username"
+            />
+            <TextField
+              label="Password"
+              type="password"
+              value={password}
+              onChange={(e) => setPassword(e.target.value)}
+              required={!editingId}
+              placeholder={editingId ? "Leave blank to keep unchanged" : ""}
+              autoComplete="new-password"
+            />
+          </div>
+        </form>
+      </Modal>
     </div>
   );
 }

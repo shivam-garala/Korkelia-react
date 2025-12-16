@@ -19,6 +19,6 @@ export async function POST() {
   const res = NextResponse.json(parsed ?? null, { status: response.status });
   res.cookies.set("authToken", "", { path: "/", maxAge: 0 });
   res.cookies.set("userName", "", { path: "/", maxAge: 0 });
+  res.cookies.set("email", "", { path: "/", maxAge: 0 });
   return res;
 }
-
