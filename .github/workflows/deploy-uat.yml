@@ -34,7 +34,7 @@ jobs:
             echo "🧹 Resetting local git state..."
             git fetch origin
             git checkout -B $BRANCH origin/$BRANCH
-            git clean -fdx
+            git clean -fd
 
             # ---------- FETCH ENV ----------
             echo "🔐 Fetching environment file from S3..."
@@ -51,7 +51,7 @@ jobs:
 
             # ---------- BUILD ----------
             echo "📦 Installing dependencies..."
-            npm install
+            npm install --no-audit --no-fund
 
             echo "🏗️ Building Next.js (SSR)..."
             npm run build
