@@ -32,6 +32,7 @@ jobs:
 
             # ---------- GIT RESET ----------
             echo "🧹 Resetting local git state..."
+            git checkout .
             git fetch origin
             git checkout -B $BRANCH origin/$BRANCH
             git clean -fd
