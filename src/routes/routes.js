@@ -8,7 +8,7 @@ export const protectedRoutes = [
   { id: "DR1", name: "dashboard", path: "/dashboard", access: "protected" },
   { id: "DR2", name: "dashboard-orders", path: "/dashboard/orders", access: "protected" },
   { id: "DR3", name: "admin", path: "/admin", access: "protected" },
-  { id: "DR4", name: "dashboard-gold-rate", path: "/dashboard/gold-rate", access: "protected" },
+  { id: "DR4", name: "metal-rate", path: "/dashboard/gold-rate", access: "protected" },
   { id: "DR5", name: "dashboard-user", path: "/dashboard/user", access: "protected" },
   { id: "DR6", name: "dashboard-user-role", path: "/dashboard/user-role", access: "protected" },
   { id: "DR7", name: "dashboard-product", path: "/dashboard/product", access: "protected" },

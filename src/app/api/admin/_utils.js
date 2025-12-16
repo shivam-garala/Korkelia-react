@@ -28,9 +28,11 @@ export async function readJsonBody(request) {
 export function extractToken(payload) {
   if (!payload) return null;
   if (typeof payload === "string") return payload;
+  if (typeof payload?.authToken === "string") return payload.authToken;
   if (typeof payload?.token === "string") return payload.token;
   if (typeof payload?.accessToken === "string") return payload.accessToken;
   if (typeof payload?.access_token === "string") return payload.access_token;
+  if (typeof payload?.data?.authToken === "string") return payload.data.authToken;
   if (typeof payload?.data?.token === "string") return payload.data.token;
   if (typeof payload?.data?.accessToken === "string") return payload.data.accessToken;
   if (typeof payload?.data?.access_token === "string") return payload.data.access_token;

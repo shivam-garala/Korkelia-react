@@ -12,7 +12,8 @@ export default function StoreProvider({ children }) {
     // Sync auth state from cookies on the client so middleware + Redux stay aligned.
     const token = Cookies.get("authToken") ?? null;
     const userName = Cookies.get("userName") ?? null;
-    store.dispatch(hydrateFromCookie({ token, userName }));
+    const email = Cookies.get("email") ?? null;
+    store.dispatch(hydrateFromCookie({ token, userName, email }));
   }, []);
 
   return (

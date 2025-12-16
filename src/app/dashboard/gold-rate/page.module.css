@@ -6,84 +6,95 @@
   box-shadow: var(--shadow-soft);
 }
 
-.formRow {
-  display: grid;
-  grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-  gap: 12px;
-  align-items: end;
-  margin-bottom: 16px;
+.headerRow {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  margin-bottom: 12px;
 }
 
-.field {
-  display: grid;
-  gap: 6px;
-  font-weight: 700;
-  color: var(--foreground);
+.title {
+  margin: 0;
+  font-size: 18px;
+  font-weight: 400;
+  font-family: var(--font-heading);
+  color: var(--color-heading);
 }
 
-.field input {
-  padding: 12px;
+.cta {
+  padding: 10px 14px;
   border-radius: 10px;
-  border: 1px solid var(--color-border);
-  background: #fff;
-}
-
-.saveBtn {
-  align-self: flex-end;
-  padding: 12px;
-  border-radius: 10px;
-  border: 1px solid #fca5a5;
-  background: #f97316;
+  border: 1px solid var(--color-line);
+  background: var(--color-line);
   color: #fff;
-  font-weight: 800;
+  font-weight: 600;
+  font-family: var(--font-heading);
   cursor: pointer;
 }
 
-.tableCard {
-  background: #fff;
+.secondaryBtn {
+  padding: 10px 14px;
+  border-radius: 10px;
   border: 1px solid var(--color-border);
-  border-radius: 12px;
-  overflow: hidden;
+  background: var(--color-surface);
+  color: var(--foreground);
+  font-weight: 600;
+  font-family: var(--font-heading);
+  cursor: pointer;
 }
 
-.tableHead,
-.dataRow {
-  display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
+.secondaryBtn:disabled {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.error {
+  margin: 10px 0 12px;
   padding: 10px 12px;
-  align-items: center;
+  border-radius: 10px;
+  border: 1px solid color-mix(in srgb, #dc2626, var(--color-border) 40%);
+  background: color-mix(in srgb, #dc2626, #ffffff 92%);
+  color: #7f1d1d;
+  font-size: 13px;
 }
 
-.tableHead {
-  background: #e5e7eb;
-  font-weight: 800;
+.form {
+  margin: 0;
+  padding: 0;
 }
 
-.filterRow {
+.formRow {
   display: grid;
-  grid-template-columns: repeat(5, 1fr);
-  gap: 8px;
-  padding: 10px 12px;
-  background: #f3f4f6;
+  gap: 10px;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
 }
 
-.filterRow input {
+.formLabel {
+  display: grid;
+  gap: 6px;
+  font-size: 12px;
+  font-weight: 700;
+  color: var(--color-heading);
+  font-family: var(--font-heading);
+}
+
+.formLabel input,
+.formLabel select {
   padding: 10px;
-  border-radius: 8px;
+  border-radius: 10px;
   border: 1px solid var(--color-border);
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
 }
 
-.body {
-  display: grid;
-  gap: 2px;
+.formActions {
+  display: flex;
+  gap: 10px;
 }
 
-.dataRow {
-  background: #fff;
-  border-top: 1px solid var(--color-border);
-}
-
-.dataRow:nth-child(odd) {
-  background: #f9fafb;
+@media (max-width: 860px) {
+  .formRow {
+    grid-template-columns: 1fr;
+  }
 }

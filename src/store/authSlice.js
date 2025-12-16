@@ -1,6 +1,7 @@
 export {
   clearCredentials,
   hydrateFromCookie,
+  selectEmail,
   selectIsAuthenticated,
   selectUserName,
   setCredentials,

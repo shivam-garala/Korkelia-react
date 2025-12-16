@@ -19,8 +19,8 @@ const sidebarSections = [
     title: "Management",
     items: [
       { label: "User", href: "/dashboard/user", icon: "user" },
-      { label: "User Role", href: "/dashboard/user-role", icon: "user" },
-      { label: "Today's Gold Rate", href: "/dashboard/gold-rate", icon: "chart" },
+      // { label: "User Role", href: "/dashboard/user-role", icon: "user" },
+      { label: "Metal Rate", href: "/dashboard/gold-rate", icon: "chart" },
       // { label: "Stock Master", href: "/dashboard/stock-master", icon: "box" },
       // { label: "Design List", href: "/dashboard/design-list", icon: "grid" },
       // { label: "Change Password", href: "/dashboard/change-password", icon: "lock" },
