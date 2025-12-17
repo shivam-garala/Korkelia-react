@@ -15,10 +15,13 @@
     "next": "16.0.8",
     "react": "19.2.1",
     "react-dom": "19.2.1",
-    "react-redux": "^9.2.0"
+    "react-redux": "^9.2.0",
+    "react-select": "^5.10.2"
   },
   "devDependencies": {
+    "@svgr/webpack": "^8.1.0",
     "@tailwindcss/postcss": "^4.1.17",
+    "@types/node": "25.0.3",
     "autoprefixer": "^10.4.22",
     "eslint": "^9",
     "eslint-config-next": "16.0.8",

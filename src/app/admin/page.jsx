@@ -1,14 +1,14 @@
 'use client';
 
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import SidebarNav from "../../components/Sidebar/SidebarNav.jsx";
-import LanguageDropdown from "../../components/LanguageDropdown/LanguageDropdown.jsx";
+import AdminHeader from "../../components/AdminHeader/AdminHeader.jsx";
 import NotificationDrawer from "../../components/NotificationDrawer/NotificationDrawer.jsx";
 import ProfileDrawer from "../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../components/SearchOverlay/SearchOverlay.jsx";
 import { useAppDispatch, useAppSelector } from "../../store/hooks.js";
-import { clearCredentials, selectUserName } from "../../store/authSlice.js";
+import { clearCredentials, selectEmail, selectUserName } from "../../store/authSlice.js";
 import styles from "../../styles/workspace.module.css";
 
 export default function AdminPage() {
@@ -16,6 +16,26 @@ export default function AdminPage() {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const userName = useAppSelector(selectUserName) ?? "Admin";
+  const userEmail = useAppSelector(selectEmail) ?? "";
+  const avatarInitials = useMemo(() => {
+    const normalizedName = (userName ?? "").trim();
+    if (normalizedName.length) {
+      return normalizedName
+        .split(" ")
+        .map((part) => part.trim()?.[0])
+        .filter(Boolean)
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+    }
+    const normalizedEmail = (userEmail ?? "").trim();
+    if (normalizedEmail.length) {
+      const firstChar = normalizedEmail[0];
+      const domainChar = normalizedEmail.split("@")[1]?.[0];
+      return [firstChar, domainChar].filter(Boolean).join("").slice(0, 2).toUpperCase() || "U";
+    }
+    return "U";
+  }, [userEmail, userName]);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -25,32 +45,11 @@ export default function AdminPage() {
       <SidebarNav activePath={pathname} />
 
       <div className={styles.main}>
-        <header className={styles.headerBar}>
-          <div className={styles.team}>
-            {/* <div className={styles.badge}>Team 1 · Free</div>
-            <span style={{ color: "#9ca3af", fontSize: 14 }}>▼</span> */}
-          </div>
-          <div className={styles.actionsRow}>
-            <button className={styles.chip} onClick={() => setSearchOpen(true)}>
-              🔍 ⌘K
-            </button>
-            <LanguageDropdown />
-            <div style={{ position: "relative" }}>
-              <button className={styles.ghostIcon} onClick={() => setNotifOpen(true)} aria-label="Open notifications">
-                🔔
-              </button>
-              <span className={styles.dot} />
-            </div>
-            <button className={styles.ghostIcon}>⚙️</button>
-            <button
-              className={styles.avatarRing}
-              onClick={() => setProfileOpen(true)}
-              aria-label="Open profile"
-            >
-              <span className={styles.avatarRingInner}>JF</span>
-            </button>
-          </div>
-        </header>
+                <AdminHeader
+          onSearch={() => setSearchOpen(true)}
+          onProfile={() => setProfileOpen(true)}
+          avatarText={avatarInitials}
+        />
 
         <main className={styles.content}>
           <div className={styles.titleRow}>
@@ -68,6 +67,7 @@ export default function AdminPage() {
         open={profileOpen}
         onClose={() => setProfileOpen(false)}
         name={userName}
+        email={userEmail}
         onLogout={async () => {
           try {
             await fetch("/api/admin/logout", { method: "POST" });
@@ -82,3 +82,4 @@ export default function AdminPage() {
     </div>
   );
 }
+

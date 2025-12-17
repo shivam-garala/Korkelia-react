@@ -7,6 +7,7 @@ import diamondMasterReducer from "./slices/diamondMasterSlice";
 import cutMasterReducer from "./slices/cutMasterSlice";
 import categoryMasterReducer from "./slices/categoryMasterSlice";
 import styleMasterReducer from "./slices/styleMasterSlice";
+import designReducer from "./slices/designSlice";
 
 export const store = configureStore({
   reducer: {
@@ -18,5 +19,6 @@ export const store = configureStore({
     cutMaster: cutMasterReducer,
     categoryMaster: categoryMasterReducer,
     styleMaster: styleMasterReducer,
+    designs: designReducer,
   },
 });

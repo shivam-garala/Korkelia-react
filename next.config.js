@@ -1,4 +1,4 @@
-const path = require("path");
+﻿const path = require("path");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -20,12 +20,25 @@ const nextConfig = {
     resolveAlias: {
       "@": path.resolve(__dirname, "src"),
     },
+    rules: {
+      "*.svg": {
+        loaders: ["@svgr/webpack"],
+        as: "*.js",
+      },
+    },
   },
   webpack: (config) => {
     config.resolve.alias = {
       ...(config.resolve.alias ?? {}),
       "@": path.resolve(__dirname, "src"),
     };
+
+    config.module.rules.push({
+      test: /\.svg$/i,
+      issuer: /\.[jt]sx?$/,
+      use: ["@svgr/webpack"],
+    });
+
     return config;
   },
 };

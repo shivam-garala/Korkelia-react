@@ -25,6 +25,7 @@ const sidebarSections = [
       { label: "Cut Master", href: "/dashboard/cut-master", icon: "grid" },
       { label: "Category Master", href: "/dashboard/category-master", icon: "grid" },
       { label: "Style Master", href: "/dashboard/style-master", icon: "grid" },
+      { label: "Design", href: "/dashboard/design", icon: "grid" },
       // { label: "Stock Master", href: "/dashboard/stock-master", icon: "box" },
       // { label: "Design List", href: "/dashboard/design-list", icon: "grid" },
       // { label: "Change Password", href: "/dashboard/change-password", icon: "lock" },

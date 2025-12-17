@@ -16,6 +16,7 @@ export const protectedRoutes = [
   { id: "DR9", name: "cut-master", path: "/dashboard/cut-master", access: "protected" },
   { id: "DR10", name: "category-master", path: "/dashboard/category-master", access: "protected" },
   { id: "DR11", name: "style-master", path: "/dashboard/style-master", access: "protected" },
+  { id: "DR12", name: "design", path: "/dashboard/design", access: "protected" },
 ];
 
 export const allRoutes = [...publicRoutes, ...protectedRoutes];
