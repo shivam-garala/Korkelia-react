@@ -1,14 +1,14 @@
 'use client';
 
 import Link from "next/link";
-import { useState } from "react";
+import { useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import SidebarNav from "../../components/Sidebar/SidebarNav.jsx";
 import LanguageDropdown from "../../components/LanguageDropdown/LanguageDropdown.jsx";
 import ProfileDrawer from "../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../components/SearchOverlay/SearchOverlay.jsx";
 import { protectedRoutes } from "../../routes/routes.js";
-import { clearCredentials, selectUserName } from "../../store/authSlice.js";
+import { clearCredentials, selectUserName, selectEmail } from "../../store/authSlice.js";
 import { useAppDispatch, useAppSelector } from "../../store/hooks.js";
 import styles from "../../styles/workspace.module.css";
 
@@ -21,6 +21,26 @@ export default function DashboardPage() {
   const pathname = usePathname();
   const dispatch = useAppDispatch();
   const userName = useAppSelector(selectUserName) ?? "Admin";
+  const userEmail = useAppSelector(selectEmail) ?? "";
+  const avatarInitials = useMemo(() => {
+    const normalizedName = (userName ?? "").trim();
+    if (normalizedName.length) {
+      return normalizedName
+        .split(" ")
+        .map((part) => part.trim()?.[0])
+        .filter(Boolean)
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+    }
+    const normalizedEmail = (userEmail ?? "").trim();
+    if (normalizedEmail.length) {
+      const firstChar = normalizedEmail[0];
+      const domainChar = normalizedEmail.split("@")[1]?.[0];
+      return [firstChar, domainChar].filter(Boolean).join("").slice(0, 2).toUpperCase() || "U";
+    }
+    return "U";
+  }, [userEmail, userName]);
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
 
@@ -39,14 +59,14 @@ export default function DashboardPage() {
               🔍 ⌘K
             </button>
             <LanguageDropdown />
-            <button className={styles.ghostIcon}>⚙️</button>
-            <button className={styles.ghostIcon}>🔔</button>
+            {/* <button className={styles.ghostIcon}>⚙️</button> */}
+            {/* <button className={styles.ghostIcon}>🔔</button> */}
             <button
               className={styles.avatarRing}
               onClick={() => setProfileOpen(true)}
               aria-label="Open profile"
             >
-              <span className={styles.avatarRingInner}>JF</span>
+              <span className={styles.avatarRingInner}>{avatarInitials}</span>
             </button>
           </div>
         </header>
@@ -73,6 +93,7 @@ export default function DashboardPage() {
         open={profileOpen}
         onClose={() => setProfileOpen(false)}
         name={userName}
+        email={userEmail}
         onLogout={async () => {
           try {
             await fetch("/api/admin/logout", { method: "POST" });
