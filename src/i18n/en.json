@@ -9,6 +9,21 @@
     "appointment": "BOOK AN APPOINTMENT",
     "ambassador": "CONTACT AN AMBASSADOR"
   },
+  "menu": {
+    "home": "Home",
+    "about": "About us",
+    "products": "Products",
+    "diamondDifference": "The Korkeila Helsinki Diamond Difference",
+    "diamondGuide": "The Korkeila Helsinki Diamond Guide",
+    "shippingReturns": "Shipping & Returns",
+    "contact": "Contact us",
+    "productsSub": {
+      "rings": "Rings",
+      "bracelets": "Bracelets",
+      "necklaces": "Necklaces & Pendants",
+      "earrings": "Earrings"
+    }
+  },
   "home": {
     "hero": {
       "eyebrow": "BESPOKE DREAM RING",

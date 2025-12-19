@@ -1,4 +1,4 @@
-import { Geist, Geist_Mono, Marcellus, Noto_Sans } from "next/font/google";
+import { Geist, Geist_Mono, Marcellus, Nata_Sans } from "next/font/google";
 import "./globals.css";
 import StoreProvider from "../providers/StoreProvider.jsx";
 
@@ -12,7 +12,7 @@ const geistMono = Geist_Mono({
   subsets: ["latin"],
 });
 
-const nataSans = Noto_Sans({
+const nataSans = Nata_Sans({
   variable: "--font-nata-sans",
   subsets: ["latin"],
   weight: ["300", "400", "500", "600", "700"],

@@ -67,9 +67,6 @@ export default function SiteHeader() {
             >
               <Image className={styles.icon} src="/icons/menu.png" alt="" width={18} height={18} />
             </button>
-            <button type="button" className={styles.iconBtn} aria-label="Search">
-              <Image className={styles.icon} src="/icons/search.png" alt="" width={18} height={18} />
-            </button>
           </div>
 
           <Link className={styles.brand} href="/" aria-label="Home">

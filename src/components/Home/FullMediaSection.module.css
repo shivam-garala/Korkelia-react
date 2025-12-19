@@ -36,11 +36,12 @@
 .content {
   position: relative;
   max-width: var(--container-width);
+  width: 100%;
   margin: 0 auto;
   min-height: inherit;
   display: grid;
   align-content: center;
-  padding: 72px 32px;
+  padding: 72px 0;
 }
 
 .text {
@@ -49,6 +50,7 @@
   gap: 10px;
   color: #ffffff;
   text-shadow: 0 2px 16px rgba(0, 0, 0, 0.45);
+  font-family: var(--font-heading);
 }
 
 .alignRight {
@@ -84,7 +86,7 @@
   max-width: 620px;
   font-size: 16px;
   line-height: 1.6;
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
 }
 
 .description {
@@ -92,15 +94,16 @@
   max-width: 640px;
   font-size: 15px;
   line-height: 1.65;
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
 }
 
 .cta {
+  width: max-content;
   margin-top: 14px;
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  font-family: var(--font-body);
+  font-family: var(--font-heading);
   font-weight: 600;
   letter-spacing: 1.3px;
   text-transform: uppercase;

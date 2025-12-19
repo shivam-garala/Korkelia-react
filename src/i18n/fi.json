@@ -9,6 +9,21 @@
     "appointment": "VARAA AIKA",
     "ambassador": "OTA YHTEYTTAA SUURLAHETTILAASEEN"
   },
+  "menu": {
+    "home": "Kotiin",
+    "about": "Tietoja meista",
+    "products": "Tuotteet",
+    "diamondDifference": "Korkeila Helsinki timantin ero",
+    "diamondGuide": "Korkeila Helsinki Timanttiopas",
+    "shippingReturns": "Toimitus ja palautukset",
+    "contact": "Ota yhteytta",
+    "productsSub": {
+      "rings": "Sormukset",
+      "bracelets": "Rannekorut",
+      "necklaces": "Kaulakorut ja riipukset",
+      "earrings": "Korvakorut"
+    }
+  },
   "home": {
     "hero": {
       "eyebrow": "UNELMIEN SORMUS TILAUSTYONA",

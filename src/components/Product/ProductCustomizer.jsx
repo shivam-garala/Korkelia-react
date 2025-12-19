@@ -1,7 +1,8 @@
-'use client';
+"use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useId, useMemo, useState } from "react";
+import Select from "react-select";
 import styles from "./ProductCustomizer.module.css";
 
 const diamondCuts = [
@@ -16,6 +17,10 @@ const diamondCuts = [
 ];
 
 export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
+  const qualityId = useId();
+  const clarityId = useId();
+  const metalTypeId = useId();
+  const sizeId = useId();
   const [cut, setCut] = useState("round");
   const [quality, setQuality] = useState("natural");
   const [clarity, setClarity] = useState("fvs");
@@ -26,6 +31,38 @@ export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
   const [engraving, setEngraving] = useState("");
 
   const carats = useMemo(() => ["0.05", "0.10", "0.20", "0.30", "0.50"], []);
+  const qualityOptions = useMemo(
+    () => [
+      { value: "natural", label: "NATURAL BRILLIANT" },
+      { value: "lab", label: "LAB GROWN" },
+    ],
+    []
+  );
+  const clarityOptions = useMemo(
+    () => [
+      { value: "fvs", label: "FVS" },
+      { value: "vs1", label: "VS1" },
+      { value: "si1", label: "SI1" },
+    ],
+    []
+  );
+  const metalTypeOptions = useMemo(
+    () => [
+      { value: "14k", label: "14K" },
+      { value: "18k", label: "18K" },
+      { value: "22k", label: "22K" },
+    ],
+    []
+  );
+  const sizeOptions = useMemo(
+    () => [
+      { value: "5", label: "5" },
+      { value: "6", label: "6" },
+      { value: "7", label: "7" },
+      { value: "8", label: "8" },
+    ],
+    []
+  );
 
   return (
     <aside className={styles.panel}>
@@ -57,18 +94,27 @@ export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
         <div className={styles.gridFields}>
           <div>
             <div className={styles.fieldTitle}>DIAMOND QUALITY</div>
-            <select className={styles.select} value={quality} onChange={(e) => setQuality(e.target.value)}>
-              <option value="natural">NATURAL BRILLIANT</option>
-              <option value="lab">LAB GROWN</option>
-            </select>
+            <Select
+              className={styles.select}
+              classNamePrefix="customizer"
+              instanceId={qualityId}
+              value={qualityOptions.find((opt) => opt.value === quality) ?? null}
+              options={qualityOptions}
+              onChange={(option) => setQuality(option?.value ?? "")}
+              isSearchable={false}
+            />
           </div>
           <div>
             <div className={styles.fieldTitle}>&nbsp;</div>
-            <select className={styles.select} value={clarity} onChange={(e) => setClarity(e.target.value)}>
-              <option value="fvs">FVS</option>
-              <option value="vs1">VS1</option>
-              <option value="si1">SI1</option>
-            </select>
+            <Select
+              className={styles.select}
+              classNamePrefix="customizer"
+              instanceId={clarityId}
+              value={clarityOptions.find((opt) => opt.value === clarity) ?? null}
+              options={clarityOptions}
+              onChange={(option) => setClarity(option?.value ?? "")}
+              isSearchable={false}
+            />
           </div>
         </div>
 
@@ -109,21 +155,28 @@ export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
         <div className={styles.gridFields}>
           <div>
             <div className={styles.fieldTitle}>METAL TYPE</div>
-            <select className={styles.select} value={metalType} onChange={(e) => setMetalType(e.target.value)}>
-              <option value="14k">14K</option>
-              <option value="18k">18K</option>
-              <option value="22k">22K</option>
-            </select>
+            <Select
+              className={styles.select}
+              classNamePrefix="customizer"
+              instanceId={metalTypeId}
+              value={metalTypeOptions.find((opt) => opt.value === metalType) ?? null}
+              options={metalTypeOptions}
+              onChange={(option) => setMetalType(option?.value ?? "")}
+              isSearchable={false}
+            />
           </div>
           <div>
             <div className={styles.fieldTitle}>RING SIZE</div>
-            <select className={styles.select} value={size} onChange={(e) => setSize(e.target.value)}>
-              <option value="">Select Size</option>
-              <option value="5">5</option>
-              <option value="6">6</option>
-              <option value="7">7</option>
-              <option value="8">8</option>
-            </select>
+            <Select
+              className={styles.select}
+              classNamePrefix="customizer"
+              instanceId={sizeId}
+              value={sizeOptions.find((opt) => opt.value === size) ?? null}
+              options={sizeOptions}
+              onChange={(option) => setSize(option?.value ?? "")}
+              placeholder="Select Size"
+              isSearchable={false}
+            />
           </div>
         </div>
 
@@ -147,4 +200,3 @@ export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
     </aside>
   );
 }
-

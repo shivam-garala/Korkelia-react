@@ -1,26 +1,50 @@
+"use client";
+
+import { useId } from "react";
+import Select from "react-select";
 import styles from "./FiltersBar.module.css";
 
-export default function FiltersBar({ leftLabel, rightLabel, leftValue, rightValue, onLeftChange, onRightChange }) {
+export default function FiltersBar({
+  leftLabel,
+  rightLabel,
+  leftValue,
+  rightValue,
+  onLeftChange,
+  onRightChange,
+  leftOptions = [],
+  rightOptions = [],
+}) {
+  const leftId = useId();
+  const rightId = useId();
+  const leftSelected = leftOptions.find((opt) => opt.value === leftValue) ?? null;
+  const rightSelected = rightOptions.find((opt) => opt.value === rightValue) ?? null;
+
   return (
     <div className={styles.bar}>
       <div className={styles.slot}>
-        <select className={styles.select} value={leftValue} onChange={(e) => onLeftChange?.(e.target.value)}>
-          <option value="all">{leftLabel}</option>
-          <option value="all">All</option>
-          <option value="classic">Classic</option>
-          <option value="modern">Modern</option>
-        </select>
+        <Select
+          className={styles.select}
+          classNamePrefix="filters"
+          instanceId={leftId}
+          value={leftSelected}
+          placeholder={leftLabel}
+          options={leftOptions}
+          onChange={(option) => onLeftChange?.(option?.value ?? "")}
+          isSearchable={false}
+        />
       </div>
       <div className={styles.slotRight}>
-        <select className={styles.select} value={rightValue} onChange={(e) => onRightChange?.(e.target.value)}>
-          <option value="all">{rightLabel}</option>
-          <option value="rings">Rings</option>
-          <option value="bracelets">Bracelets</option>
-          <option value="necklaces">Necklaces</option>
-          <option value="earrings">Earrings</option>
-        </select>
+        <Select
+          className={styles.select}
+          classNamePrefix="filters"
+          instanceId={rightId}
+          value={rightSelected}
+          placeholder={rightLabel}
+          options={rightOptions}
+          onChange={(option) => onRightChange?.(option?.value ?? "")}
+          isSearchable={false}
+        />
       </div>
     </div>
   );
 }
-

@@ -4,6 +4,7 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
 import styles from "./NavMenuOverlay.module.css";
+import { useI18n } from "../../providers/I18nProvider.jsx";
 
 function Icon({ path, className, style }) {
   return (
@@ -25,13 +26,17 @@ function Icon({ path, className, style }) {
 
 export default function NavMenuOverlay({ open, onClose }) {
   const [productsOpen, setProductsOpen] = useState(false);
+  const { t } = useI18n();
 
   useEffect(() => {
     if (!open) return;
-    const prev = document.body.style.overflow;
+    const prevBody = document.body.style.overflow;
+    const prevHtml = document.documentElement.style.overflow;
     document.body.style.overflow = "hidden";
+    document.documentElement.style.overflow = "hidden";
     return () => {
-      document.body.style.overflow = prev;
+      document.body.style.overflow = prevBody;
+      document.documentElement.style.overflow = prevHtml;
     };
   }, [open]);
 
@@ -70,75 +75,79 @@ export default function NavMenuOverlay({ open, onClose }) {
       </div>
 
       <div className={styles.content}>
-        <ul className={styles.menu}>
-          <li className={styles.item}>
-            <Link className={styles.link} href="/" onClick={onClose}>
-              Home (Kotiin)
-            </Link>
-          </li>
-          <li className={styles.item}>
-            <Link className={styles.link} href="#" onClick={onClose}>
-              About us (Meistä)
-            </Link>
-          </li>
-          <li className={styles.item}>
-            <div className={styles.itemRow}>
-              <Link className={styles.link} href="/dashboard/product" onClick={onClose}>
-                Products (Tuotteet)
+        <div className={styles.contentInner}>
+          <div className={styles.divider} aria-hidden="true" />
+          <ul className={styles.menu}>
+            <li className={styles.item}>
+              <Link className={styles.link} href="/" onClick={onClose}>
+                {t("menu.home")}
               </Link>
-              <button
-                type="button"
-                className={styles.iconBtn}
-                aria-label="Toggle products submenu"
-                onClick={() => setProductsOpen((prev) => !prev)}
-                aria-expanded={productsOpen}
-              >
-                <Icon
-                  className={styles.chev}
-                  path="m6 9 6 6 6-6"
-                  style={productsOpen ? { transform: "rotate(180deg)" } : undefined}
-                />
-              </button>
-            </div>
-            {productsOpen ? (
-              <div className={styles.subMenu}>
-                <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
-                  Rings (Sormukset)
+            </li>
+            <li className={styles.item}>
+              <Link className={styles.link} href="#" onClick={onClose}>
+                {t("menu.about")}
+              </Link>
+            </li>
+            <li className={styles.item}>
+              <div className={styles.itemRow}>
+                <Link className={styles.link} href="/dashboard/product" onClick={onClose}>
+                  {t("menu.products")}
                 </Link>
-                <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
-                  Bracelets (Rannekorut)
-                </Link>
-                <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
-                  Necklaces &amp; Pendants (Kaulakorut ja Riipukse)
-                </Link>
-                <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
-                  Earrings (Korvakorut)
-                </Link>
+                <button
+                  type="button"
+                  className={styles.iconBtn}
+                  aria-label="Toggle products submenu"
+                  onClick={() => setProductsOpen((prev) => !prev)}
+                  aria-expanded={productsOpen}
+                >
+                  <Icon
+                    className={styles.chev}
+                    path="m6 9 6 6 6-6"
+                    style={productsOpen ? { transform: "rotate(180deg)" } : undefined}
+                  />
+                </button>
               </div>
-            ) : null}
-          </li>
-          <li className={styles.item}>
-            <Link className={styles.link} href="#" onClick={onClose}>
-              The Korkeila Helsinki Diamond Difference (Korkeila Helsinki timantin ero)
-            </Link>
-          </li>
-          <li className={styles.item}>
-            <Link className={styles.link} href="#" onClick={onClose}>
-              The Korkeila Helsinki Diamond Guide (Korkeila Helsinki Timanttiopas)
-            </Link>
-          </li>
-          <li className={styles.item}>
-            <Link className={`${styles.link} ${styles.muted}`} href="#" onClick={onClose} aria-disabled="true">
-              Shipping &amp; Returns (Toimitus ja Palautukset)
-            </Link>
-          </li>
-          <li className={styles.item}>
-            <Link className={styles.link} href="#" onClick={onClose}>
-              Contact us (Ota yhteyttä)
-            </Link>
-          </li>
-        </ul>
+              {productsOpen ? (
+                <div className={styles.subMenu}>
+                  <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
+                    {t("menu.productsSub.rings")}
+                  </Link>
+                  <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
+                    {t("menu.productsSub.bracelets")}
+                  </Link>
+                  <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
+                    {t("menu.productsSub.necklaces")}
+                  </Link>
+                  <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
+                    {t("menu.productsSub.earrings")}
+                  </Link>
+                </div>
+              ) : null}
+            </li>
+            <li className={styles.item}>
+              <Link className={styles.link} href="#" onClick={onClose}>
+                {t("menu.diamondDifference")}
+              </Link>
+            </li>
+            <li className={styles.item}>
+              <Link className={styles.link} href="#" onClick={onClose}>
+                {t("menu.diamondGuide")}
+              </Link>
+            </li>
+            <li className={styles.item}>
+              <Link className={`${styles.link} ${styles.muted}`} href="#" onClick={onClose} aria-disabled="true">
+                {t("menu.shippingReturns")}
+              </Link>
+            </li>
+            <li className={styles.item}>
+              <Link className={styles.link} href="#" onClick={onClose}>
+                {t("menu.contact")}
+              </Link>
+            </li>
+          </ul>
+        </div>
       </div>
     </div>
   );
 }
+
