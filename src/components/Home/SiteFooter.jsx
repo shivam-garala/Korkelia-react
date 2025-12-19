@@ -2,15 +2,23 @@ import Link from "next/link";
 import Image from "next/image";
 import styles from "./SiteFooter.module.css";
 
+const socials = [
+  { href: "#", src: "/icons/facebook.png", alt: "Facebook" },
+  { href: "#", src: "/icons/pintrest.png", alt: "Pinterest" },
+  { href: "#", src: "/icons/insta.png", alt: "Instagram" },
+  { href: "#", src: "/icons/youtube.png", alt: "YouTube" },
+  { href: "#", src: "/icons/xtwitter.png", alt: "X" },
+];
+
 export default function SiteFooter() {
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <div className={styles.topRow}>
           <div>
-            <p className={styles.brandTitle}>KORKEILA HALSINKI</p>
+            <p className={styles.brandTitle}>KORKEILA HELSINKI</p>
             <p className={styles.brandCopy}>
-              Kultasepänliike Helsingissä. Tilaustyöt, kulta- ja hopeakorut.
+              Kultasepanliike Helsingissa. Tilaustyot, kulta- ja hopeakorut.
               <br />
               Laboratorio- ja luonnontimantit.
             </p>
@@ -48,35 +56,21 @@ export default function SiteFooter() {
             <Image
               className={styles.logo}
               src="/logo/footer_logo.png"
-              alt=""
-              width={200}
+              alt="Korkeila Helsinki"
+              width={180}
               height={80}
             />
           </div>
 
-          <div className={styles.icons} aria-label="Social">
-            <span className={styles.icon} aria-hidden>
-              f
-            </span>
-            <span className={styles.icon} aria-hidden>
-              p
-            </span>
-            <span className={styles.icon} aria-hidden>
-              ig
-            </span>
-            <span className={styles.icon} aria-hidden>
-              in
-            </span>
-            <span className={styles.icon} aria-hidden>
-              y
-            </span>
-            <span className={styles.icon} aria-hidden>
-              x
-            </span>
+          <div className={styles.social} aria-label="Social media">
+            {socials.map((social) => (
+              <Link key={social.alt} className={styles.socialLink} href={social.href}>
+                <Image className={styles.socialIcon} src={social.src} alt={social.alt} width={18} height={18} />
+              </Link>
+            ))}
           </div>
         </div>
       </div>
     </footer>
   );
 }
-

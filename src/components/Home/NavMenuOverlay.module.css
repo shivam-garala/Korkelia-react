@@ -2,20 +2,20 @@
   position: fixed;
   inset: 0;
   z-index: 60;
-  background: rgba(255, 255, 255, 0.92);
+  background: rgba(255, 255, 255, 0.96);
   backdrop-filter: blur(14px);
   display: grid;
   grid-template-rows: auto 1fr;
 }
 
 .top {
-  border-bottom: 1px solid var(--color-line);
+  border-bottom: none;
 }
 
 .topInner {
-  max-width: 1180px;
+  max-width: var(--container-width);
   margin: 0 auto;
-  padding: 16px 16px 14px;
+  padding: 36px 20px 16px;
   display: grid;
   grid-template-columns: 1fr auto 1fr;
   align-items: center;
@@ -33,19 +33,23 @@
 }
 
 .iconBtn {
-  width: 34px;
-  height: 34px;
-  border-radius: 999px;
-  border: 1px solid transparent;
-  background: transparent;
+  /* width: 40px; */
+  /* height: 40px; */
+  border-radius: 12px;
+  border: none;
+  /* border: 1px solid color-mix(in srgb, var(--color-menu-divider), transparent 45%); */
+  background: #ffffff;
   display: grid;
   place-items: center;
-  color: var(--color-icon);
+  color: var(--color-menu-divider);
   cursor: pointer;
+  transition: border-color 140ms ease, background-color 140ms ease, color 140ms ease;
 }
 
 .iconBtn:hover {
-  background: color-mix(in srgb, var(--color-border), transparent 70%);
+  background: color-mix(in srgb, var(--color-menu-divider), transparent 85%);
+  border-color: color-mix(in srgb, var(--color-menu-divider), transparent 20%);
+  color: var(--color-menu-accent);
 }
 
 .icon {
@@ -64,28 +68,25 @@
 
 .brandLogo {
   width: auto;
-  height: 64px;
+  height: 100px;
   display: block;
 }
 
-.brandName {
-  font-size: 34px;
-  letter-spacing: 3px;
-  font-weight: 500;
-  line-height: 1;
-}
-
-.brandCity {
-  font-size: 11px;
-  letter-spacing: 3px;
-  color: var(--color-muted);
-}
-
 .content {
-  max-width: 1180px;
-  margin: 0 auto;
-  padding: 34px 16px 40px;
   width: 100%;
+  padding: 0 0 48px;
+}
+
+.contentInner {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  padding: 0 20px;
+  width: 100%;
+}
+
+.divider {
+  border-top: 0.5px solid var(--color-menu-divider);
+  margin: 0 0 18px;
 }
 
 .menu {
@@ -93,10 +94,19 @@
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 16px;
-  font-family: var(--font-heading);
+  gap: 8px;
+  font-family: var(--font-body);
   color: var(--color-menu-text);
-  max-width: 520px;
+  max-width: 620px;
+}
+
+.item {
+  padding: 4px 0;
+  /* border-bottom: 0.5px solid var(--color-menu-divider); */
+}
+
+.item:last-child {
+  border-bottom: none;
 }
 
 .itemRow {
@@ -110,17 +120,24 @@
   text-decoration: none;
   color: var(--color-menu-text);
   font-size: 18px;
-  font-weight: 600;
+  font-weight: 500;
+  letter-spacing: 0.6px;
 }
 
 .link:hover {
-  color: var(--color-line);
+  color: #38766b;
+}
+
+.muted {
+  opacity: 0.6;
+  cursor: default;
 }
 
 .chev {
-  width: 14px;
-  height: 9px;
-  color: var(--color-line);
+  width: 18px;
+  height: 18px;
+  color: var(--color-menu-accent);
+  transition: transform 160ms ease;
 }
 
 .subMenu {
@@ -132,11 +149,26 @@
 
 .subLink {
   text-decoration: none;
-  color: var(--color-muted);
-  font-weight: 600;
-  font-size: 14px;
+  color: var(--color-menu-text);
+  font-weight: 500;
+  font-size: 15px;
+  letter-spacing: 0.4px;
 }
 
 .subLink:hover {
-  color: var(--color-line);
+  color: #38766b;
+}
+
+@media (max-width: 720px) {
+  .content {
+    padding: 28px 0 40px;
+  }
+
+  .contentInner {
+    padding: 0 16px;
+  }
+
+  .menu {
+    max-width: 100%;
+  }
 }

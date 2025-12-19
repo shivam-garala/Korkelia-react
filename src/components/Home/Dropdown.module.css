@@ -8,25 +8,26 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  border: 0;
-  background: transparent;
-  color: var(--color-menu-text);
+  border: 1px solid color-mix(in srgb, var(--color-border), transparent 40%);
+  background: #ffffff;
+  color: #373435;
   cursor: pointer;
-  padding: 4px 6px;
-  border-radius: 8px;
-  font-weight: 600;
+  padding: 6px 10px;
+  border-radius: 12px;
+  font-weight: 400;
   font-size: 12px;
-  letter-spacing: 0.2px;
-  font-family: var(--font-heading);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  font-family: var(--font-body);
 }
 
 .trigger:hover {
-  background: color-mix(in srgb, var(--color-border), transparent 70%);
+  background: color-mix(in srgb, var(--color-border), transparent 65%);
 }
 
 .icon {
-  width: 16px;
-  height: 16px;
+  width: 15px;
+  height: 15px;
   display: block;
 }
 
@@ -35,6 +36,7 @@
   height: 9px;
   display: block;
   margin-top: 1px;
+  filter: brightness(0) saturate(100%) invert(70%) sepia(18%) saturate(656%) hue-rotate(309deg) brightness(88%) contrast(90%);
 }
 
 .menu {
@@ -44,8 +46,8 @@
   min-width: 160px;
   padding: 6px;
   border-radius: 12px;
-  border: 1px solid var(--color-border);
-  background: var(--color-surface);
+  border: 1px solid color-mix(in srgb, var(--color-menu-divider), transparent 28%);
+  background: #ffffff;
   box-shadow: var(--shadow-soft);
   display: grid;
   gap: 4px;
@@ -61,8 +63,8 @@
   border-radius: 10px;
   cursor: pointer;
   color: var(--color-menu-text);
-  font-weight: 600;
-  font-family: var(--font-heading);
+  font-weight: 500;
+  font-family: var(--font-body);
 }
 
 .item:hover {

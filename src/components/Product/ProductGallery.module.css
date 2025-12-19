@@ -6,12 +6,12 @@
     "c d"
     "e e";
   gap: 0;
-  border: 1px solid var(--color-border);
+  border: 1px solid color-mix(in srgb, var(--color-line), transparent 75%);
 }
 
 .cell {
-  border-right: 1px solid var(--color-border);
-  border-bottom: 1px solid var(--color-border);
+  border-right: 1px solid color-mix(in srgb, var(--color-line), transparent 75%);
+  border-bottom: 1px solid color-mix(in srgb, var(--color-line), transparent 75%);
 }
 
 .cell:nth-child(2n) {
@@ -21,11 +21,11 @@
 .media {
   position: relative;
   background: #fff;
-  min-height: 260px;
+  min-height: 220px;
 }
 
 .image {
-  object-fit: cover;
+  object-fit: contain;
 }
 
 .square {
@@ -51,15 +51,19 @@
 .square .media,
 .circle .media,
 .wide .media {
-  min-height: 240px;
+  min-height: 220px;
 }
 
 .tall .media {
-  min-height: 480px;
+  min-height: 460px;
 }
 
 .video .media {
-  min-height: 260px;
+  min-height: 240px;
+}
+
+.tall .image {
+  object-fit: cover;
 }
 
 .play {
@@ -106,4 +110,3 @@
     border-right: none;
   }
 }
-

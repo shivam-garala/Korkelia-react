@@ -10,45 +10,38 @@ import { useI18n } from "../../providers/I18nProvider.jsx";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const [currency, setCurrency] = useState("eur");
   const { language, setLanguage, t } = useI18n();
 
   return (
     <>
       <header className={styles.header}>
-        <div className={styles.topBar}>
+        <div>
           <div className={styles.topInner}>
             <div className={styles.topLeft}>
               <Dropdown
-	                ariaLabel={t("common.language")}
+                ariaLabel={t("common.language")}
                 leadingIcon="globe"
                 value={language}
                 onChange={setLanguage}
                 options={[
                   { value: "en", label: "English" },
-	                  { value: "fi", label: "Finish" },
+                  { value: "fi", label: "Finnish" },
                 ]}
               />
-              <Dropdown
-	                ariaLabel={t("common.currency")}
-                leadingIcon="currency"
-                value={currency}
-                onChange={setCurrency}
-                options={[
-                  { value: "eur", label: "EURO" },
-                  // { value: "usd", label: "$ USD" },
-                ]}
-              />
+              <div className={styles.currency} aria-label="Currency">
+                <Image className={styles.currencyIcon} src="/icons/euro.png" alt="" width={14} height={14} />
+                <span>{t("header.currency")}</span>
+              </div>
             </div>
 
             <div className={styles.topRight}>
               <Link className={styles.topLink} href="#">
                 <Image className={styles.topIcon} src="/icons/share.png" alt="" width={14} height={14} />
-                SHARE
+                <span>{t("header.share")}</span>
               </Link>
               <Link className={styles.topLink} href="#">
                 <Image className={styles.topIcon} src="/icons/appointment.png" alt="" width={14} height={14} />
-                BOOK AN APPOINTMENT
+                <span>{t("header.appointment")}</span>
               </Link>
               <Link className={styles.topLink} href="#">
                 <Image
@@ -58,7 +51,7 @@ export default function SiteHeader() {
                   width={14}
                   height={14}
                 />
-                CONTACT AN AMBASSADOR
+                <span>{t("header.ambassador")}</span>
               </Link>
             </div>
           </div>
@@ -73,9 +66,6 @@ export default function SiteHeader() {
               onClick={() => setMenuOpen(true)}
             >
               <Image className={styles.icon} src="/icons/menu.png" alt="" width={18} height={18} />
-            </button>
-            <button type="button" className={styles.iconBtn} aria-label="Search">
-              <Image className={styles.icon} src="/icons/search.png" alt="" width={18} height={18} />
             </button>
           </div>
 

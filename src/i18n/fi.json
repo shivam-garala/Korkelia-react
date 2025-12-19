@@ -3,28 +3,78 @@
     "language": "Kieli",
     "currency": "Valuutta"
   },
+  "header": {
+    "currency": "Euro",
+    "share": "JAKAA",
+    "appointment": "VARAA AIKA",
+    "ambassador": "OTA YHTEYTTAA SUURLAHETTILAASEEN"
+  },
+  "menu": {
+    "home": "Kotiin",
+    "about": "Tietoja meista",
+    "products": "Tuotteet",
+    "diamondDifference": "Korkeila Helsinki timantin ero",
+    "diamondGuide": "Korkeila Helsinki Timanttiopas",
+    "shippingReturns": "Toimitus ja palautukset",
+    "contact": "Ota yhteytta",
+    "productsSub": {
+      "rings": "Sormukset",
+      "bracelets": "Rannekorut",
+      "necklaces": "Kaulakorut ja riipukset",
+      "earrings": "Korvakorut"
+    }
+  },
   "home": {
     "hero": {
-      "eyebrow": "UNELMIEN SORMUS TILAUSTYÖNÄ",
-      "title": "Olemme kultaseppiä Helsingissä ja toteutamme niin pienet kuin vaativammatkin tilaustyöt",
-      "subcopy": "Olemme kultaseppäliike Helsingissä ja toteutamme niin pienet kuin vaativammatkin tilaustyöt.",
-      "ctaPrimary": "Lue lisää",
-      "ctaSecondary": "Pyydä tarjous"
+      "eyebrow": "UNELMIEN SORMUS TILAUSTYONA",
+      "title": "Olemme kultasepanliike Helsingissa ja toteutamme seka pienet etta vaativatkin tilaustyot.",
+      "subcopy": "Hienoja koruja, jotka rakentavat ajattomia muistoja - laboratoriotimanteilla ja luonnontimanteilla.",
+      "ctaPrimary": "Lue lisaa",
+      "ctaSecondary": "Pyyda tarjous"
+    },
+    "categories": {
+      "title": "KATEGORIAT",
+      "items": {
+        "rings": "SORMUKSET",
+        "bracelets": "RANNEKORUT",
+        "necklaces": "KAULAKORUT JA RIIPUKSET",
+        "earrings": "KORVAKORUT"
+      }
+    },
+    "diamondDifference": {
+      "eyebrow": "KORKEILA HELSINGIN TIMANTTIEN ERO",
+      "title": "KORKEILA HELSINGIN TIMANTTIEN ERO",
+      "subtitle": "Henkilokohtainen timanttien hankintakonsulttisi",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit. Fusce elit leo, fermentum eget urna sit amet, eros molestie varius in."
+    },
+    "diamondGuide": {
+      "eyebrow": "KORKEILA HELSINGIN TIMANTTIOPAS",
+      "title": "KORKEILA HELSINGIN TIMANTTIOPAS",
+      "subtitle": "Johdatus timanttien ainutlaatuiseen loistoon",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit. Fusce elit leo, fermentum eget urna sit amet, eros molestie varius in."
+    },
+    "about": {
+      "eyebrow": "MEISTA",
+      "title": "Korkeila Helsingin juuret ovat pohjoismaisessa estetiikassa - luonnon kauneudessa, selkeissa linjoissa ja ajattomassa yksinkertaisuudessa.",
+      "subtitle": "Rooted in Nordic heritage, Korkeila Helsinki draws inspiration from natural beauty, clean lines, and timeless simplicity.",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit."
+    },
+    "cta": {
+      "discover": "LOYDA"
     }
   },
   "footer": {
     "brandTitle": "KORKEILA HELSINKI",
-    "brandCopyLine1": "Kultasepänliike Helsingissä. Tilaustyöt, kulta- ja hopeakorut.",
+    "brandCopyLine1": "Kultasepanliike Helsingissa. Tilaustyot, kulta- ja hopeakorut.",
     "brandCopyLine2": "Laboratorio- ja luonnontimantit.",
     "infoTitle": "INFORMATION",
     "links": {
-      "privacy": "Tietosuojakäytäntö",
+      "privacy": "Tietosuojakaytanto",
       "shipping": "Toimitusehdot",
       "returns": "Palautukset",
       "search": "Hae sivustolta"
     },
-    "copyrightLine1": "© Korkeila Helsinki.",
-    "copyrightLine2": "Kaikki oikeudet pidätetään."
+    "copyrightLine1": "Ac Korkeila Helsinki.",
+    "copyrightLine2": "Kaikki oikeudet pidatetaan."
   }
 }
-

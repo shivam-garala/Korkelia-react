@@ -4,7 +4,7 @@
 
 :root {
   --background: #ffffff;
-  --foreground: #606062;
+  --foreground: #373435;
 
   /* Brand / UI tokens */
   --color-primary: #38766b;
@@ -13,15 +13,21 @@
   --color-border: #e6e7e8;
   --color-muted: #727376;
   --shadow-soft: 0 10px 30px rgba(0, 0, 0, 0.08);
+  --container-width: 1400px;
 
   /* Project-specific colors */
-  --color-heading: #606062;
+  --color-heading: #373435;
   --color-line: #38766b;
   --color-category-line: #74616d;
   --color-icon: #38766b;
   --color-footer-text: #727376;
   --color-menu-text: #373435;
   --color-product-detail-line: #e6e7e8;
+  --color-menu-divider: #7b606e;
+  --color-menu-accent: #cd9295;
+  --color-footer-bg: #7b606e;
+  --color-footer-border: #efb8a4;
+  --color-footer-text-contrast: #ffffff;
 
   /* Fonts */
   --font-body: var(--font-nata-sans), sans-serif;

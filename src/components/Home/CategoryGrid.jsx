@@ -21,7 +21,6 @@ export default function CategoryGrid({
                 <Image className={styles.image} src={category.imageSrc} alt="" fill />
               </div>
               <p className={styles.label}>{category.label}</p>
-              <div className={styles.rule} aria-hidden />
             </Link>
           ))}
         </div>

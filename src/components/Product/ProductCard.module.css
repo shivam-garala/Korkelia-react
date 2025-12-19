@@ -1,6 +1,6 @@
 .card {
   display: grid;
-  gap: 14px;
+  gap: 16px;
   text-decoration: none;
   color: inherit;
 }
@@ -9,33 +9,35 @@
   position: relative;
   aspect-ratio: 1 / 1;
   background: #ffffff;
+  display: grid;
+  place-items: center;
 }
 
 .image {
   object-fit: contain;
+  inset: 12%;
 }
 
 .rule {
   height: 1px;
   background: var(--color-category-line);
-  opacity: 0.9;
+  opacity: 0.7;
 }
 
 .meta {
   display: grid;
   gap: 4px;
-  font-family: var(--font-nata-sans), sans-serif;
+  font-family: var(--font-body);
   color: var(--color-heading);
 }
 
 .name {
-  font-size: 12px;
-  letter-spacing: 1.2px;
+  font-size: 11px;
+  letter-spacing: 1.4px;
   text-transform: uppercase;
 }
 
 .price {
-  font-size: 12px;
+  font-size: 11px;
   color: var(--color-muted);
 }
-

@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import SiteFooter from "../../components/Home/SiteFooter.jsx";
@@ -9,20 +9,38 @@ import ProductGrid from "../../components/Product/ProductGrid.jsx";
 import styles from "./page.module.css";
 
 export default function ProductListingPage() {
-  const [leftFilter, setLeftFilter] = useState("all");
+  const [leftFilter, setLeftFilter] = useState("featured");
   const [categoryFilter, setCategoryFilter] = useState("rings");
+  const sortOptions = useMemo(
+    () => [
+      { value: "featured", label: "Featured" },
+      { value: "newest", label: "Newest" },
+      { value: "price-asc", label: "Price: Low to High" },
+      { value: "price-desc", label: "Price: High to Low" },
+    ],
+    []
+  );
+  const categoryOptions = useMemo(
+    () => [
+      { value: "rings", label: "Rings" },
+      { value: "bracelets", label: "Bracelets" },
+      { value: "necklaces", label: "Necklaces" },
+      { value: "earrings", label: "Earrings" },
+    ],
+    []
+  );
 
   const products = useMemo(
     () => [
-      { id: 1, name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/1" },
-      { id: 2, name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/2" },
-      { id: 3, name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/3" },
-      { id: 4, name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/4" },
-      { id: 5, name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/5" },
-      { id: 6, name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/6" },
-      { id: 7, name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/7" },
-      { id: 8, name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/8" },
-      { id: 9, name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/9" },
+      { id: 1, name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/1" },
+      { id: 2, name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/2" },
+      { id: 3, name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/3" },
+      { id: 4, name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/4" },
+      { id: 5, name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/5" },
+      { id: 6, name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/6" },
+      { id: 7, name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/7" },
+      { id: 8, name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/8" },
+      { id: 9, name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/9" },
     ],
     []
   );
@@ -36,12 +54,14 @@ export default function ProductListingPage() {
           <h1 className={styles.heading}>RINGS</h1>
 
           <FiltersBar
-            leftLabel="Alliance"
+            leftLabel="Sort By"
             rightLabel="Select Category"
             leftValue={leftFilter}
             rightValue={categoryFilter}
             onLeftChange={setLeftFilter}
             onRightChange={setCategoryFilter}
+            leftOptions={sortOptions}
+            rightOptions={categoryOptions}
           />
 
           <div className={styles.gridWrap}>
@@ -53,4 +73,8 @@ export default function ProductListingPage() {
     </div>
   );
 }
+
+
+
+
 

@@ -3,13 +3,64 @@
     "language": "Language",
     "currency": "Currency"
   },
+  "header": {
+    "currency": "Euro",
+    "share": "SHARE",
+    "appointment": "BOOK AN APPOINTMENT",
+    "ambassador": "CONTACT AN AMBASSADOR"
+  },
+  "menu": {
+    "home": "Home",
+    "about": "About us",
+    "products": "Products",
+    "diamondDifference": "The Korkeila Helsinki Diamond Difference",
+    "diamondGuide": "The Korkeila Helsinki Diamond Guide",
+    "shippingReturns": "Shipping & Returns",
+    "contact": "Contact us",
+    "productsSub": {
+      "rings": "Rings",
+      "bracelets": "Bracelets",
+      "necklaces": "Necklaces & Pendants",
+      "earrings": "Earrings"
+    }
+  },
   "home": {
     "hero": {
-      "eyebrow": "CUSTOM RING AS A DREAM",
-      "title": "We are goldsmiths in Helsinki and we create everything from small to demanding custom work",
-      "subcopy": "We are a goldsmith shop in Helsinki and deliver both small and more demanding custom work.",
+      "eyebrow": "BESPOKE DREAM RING",
+      "title": "We are a goldsmith shop in Helsinki crafting everything from small to demanding bespoke pieces.",
+      "subcopy": "Fine jewellery crafted into eternal elegance and enchanting memories.",
       "ctaPrimary": "Read more",
       "ctaSecondary": "Request a quote"
+    },
+    "categories": {
+      "title": "CATEGORIES",
+      "items": {
+        "rings": "RINGS",
+        "bracelets": "BRACELETS",
+        "necklaces": "NECKLACES & PENDANTS",
+        "earrings": "EARRINGS"
+      }
+    },
+    "diamondDifference": {
+      "eyebrow": "THE KORKEILA HELSINKI DIAMOND DIFFERENCE",
+      "title": "THE KORKEILA HELSINKI DIAMOND DIFFERENCE",
+      "subtitle": "The Korkeila Helsinki Diamond Difference: Your personal diamond sourcing concierge",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit. Fusce elit leo, fermentum eget urna sit amet, eros molestie varius in."
+    },
+    "diamondGuide": {
+      "eyebrow": "THE KORKEILA HELSINKI DIAMOND GUIDE",
+      "title": "THE KORKEILA HELSINKI DIAMOND GUIDE",
+      "subtitle": "A curated guide to the brilliance of diamonds",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit. Fusce elit leo, fermentum eget urna sit amet, eros molestie varius in."
+    },
+    "about": {
+      "eyebrow": "ABOUT",
+      "title": "Rooted in Nordic heritage, Korkeila Helsinki draws inspiration from natural beauty, clean lines, and timeless simplicity.",
+      "subtitle": "Korkeila Helsingin juuret ovat pohjoismaisessa estetiikassa - luonnon kauneudessa, selkeissa linjoissa ja ajattomassa yksinkertaisuudessa.",
+      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit."
+    },
+    "cta": {
+      "discover": "DISCOVER"
     }
   },
   "footer": {
@@ -23,8 +74,7 @@
       "returns": "Returns",
       "search": "Search the Site"
     },
-    "copyrightLine1": "© Korkeila Helsinki.",
+    "copyrightLine1": "Ac Korkeila Helsinki.",
     "copyrightLine2": "All rights reserved."
   }
 }
-

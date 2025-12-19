@@ -4,7 +4,7 @@
   font-family: var(--font-nata-sans), sans-serif;
 }
 
-.stack {
+.main {
   display: grid;
+  gap: 0;
 }
-

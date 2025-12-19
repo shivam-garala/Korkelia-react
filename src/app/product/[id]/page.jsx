@@ -1,3 +1,4 @@
+import Image from "next/image";
 import SiteFooter from "../../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../../components/Home/SiteHeader.jsx";
 import Container from "../../../components/ui/Container.jsx";
@@ -8,19 +9,17 @@ import styles from "./page.module.css";
 
 export default async function ProductDetailsPage({ params }) {
   const { id } = await params;
-
   const galleryItems = [
-    { key: "a", variant: "square", src: "/others/1_prddetails.png" },
-    { key: "b", variant: "tall", src: "/others/2_prd_details.png" },
-    { key: "c", variant: "circle", src: "/others/1_prddetails.png" },
-    { key: "d", variant: "wide", src: "/others/productandcategory.png" },
-    { key: "e", variant: "video", src: "/others/1_prddetails.png", badge: "play" },
+    { key: "a", variant: "square", src: "/productdetails/1.jpg" },
+    { key: "b", variant: "tall", src: "/productdetails/2.jpg" },
+    { key: "c", variant: "circle", src: "/productdetails/3.jpg" },
+    { key: "d", variant: "wide", src: "/productdetails/4.jpg" },
+    { key: "e", variant: "video", src: "/productdetails/4.jpg", badge: "play" },
   ];
-
   const related = [
-    { id: "r1", name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/2" },
-    { id: "r2", name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/3" },
-    { id: "r3", name: "PRODUCT NAME", price: "€ 3,000", imageSrc: "/others/productandcategory.png", href: "/product/4" },
+    { id: "r1", name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/2" },
+    { id: "r2", name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/3" },
+    { id: "r3", name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/4" },
   ];
 
   return (
@@ -28,13 +27,15 @@ export default async function ProductDetailsPage({ params }) {
       <SiteHeader />
       <main className={styles.main}>
         <Container>
-          <div className={styles.topLine} aria-hidden />
+          <div className={styles.topRow}>
+            <button className={styles.shareBtn} type="button" aria-label="Share">
+              <Image src="/icons/share.png" alt="" width={14} height={14} />
+            </button>
+            <div className={styles.topLine} aria-hidden />
+          </div>
 
           <div className={styles.layout}>
             <div className={styles.gallery}>
-              <div className={styles.share} aria-hidden>
-                <span className={styles.shareIcon}>↗</span>
-              </div>
               <ProductGallery items={galleryItems} />
             </div>
 
