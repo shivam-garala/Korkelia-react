@@ -15,6 +15,7 @@ const geistMono = Geist_Mono({
 const nataSans = Noto_Sans({
   variable: "--font-nata-sans",
   subsets: ["latin"],
+  weight: ["300", "400", "500", "600", "700"],
 });
 
 const marcellus = Marcellus({

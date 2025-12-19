@@ -34,8 +34,8 @@ export default function Hero({
       </div>
       <div className={styles.content}>
         <div className={styles.contentInner}>
-          {eyebrow ? <h1 className={styles.headline}>{eyebrow}</h1> : null}
-          {title ? <p className={styles.copy}>{title}</p> : null}
+          {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
+          {title ? <h1 className={styles.title}>{title}</h1> : null}
           {subcopy ? <p className={styles.subcopy}>{subcopy}</p> : null}
           <div className={styles.ctaRow}>
             {primaryCta ? (

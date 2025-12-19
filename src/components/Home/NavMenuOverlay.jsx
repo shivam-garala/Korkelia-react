@@ -5,10 +5,11 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import styles from "./NavMenuOverlay.module.css";
 
-function Icon({ path }) {
+function Icon({ path, className, style }) {
   return (
     <svg
-      className={styles.icon}
+      className={className ?? styles.icon}
+      style={style}
       viewBox="0 0 24 24"
       fill="none"
       stroke="currentColor"
@@ -22,10 +23,7 @@ function Icon({ path }) {
   );
 }
 
-export default function NavMenuOverlay({
-  open,
-  onClose,
-}) {
+export default function NavMenuOverlay({ open, onClose }) {
   const [productsOpen, setProductsOpen] = useState(false);
 
   useEffect(() => {
@@ -55,9 +53,6 @@ export default function NavMenuOverlay({
             <button type="button" className={styles.iconBtn} aria-label="Close menu" onClick={onClose}>
               <Icon path="M18 6 6 18M6 6l12 12" />
             </button>
-            <button type="button" className={styles.iconBtn} aria-label="Search">
-              <Image className={styles.icon} src="/icons/search.png" alt="" width={18} height={18} />
-            </button>
           </div>
 
           <Link className={styles.brand} href="/" aria-label="Home" onClick={onClose}>
@@ -76,33 +71,31 @@ export default function NavMenuOverlay({
 
       <div className={styles.content}>
         <ul className={styles.menu}>
-          <li className={styles.itemRow}>
+          <li className={styles.item}>
             <Link className={styles.link} href="/" onClick={onClose}>
-              Kotiin
+              Home (Kotiin)
             </Link>
           </li>
-          <li className={styles.itemRow}>
+          <li className={styles.item}>
             <Link className={styles.link} href="#" onClick={onClose}>
-              Tietoja meistä
+              About us (Meistä)
             </Link>
           </li>
-          <li>
+          <li className={styles.item}>
             <div className={styles.itemRow}>
               <Link className={styles.link} href="/dashboard/product" onClick={onClose}>
-                Tuotteet
+                Products (Tuotteet)
               </Link>
               <button
                 type="button"
                 className={styles.iconBtn}
                 aria-label="Toggle products submenu"
                 onClick={() => setProductsOpen((prev) => !prev)}
+                aria-expanded={productsOpen}
               >
-                <Image
+                <Icon
                   className={styles.chev}
-                  src="/icons/down_Arrow.png"
-                  alt=""
-                  width={14}
-                  height={9}
+                  path="m6 9 6 6 6-6"
                   style={productsOpen ? { transform: "rotate(180deg)" } : undefined}
                 />
               </button>
@@ -110,35 +103,38 @@ export default function NavMenuOverlay({
             {productsOpen ? (
               <div className={styles.subMenu}>
                 <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
-                  Rings
+                  Rings (Sormukset)
                 </Link>
                 <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
-                  Necklace
+                  Bracelets (Rannekorut)
                 </Link>
                 <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
-                  Earrings
+                  Necklaces &amp; Pendants (Kaulakorut ja Riipukse)
+                </Link>
+                <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
+                  Earrings (Korvakorut)
                 </Link>
               </div>
             ) : null}
           </li>
-          <li className={styles.itemRow}>
+          <li className={styles.item}>
             <Link className={styles.link} href="#" onClick={onClose}>
-              Kestävä kehitys ja eettinen hankinta
+              The Korkeila Helsinki Diamond Difference (Korkeila Helsinki timantin ero)
             </Link>
           </li>
-          <li className={styles.itemRow}>
+          <li className={styles.item}>
             <Link className={styles.link} href="#" onClick={onClose}>
-              Timanttiopas
+              The Korkeila Helsinki Diamond Guide (Korkeila Helsinki Timanttiopas)
             </Link>
           </li>
-          <li className={styles.itemRow}>
-            <Link className={styles.link} href="#" onClick={onClose}>
-              Toimitus ja palautus
+          <li className={styles.item}>
+            <Link className={`${styles.link} ${styles.muted}`} href="#" onClick={onClose} aria-disabled="true">
+              Shipping &amp; Returns (Toimitus ja Palautukset)
             </Link>
           </li>
-          <li className={styles.itemRow}>
+          <li className={styles.item}>
             <Link className={styles.link} href="#" onClick={onClose}>
-              Ota yhteyttä
+              Contact us (Ota yhteyttä)
             </Link>
           </li>
         </ul>

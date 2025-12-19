@@ -1,8 +1,8 @@
 "use client";
 
 import CategoryGrid from "../components/Home/CategoryGrid.jsx";
+import FullMediaSection from "../components/Home/FullMediaSection.jsx";
 import Hero from "../components/Home/Hero.jsx";
-import ImageBanner from "../components/Home/ImageBanner.jsx";
 import SiteFooter from "../components/Home/SiteFooter.jsx";
 import SiteHeader from "../components/Home/SiteHeader.jsx";
 import { useI18n } from "../providers/I18nProvider.jsx";
@@ -14,72 +14,68 @@ export default function HomeClient() {
   return (
     <div className={styles.page}>
       <SiteHeader />
-      <div className={styles.stack}>
+      <main className={styles.main}>
         <Hero
-          imageSrc="/homebanner/banner-story.jpg"
-          videoSrc="/others/202411221117018124.mp4"
-          posterSrc="/homebanner/banner-story.jpg"
+          videoSrc="/productdetails/Rose%20Anim%20Kastehelmi%20Mq%20Rd%201725.mp4"
+          posterSrc="/homepage/banner_1.jpg"
           eyebrow={t("home.hero.eyebrow")}
           title={t("home.hero.title")}
-          subcopy={null}
+          subcopy={t("home.hero.subcopy")}
           primaryCta={{ label: t("home.hero.ctaPrimary"), href: "#" }}
           secondaryCta={{ label: t("home.hero.ctaSecondary"), href: "#" }}
         />
 
         <CategoryGrid
+          title={t("home.categories.title")}
           categories={[
-            { label: "RINGS", href: "/product", imageSrc: "/others/productandcategory.png" },
-            { label: "BRACELETS", href: "/product", imageSrc: "/others/productandcategory.png" },
-            { label: "NECKLACES & PENDANTS", href: "/product", imageSrc: "/others/productandcategory.png" },
-            { label: "EARRINGS", href: "/product", imageSrc: "/others/productandcategory.png" },
+            { label: t("home.categories.items.rings"), href: "/product", imageSrc: "/homepage/category.jpg" },
+            { label: t("home.categories.items.bracelets"), href: "/product", imageSrc: "/homepage/category.jpg" },
+            {
+              label: t("home.categories.items.necklaces"),
+              href: "/product",
+              imageSrc: "/homepage/category.jpg",
+            },
+            { label: t("home.categories.items.earrings"), href: "/product", imageSrc: "/homepage/category.jpg" },
           ]}
         />
 
-        <ImageBanner
-          imageSrc="/homebanner/banner-ethical.jpg"
-          scheme="light"
-          shade="light"
-          align="left"
-          title="Ethical & sustainable"
-          copy="Responsible sourcing, crafted with care and transparency."
-          cta={{ label: "Learn more", href: "#" }}
+        <FullMediaSection
+          mediaType="video"
+          mediaSrc="/productdetails/Rose%20Anim%20Kastehelmi%20Mq%20Rd%201725.mp4"
+          posterSrc="/homepage/banner_2.jpg"
+          eyebrow={t("home.diamondGuide.eyebrow")}
+          title={t("home.diamondGuide.title")}
+          subtitle={t("home.diamondGuide.subtitle")}
+          description={t("home.diamondGuide.description")}
+          ctaLabel={t("home.cta.discover")}
+          href="#"
         />
 
-        <section id="our-story">
-          <ImageBanner
-            imageSrc="/homebanner/banner-story.jpg"
-            scheme="light"
-            shade="light"
-            align="left"
-            eyebrow="OUR STORY"
-            title="Modern heirlooms"
-            copy="A focus on craftsmanship, comfort, and long-lasting shine."
-            cta={{ label: "Read more", href: "#our-story" }}
-          />
-        </section>
-
-        <ImageBanner
-          imageSrc="/homebanner/banner-diamond.jpg"
-          scheme="dark"
-          shade="dark"
-          align="left"
-          title="Diamond guide"
-          copy="Cut, clarity, color, and carat — made easy."
-          cta={{ label: "Explore", href: "#" }}
+        <FullMediaSection
+          mediaType="video"
+          mediaSrc="/productdetails/Rose%20Anim%20Kastehelmi%20Mq%20Rd%201725.mp4"
+          posterSrc="/homepage/banner_1.jpg"
+          eyebrow={t("home.diamondDifference.eyebrow")}
+          title={t("home.diamondDifference.title")}
+          subtitle={t("home.diamondDifference.subtitle")}
+          description={t("home.diamondDifference.description")}
+          ctaLabel={t("home.cta.discover")}
+          href="#"
         />
 
-        <ImageBanner
-          imageSrc="/homebanner/banner-logistics.jpg"
-          scheme="dark"
-          shade="dark"
-          align="left"
-          title="White glove logistics"
-          copy="Secure delivery with thoughtful packaging and tracking."
-          cta={{ label: "Shipping info", href: "#" }}
+        <FullMediaSection
+          mediaType="image"
+          mediaSrc="/homepage/banner_3.jpg"
+          posterSrc="/homepage/banner_3.jpg"
+          eyebrow={t("home.about.eyebrow")}
+          title={t("home.about.title")}
+          subtitle={t("home.about.subtitle")}
+          description={t("home.about.description")}
+          ctaLabel={t("home.cta.discover")}
+          href="#"
         />
-
-        <SiteFooter />
-      </div>
+      </main>
+      <SiteFooter />
     </div>
   );
 }
