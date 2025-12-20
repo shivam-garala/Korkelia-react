@@ -28,6 +28,8 @@
   --color-footer-bg: #7b606e;
   --color-footer-border: #efb8a4;
   --color-footer-text-contrast: #ffffff;
+  --font-nata-sans: "Nata Sans", sans-serif;
+  --font-marcellus: "Marcellus", serif;
 
   /* Fonts */
   --font-body: var(--font-nata-sans), sans-serif;
