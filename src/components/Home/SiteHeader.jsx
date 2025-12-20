@@ -65,7 +65,7 @@ export default function SiteHeader() {
               aria-label="Open menu"
               onClick={() => setMenuOpen(true)}
             >
-              <Image className={styles.icon} src="/icons/menu.png" alt="" width={18} height={18} />
+              <Image className={styles.icon} src="/icons/menu.png" alt="" width={22} height={22} />
             </button>
           </div>
 

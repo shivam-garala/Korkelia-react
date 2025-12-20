@@ -26,9 +26,9 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "BESPOKE DREAM RING",
-      "title": "We are a goldsmith shop in Helsinki crafting everything from small to demanding bespoke pieces.",
-      "subcopy": "Fine jewellery crafted into eternal elegance and enchanting memories.",
+      "eyebrow": "",
+      "title": "We are a goldsmith shop in Helsinki crafting everything",
+      "subcopy": "The Korkeila Helsinki Diamond Difference: Your personal diamond sourcing Concierge",
       "ctaPrimary": "Read more",
       "ctaSecondary": "Request a quote"
     },
@@ -42,22 +42,22 @@
       }
     },
     "diamondDifference": {
-      "eyebrow": "THE KORKEILA HELSINKI DIAMOND DIFFERENCE",
-      "title": "THE KORKEILA HELSINKI DIAMOND DIFFERENCE",
-      "subtitle": "The Korkeila Helsinki Diamond Difference: Your personal diamond sourcing concierge",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit. Fusce elit leo, fermentum eget urna sit amet, eros molestie varius in."
+      "eyebrow": "",
+      "title": "The Korkeila Helsinki Diamond Guide",
+      "subtitle": "A Curated Guide to the brilliance of diamondssourcing Concierge",
+      "description": ""
     },
     "diamondGuide": {
-      "eyebrow": "THE KORKEILA HELSINKI DIAMOND GUIDE",
-      "title": "THE KORKEILA HELSINKI DIAMOND GUIDE",
-      "subtitle": "A curated guide to the brilliance of diamonds",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit. Fusce elit leo, fermentum eget urna sit amet, eros molestie varius in."
+      "eyebrow": "",
+      "title": "The Korkeila Helsinki Diamond Difference",
+      "subtitle": "The Korkeila Helsinki Diamond Difference: Your personal diamond sourcing Concierge",
+      "description": ""
     },
     "about": {
-      "eyebrow": "ABOUT",
-      "title": "Rooted in Nordic heritage, Korkeila Helsinki draws inspiration from natural beauty, clean lines, and timeless simplicity.",
-      "subtitle": "Korkeila Helsingin juuret ovat pohjoismaisessa estetiikassa - luonnon kauneudessa, selkeissa linjoissa ja ajattomassa yksinkertaisuudessa.",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit."
+      "eyebrow": "",
+      "title": "ABOUT",
+      "subtitle": "Rooted in Nordic heritage, Korkeila Helsinki draws inspiration from natural beauty, clean lines, and timeless simplicity",
+      "description": ""
     },
     "cta": {
       "discover": "DISCOVER"
@@ -65,16 +65,15 @@
   },
   "footer": {
     "brandTitle": "KORKEILA HELSINKI",
-    "brandCopyLine1": "Goldsmith shop in Helsinki. Custom work, gold and silver jewelry.",
-    "brandCopyLine2": "Lab-grown and natural diamonds.",
+    "brandCopyLine1": "Fine jewellery crafted into eternal elegance and enchanting memories.",
+    "brandCopyLine2": "Natural and laboratory diamonds.",
     "infoTitle": "INFORMATION",
     "links": {
       "privacy": "Privacy Policy",
-      "shipping": "Shipping Policy",
-      "returns": "Returns",
-      "search": "Search the Site"
+      "shippingReturns": "Shipping and Return Policy",
+      "contact": "Contact Us"
     },
-    "copyrightLine1": "Ac Korkeila Helsinki.",
+    "copyrightLine1": "© Korkeila Helsinki.",
     "copyrightLine2": "All rights reserved."
   }
 }

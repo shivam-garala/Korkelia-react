@@ -9,14 +9,14 @@ import ProductGrid from "../../components/Product/ProductGrid.jsx";
 import styles from "./page.module.css";
 
 export default function ProductListingPage() {
-  const [leftFilter, setLeftFilter] = useState("featured");
+  const [sortFilter, setSortFilter] = useState("featured");
   const [categoryFilter, setCategoryFilter] = useState("rings");
   const sortOptions = useMemo(
     () => [
-      { value: "featured", label: "Featured" },
-      { value: "newest", label: "Newest" },
-      { value: "price-asc", label: "Price: Low to High" },
-      { value: "price-desc", label: "Price: High to Low" },
+      // { value: "featured", label: "Featured" },
+      // { value: "newest", label: "Newest" },
+      { value: "price-asc", label: "Low to High" },
+      { value: "price-desc", label: "High to Low" },
     ],
     []
   );
@@ -56,12 +56,12 @@ export default function ProductListingPage() {
           <FiltersBar
             leftLabel="Sort By"
             rightLabel="Select Category"
-            leftValue={leftFilter}
-            rightValue={categoryFilter}
-            onLeftChange={setLeftFilter}
-            onRightChange={setCategoryFilter}
-            leftOptions={sortOptions}
-            rightOptions={categoryOptions}
+            leftValue={categoryFilter}
+            rightValue={sortFilter}
+            onLeftChange={setCategoryFilter}
+            onRightChange={setSortFilter}
+            leftOptions={categoryOptions}
+            rightOptions={sortOptions}
           />
 
           <div className={styles.gridWrap}>

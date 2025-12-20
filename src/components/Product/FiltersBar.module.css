@@ -41,7 +41,7 @@
 :global(.filters__placeholder) {
   color: var(--color-heading);
   font-family: var(--font-body);
-  font-size: 10px;
+  font-size: 14px;
   letter-spacing: 0.8px;
   text-transform: uppercase;
 }
