@@ -1,7 +1,7 @@
 "use client";
 
 import Cookies from "js-cookie";
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import en from "../i18n/en.json";
 import fi from "../i18n/fi.json";
 
@@ -26,8 +26,14 @@ function getByPath(object, path) {
 const I18nContext = createContext(null);
 
 export function I18nProvider({ children }) {
-  const initial = Cookies.get(COOKIE_NAME) || DEFAULT_LANGUAGE;
-  const [language, setLanguageState] = useState(initial in dictionaries ? initial : DEFAULT_LANGUAGE);
+  const [language, setLanguageState] = useState(DEFAULT_LANGUAGE);
+
+  useEffect(() => {
+    const initial = Cookies.get(COOKIE_NAME);
+    if (initial in dictionaries) {
+      setLanguageState(initial);
+    }
+  }, []);
 
   const setLanguage = useCallback((nextLanguage) => {
     const normalized = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
@@ -58,4 +64,3 @@ export function useI18n() {
   }
   return value;
 }
-

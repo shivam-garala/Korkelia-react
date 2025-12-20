@@ -1,9 +1,13 @@
+"use client";
+
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./SiteFooter.module.css";
+import { useI18n } from "../../providers/I18nProvider.jsx";
 
 const socials = [
   { href: "#", src: "/icons/facebook.png", alt: "Facebook" },
+  { href: "#", src: "/icons/othersocial.png", alt: "other social" },
   { href: "#", src: "/icons/pintrest.png", alt: "Pinterest" },
   { href: "#", src: "/icons/insta.png", alt: "Instagram" },
   { href: "#", src: "/icons/youtube.png", alt: "YouTube" },
@@ -11,33 +15,32 @@ const socials = [
 ];
 
 export default function SiteFooter() {
+  const { t } = useI18n();
+
   return (
     <footer className={styles.footer}>
       <div className={styles.inner}>
         <div className={styles.topRow}>
           <div>
-            <p className={styles.brandTitle}>KORKEILA HELSINKI</p>
+            <p className={styles.brandTitle}>{t("footer.brandTitle")}</p>
             <p className={styles.brandCopy}>
-              Kultasepanliike Helsingissa. Tilaustyot, kulta- ja hopeakorut.
+              {t("footer.brandCopyLine1")}
               <br />
-              Laboratorio- ja luonnontimantit.
+              {t("footer.brandCopyLine2")}
             </p>
           </div>
 
           <div>
-            <p className={styles.infoTitle}>INFORMATION</p>
-            <nav className={styles.infoLinks} aria-label="Information">
+            <p className={styles.infoTitle}>{t("footer.infoTitle")}</p>
+            <nav className={styles.infoLinks} aria-label={t("footer.infoTitle")}>
               <Link className={styles.link} href="#">
-                Privacy Policy
+                {t("footer.links.privacy")}
               </Link>
               <Link className={styles.link} href="#">
-                Shipping Policy
+                {t("footer.links.shippingReturns")}
               </Link>
               <Link className={styles.link} href="#">
-                Returns
-              </Link>
-              <Link className={styles.link} href="#">
-                Search the Site
+                {t("footer.links.contact")}
               </Link>
             </nav>
           </div>
@@ -47,9 +50,9 @@ export default function SiteFooter() {
 
         <div className={styles.bottomRow}>
           <div className={styles.meta}>
-            © Korkeila Helsinki.
+            {t("footer.copyrightLine1")}
             <br />
-            All rights reserved.
+            {t("footer.copyrightLine2")}
           </div>
 
           <div className={styles.logoWrap} aria-hidden>

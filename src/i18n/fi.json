@@ -26,9 +26,9 @@
   },
   "home": {
     "hero": {
-      "eyebrow": "UNELMIEN SORMUS TILAUSTYONA",
-      "title": "Olemme kultasepanliike Helsingissa ja toteutamme seka pienet etta vaativatkin tilaustyot.",
-      "subcopy": "Hienoja koruja, jotka rakentavat ajattomia muistoja - laboratoriotimanteilla ja luonnontimanteilla.",
+      "eyebrow": "",
+      "title": "Mikä tekee timanteistamme ainutlaatuisia?",
+      "subcopy": "Henkilökohtainen timanttien hankintakonsulttisi",
       "ctaPrimary": "Lue lisaa",
       "ctaSecondary": "Pyyda tarjous"
     },
@@ -42,22 +42,22 @@
       }
     },
     "diamondDifference": {
-      "eyebrow": "KORKEILA HELSINGIN TIMANTTIEN ERO",
-      "title": "KORKEILA HELSINGIN TIMANTTIEN ERO",
-      "subtitle": "Henkilokohtainen timanttien hankintakonsulttisi",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit. Fusce elit leo, fermentum eget urna sit amet, eros molestie varius in."
+      "eyebrow": "",
+      "title": "Korkeila Helsinkitimanttiopas",
+      "subtitle": "Johdatus timanttien ainutlaatuiseen loistoon",
+      "description": ""
     },
     "diamondGuide": {
-      "eyebrow": "KORKEILA HELSINGIN TIMANTTIOPAS",
-      "title": "KORKEILA HELSINGIN TIMANTTIOPAS",
-      "subtitle": "Johdatus timanttien ainutlaatuiseen loistoon",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit. Fusce elit leo, fermentum eget urna sit amet, eros molestie varius in."
+      "eyebrow": "",
+      "title": "Mikä tekee timanteistamme ainutlaatuisia?",
+      "subtitle": "Henkilökohtainen timanttien hankintakonsulttisi",
+      "description": ""
     },
     "about": {
-      "eyebrow": "MEISTA",
-      "title": "Korkeila Helsingin juuret ovat pohjoismaisessa estetiikassa - luonnon kauneudessa, selkeissa linjoissa ja ajattomassa yksinkertaisuudessa.",
-      "subtitle": "Rooted in Nordic heritage, Korkeila Helsinki draws inspiration from natural beauty, clean lines, and timeless simplicity.",
-      "description": "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas id pulvinar ante, ac euismod elit."
+      "eyebrow": "",
+      "title": "Meistä",
+      "subtitle": "Korkeila Helsingin juuret ovat pohjoismaisessa estetiikassa – luonnon kauneudessa, selkeissä linjoissa ja ajattomassa yksinkertaisuudessa",
+      "description": ""
     },
     "cta": {
       "discover": "LOYDA"
@@ -65,16 +65,15 @@
   },
   "footer": {
     "brandTitle": "KORKEILA HELSINKI",
-    "brandCopyLine1": "Kultasepanliike Helsingissa. Tilaustyot, kulta- ja hopeakorut.",
+    "brandCopyLine1": "Kultasepänliike Helsingissä. Tilaustyöt, kulta- ja hopeakorut.",
     "brandCopyLine2": "Laboratorio- ja luonnontimantit.",
-    "infoTitle": "INFORMATION",
+    "infoTitle": "TIEDOT",
     "links": {
-      "privacy": "Tietosuojakaytanto",
-      "shipping": "Toimitusehdot",
-      "returns": "Palautukset",
-      "search": "Hae sivustolta"
+      "privacy": "Tietosuojakäytäntö",
+      "shippingReturns": "Toimitus- ja palautuskäytäntö",
+      "contact": "Ota yhteyttä"
     },
-    "copyrightLine1": "Ac Korkeila Helsinki.",
-    "copyrightLine2": "Kaikki oikeudet pidatetaan."
+    "copyrightLine1": "© Korkeila Helsinki.",
+    "copyrightLine2": "Kaikki oikeudet pidätetään."
   }
 }

@@ -40,9 +40,9 @@ export default function HomeClient() {
         />
 
         <FullMediaSection
-          mediaType="video"
-          mediaSrc="/productdetails/Rose%20Anim%20Kastehelmi%20Mq%20Rd%201725.mp4"
-          posterSrc="/homepage/banner_2.jpg"
+          mediaType="image"
+          mediaSrc="/homepage/banner_1.jpg"
+          posterSrc="/homepage/banner_1.jpg"
           eyebrow={t("home.diamondGuide.eyebrow")}
           title={t("home.diamondGuide.title")}
           subtitle={t("home.diamondGuide.subtitle")}
@@ -52,9 +52,9 @@ export default function HomeClient() {
         />
 
         <FullMediaSection
-          mediaType="video"
-          mediaSrc="/productdetails/Rose%20Anim%20Kastehelmi%20Mq%20Rd%201725.mp4"
-          posterSrc="/homepage/banner_1.jpg"
+          mediaType="image"
+          mediaSrc="/homepage/banner_2.jpg"
+          posterSrc="/homepage/banner_2.jpg"
           eyebrow={t("home.diamondDifference.eyebrow")}
           title={t("home.diamondDifference.title")}
           subtitle={t("home.diamondDifference.subtitle")}

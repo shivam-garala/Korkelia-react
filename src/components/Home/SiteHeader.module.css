@@ -3,7 +3,7 @@
   top: 0;
   z-index: 20;
   background: #ffffff;
-  border-bottom: 1px solid color-mix(in srgb, var(--color-line), transparent 65%);
+  /* border-bottom: 1px solid color-mix(in srgb, var(--color-line), transparent 65%); */
 }
 
 .topInner,
@@ -47,7 +47,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
-  color: #38766b;
+  color: #000000;
   text-decoration: none;
   font-size: 12px;
   font-weight: 400;
@@ -71,7 +71,7 @@
   display: inline-flex;
   align-items: center;
   gap: 6px;
-  color: #38766b;
+  color: #000000;
   font-size: 12px;
   letter-spacing: 0.8px;
   font-weight: 500;
@@ -148,7 +148,7 @@
 }
 
 .icon {
-  width: 18px;
+  width: 22px;
   height: auto;
   display: block;
 }
