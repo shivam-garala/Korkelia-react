@@ -48,7 +48,7 @@ export default function HomeClient() {
           subtitle={t("home.diamondGuide.subtitle")}
           description={t("home.diamondGuide.description")}
           ctaLabel={t("home.cta.discover")}
-          href="#"
+          href="/diamond-guide"
         />
 
         <FullMediaSection
@@ -60,7 +60,7 @@ export default function HomeClient() {
           subtitle={t("home.diamondDifference.subtitle")}
           description={t("home.diamondDifference.description")}
           ctaLabel={t("home.cta.discover")}
-          href="#"
+          href="/diamond-difference"
         />
 
         <FullMediaSection
@@ -72,7 +72,7 @@ export default function HomeClient() {
           subtitle={t("home.about.subtitle")}
           description={t("home.about.description")}
           ctaLabel={t("home.cta.discover")}
-          href="#"
+          href="/about"
         />
       </main>
       <SiteFooter />

@@ -1,0 +1,164 @@
+"use client";
+
+import Image from "next/image";
+import Link from "next/link";
+import SiteFooter from "../../components/Home/SiteFooter.jsx";
+import SiteHeader from "../../components/Home/SiteHeader.jsx";
+import Container from "../../components/ui/Container.jsx";
+import { useI18n } from "../../providers/I18nProvider.jsx";
+import styles from "./page.module.css";
+
+const contentByLanguage = {
+  en: {
+    heading: "CONTACT US",
+    lead:
+      "Whether you have a question about our jewellery, need help choosing the perfect piece or want to design something custom — we’d love to hear from you.",
+    sections: {
+      appointments: {
+        title: "Personal Appointments",
+        body: "For product inquiries or personal bespoke jewellery design sessions, our team will be happy to connect.",
+        cta: "Please book an appointment",
+      },
+      visit: {
+        title: "Visit Us",
+        lines: ["We welcome you to our Boutique", "Korkeavuorenkatu 6, 00150 Helsinki"],
+      },
+      hours: {
+        title: "Opening Hours",
+        lines: ["Mon–Fri 11–18 EET", "Sat 10–15 EET"],
+      },
+      contact: {
+        title: "Contact Details",
+        phone: "Phone: +358 50 327 0600",
+        whatsapp: "WhatsApp: +358 50 327 0600",
+        email: "Email: korkeila@korkeilahelsinki.fi",
+      },
+      mapLink: "Open in Google Maps",
+    },
+  },
+  fi: {
+    heading: "OTA YHTEYTTA",
+    lead:
+      "Jos sinulla on kysyttävää koruistamme, tarvitset apua täydellisen korun valinnassa tai haluat suunnitella jotain täysin omaa — autamme mielellämme.",
+    sections: {
+      appointments: {
+        title: "Henkilokohtaiset ajanvaraukset",
+        body: "Tuotekysymyksiä tai yksilöllisiä korusuunnittelutapaamisia varten tiimimme palvelee sinua mielellään.",
+        cta: "Varaa aika kalenteristamme",
+      },
+      visit: {
+        title: "TULE KAYMAAN",
+        lines: ["Toivotamme sinut lämpimästi tervetulleeksi myymäläämme", "Korkeavuorenkatu 6, 00150 Helsinki"],
+      },
+      hours: {
+        title: "AVOINNA",
+        lines: ["Ma–pe 11–18", "La 10–15"],
+      },
+      contact: {
+        title: "YHTEYSTIEDOT",
+        phone: "Puhelin: +358 50 327 0600",
+        whatsapp: "WhatsApp: +358 50 327 0600",
+        email: "Sposti: korkeila@korkeilahelsinki.fi",
+      },
+      mapLink: "Avaa Google Mapsissa",
+    },
+  },
+};
+
+export default function ContactPage() {
+  const { language } = useI18n();
+  const languageKey = language === "fi" ? "fi" : "en";
+  const content = contentByLanguage[languageKey] ?? contentByLanguage.en;
+
+  return (
+    <div className={styles.page}>
+      <SiteHeader />
+      <main className={styles.main}>
+        <Container>
+          <div className={styles.topLine} aria-hidden />
+          <div className={styles.header}>
+            <h1 className={styles.heading}>{content.heading}</h1>
+            <p className={styles.lead}>{content.lead}</p>
+          </div>
+
+          <div className={styles.content}>
+            <div className={styles.info}>
+              <section className={styles.block}>
+                <h2 className={styles.blockTitle}>{content.sections.appointments.title}</h2>
+                <p className={styles.blockBody}>{content.sections.appointments.body}</p>
+                <Link className={styles.cta} href="/appointment">
+                  <span>{content.sections.appointments.cta}</span>
+                </Link>
+              </section>
+
+              <section className={styles.block}>
+                <h2 className={styles.blockTitle}>{content.sections.visit.title}</h2>
+                {content.sections.visit.lines.map((line) => (
+                  <p key={line} className={styles.blockBody}>
+                    {line}
+                  </p>
+                ))}
+              </section>
+
+              <section className={styles.block}>
+                <h2 className={styles.blockTitle}>{content.sections.hours.title}</h2>
+                {content.sections.hours.lines.map((line) => (
+                  <p key={line} className={styles.blockBody}>
+                    {line}
+                  </p>
+                ))}
+              </section>
+
+              <section className={styles.block}>
+                <h2 className={styles.blockTitle}>{content.sections.contact.title}</h2>
+                <ul className={styles.contactList}>
+                  <li className={styles.contactItem}>
+                    <Image src="/icons/icon_phone_contact.png" alt="" width={16} height={16} />
+                    <div className={styles.contactText}>
+                      <span>{content.sections.contact.phone}</span>
+                    </div>
+                  </li>
+                  <li className={styles.contactItem}>
+                    <Image src="/icons/icon_whatsapp_contact.png" alt="" width={16} height={16} />
+                    <div className={styles.contactText}>
+                      <span>{content.sections.contact.whatsapp}</span>
+                    </div>
+                  </li>
+                  <li className={styles.contactItem}>
+                    <Image src="/icons/icon_email_contact.png" alt="" width={16} height={16} />
+                    <div className={styles.contactText}>
+                      <span>{content.sections.contact.email}</span>
+                    </div>
+                  </li>
+                </ul>
+              </section>
+            </div>
+
+            <div className={styles.map}>
+              <iframe
+                className={styles.mapFrame}
+                src="https://www.google.com/maps/embed?pb=!1m18!1m12!1m3!1d2468.5883311446205!2d24.946343!3d60.1606973!2m3!1f0!2f0!3f0!3m2!1i1024!2i768!4f13.1!3m3!1m2!1s0x46920bc81e95ce35%3A0xe295a664e0438378!2sKorkeila%20Helsinki%20Oy!5e1!3m2!1sen!2sin!4v1765612481650!5m2!1sen!2sin"
+                width="600"
+                height="450"
+                style={{ border: 0 }}
+                allowFullScreen
+                loading="lazy"
+                referrerPolicy="no-referrer-when-downgrade"
+                title="Korkeila Helsinki map"
+              />
+              <a
+                className={styles.mapLink}
+                href="https://maps.app.goo.gl/oBCVEZcfPiPovWjq9"
+                target="_blank"
+                rel="noreferrer"
+              >
+                {content.sections.mapLink}
+              </a>
+            </div>
+          </div>
+        </Container>
+      </main>
+      <SiteFooter />
+    </div>
+  );
+}

@@ -25,7 +25,7 @@
   margin: 0 0 12px;
   font-size: 13px;
   letter-spacing: 1.2px;
-  font-weight: 600;
+  font-weight: 400;
   text-transform: uppercase;
 }
 
@@ -39,7 +39,7 @@
   margin: 0 0 12px;
   font-size: 13px;
   letter-spacing: 1.2px;
-  font-weight: 600;
+  font-weight: 400;
   text-transform: uppercase;
   text-align: right;
 }
@@ -52,7 +52,7 @@
 
 .link {
   color: var(--color-footer-text-contrast);
-  font-weight: 600;
+  font-weight: 400;
   font-size: 13px;
   text-decoration: none;
 }
@@ -76,6 +76,8 @@
 .meta {
   font-size: 13px;
   line-height: 1.5;
+  display: grid;
+  gap: 2px;
 }
 
 .logoWrap {

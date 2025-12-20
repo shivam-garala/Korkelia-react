@@ -84,15 +84,21 @@ export default function NavMenuOverlay({ open, onClose }) {
               </Link>
             </li>
             <li className={styles.item}>
-              <Link className={styles.link} href="#" onClick={onClose}>
+              <Link className={styles.link} href="/about" onClick={onClose}>
                 {t("menu.about")}
               </Link>
             </li>
             <li className={styles.item}>
               <div className={styles.itemRow}>
-                <Link className={styles.link} href="/dashboard/product" onClick={onClose}>
+                <button
+                  type="button"
+                  className={`${styles.link} ${styles.linkButton}`}
+                  onClick={() => setProductsOpen((prev) => !prev)}
+                  aria-expanded={productsOpen}
+                  aria-controls="products-submenu"
+                >
                   {t("menu.products")}
-                </Link>
+                </button>
                 <button
                   type="button"
                   className={styles.iconBtn}
@@ -108,39 +114,39 @@ export default function NavMenuOverlay({ open, onClose }) {
                 </button>
               </div>
               {productsOpen ? (
-                <div className={styles.subMenu}>
-                  <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
+                <div id="products-submenu" className={styles.subMenu}>
+                  <Link className={styles.subLink} href="/product" onClick={onClose}>
                     {t("menu.productsSub.rings")}
                   </Link>
-                  <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
+                  <Link className={styles.subLink} href="/product" onClick={onClose}>
                     {t("menu.productsSub.bracelets")}
                   </Link>
-                  <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
+                  <Link className={styles.subLink} href="/product" onClick={onClose}>
                     {t("menu.productsSub.necklaces")}
                   </Link>
-                  <Link className={styles.subLink} href="/dashboard/product" onClick={onClose}>
+                  <Link className={styles.subLink} href="/product" onClick={onClose}>
                     {t("menu.productsSub.earrings")}
                   </Link>
                 </div>
               ) : null}
             </li>
             <li className={styles.item}>
-              <Link className={styles.link} href="#" onClick={onClose}>
+              <Link className={styles.link} href="/diamond-difference" onClick={onClose}>
                 {t("menu.diamondDifference")}
               </Link>
             </li>
             <li className={styles.item}>
-              <Link className={styles.link} href="#" onClick={onClose}>
+              <Link className={styles.link} href="/diamond-guide" onClick={onClose}>
                 {t("menu.diamondGuide")}
               </Link>
             </li>
-            <li className={styles.item}>
+            {/* <li className={styles.item}>
               <Link className={`${styles.link} ${styles.muted}`} href="#" onClick={onClose} aria-disabled="true">
                 {t("menu.shippingReturns")}
               </Link>
-            </li>
+            </li> */}
             <li className={styles.item}>
-              <Link className={styles.link} href="#" onClick={onClose}>
+              <Link className={styles.link} href="/contact" onClick={onClose}>
                 {t("menu.contact")}
               </Link>
             </li>
@@ -150,4 +156,3 @@ export default function NavMenuOverlay({ open, onClose }) {
     </div>
   );
 }
-

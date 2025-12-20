@@ -39,11 +39,11 @@ export default function SiteHeader() {
                 <Image className={styles.topIcon} src="/icons/share.png" alt="" width={14} height={14} />
                 <span>{t("header.share")}</span>
               </Link>
-              <Link className={styles.topLink} href="#">
+              <Link className={styles.topLink} href="/appointment">
                 <Image className={styles.topIcon} src="/icons/appointment.png" alt="" width={14} height={14} />
                 <span>{t("header.appointment")}</span>
               </Link>
-              <Link className={styles.topLink} href="#">
+              <Link className={styles.topLink} href="/contact">
                 <Image
                   className={styles.topIcon}
                   src="/icons/contact_header_icon.png"
