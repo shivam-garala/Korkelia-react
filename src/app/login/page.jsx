@@ -10,6 +10,7 @@ import {
   setCredentials,
 } from "../../store/authSlice.js";
 import { useAppDispatch, useAppSelector } from "../../store/hooks.js";
+import axiosClient from "../../lib/axiosClient.js";
 import styles from "./page.module.css";
 
 function EyeIcon({ open, ...props }) {
@@ -67,16 +68,18 @@ export default function LoginPage() {
     setMessage(null);
 
     try {
-      const response = await fetch("/api/admin/login", {
-        method: "POST",
-        headers: {
-          "Content-Type": "application/json",
-          Accept: "application/json",
-        },
-        body: JSON.stringify({ email, password }),
-      });
+      const response = await axiosClient.post(
+        "admin/login",
+        { email, password },
+        {
+          headers: {
+            "Content-Type": "application/json",
+            Accept: "application/json",
+          },
+        }
+      );
 
-      const data = await response.json().catch(() => null);
+      const data = response?.data ?? null;
       const token =
         data?.authToken ??
         data?.token ??
@@ -86,7 +89,7 @@ export default function LoginPage() {
       const resolvedEmail = data?.email ?? email;
       const resolvedUserName = data?.username ?? data?.userName ?? resolvedEmail;
 
-      if (!response.ok || !token) {
+      if (!token) {
         const errorMessage =
           data?.message ??
           data?.error ??
@@ -105,7 +108,13 @@ export default function LoginPage() {
       );
       router.push("/admin");
     } catch (error) {
-      setMessage("Login failed. Check the console for details.");
+      const data = error?.response?.data ?? null;
+      const errorMessage =
+        data?.message ??
+        data?.error ??
+        (typeof data === "string" ? data : null) ??
+        "Login failed. Please check your credentials.";
+      setMessage(errorMessage);
       console.error("Login error", error);
     } finally {
       setBusy(false);
@@ -114,7 +123,7 @@ export default function LoginPage() {
 
   const handleLogout = async () => {
     try {
-      await fetch("/api/admin/logout", { method: "POST" });
+      await axiosClient.post("admin/logout");
     } catch (error) {
       console.error("Logout error", error);
     }

@@ -10,7 +10,7 @@
 
 .topLine {
   height: 1px;
-  background: color-mix(in srgb, var(--color-line), transparent 55%);
+  background: color-mix(in srgb, var(--color-primary), transparent 55%);
   margin: 18px 0 26px;
 }
 

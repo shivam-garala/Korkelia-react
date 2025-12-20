@@ -39,7 +39,7 @@ export default function SiteFooter() {
               <Link className={styles.link} href="#">
                 {t("footer.links.shippingReturns")}
               </Link>
-              <Link className={styles.link} href="#">
+              <Link className={styles.link} href="/contact">
                 {t("footer.links.contact")}
               </Link>
             </nav>
@@ -50,9 +50,8 @@ export default function SiteFooter() {
 
         <div className={styles.bottomRow}>
           <div className={styles.meta}>
-            {t("footer.copyrightLine1")}
-            <br />
-            {t("footer.copyrightLine2")}
+            <span><span style={{ fontSize: '18px', verticalAlign: 'middle', marginRight: '2px' }}>©</span>{t("footer.copyrightLine1")}</span>
+            <span>{t("footer.copyrightLine2")}</span>
           </div>
 
           <div className={styles.logoWrap} aria-hidden>

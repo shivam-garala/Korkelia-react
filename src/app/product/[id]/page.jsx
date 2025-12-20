@@ -31,8 +31,8 @@ export default async function ProductDetailsPage({ params }) {
             <button className={styles.shareBtn} type="button" aria-label="Share">
               <Image src="/icons/share.png" alt="" width={14} height={14} />
             </button>
-            <div className={styles.topLine} aria-hidden />
           </div>
+          <div className={styles.topLine} aria-hidden />
 
           <div className={styles.layout}>
             <div className={styles.gallery}>

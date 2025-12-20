@@ -5,14 +5,14 @@
 }
 
 .main {
-  padding: 18px 0 96px;
+  padding: 0 0 96px;
 }
 
 .topRow {
   display: flex;
   align-items: center;
   gap: 12px;
-  margin: 18px 0 32px;
+  margin: 0 0 18px;
 }
 
 .shareBtn {
@@ -30,12 +30,13 @@
 .topLine {
   flex: 1;
   height: 1px;
-  background: color-mix(in srgb, var(--color-line), transparent 55%);
+  margin: 18px 0 60px;
+  background: color-mix(in srgb, var(--color-primary), transparent 55%);
 }
 
 .layout {
   display: grid;
-  grid-template-columns: minmax(0, 1fr) 360px;
+  grid-template-columns: minmax(0, 1fr) 450px;
   gap: 40px;
   align-items: start;
 }

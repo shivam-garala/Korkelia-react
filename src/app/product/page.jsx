@@ -55,7 +55,7 @@ export default function ProductListingPage() {
 
           <FiltersBar
             leftLabel="Sort By"
-            rightLabel="Select Category"
+            rightLabel="Sort By Price"
             leftValue={categoryFilter}
             rightValue={sortFilter}
             onLeftChange={setCategoryFilter}
