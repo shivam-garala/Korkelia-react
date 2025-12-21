@@ -9,6 +9,7 @@ import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import DataTable from "../../../components/ui/DataTable.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
+import Button from "../../../components/ui/Button.jsx";
 import { clearCredentials, selectUserName, selectEmail } from "../../../store/authSlice.js";
 import {
   createDesign,
@@ -480,6 +481,7 @@ export default function DesignPage() {
     tableRows,
   ]);
 
+
   const columns = [
     {
       key: "variant",
@@ -629,17 +631,18 @@ export default function DesignPage() {
             <div className={crudStyles.headerRow}>
               <h2 className={crudStyles.title}>Design</h2>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <button
-                  className={crudStyles.secondaryBtn}
-                  type="button"
+                <Button
+                  variant="secondary"
+                  icon="refresh"
+                  iconOnly
                   onClick={() => dispatch(fetchDesigns())}
                   disabled={loading}
                 >
                   {loading ? "Refreshing..." : "Refresh"}
-                </button>
-                <button className={crudStyles.cta} type="button" onClick={openCreate}>
+                </Button>
+                <Button variant="primarySoft" onClick={openCreate}>
                   Create Design
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -683,19 +686,23 @@ export default function DesignPage() {
         }}
         footer={
           <div className={crudStyles.formActions}>
-            <button className={crudStyles.cta} type="submit" form="design-form" disabled={saving || loading}>
+            <Button
+              variant="primarySoft"
+              type="submit"
+              form="design-form"
+              disabled={saving || loading}
+            >
               {saving ? "Saving..." : "Save"}
-            </button>
-            <button
-              className={crudStyles.secondaryBtn}
-              type="button"
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() => {
                 setModalOpen(false);
                 resetForm();
               }}
             >
               Cancel
-            </button>
+            </Button>
           </div>
         }
       >

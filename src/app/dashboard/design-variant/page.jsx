@@ -1,0 +1,649 @@
+'use client';
+
+import { useEffect, useMemo, useState } from "react";
+import { usePathname, useRouter } from "next/navigation";
+import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
+import AdminHeader from "../../../components/AdminHeader/AdminHeader.jsx";
+import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
+import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
+import DataTable from "../../../components/ui/DataTable.jsx";
+import Modal from "../../../components/ui/Modal.jsx";
+import SelectField from "../../../components/ui/SelectField.jsx";
+import TextField from "../../../components/ui/TextField.jsx";
+import Button from "../../../components/ui/Button.jsx";
+import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
+import {
+  createDesignVariant,
+  deleteDesignVariant,
+  fetchCategoryDropdown,
+  fetchDesignVariants,
+  fetchMetalRateDropdown,
+  fetchProductDropdown,
+  selectDesignVariantCategories,
+  selectDesignVariantError,
+  selectDesignVariantLoading,
+  selectDesignVariantMetalRates,
+  selectDesignVariantProducts,
+  selectDesignVariants,
+  updateDesignVariant,
+} from "../../../store/slices/designVariantSlice.js";
+import { fetchCutMasters, selectCutMasters } from "../../../store/slices/cutMasterSlice.js";
+import { fetchDiamondRates, selectDiamondRates } from "../../../store/slices/diamondRateSlice.js";
+import { useAppDispatch, useAppSelector } from "../../../store/hooks.js";
+import { clearCredentials, selectEmail, selectUserName } from "../../../store/authSlice.js";
+import layout from "../../../styles/workspace.module.css";
+import crudStyles from "../../../styles/crudPage.module.css";
+import styles from "./page.module.css";
+
+function pickValue(obj, keys) {
+  for (const key of keys) {
+    const value = obj?.[key];
+    if (value !== undefined && value !== null) return value;
+  }
+  return null;
+}
+
+function formatDetailSummary(details) {
+  if (!Array.isArray(details) || !details.length) return "-";
+  return details
+    .map((detail) => {
+      const cutCode = pickValue(detail, ["cut_code", "cutCode", "code", "cut"]);
+      const diamondRateName = pickValue(detail, ["diamond_rate_name", "diamondRateName", "rate_name", "name"]);
+      const pcs = pickValue(detail, ["pcs", "pieces", "diamond_pcs"]);
+      return [cutCode, diamondRateName, pcs ? `x${pcs}` : null].filter(Boolean).join(" ");
+    })
+    .filter(Boolean)
+    .join(", ");
+}
+
+export default function DesignVariantPage() {
+  const pathname = usePathname();
+  const router = useRouter();
+  const dispatch = useAppDispatch();
+  const items = useAppSelector(selectDesignVariants);
+  const products = useAppSelector(selectDesignVariantProducts);
+  const metalRates = useAppSelector(selectDesignVariantMetalRates);
+  const categories = useAppSelector(selectDesignVariantCategories);
+  const cutMasters = useAppSelector(selectCutMasters);
+  const diamondRates = useAppSelector(selectDiamondRates);
+  const loading = useAppSelector(selectDesignVariantLoading);
+  const error = useAppSelector(selectDesignVariantError);
+  const userName = useAppSelector(selectUserName) ?? "Admin";
+  const userEmail = useAppSelector(selectEmail) ?? "";
+  const avatarInitials = useMemo(() => {
+    const normalizedName = (userName ?? "").trim();
+    if (normalizedName.length) {
+      return normalizedName
+        .split(" ")
+        .map((part) => part.trim()?.[0])
+        .filter(Boolean)
+        .join("")
+        .slice(0, 2)
+        .toUpperCase();
+    }
+    const normalizedEmail = (userEmail ?? "").trim();
+    if (normalizedEmail.length) {
+      const firstChar = normalizedEmail[0];
+      const domainChar = normalizedEmail.split("@")[1]?.[0];
+      return [firstChar, domainChar].filter(Boolean).join("").slice(0, 2).toUpperCase() || "U";
+    }
+    return "U";
+  }, [userEmail, userName]);
+
+  const [profileOpen, setProfileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+
+  const [categoryId, setCategoryId] = useState("");
+  const [productId, setProductId] = useState("");
+  const [productName, setProductName] = useState("");
+  const [metalRateId, setMetalRateId] = useState("");
+  const [metalRateName, setMetalRateName] = useState("");
+  const [weight, setWeight] = useState("");
+  const [markUp, setMarkUp] = useState("");
+  const [description, setDescription] = useState("");
+  const [detailRows, setDetailRows] = useState([]);
+  const [filters, setFilters] = useState({
+    no: "",
+    product: "",
+    metal_rate: "",
+    weight: "",
+    mark_up: "",
+  });
+
+  useEffect(() => {
+    dispatch(fetchDesignVariants());
+    dispatch(fetchProductDropdown());
+    dispatch(fetchMetalRateDropdown());
+    dispatch(fetchCategoryDropdown());
+    dispatch(fetchCutMasters());
+    dispatch(fetchDiamondRates());
+  }, [dispatch]);
+
+  const categoryOptions = useMemo(() => {
+    const list = Array.isArray(categories) ? categories : [];
+    return list
+      .map((item) => {
+        const id = pickValue(item, ["id", "category_id", "categoryId"]);
+        const label = pickValue(item, ["category_name", "categoryName", "name", "label"]);
+        if (id === null || id === undefined || label === null || label === undefined) return null;
+        return { id: String(id), label: String(label) };
+      })
+      .filter(Boolean);
+  }, [categories]);
+
+  const productOptions = useMemo(() => {
+    const list = Array.isArray(products) ? products : [];
+    return list
+      .map((item) => {
+        const id = pickValue(item, ["id", "product_id", "productId"]);
+        const label = pickValue(item, ["product_name", "productName", "name", "label"]);
+        const catId = pickValue(item, ["category_id", "categoryId", "category_master_id", "categoryMasterId"]);
+        if (id === null || id === undefined || label === null || label === undefined) return null;
+        return { id: String(id), label: String(label), categoryId: catId ?? "" };
+      })
+      .filter(Boolean);
+  }, [products]);
+
+  const filteredProductOptions = useMemo(() => {
+    if (!categoryId) return productOptions;
+    return productOptions.filter((opt) => String(opt.categoryId) === String(categoryId));
+  }, [categoryId, productOptions]);
+
+  const metalRateOptions = useMemo(() => {
+    const list = Array.isArray(metalRates) ? metalRates : [];
+    return list
+      .map((item) => {
+        const id = pickValue(item, ["id", "metal_rate_id", "metalRateId"]);
+        const label = pickValue(item, ["metal_rate_name", "metalRateName", "name", "label"]);
+        if (id === null || id === undefined || label === null || label === undefined) return null;
+        return { id: String(id), label: String(label) };
+      })
+      .filter(Boolean);
+  }, [metalRates]);
+
+  const cutOptions = useMemo(() => {
+    const list = Array.isArray(cutMasters) ? cutMasters : [];
+    return list
+      .map((item) => {
+        const id = pickValue(item, ["id", "cut_id", "cutId"]);
+        const code = pickValue(item, ["cut_code", "cutCode", "code"]);
+        const name = pickValue(item, ["cut_name", "cutName", "name"]);
+        const label = code ?? name;
+        if (id === null || id === undefined || label === null || label === undefined) return null;
+        return { id: String(id), label: String(label), code: code ?? label };
+      })
+      .filter(Boolean);
+  }, [cutMasters]);
+
+  const diamondRateOptions = useMemo(() => {
+    const list = Array.isArray(diamondRates) ? diamondRates : [];
+    return list
+      .map((item) => {
+        const id = pickValue(item, ["id", "diamond_rate_id", "diamondRateId"]);
+        const label = pickValue(item, ["diamond_rate_name", "diamondRateName", "rate_name", "name", "label"]);
+        if (id === null || id === undefined || label === null || label === undefined) return null;
+        return { id: String(id), label: String(label) };
+      })
+      .filter(Boolean);
+  }, [diamondRates]);
+
+  const tableRows = useMemo(() => {
+    const rows = Array.isArray(items) ? items : [];
+    return rows.map((item, index) => {
+      const id = pickValue(item, ["id", "design_id", "designId"]) ?? index + 1;
+      const rawProductId = pickValue(item, ["product_id", "productId"]);
+      const rawMetalRateId = pickValue(item, ["metal_rate_id", "metalRateId"]);
+      const productLabel =
+        pickValue(item, ["product_name", "productName"]) ??
+        productOptions.find((opt) => String(opt.id) === String(rawProductId))?.label ??
+        (rawProductId !== null && rawProductId !== undefined ? String(rawProductId) : "-");
+      const metalRateLabel =
+        pickValue(item, ["metal_rate_name", "metalRateName"]) ??
+        metalRateOptions.find((opt) => String(opt.id) === String(rawMetalRateId))?.label ??
+        (rawMetalRateId !== null && rawMetalRateId !== undefined ? String(rawMetalRateId) : "-");
+      const detailList =
+        pickValue(item, ["diamond_design_detail", "diamond_design_details", "diamond_details"]) ??
+        item?.diamond_design_detail ??
+        [];
+
+      return {
+        no: index + 1,
+        id,
+        product: productLabel ?? "-",
+        metal_rate: metalRateLabel ?? "-",
+        weight: pickValue(item, ["weight"]) ?? "-",
+        mark_up: pickValue(item, ["mark_up", "markUp"]) ?? "-",
+        details: formatDetailSummary(Array.isArray(detailList) ? detailList : []),
+        _raw: item,
+      };
+    });
+  }, [items, metalRateOptions, productOptions]);
+
+  const filteredRows = useMemo(() => {
+    const normalize = (value) => String(value ?? "").trim().toLowerCase();
+    const noQuery = normalize(filters.no);
+    const productQuery = normalize(filters.product);
+    const metalRateQuery = normalize(filters.metal_rate);
+    const weightQuery = normalize(filters.weight);
+    const markUpQuery = normalize(filters.mark_up);
+    if (!noQuery && !productQuery && !metalRateQuery && !weightQuery && !markUpQuery) return tableRows;
+
+    return tableRows.filter((row) => {
+      const noMatches = noQuery
+        ? normalize(row.no).includes(noQuery) || normalize(row.id).includes(noQuery)
+        : true;
+      const productMatches = productQuery ? normalize(row.product).includes(productQuery) : true;
+      const metalRateMatches = metalRateQuery ? normalize(row.metal_rate).includes(metalRateQuery) : true;
+      const weightMatches = weightQuery ? normalize(row.weight).includes(weightQuery) : true;
+      const markUpMatches = markUpQuery ? normalize(row.mark_up).includes(markUpQuery) : true;
+      return noMatches && productMatches && metalRateMatches && weightMatches && markUpMatches;
+    });
+  }, [filters.mark_up, filters.metal_rate, filters.no, filters.product, filters.weight, tableRows]);
+
+  const openCreate = () => {
+    setEditingId(null);
+    setCategoryId("");
+    setProductId("");
+    setProductName("");
+    setMetalRateId("");
+    setMetalRateName("");
+    setWeight("");
+    setMarkUp("");
+    setDescription("");
+    setDetailRows([]);
+    setModalOpen(true);
+  };
+
+  const openEdit = (row) => {
+    const rawId = pickValue(row, ["id", "design_id", "designId"]);
+    const rawProductId = pickValue(row, ["product_id", "productId"]);
+    const rawProductName = pickValue(row, ["product_name", "productName"]);
+    const rawMetalRateId = pickValue(row, ["metal_rate_id", "metalRateId"]);
+    const rawMetalRateName = pickValue(row, ["metal_rate_name", "metalRateName"]);
+    const rawCategoryId = pickValue(row, ["category_id", "categoryId", "category_master_id"]);
+    const detailList =
+      pickValue(row, ["diamond_design_detail", "diamond_design_details", "diamond_details"]) ??
+      row?.diamond_design_detail ??
+      [];
+
+    setEditingId(rawId ?? null);
+    setCategoryId(rawCategoryId !== null && rawCategoryId !== undefined ? String(rawCategoryId) : "");
+    setProductId(rawProductId !== null && rawProductId !== undefined ? String(rawProductId) : "");
+    setProductName(rawProductName ? String(rawProductName) : "");
+    setMetalRateId(rawMetalRateId !== null && rawMetalRateId !== undefined ? String(rawMetalRateId) : "");
+    setMetalRateName(rawMetalRateName ? String(rawMetalRateName) : "");
+    setWeight(String(pickValue(row, ["weight"]) ?? ""));
+    setMarkUp(String(pickValue(row, ["mark_up", "markUp"]) ?? ""));
+    setDescription(String(pickValue(row, ["description"]) ?? ""));
+    setDetailRows(
+      Array.isArray(detailList)
+        ? detailList.map((detail, idx) => ({
+            key: `${Date.now()}-${idx}`,
+            cutId: String(pickValue(detail, ["cut_id", "cutId"]) ?? ""),
+            cutCode: String(pickValue(detail, ["cut_code", "cutCode", "code"]) ?? ""),
+            diamondRateId: String(pickValue(detail, ["diamond_rate_id", "diamondRateId"]) ?? ""),
+            diamondRateName: String(
+              pickValue(detail, ["diamond_rate_name", "diamondRateName", "rate_name", "name"]) ?? ""
+            ),
+            pcs: String(pickValue(detail, ["pcs", "pieces", "diamond_pcs"]) ?? ""),
+          }))
+        : []
+    );
+    setModalOpen(true);
+  };
+
+  const addDetailRow = () => {
+    setDetailRows((prev) => [
+      ...prev,
+      {
+        key: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        cutId: "",
+        cutCode: "",
+        diamondRateId: "",
+        diamondRateName: "",
+        pcs: "",
+      },
+    ]);
+  };
+
+  const updateDetailRow = (key, updates) => {
+    setDetailRows((prev) =>
+      prev.map((row) => (row.key === key ? { ...row, ...updates } : row))
+    );
+  };
+
+  const removeDetailRow = (key) => {
+    setDetailRows((prev) => prev.filter((row) => row.key !== key));
+  };
+
+  const submit = async (event) => {
+    event.preventDefault();
+
+    if (!productId || !metalRateId) {
+      window.alert("Select product and metal rate.");
+      return;
+    }
+
+    if (!detailRows.length) {
+      window.alert("Add at least one diamond detail row.");
+      return;
+    }
+
+    const missingDetails = detailRows.some(
+      (row) => !row.cutId || !row.diamondRateId || !row.pcs
+    );
+    if (missingDetails) {
+      window.alert("Fill cut, diamond rate, and pcs for each detail row.");
+      return;
+    }
+
+    const payload = {
+      product_id: productId,
+      product_name: productName,
+      metal_rate_id: metalRateId,
+      metal_rate_name: metalRateName,
+      weight,
+      mark_up: markUp,
+      description,
+      diamond_design_detail: detailRows.map((row) => ({
+        cut_id: row.cutId,
+        cut_code: row.cutCode,
+        diamond_rate_id: row.diamondRateId,
+        diamond_rate_name: row.diamondRateName,
+        pcs: row.pcs,
+      })),
+    };
+
+    const action = editingId
+      ? updateDesignVariant({ id: editingId, payload })
+      : createDesignVariant(payload);
+
+    const result = await dispatch(action);
+    if (!result?.error) {
+      setModalOpen(false);
+      setEditingId(null);
+      dispatch(fetchDesignVariants());
+    }
+  };
+
+  const handleDelete = (id) => {
+    if (!id) return;
+    setDeleteTarget(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    await dispatch(deleteDesignVariant(deleteTarget));
+    dispatch(fetchDesignVariants());
+    setDeleteTarget(null);
+  };
+
+  const columns = [
+    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "product", header: "Product", filterable: true, filterPlaceholder: "Search Product" },
+    { key: "metal_rate", header: "Metal Rate", filterable: true, filterPlaceholder: "Search Metal Rate" },
+    { key: "weight", header: "Weight", filterable: true, filterPlaceholder: "Search Weight" },
+    { key: "mark_up", header: "Mark Up", filterable: true, filterPlaceholder: "Search Mark Up" },
+    { key: "details", header: "Diamond Detail", filterable: false },
+    {
+      key: "actions",
+      header: "Action",
+      filterable: false,
+      render: (row) => (
+        <div className={crudStyles.actions}>
+          <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
+            Edit
+          </Button>
+          <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
+            Delete
+          </Button>
+        </div>
+      ),
+    },
+  ];
+
+  return (
+    <div className={layout.page}>
+      <SidebarNav activePath={pathname} />
+      <div className={layout.main}>
+        <AdminHeader
+          onSearch={() => setSearchOpen(true)}
+          onProfile={() => setProfileOpen(true)}
+          avatarText={avatarInitials}
+        />
+
+        <main className={layout.content}>
+          <div className={crudStyles.panel}>
+            <div className={crudStyles.headerRow}>
+              <h2 className={crudStyles.title}>Design Variant</h2>
+              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                <Button
+                  variant="secondary"
+                  icon="refresh"
+                  iconOnly
+                  onClick={() => dispatch(fetchDesignVariants())}
+                  disabled={loading}
+                >
+                  {loading ? "Refreshing..." : "Refresh"}
+                </Button>
+                <Button variant="primarySoft" onClick={openCreate}>
+                  Add Design Variant
+                </Button>
+              </div>
+            </div>
+
+            {error ? <div className={crudStyles.error}>{String(error)}</div> : null}
+
+            <DataTable
+              columns={columns}
+              rows={filteredRows}
+              getRowKey={(row) => row.id}
+              filters={filters}
+              onFiltersChange={setFilters}
+              emptyMessage={loading ? "Loading..." : "No records found"}
+            />
+          </div>
+        </main>
+      </div>
+
+      <ProfileDrawer
+        open={profileOpen}
+        onClose={() => setProfileOpen(false)}
+        name={userName}
+        email={userEmail}
+        onLogout={async () => {
+          try {
+            await fetch("/api/admin/logout", { method: "POST" });
+          } catch (error) {
+            console.error("Logout error", error);
+          }
+          dispatch(clearCredentials());
+          router.push("/login");
+        }}
+      />
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+
+      <Modal
+        open={modalOpen}
+        title={editingId ? "Update Design Variant" : "Add Design Variant"}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingId(null);
+        }}
+        footer={
+          <div className={crudStyles.formActions}>
+            <Button
+              variant={editingId ? "primary" : "primarySoft"}
+              type="submit"
+              form="design-variant-form"
+              disabled={loading}
+            >
+              {editingId ? "Update" : "Create"}
+            </Button>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setModalOpen(false);
+                setEditingId(null);
+              }}
+            >
+              Cancel
+            </Button>
+          </div>
+        }
+      >
+        <form id="design-variant-form" className={crudStyles.form} onSubmit={submit}>
+          <div className={crudStyles.formRow3}>
+            <SelectField
+              label="Category"
+              value={categoryId}
+              onChange={(e) => {
+                const nextId = e.target.value;
+                setCategoryId(nextId);
+                setProductId("");
+                setProductName("");
+              }}
+              disabled={!categoryOptions.length}
+              placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
+              options={categoryOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+            />
+            <SelectField
+              label="Product"
+              value={productId}
+              onChange={(e) => {
+                const nextId = e.target.value;
+                const selected = filteredProductOptions.find((opt) => opt.id === nextId);
+                setProductId(nextId);
+                setProductName(selected?.label ?? "");
+              }}
+              required
+              disabled={!filteredProductOptions.length}
+              placeholder={filteredProductOptions.length ? "Select product" : "Loading products..."}
+              options={filteredProductOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+            />
+            <SelectField
+              label="Metal Rate"
+              value={metalRateId}
+              onChange={(e) => {
+                const nextId = e.target.value;
+                const selected = metalRateOptions.find((opt) => opt.id === nextId);
+                setMetalRateId(nextId);
+                setMetalRateName(selected?.label ?? "");
+              }}
+              required
+              disabled={!metalRateOptions.length}
+              placeholder={metalRateOptions.length ? "Select metal rate" : "Loading metal rates..."}
+              options={metalRateOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+            />
+          </div>
+
+          <div className={crudStyles.formRow3}>
+            <TextField
+              label="Weight"
+              type="number"
+              step="0.01"
+              value={weight}
+              onChange={(e) => setWeight(e.target.value)}
+              required
+              preventWheel
+            />
+            <TextField
+              label="Mark Up"
+              type="number"
+              step="0.01"
+              value={markUp}
+              onChange={(e) => setMarkUp(e.target.value)}
+              required
+              preventWheel
+            />
+            <TextField
+              label="Description"
+              value={description}
+              onChange={(e) => setDescription(e.target.value)}
+            />
+          </div>
+
+          <div className={styles.detailHeader}>Diamond Details</div>
+          <div className={styles.detailList}>
+            <div className={`${styles.detailRow} ${styles.detailRowHeader}`}>
+              <span>Cut</span>
+              <span>Diamond Rate</span>
+              <span>Pcs</span>
+              <span />
+            </div>
+            {detailRows.map((row) => (
+              <div key={row.key} className={styles.detailRow}>
+                <SelectField
+                  label=""
+                  value={row.cutId}
+                  onChange={(e) => {
+                    const nextId = e.target.value;
+                    const selected = cutOptions.find((opt) => opt.id === nextId);
+                    updateDetailRow(row.key, { cutId: nextId, cutCode: selected?.code ?? "" });
+                  }}
+                  required
+                  disabled={!cutOptions.length}
+                  placeholder={cutOptions.length ? "Select cut" : "Loading cuts..."}
+                  options={cutOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+                />
+                <SelectField
+                  label=""
+                  value={row.diamondRateId}
+                  onChange={(e) => {
+                    const nextId = e.target.value;
+                    const selected = diamondRateOptions.find((opt) => opt.id === nextId);
+                    updateDetailRow(row.key, {
+                      diamondRateId: nextId,
+                      diamondRateName: selected?.label ?? "",
+                    });
+                  }}
+                  required
+                  disabled={!diamondRateOptions.length}
+                  placeholder={diamondRateOptions.length ? "Select diamond rate" : "Loading diamond rates..."}
+                  options={diamondRateOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+                />
+                <TextField
+                  label=""
+                  type="number"
+                  step="1"
+                  value={row.pcs}
+                  onChange={(e) => updateDetailRow(row.key, { pcs: e.target.value })}
+                  required
+                  preventWheel
+                />
+                <div className={styles.rowActions}>
+                  <Button
+                    variant="danger"
+                    size="sm"
+                    icon="delete"
+                    iconOnly
+                    type="button"
+                    onClick={() => removeDetailRow(row.key)}
+                  >
+                    Remove
+                  </Button>
+                </div>
+              </div>
+            ))}
+          </div>
+          <div className={styles.addRow}>
+            <Button variant="secondary" type="button" onClick={addDetailRow}>
+              Add Diamond Detail
+            </Button>
+          </div>
+        </form>
+      </Modal>
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete Design Variant"
+        message="Delete this design variant? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
+    </div>
+  );
+}

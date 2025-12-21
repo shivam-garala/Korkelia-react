@@ -9,6 +9,9 @@ import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import DataTable from "../../../components/ui/DataTable.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
+import fieldStyles from "../../../components/ui/Fields.module.css";
+import Button from "../../../components/ui/Button.jsx";
+import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import {
   createCategoryMaster,
   deleteCategoryMaster,
@@ -64,9 +67,12 @@ export default function CategoryMasterPage() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const [categoryName, setCategoryName] = useState("");
   const [categoryCode, setCategoryCode] = useState("");
+  const [categoryImage, setCategoryImage] = useState(null);
+  const [fileInputKey, setFileInputKey] = useState(0);
   const [filters, setFilters] = useState({ no: "", category_name: "", category_code: "" });
 
   useEffect(() => {
@@ -104,10 +110,13 @@ export default function CategoryMasterPage() {
     });
   }, [filters.category_code, filters.category_name, filters.no, tableRows]);
 
+
   const openCreate = () => {
     setEditingId(null);
     setCategoryName("");
     setCategoryCode("");
+    setCategoryImage(null);
+    setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
   };
 
@@ -116,12 +125,17 @@ export default function CategoryMasterPage() {
     setEditingId(rawId ?? null);
     setCategoryName(String(pickValue(row, ["category_name", "categoryName", "name"]) ?? ""));
     setCategoryCode(String(pickValue(row, ["category_code", "categoryCode", "code"]) ?? ""));
+    setCategoryImage(null);
+    setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
   };
 
   const submit = async (event) => {
     event.preventDefault();
-    const payload = { category_name: categoryName, category_code: categoryCode };
+    const payload = new FormData();
+    payload.append("category_name", categoryName);
+    payload.append("category_code", categoryCode);
+    if (categoryImage) payload.append("image", categoryImage);
 
     const action = editingId
       ? updateCategoryMaster({ id: editingId, payload })
@@ -137,9 +151,14 @@ export default function CategoryMasterPage() {
 
   const handleDelete = async (id) => {
     if (!id) return;
-    if (!window.confirm("Delete this record?")) return;
-    await dispatch(deleteCategoryMaster(id));
+    setDeleteTarget(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    await dispatch(deleteCategoryMaster(deleteTarget));
     dispatch(fetchCategoryMasters());
+    setDeleteTarget(null);
   };
 
   const columns = [
@@ -152,12 +171,12 @@ export default function CategoryMasterPage() {
       filterable: false,
       render: (row) => (
         <div className={styles.actions}>
-          <button className={styles.iconBtn} type="button" onClick={() => openEdit(row._raw)}>
+          <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
             Edit
-          </button>
-          <button className={styles.iconBtn} type="button" onClick={() => handleDelete(row.id)}>
+          </Button>
+          <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
             Delete
-          </button>
+          </Button>
         </div>
       ),
     },
@@ -178,17 +197,17 @@ export default function CategoryMasterPage() {
             <div className={styles.headerRow}>
               <h2 className={styles.title}>Category Master</h2>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <button
-                  className={styles.secondaryBtn}
-                  type="button"
+                <Button
+                  variant="secondary"
+                  icon="refresh" iconOnly
                   onClick={() => dispatch(fetchCategoryMasters())}
                   disabled={loading}
                 >
                   {loading ? "Refreshing..." : "Refresh"}
-                </button>
-                <button className={styles.cta} type="button" onClick={openCreate}>
+                </Button>
+                <Button variant="primarySoft" onClick={openCreate}>
                   Add Category
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -229,27 +248,30 @@ export default function CategoryMasterPage() {
         onClose={() => {
           setModalOpen(false);
           setEditingId(null);
+          setCategoryImage(null);
+          setFileInputKey((prev) => prev + 1);
         }}
         footer={
           <div className={styles.formActions}>
-            <button className={styles.cta} type="submit" form="category-form" disabled={loading}>
+            <Button variant={editingId ? "primary" : "primarySoft"} type="submit" form="category-form" disabled={loading}>
               {editingId ? "Update" : "Create"}
-            </button>
-            <button
-              className={styles.secondaryBtn}
-              type="button"
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() => {
                 setModalOpen(false);
                 setEditingId(null);
+                setCategoryImage(null);
+                setFileInputKey((prev) => prev + 1);
               }}
             >
               Cancel
-            </button>
+            </Button>
           </div>
         }
       >
         <form id="category-form" className={styles.form} onSubmit={submit}>
-          <div className={styles.formRow2}>
+          <div className={styles.formRow3}>
             <TextField
               label="Category Name"
               value={categoryName}
@@ -262,9 +284,28 @@ export default function CategoryMasterPage() {
               onChange={(e) => setCategoryCode(e.target.value)}
               required
             />
+            <label className={fieldStyles.field}>
+              <span className={fieldStyles.label}>Image</span>
+              <input
+                key={fileInputKey}
+                className={fieldStyles.control}
+                type="file"
+                accept="image/*"
+                onChange={(e) => setCategoryImage(e.target.files?.[0] ?? null)}
+              />
+            </label>
           </div>
         </form>
       </Modal>
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete Category"
+        message="Delete this category? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
+

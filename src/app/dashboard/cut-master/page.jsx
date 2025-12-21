@@ -9,6 +9,8 @@ import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import DataTable from "../../../components/ui/DataTable.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
+import Button from "../../../components/ui/Button.jsx";
+import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import {
   createCutMaster,
   deleteCutMaster,
@@ -64,6 +66,7 @@ export default function CutMasterPage() {
   const [searchOpen, setSearchOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
 
   const [cutName, setCutName] = useState("");
   const [cutCode, setCutCode] = useState("");
@@ -104,6 +107,7 @@ export default function CutMasterPage() {
     });
   }, [filters.cut_code, filters.cut_name, filters.no, tableRows]);
 
+
   const openCreate = () => {
     setEditingId(null);
     setCutName("");
@@ -135,9 +139,14 @@ export default function CutMasterPage() {
 
   const handleDelete = async (id) => {
     if (!id) return;
-    if (!window.confirm("Delete this record?")) return;
-    await dispatch(deleteCutMaster(id));
+    setDeleteTarget(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    await dispatch(deleteCutMaster(deleteTarget));
     dispatch(fetchCutMasters());
+    setDeleteTarget(null);
   };
 
   const columns = [
@@ -150,12 +159,12 @@ export default function CutMasterPage() {
       filterable: false,
       render: (row) => (
         <div className={styles.actions}>
-          <button className={styles.iconBtn} type="button" onClick={() => openEdit(row._raw)}>
+          <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
             Edit
-          </button>
-          <button className={styles.iconBtn} type="button" onClick={() => handleDelete(row.id)}>
+          </Button>
+          <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
             Delete
-          </button>
+          </Button>
         </div>
       ),
     },
@@ -176,17 +185,17 @@ export default function CutMasterPage() {
             <div className={styles.headerRow}>
               <h2 className={styles.title}>Cut Master</h2>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <button
-                  className={styles.secondaryBtn}
-                  type="button"
+                <Button
+                  variant="secondary"
+                  icon="refresh" iconOnly
                   onClick={() => dispatch(fetchCutMasters())}
                   disabled={loading}
                 >
                   {loading ? "Refreshing..." : "Refresh"}
-                </button>
-                <button className={styles.cta} type="button" onClick={openCreate}>
+                </Button>
+                <Button variant="primarySoft" onClick={openCreate}>
                   Add Cut
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -230,19 +239,18 @@ export default function CutMasterPage() {
         }}
         footer={
           <div className={styles.formActions}>
-            <button className={styles.cta} type="submit" form="cut-form" disabled={loading}>
+            <Button variant={editingId ? "primary" : "primarySoft"} type="submit" form="cut-form" disabled={loading}>
               {editingId ? "Update" : "Create"}
-            </button>
-            <button
-              className={styles.secondaryBtn}
-              type="button"
+            </Button>
+            <Button
+              variant="secondary"
               onClick={() => {
                 setModalOpen(false);
                 setEditingId(null);
               }}
             >
               Cancel
-            </button>
+            </Button>
           </div>
         }
       >
@@ -253,6 +261,15 @@ export default function CutMasterPage() {
           </div>
         </form>
       </Modal>
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete Cut"
+        message="Delete this cut? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
+

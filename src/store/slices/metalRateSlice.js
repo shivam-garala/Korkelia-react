@@ -19,7 +19,7 @@ export const fetchKarats = createAsyncThunk(
   "metalRates/fetchKarats",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.get("/api/metalRateMaster/karat-read");
+      const { data } = await axiosClient.get("/api/karat/read");
       return data;
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
@@ -109,4 +109,3 @@ export const selectMetalRatesLoading = (state) => state.metalRates.loading;
 export const selectMetalRatesError = (state) => state.metalRates.error;
 
 export default metalRateSlice.reducer;
-

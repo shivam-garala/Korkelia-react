@@ -5,7 +5,7 @@ import { usePathname } from "next/navigation";
 import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import LanguageDropdown from "../../../components/LanguageDropdown/LanguageDropdown.jsx";
 import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
-import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
+import Button from "../../../components/ui/Button.jsx";
 import {
   createAdminRole,
   fetchAdminRoles,
@@ -34,7 +34,6 @@ export default function UserRolePage() {
   const error = useAppSelector(selectAdminRolesError);
 
   const [profileOpen, setProfileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   const [formOpen, setFormOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
@@ -78,9 +77,6 @@ export default function UserRolePage() {
         <header className={layout.headerBar}>
           <div className={layout.team} />
           <div className={layout.actionsRow}>
-            <button className={layout.chip} onClick={() => setSearchOpen(true)}>
-              Search
-            </button>
             <LanguageDropdown />
             <button className={layout.ghostIcon}>?</button>
             <button className={layout.ghostIcon}>...</button>
@@ -100,17 +96,17 @@ export default function UserRolePage() {
             <div className={styles.headerRow}>
               <h2 className={styles.title}>User Roles</h2>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <button
-                  className={styles.secondaryBtn}
-                  type="button"
+                <Button
+                  variant="secondary"
+                  icon="refresh" iconOnly
                   onClick={() => dispatch(fetchAdminRoles())}
                   disabled={loading}
                 >
                   {loading ? "Refreshing..." : "Refresh"}
-                </button>
-                <button className={styles.cta} type="button" onClick={openCreate}>
+                </Button>
+                <Button variant="primarySoft" onClick={openCreate}>
                   Create User Role
-                </button>
+                </Button>
               </div>
             </div>
 
@@ -125,26 +121,21 @@ export default function UserRolePage() {
                   </label>
                 </div>
                 <div className={styles.formActions}>
-                  <button className={styles.cta} type="submit" disabled={loading}>
+                  <Button variant={editingId ? "primary" : "primarySoft"} type="submit" disabled={loading}>
                     {editingId ? "Update" : "Create"}
-                  </button>
-                  <button
-                    className={styles.secondaryBtn}
-                    type="button"
+                  </Button>
+                  <Button
+                    variant="secondary"
                     onClick={() => {
                       setFormOpen(false);
                       setEditingId(null);
                     }}
                   >
                     Cancel
-                  </button>
+                  </Button>
                 </div>
               </form>
             ) : null}
-
-            <div className={styles.searchBar}>
-              <input type="text" placeholder="Search (UI only)" disabled />
-            </div>
 
             <div className={styles.tableCard}>
               <div className={styles.tableHead}>
@@ -162,9 +153,9 @@ export default function UserRolePage() {
                       <div>{id}</div>
                       <div>{displayName}</div>
                       <div className={styles.actions}>
-                        <button className={styles.iconBtn} type="button" onClick={() => openEdit(role)}>
+                        <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(role)}>
                           Edit
-                        </button>
+                        </Button>
                       </div>
                     </div>
                   );
@@ -176,8 +167,9 @@ export default function UserRolePage() {
       </div>
 
       <ProfileDrawer open={profileOpen} onClose={() => setProfileOpen(false)} />
-      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }
+
+
 

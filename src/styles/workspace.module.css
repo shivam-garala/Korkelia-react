@@ -3,8 +3,9 @@
   background: var(--background);
   color: var(--foreground);
   display: grid;
-  grid-template-columns: 250px 1fr;
+  grid-template-columns: auto 1fr;
   overflow: hidden;
+  --admin-header-height: 76px;
 }
 
 .main {
@@ -12,24 +13,55 @@
   flex-direction: column;
   height: 100vh;
   min-height: 0;
+  padding-top: var(--admin-header-height);
 }
 
 .headerBar {
   display: flex;
   align-items: center;
   justify-content: space-between;
+  height: var(--admin-header-height);
   padding: 18px 24px;
   background: var(--color-surface);
   border-bottom: 1px solid var(--color-line);
-  position: sticky;
+  position: fixed;
   top: 0;
-  z-index: 5;
+  left: 0;
+  right: 0;
+  z-index: 10;
+  width: 100vw;
 }
 
 .team {
   display: flex;
   align-items: center;
   gap: 8px;
+}
+
+.menuBtn {
+  width: 40px;
+  height: 40px;
+  border-radius: 12px;
+  border: 1px solid var(--color-border);
+  background: #f9fafb;
+  display: grid;
+  place-items: center;
+  color: var(--color-icon);
+  cursor: pointer;
+  transition: all 120ms ease;
+}
+
+.menuBtn:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+  box-shadow: var(--shadow-soft);
+}
+
+.headerLogo {
+  width: auto;
+  height: 70px;
+  display: block;
+  margin-left: 16px;
 }
 
 .badge {
@@ -48,6 +80,12 @@
   display: flex;
   align-items: stretch;
   gap: 8px;
+}
+
+.adminLanguageDropdown {
+  height: 40px;
+  padding: 0 12px;
+  box-sizing: border-box;
 }
 
 .iconBtn {

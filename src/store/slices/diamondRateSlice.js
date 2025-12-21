@@ -15,11 +15,11 @@ function axiosErrorMessage(error, fallback) {
   return message || fallback;
 }
 
-export const fetchCategoryMasters = createAsyncThunk(
-  "categoryMaster/fetchAll",
+export const fetchDiamondRates = createAsyncThunk(
+  "diamondRate/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.get("/api/categoryMaster/read");
+      const { data } = await axiosClient.get("/api/diamondRate/read");
       return data;
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
@@ -27,13 +27,11 @@ export const fetchCategoryMasters = createAsyncThunk(
   }
 );
 
-export const fetchCategoryMaster = createAsyncThunk(
-  "categoryMaster/fetchOne",
+export const fetchDiamondRate = createAsyncThunk(
+  "diamondRate/fetchOne",
   async (id, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.get(
-        `/api/categoryMaster/readOne/${encodeURIComponent(id)}`
-      );
+      const { data } = await axiosClient.get(`/api/diamondRate/readOne/${encodeURIComponent(id)}`);
       return { id, data };
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
@@ -41,11 +39,11 @@ export const fetchCategoryMaster = createAsyncThunk(
   }
 );
 
-export const createCategoryMaster = createAsyncThunk(
-  "categoryMaster/create",
+export const createDiamondRate = createAsyncThunk(
+  "diamondRate/create",
   async (payload, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.post("/api/categoryMaster/create", payload ?? {});
+      const { data } = await axiosClient.post("/api/diamondRate/create", payload ?? {});
       return data;
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
@@ -53,14 +51,18 @@ export const createCategoryMaster = createAsyncThunk(
   }
 );
 
-export const updateCategoryMaster = createAsyncThunk(
-  "categoryMaster/update",
+export const updateDiamondRate = createAsyncThunk(
+  "diamondRate/update",
   async ({ id, payload }, { rejectWithValue }) => {
+    console.log(payload);
+    
     try {
       const { data } = await axiosClient.put(
-        `/api/categoryMaster/update/${encodeURIComponent(id)}`,
+        `/api/diamondRate/update/${encodeURIComponent(id)}`,
         payload ?? {}
       );
+      console.log(data);
+      
       return { id, data };
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
@@ -68,13 +70,11 @@ export const updateCategoryMaster = createAsyncThunk(
   }
 );
 
-export const deleteCategoryMaster = createAsyncThunk(
-  "categoryMaster/delete",
+export const deleteDiamondRate = createAsyncThunk(
+  "diamondRate/delete",
   async (id, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.delete(
-        `/api/categoryMaster/delete/${encodeURIComponent(id)}`
-      );
+      const { data } = await axiosClient.delete(`/api/diamondRate/delete/${encodeURIComponent(id)}`);
       return { id, data };
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
@@ -89,52 +89,51 @@ const initialState = {
   error: null,
 };
 
-const categoryMasterSlice = createSlice({
-  name: "categoryMaster",
+const diamondRateSlice = createSlice({
+  name: "diamondRate",
   initialState,
   reducers: {
-    clearCategoryMasterError(state) {
+    clearDiamondRateError(state) {
       state.error = null;
     },
-    setSelectedCategoryMaster(state, action) {
+    setSelectedDiamondRate(state, action) {
       state.selected = action.payload ?? null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCategoryMasters.pending, (state) => {
+      .addCase(fetchDiamondRates.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCategoryMasters.fulfilled, (state, action) => {
+      .addCase(fetchDiamondRates.fulfilled, (state, action) => {
         state.loading = false;
         state.items = Array.isArray(action.payload)
           ? action.payload
           : action.payload?.data ?? [];
       })
-      .addCase(fetchCategoryMasters.rejected, (state, action) => {
+      .addCase(fetchDiamondRates.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? "Failed to load category master.";
+        state.error = action.payload ?? "Failed to load diamond rates.";
       })
-      .addCase(fetchCategoryMaster.fulfilled, (state, action) => {
+      .addCase(fetchDiamondRate.fulfilled, (state, action) => {
         state.selected = action.payload?.data ?? null;
       })
-      .addCase(createCategoryMaster.fulfilled, (state, action) => {
+      .addCase(createDiamondRate.fulfilled, (state, action) => {
         const created = action.payload?.data ?? action.payload;
         if (created) state.items = [created, ...state.items];
       })
-      .addCase(updateCategoryMaster.fulfilled, (state, action) => {
+      .addCase(updateDiamondRate.fulfilled, (state, action) => {
         const updated = action.payload?.data?.data ?? action.payload?.data;
         if (!updated) return;
         const index = state.items.findIndex((item) => String(item?.id) === String(action.payload.id));
         if (index >= 0) state.items[index] = updated;
       })
-      .addCase(deleteCategoryMaster.fulfilled, (state, action) => {
+      .addCase(deleteDiamondRate.fulfilled, (state, action) => {
         state.items = state.items.filter((item) => String(item?.id) !== String(action.payload.id));
       })
       .addMatcher(
-        (action) =>
-          action.type.startsWith("categoryMaster/") && action.type.endsWith("/rejected"),
+        (action) => action.type.startsWith("diamondRate/") && action.type.endsWith("/rejected"),
         (state, action) => {
           state.loading = false;
           state.error = action.payload ?? "Request failed.";
@@ -143,11 +142,10 @@ const categoryMasterSlice = createSlice({
   },
 });
 
-export const { clearCategoryMasterError, setSelectedCategoryMaster } =
-  categoryMasterSlice.actions;
-export const selectCategoryMasters = (state) => state.categoryMaster.items;
-export const selectCategoryMasterLoading = (state) => state.categoryMaster.loading;
-export const selectCategoryMasterError = (state) => state.categoryMaster.error;
-export const selectSelectedCategoryMaster = (state) => state.categoryMaster.selected;
+export const { clearDiamondRateError, setSelectedDiamondRate } = diamondRateSlice.actions;
+export const selectDiamondRates = (state) => state.diamondRate.items;
+export const selectDiamondRateLoading = (state) => state.diamondRate.loading;
+export const selectDiamondRateError = (state) => state.diamondRate.error;
+export const selectSelectedDiamondRate = (state) => state.diamondRate.selected;
 
-export default categoryMasterSlice.reducer;
+export default diamondRateSlice.reducer;

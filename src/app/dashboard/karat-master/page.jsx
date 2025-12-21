@@ -1,7 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from "react";
-import { usePathname } from "next/navigation";
+import { usePathname, useRouter } from "next/navigation";
 import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import AdminHeader from "../../../components/AdminHeader/AdminHeader.jsx";
 import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
@@ -11,34 +11,35 @@ import Modal from "../../../components/ui/Modal.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
-import { clearCredentials, selectEmail, selectUserName } from "../../../store/authSlice.js";
 import {
-  createUser,
-  deleteUser,
-  fetchUsers,
-  selectUsers,
-  selectUsersError,
-  selectUsersLoading,
-  updateUser,
-} from "../../../store/slices/userSlice.js";
+  createKaratMaster,
+  deleteKaratMaster,
+  fetchKaratMasters,
+  selectKaratMasterError,
+  selectKaratMasterLoading,
+  selectKaratMasters,
+  updateKaratMaster,
+} from "../../../store/slices/karatMasterSlice.js";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks.js";
+import { clearCredentials, selectEmail, selectUserName } from "../../../store/authSlice.js";
 import layout from "../../../styles/workspace.module.css";
-import styles from "./page.module.css";
+import styles from "../../../styles/crudPage.module.css";
 
-function pickValue(user, keys) {
+function pickValue(obj, keys) {
   for (const key of keys) {
-    const value = user?.[key];
+    const value = obj?.[key];
     if (value !== undefined && value !== null) return value;
   }
-  return "";
+  return null;
 }
 
-export default function UserPage() {
+export default function KaratMasterPage() {
   const pathname = usePathname();
+  const router = useRouter();
   const dispatch = useAppDispatch();
-  const users = useAppSelector(selectUsers);
-  const loading = useAppSelector(selectUsersLoading);
-  const error = useAppSelector(selectUsersError);
+  const items = useAppSelector(selectKaratMasters);
+  const loading = useAppSelector(selectKaratMasterLoading);
+  const error = useAppSelector(selectKaratMasterError);
   const userName = useAppSelector(selectUserName) ?? "Admin";
   const userEmail = useAppSelector(selectEmail) ?? "";
   const avatarInitials = useMemo(() => {
@@ -60,55 +61,73 @@ export default function UserPage() {
     }
     return "U";
   }, [userEmail, userName]);
+
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [email, setEmail] = useState("");
-  const [username, setUsername] = useState("");
-  const [password, setPassword] = useState("");
-  const [filters, setFilters] = useState({ no: "", email: "", username: "" });
-
-  const rows = useMemo(() => (Array.isArray(users) ? users : []), [users]);
+  const [karatValue, setKaratValue] = useState("");
+  const [filters, setFilters] = useState({ no: "", karat: "" });
 
   useEffect(() => {
-    dispatch(fetchUsers());
+    dispatch(fetchKaratMasters());
   }, [dispatch]);
+
+  const tableRows = useMemo(() => {
+    const rows = Array.isArray(items) ? items : [];
+    return rows.map((item, index) => {
+      const id = pickValue(item, ["id", "karat_id", "karatId"]) ?? index + 1;
+      return {
+        no: index + 1,
+        id,
+        karat: pickValue(item, ["karat", "karat_name", "karatName", "name"]) ?? "-",
+        _raw: item,
+      };
+    });
+  }, [items]);
+
+  const filteredRows = useMemo(() => {
+    const normalize = (value) => String(value ?? "").trim().toLowerCase();
+    const noQuery = normalize(filters.no);
+    const karatQuery = normalize(filters.karat);
+    if (!noQuery && !karatQuery) return tableRows;
+
+    return tableRows.filter((row) => {
+      const noMatches = noQuery
+        ? normalize(row.no).includes(noQuery) || normalize(row.id).includes(noQuery)
+        : true;
+      const karatMatches = karatQuery ? normalize(row.karat).includes(karatQuery) : true;
+      return noMatches && karatMatches;
+    });
+  }, [filters.karat, filters.no, tableRows]);
+
 
   const openCreate = () => {
     setEditingId(null);
-    setEmail("");
-    setUsername("");
-    setPassword("");
+    setKaratValue("");
     setModalOpen(true);
   };
 
-  const openEdit = (user) => {
-    const id = pickValue(user, ["id", "user_id", "userId"]);
-    setEditingId(id);
-    setEmail(pickValue(user, ["email", "user_email", "userEmail"]));
-    setUsername(pickValue(user, ["username", "user_name", "userName", "name"]));
-    setPassword("");
+  const openEdit = (row) => {
+    const rawId = pickValue(row, ["id", "karat_id", "karatId"]);
+    setEditingId(rawId ?? null);
+    setKaratValue(String(pickValue(row, ["karat", "karat_name", "karatName", "name"]) ?? ""));
     setModalOpen(true);
   };
 
-  const submitForm = async (event) => {
+  const submit = async (event) => {
     event.preventDefault();
-    const payload = {
-      email,
-      username,
-      ...(password ? { password } : null),
-    };
+    const payload = { karat: karatValue };
 
-    if (editingId) {
-      await dispatch(updateUser({ id: editingId, payload }));
-    } else {
-      await dispatch(createUser(payload));
+    const action = editingId ? updateKaratMaster({ id: editingId, payload }) : createKaratMaster(payload);
+
+    const result = await dispatch(action);
+    if (!result?.error) {
+      setModalOpen(false);
+      setEditingId(null);
+      dispatch(fetchKaratMasters());
     }
-    setModalOpen(false);
-    setEditingId(null);
   };
 
   const handleDelete = async (id) => {
@@ -118,66 +137,24 @@ export default function UserPage() {
 
   const confirmDelete = async () => {
     if (!deleteTarget) return;
-    await dispatch(deleteUser(deleteTarget));
+    await dispatch(deleteKaratMaster(deleteTarget));
+    dispatch(fetchKaratMasters());
     setDeleteTarget(null);
   };
 
-  const tableRows = useMemo(() => {
-    return rows.map((user, index) => {
-      const rawId = pickValue(user, ["id", "user_id", "userId"]);
-      return {
-        no: index + 1,
-        id: rawId || index + 1,
-        email: pickValue(user, ["email", "user_email", "userEmail"]) || "-",
-        username: pickValue(user, ["username", "user_name", "userName", "name"]) || "-",
-        _raw: user,
-      };
-    });
-  }, [rows]);
-
-  const filteredRows = useMemo(() => {
-    const normalize = (value) => String(value ?? "").trim().toLowerCase();
-    const noQuery = normalize(filters.no);
-    const emailQuery = normalize(filters.email);
-    const usernameQuery = normalize(filters.username);
-
-    if (!noQuery && !emailQuery && !usernameQuery) return tableRows;
-
-    return tableRows.filter((row) => {
-      const noMatches = noQuery ? normalize(row.no).includes(noQuery) || normalize(row.id).includes(noQuery) : true;
-      const emailMatches = emailQuery ? normalize(row.email).includes(emailQuery) : true;
-      const usernameMatches = usernameQuery ? normalize(row.username).includes(usernameQuery) : true;
-      return noMatches && emailMatches && usernameMatches;
-    });
-  }, [filters.email, filters.no, filters.username, tableRows]);
-
-
   const columns = [
     { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
-    { key: "email", header: "Email", filterable: true, filterPlaceholder: "Search Email" },
-    { key: "username", header: "Username", filterable: true, filterPlaceholder: "Search Username" },
+    { key: "karat", header: "Karat", filterable: true, filterPlaceholder: "Search Karat" },
     {
       key: "actions",
       header: "Action",
       filterable: false,
       render: (row) => (
         <div className={styles.actions}>
-          <Button
-            variant="ghost"
-            size="sm"
-            icon="edit"
-            iconOnly
-            onClick={() => openEdit(row._raw)}
-          >
+          <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
             Edit
           </Button>
-          <Button
-            variant="danger"
-            size="sm"
-            icon="delete"
-            iconOnly
-            onClick={() => handleDelete(row.id)}
-          >
+          <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
             Delete
           </Button>
         </div>
@@ -196,16 +173,20 @@ export default function UserPage() {
         />
 
         <main className={layout.content}>
-          {/* <h1 className={layout.pageTitle}>System Users</h1> */}
           <div className={styles.panel}>
             <div className={styles.headerRow}>
-              <h2 className={styles.title}>System Users</h2>
+              <h2 className={styles.title}>Karat Master</h2>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
-                <Button variant="secondary" icon="refresh" iconOnly onClick={() => dispatch(fetchUsers())} disabled={loading}>
+                <Button
+                  variant="secondary"
+                  icon="refresh" iconOnly
+                  onClick={() => dispatch(fetchKaratMasters())}
+                  disabled={loading}
+                >
                   {loading ? "Refreshing..." : "Refresh"}
                 </Button>
                 <Button variant="primarySoft" onClick={openCreate}>
-                  Create User
+                  Add Karat
                 </Button>
               </div>
             </div>
@@ -218,7 +199,7 @@ export default function UserPage() {
               getRowKey={(row) => row.id}
               filters={filters}
               onFiltersChange={setFilters}
-              emptyMessage={loading ? "Loading..." : "No users found"}
+              emptyMessage={loading ? "Loading..." : "No records found"}
             />
           </div>
         </main>
@@ -236,21 +217,21 @@ export default function UserPage() {
             console.error("Logout error", error);
           }
           dispatch(clearCredentials());
-          window.location.href = "/login";
+          router.push("/login");
         }}
       />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
 
       <Modal
         open={modalOpen}
-        title={editingId ? "Update User" : "Create User"}
+        title={editingId ? "Update Karat" : "Add Karat"}
         onClose={() => {
           setModalOpen(false);
           setEditingId(null);
         }}
         footer={
           <div className={styles.formActions}>
-            <Button variant={editingId ? "primary" : "primarySoft"} type="submit" form="user-modal-form" disabled={loading}>
+            <Button variant={editingId ? "primary" : "primarySoft"} type="submit" form="karat-form" disabled={loading}>
               {editingId ? "Update" : "Create"}
             </Button>
             <Button
@@ -265,39 +246,21 @@ export default function UserPage() {
           </div>
         }
       >
-        <form id="user-modal-form" className={styles.form} onSubmit={submitForm}>
-          <div className={styles.formRow}>
+        <form id="karat-form" className={styles.form} onSubmit={submit}>
+          <div className={styles.formRow2}>
             <TextField
-              label="Email"
-              type="email"
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
+              label="Karat"
+              value={karatValue}
+              onChange={(e) => setKaratValue(e.target.value)}
               required
-              autoComplete="email"
-            />
-            <TextField
-              label="Username"
-              value={username}
-              onChange={(e) => setUsername(e.target.value)}
-              required
-              placeholder="Enter username"
-            />
-            <TextField
-              label="Password"
-              type="password"
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
-              required={!editingId}
-              placeholder={editingId ? "Leave blank to keep unchanged" : ""}
-              autoComplete="new-password"
             />
           </div>
         </form>
       </Modal>
       <ConfirmDialog
         open={Boolean(deleteTarget)}
-        title="Delete User"
-        message="Delete this user? This action cannot be undone."
+        title="Delete Karat"
+        message="Delete this karat? This action cannot be undone."
         confirmLabel="Delete"
         onConfirm={confirmDelete}
         onClose={() => setDeleteTarget(null)}

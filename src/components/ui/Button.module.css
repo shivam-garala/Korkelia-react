@@ -1,0 +1,90 @@
+.button {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 8px;
+  border-radius: 10px;
+  border: 1px solid var(--color-border);
+  background: var(--color-surface);
+  color: var(--foreground);
+  font-weight: 600;
+  font-family: var(--font-heading);
+  cursor: pointer;
+  padding: 10px 14px;
+  transition: all 120ms ease;
+}
+
+.button:disabled {
+  opacity: 0.6;
+  cursor: not-allowed;
+}
+
+.primary {
+  background: var(--color-line);
+  border-color: var(--color-line);
+  color: #fff;
+}
+
+.primarySoft {
+  background: var(--color-primary-soft);
+  border-color: var(--color-primary-soft);
+  color: var(--color-primary);
+}
+
+.secondary {
+  background: var(--color-surface);
+  border-color: var(--color-border);
+  color: var(--foreground);
+}
+
+.ghost {
+  background: #f9fafb;
+  border-color: var(--color-border);
+  color: var(--foreground);
+}
+
+.danger {
+  background: #fee2e2;
+  border-color: #fca5a5;
+  color: #b91c1c;
+}
+
+.sm {
+  height: 32px;
+  padding: 0 10px;
+  border-radius: 8px;
+  font-size: 12px;
+}
+
+.md {
+  height: 40px;
+  padding: 0 14px;
+  font-size: 13px;
+}
+
+.iconOnly {
+  padding: 0;
+}
+
+.sm.iconOnly {
+  width: 32px;
+}
+
+.md.iconOnly {
+  width: 40px;
+}
+
+.icon {
+  display: block;
+}
+
+.srOnly {
+  border: 0;
+  clip: rect(0 0 0 0);
+  height: 1px;
+  margin: -1px;
+  overflow: hidden;
+  padding: 0;
+  position: absolute;
+  width: 1px;
+}

@@ -1,60 +1,67 @@
+"use client";
+
+import { useEffect, useState } from "react";
 import Link from "next/link";
-import Image from "next/image";
+import Icon from "../ui/Icon.jsx";
 import styles from "./SidebarNav.module.css";
 
-const sidebarSections = [
-  // {
-  //   title: "Overview",
-  //   items: [
-  //     { label: "App", href: "/dashboard", icon: "grid" },
-  //     { label: "Ecommerce", href: "/dashboard/ecommerce", icon: "bag" },
-  //     { label: "Analytics", href: "/dashboard/analytics", icon: "chart" },
-  //     { label: "Banking", href: "/dashboard/banking", icon: "bank" },
-  //     { label: "Booking", href: "/dashboard/booking", icon: "calendar" },
-  //     { label: "File", href: "/dashboard/file", icon: "folder" },
-  //     { label: "Course", href: "/dashboard/course", icon: "play" },
-  //   ],
-  // },
+export const sidebarSections = [
   {
-    title: "Management",
+    title: "User & Access Management",
     items: [
-      { label: "User", href: "/dashboard/user", icon: "user" },
-      // { label: "User Role", href: "/dashboard/user-role", icon: "user" },
+      { label: "User Management", href: "/dashboard/user", icon: "user" },
+    ],
+  },
+  {
+    title: "Metal Management",
+    items: [
+      { label: "Metal Master", href: "/dashboard/metal-master", icon: "box" },
       { label: "Metal Rate", href: "/dashboard/gold-rate", icon: "chart" },
-      { label: "Diamond Master", href: "/dashboard/diamond-master", icon: "grid" },
-      { label: "Cut Master", href: "/dashboard/cut-master", icon: "grid" },
-      { label: "Category Master", href: "/dashboard/category-master", icon: "grid" },
-      { label: "Style Master", href: "/dashboard/style-master", icon: "grid" },
-      { label: "Design", href: "/dashboard/design", icon: "grid" },
-      // { label: "Stock Master", href: "/dashboard/stock-master", icon: "box" },
-      // { label: "Design List", href: "/dashboard/design-list", icon: "grid" },
-      // { label: "Change Password", href: "/dashboard/change-password", icon: "lock" },
-      // { label: "Product", href: "/dashboard/product", icon: "box" },
-      // { label: "Order", href: "/dashboard/orders", icon: "cart" },
-      // { label: "Invoice", href: "/dashboard/invoice", icon: "receipt" },
-      // { label: "Blog", href: "/dashboard/blog", icon: "edit" },
-      // { label: "Job", href: "/dashboard/job", icon: "briefcase" },
-      // { label: "Tour", href: "/dashboard/tour", icon: "map" },
-      // { label: "File manager", href: "/dashboard/file-manager", icon: "folder" },
+      { label: "Karat", href: "/dashboard/karat-master", icon: "bank" },
+      { label: "Gold Color", href: "/dashboard/gold-color", icon: "grid" },
+    ],
+  },
+  {
+    title: "Diamond Management",
+    items: [
+      { label: "Diamond Type", href: "/dashboard/diamond-type", icon: "grid" },
+      { label: "Diamond Clarity", href: "/dashboard/diamond-clarity", icon: "receipt" },
+      { label: "Diamond Master", href: "/dashboard/diamond-master", icon: "bag" },
+      { label: "Diamond Rate", href: "/dashboard/diamond-rate", icon: "chart" },
+      { label: "Cut Master", href: "/dashboard/cut-master", icon: "edit" },
+    ],
+  },
+  {
+    title: "Product Classification",
+    items: [
+      { label: "Category Master", href: "/dashboard/category-master", icon: "folder" },
+      { label: "Sub Category Master", href: "/dashboard/sub-category-master", icon: "map" },
+      { label: "Style Master", href: "/dashboard/style-master", icon: "play" },
+    ],
+  },
+  {
+    title: "Product & Design Management",
+    items: [
+      { label: "Products", href: "/dashboard/product", icon: "cart" },
+      // { label: "Design", href: "/dashboard/design", icon: "briefcase" },
+      { label: "Design Variant", href: "/dashboard/design-variant", icon: "briefcase" },
     ],
   },
 ];
 
 export default function SidebarNav({ activePath }) {
-  return (
-    <nav className={styles.sidebar}>
-      <div className={styles.brand}>
-        <Image
-          className={styles.brandLogo}
-          src="/logo/footer_logo.png"
-          alt="Korkeila"
-          width={56}
-          height={56}
-          priority
-        />
-        <span className={styles.brandText}>Korkeila</span>
-      </div>
+  const [collapsed, setCollapsed] = useState(false);
 
+  useEffect(() => {
+    const handleToggle = () => {
+      setCollapsed((prev) => !prev);
+    };
+    window.addEventListener("sidebar:toggle", handleToggle);
+    return () => window.removeEventListener("sidebar:toggle", handleToggle);
+  }, []);
+
+  return (
+    <nav className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}>
       {sidebarSections.map((section) => (
         <div key={section.title} className={styles.section}>
           <p className={styles.sectionTitle}>{section.title}</p>
@@ -69,9 +76,10 @@ export default function SidebarNav({ activePath }) {
                     href={item.href}
                     className={`${styles.link} ${active ? styles.active : ""}`}
                   >
-                    <span className={`${styles.icon} ${styles[item.icon]}`} />
+                    <span className={styles.icon}>
+                      <Icon className={styles.iconSvg} name={item.icon} size={16} />
+                    </span>
                     <span className={styles.label}>{item.label}</span>
-                    <span className={styles.chevron}>›</span>
                   </Link>
                 </li>
               );

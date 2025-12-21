@@ -6,7 +6,6 @@ import { usePathname } from "next/navigation";
 import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import LanguageDropdown from "../../../components/LanguageDropdown/LanguageDropdown.jsx";
 import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
-import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import { protectedRoutes } from "../../../routes/routes.js";
 import styles from "../../../styles/workspace.module.css";
 
@@ -17,7 +16,6 @@ const relatedRoutes = protectedRoutes.filter((route) =>
 export default function OrdersPage() {
   const pathname = usePathname();
   const [profileOpen, setProfileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <div className={styles.page}>
@@ -30,9 +28,6 @@ export default function OrdersPage() {
             <span style={{ color: "#9ca3af", fontSize: 14 }}>▼</span>
           </div>
           <div className={styles.actionsRow}>
-            <button className={styles.chip} onClick={() => setSearchOpen(true)}>
-              🔍 ⌘K
-            </button>
             <LanguageDropdown />
             <button className={styles.ghostIcon}>⚙️</button>
             <button className={styles.ghostIcon}>🔔</button>
@@ -72,7 +67,7 @@ export default function OrdersPage() {
           setProfileOpen(false);
         }}
       />
-      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }
+
