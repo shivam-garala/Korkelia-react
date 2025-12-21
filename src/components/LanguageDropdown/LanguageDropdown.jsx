@@ -3,7 +3,7 @@
 import Dropdown from "../Home/Dropdown.jsx";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 
-export default function LanguageDropdown() {
+export default function LanguageDropdown({ triggerClassName }) {
   const { language, setLanguage, t } = useI18n();
 
   return (
@@ -12,6 +12,7 @@ export default function LanguageDropdown() {
       leadingIcon="globe"
       value={language}
       onChange={setLanguage}
+      triggerClassName={triggerClassName}
       options={[
         { value: "en", label: "English" },
         { value: "fi", label: "Finish" }
@@ -19,4 +20,3 @@ export default function LanguageDropdown() {
     />
   );
 }
-

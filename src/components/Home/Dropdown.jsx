@@ -10,6 +10,7 @@ export default function Dropdown({
   onChange,
   leadingIcon,
   ariaLabel,
+  triggerClassName,
 }) {
   const [open, setOpen] = useState(false);
   const buttonId = useId();
@@ -54,7 +55,7 @@ export default function Dropdown({
       <button
         id={buttonId}
         type="button"
-        className={styles.trigger}
+        className={`${styles.trigger}${triggerClassName ? ` ${triggerClassName}` : ""}`}
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}

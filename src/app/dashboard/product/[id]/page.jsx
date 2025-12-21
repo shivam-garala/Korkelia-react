@@ -5,7 +5,6 @@ import { useParams, usePathname } from "next/navigation";
 import SidebarNav from "../../../../components/Sidebar/SidebarNav.jsx";
 import LanguageDropdown from "../../../../components/LanguageDropdown/LanguageDropdown.jsx";
 import ProfileDrawer from "../../../../components/ProfileDrawer/ProfileDrawer.jsx";
-import SearchOverlay from "../../../../components/SearchOverlay/SearchOverlay.jsx";
 import layout from "../../../../styles/workspace.module.css";
 import styles from "./page.module.css";
 
@@ -26,7 +25,6 @@ export default function ProductDetailsPage() {
       ? rawId[0]
       : "Product";
   const [profileOpen, setProfileOpen] = useState(false);
-  const [searchOpen, setSearchOpen] = useState(false);
 
   return (
     <div className={layout.page}>
@@ -36,9 +34,6 @@ export default function ProductDetailsPage() {
         <header className={layout.headerBar}>
           <div className={layout.team} />
           <div className={layout.actionsRow}>
-            <button className={layout.chip} onClick={() => setSearchOpen(true)}>
-              Search
-            </button>
             <LanguageDropdown />
             <button className={layout.ghostIcon}>ƒsT‹,?</button>
             <button className={layout.ghostIcon}>...</button>
@@ -89,7 +84,6 @@ export default function ProductDetailsPage() {
       </div>
 
       <ProfileDrawer open={profileOpen} onClose={() => setProfileOpen(false)} />
-      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }

@@ -7,7 +7,9 @@
 
 .tableWrap {
   width: 100%;
-  overflow: auto;
+  overflow-x: auto;
+  overflow-y: hidden;
+  -webkit-overflow-scrolling: touch;
 }
 
 .table {
@@ -53,9 +55,35 @@
   vertical-align: middle;
 }
 
+@media (max-width: 900px) {
+  .table {
+    min-width: 640px;
+  }
+
+  .th,
+  .td {
+    padding: 8px 10px;
+  }
+
+  .filterInput {
+    padding: 8px;
+  }
+}
+
+@media (max-width: 640px) {
+  .table {
+    min-width: 100%;
+  }
+
+  .th,
+  .td,
+  .filterInput {
+    font-size: 13px;
+  }
+}
+
 .emptyCell {
   padding: 14px 12px;
   color: color-mix(in srgb, var(--foreground), #ffffff 30%);
   text-align: center;
 }
-

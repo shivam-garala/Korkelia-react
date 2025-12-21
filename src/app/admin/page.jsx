@@ -45,7 +45,7 @@ export default function AdminPage() {
       <SidebarNav activePath={pathname} />
 
       <div className={styles.main}>
-                <AdminHeader
+        <AdminHeader
           onSearch={() => setSearchOpen(true)}
           onProfile={() => setProfileOpen(true)}
           avatarText={avatarInitials}

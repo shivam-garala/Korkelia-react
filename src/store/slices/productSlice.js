@@ -15,11 +15,11 @@ function axiosErrorMessage(error, fallback) {
   return message || fallback;
 }
 
-export const fetchCategoryMasters = createAsyncThunk(
-  "categoryMaster/fetchAll",
+export const fetchProducts = createAsyncThunk(
+  "product/fetchAll",
   async (_, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.get("/api/categoryMaster/read");
+      const { data } = await axiosClient.get("/api/product/read");
       return data;
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
@@ -27,13 +27,11 @@ export const fetchCategoryMasters = createAsyncThunk(
   }
 );
 
-export const fetchCategoryMaster = createAsyncThunk(
-  "categoryMaster/fetchOne",
+export const fetchProduct = createAsyncThunk(
+  "product/fetchOne",
   async (id, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.get(
-        `/api/categoryMaster/readOne/${encodeURIComponent(id)}`
-      );
+      const { data } = await axiosClient.get(`/api/product/readOne/${encodeURIComponent(id)}`);
       return { id, data };
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
@@ -41,11 +39,11 @@ export const fetchCategoryMaster = createAsyncThunk(
   }
 );
 
-export const createCategoryMaster = createAsyncThunk(
-  "categoryMaster/create",
+export const createProduct = createAsyncThunk(
+  "product/create",
   async (payload, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.post("/api/categoryMaster/create", payload ?? {});
+      const { data } = await axiosClient.post("/api/product/create", payload ?? {});
       return data;
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
@@ -53,12 +51,12 @@ export const createCategoryMaster = createAsyncThunk(
   }
 );
 
-export const updateCategoryMaster = createAsyncThunk(
-  "categoryMaster/update",
+export const updateProduct = createAsyncThunk(
+  "product/update",
   async ({ id, payload }, { rejectWithValue }) => {
     try {
       const { data } = await axiosClient.put(
-        `/api/categoryMaster/update/${encodeURIComponent(id)}`,
+        `/api/product/update/${encodeURIComponent(id)}`,
         payload ?? {}
       );
       return { id, data };
@@ -68,13 +66,11 @@ export const updateCategoryMaster = createAsyncThunk(
   }
 );
 
-export const deleteCategoryMaster = createAsyncThunk(
-  "categoryMaster/delete",
+export const deleteProduct = createAsyncThunk(
+  "product/delete",
   async (id, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.delete(
-        `/api/categoryMaster/delete/${encodeURIComponent(id)}`
-      );
+      const { data } = await axiosClient.delete(`/api/product/delete/${encodeURIComponent(id)}`);
       return { id, data };
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
@@ -89,52 +85,51 @@ const initialState = {
   error: null,
 };
 
-const categoryMasterSlice = createSlice({
-  name: "categoryMaster",
+const productSlice = createSlice({
+  name: "product",
   initialState,
   reducers: {
-    clearCategoryMasterError(state) {
+    clearProductError(state) {
       state.error = null;
     },
-    setSelectedCategoryMaster(state, action) {
+    setSelectedProduct(state, action) {
       state.selected = action.payload ?? null;
     },
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchCategoryMasters.pending, (state) => {
+      .addCase(fetchProducts.pending, (state) => {
         state.loading = true;
         state.error = null;
       })
-      .addCase(fetchCategoryMasters.fulfilled, (state, action) => {
+      .addCase(fetchProducts.fulfilled, (state, action) => {
         state.loading = false;
         state.items = Array.isArray(action.payload)
           ? action.payload
           : action.payload?.data ?? [];
       })
-      .addCase(fetchCategoryMasters.rejected, (state, action) => {
+      .addCase(fetchProducts.rejected, (state, action) => {
         state.loading = false;
-        state.error = action.payload ?? "Failed to load category master.";
+        state.error = action.payload ?? "Failed to load products.";
       })
-      .addCase(fetchCategoryMaster.fulfilled, (state, action) => {
+      .addCase(fetchProduct.fulfilled, (state, action) => {
         state.selected = action.payload?.data ?? null;
       })
-      .addCase(createCategoryMaster.fulfilled, (state, action) => {
+      .addCase(createProduct.fulfilled, (state, action) => {
         const created = action.payload?.data ?? action.payload;
         if (created) state.items = [created, ...state.items];
       })
-      .addCase(updateCategoryMaster.fulfilled, (state, action) => {
+      .addCase(updateProduct.fulfilled, (state, action) => {
         const updated = action.payload?.data?.data ?? action.payload?.data;
         if (!updated) return;
         const index = state.items.findIndex((item) => String(item?.id) === String(action.payload.id));
         if (index >= 0) state.items[index] = updated;
       })
-      .addCase(deleteCategoryMaster.fulfilled, (state, action) => {
+      .addCase(deleteProduct.fulfilled, (state, action) => {
         state.items = state.items.filter((item) => String(item?.id) !== String(action.payload.id));
       })
       .addMatcher(
-        (action) =>
-          action.type.startsWith("categoryMaster/") && action.type.endsWith("/rejected"),
+        (action) => action.type.startsWith("product/") && action.type.endsWith("/rejected"),
         (state, action) => {
           state.loading = false;
           state.error = action.payload ?? "Request failed.";
@@ -143,11 +138,10 @@ const categoryMasterSlice = createSlice({
   },
 });
 
-export const { clearCategoryMasterError, setSelectedCategoryMaster } =
-  categoryMasterSlice.actions;
-export const selectCategoryMasters = (state) => state.categoryMaster.items;
-export const selectCategoryMasterLoading = (state) => state.categoryMaster.loading;
-export const selectCategoryMasterError = (state) => state.categoryMaster.error;
-export const selectSelectedCategoryMaster = (state) => state.categoryMaster.selected;
+export const { clearProductError, setSelectedProduct } = productSlice.actions;
+export const selectProducts = (state) => state.product.items;
+export const selectProductLoading = (state) => state.product.loading;
+export const selectProductError = (state) => state.product.error;
+export const selectSelectedProduct = (state) => state.product.selected;
 
-export default categoryMasterSlice.reducer;
+export default productSlice.reducer;

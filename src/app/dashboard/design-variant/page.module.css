@@ -1,0 +1,44 @@
+.fieldRow {
+  display: grid;
+  gap: 12px;
+}
+
+.detailHeader {
+  margin: 10px 0 6px;
+  font-weight: 600;
+  color: var(--color-heading);
+}
+
+.detailList {
+  display: grid;
+  gap: 10px;
+}
+
+.detailRow {
+  display: grid;
+  grid-template-columns: 1fr 1fr 90px 40px;
+  gap: 10px;
+  align-items: end;
+}
+
+.detailRowHeader {
+  font-size: 12px;
+  color: var(--color-muted);
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+}
+
+.rowActions {
+  display: flex;
+  justify-content: center;
+}
+
+.addRow {
+  margin-top: 10px;
+}
+
+@media (max-width: 900px) {
+  .detailRow {
+    grid-template-columns: 1fr;
+  }
+}

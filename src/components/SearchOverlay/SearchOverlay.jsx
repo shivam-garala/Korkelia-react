@@ -3,36 +3,29 @@
 import { useMemo, useState, useEffect, useRef } from "react";
 import Link from "next/link";
 import styles from "./SearchOverlay.module.css";
+import { sidebarSections } from "../Sidebar/SidebarNav.jsx";
 
-const ITEMS = [
-  { label: "App", path: "/dashboard", tag: "Overview" },
-  { label: "Ecommerce", path: "/dashboard/ecommerce", tag: "Overview" },
-  { label: "Analytics", path: "/dashboard/analytics", tag: "Overview" },
-  { label: "Banking", path: "/dashboard/banking", tag: "Overview" },
-  { label: "Booking", path: "/dashboard/booking", tag: "Overview" },
-  { label: "File", path: "/dashboard/file", tag: "Overview" },
-  { label: "Metal Rate", path: "/dashboard/gold-rate", tag: "Rates" },
-  { label: "System Users", path: "/dashboard/user", tag: "Users" },
-  { label: "User Roles", path: "/dashboard/user-role", tag: "Users" },
-  { label: "Diamond Master", path: "/dashboard/diamond-master", tag: "Masters" },
-  { label: "Cut Master", path: "/dashboard/cut-master", tag: "Masters" },
-  { label: "Category Master", path: "/dashboard/category-master", tag: "Masters" },
-  { label: "Style Master", path: "/dashboard/style-master", tag: "Masters" },
-];
+const DEFAULT_ITEMS = sidebarSections.flatMap((section) =>
+  section.items.map((item) => ({
+    label: item.label,
+    path: item.href,
+    tag: section.title,
+  }))
+);
 
-export default function SearchOverlay({ open, onClose }) {
+export default function SearchOverlay({ open, onClose, items = DEFAULT_ITEMS }) {
   const [query, setQuery] = useState("");
   const inputRef = useRef(null);
 
   const results = useMemo(() => {
-    if (!query) return ITEMS;
+    if (!query) return items;
     const q = query.toLowerCase();
-    return ITEMS.filter(
+    return items.filter(
       (item) =>
         item.label.toLowerCase().includes(q) ||
         item.path.toLowerCase().includes(q)
     );
-  }, [query]);
+  }, [items, query]);
 
   useEffect(() => {
     if (open && inputRef.current) {
