@@ -10,7 +10,7 @@
   gap: 8px;
   border: 1px solid color-mix(in srgb, var(--color-border), transparent 40%);
   background: #ffffff;
-  color: #373435;
+  color: #000000;
   cursor: pointer;
   padding: 6px 10px;
   border-radius: 12px;
@@ -75,5 +75,5 @@
 .active {
   background: var(--color-primary-soft);
   border-color: color-mix(in srgb, var(--color-line), transparent 35%);
-  color: var(--color-line);
+  color: #000000;
 }

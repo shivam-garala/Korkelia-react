@@ -77,14 +77,14 @@ export default function ContactPage() {
         <Container>
           <div className={styles.topLine} aria-hidden />
           <div className={styles.header}>
-            <h1 className={styles.heading}>{content.heading}</h1>
+            <h2 className={styles.heading}>{content.heading}</h2>
             <p className={styles.lead}>{content.lead}</p>
           </div>
 
           <div className={styles.content}>
             <div className={styles.info}>
               <section className={styles.block}>
-                <h2 className={styles.blockTitle}>{content.sections.appointments.title}</h2>
+                <h3 className={styles.blockTitle}>{content.sections.appointments.title}</h3>
                 <p className={styles.blockBody}>{content.sections.appointments.body}</p>
                 <Link className={styles.cta} href="/appointment">
                   <span>{content.sections.appointments.cta}</span>
@@ -92,7 +92,7 @@ export default function ContactPage() {
               </section>
 
               <section className={styles.block}>
-                <h2 className={styles.blockTitle}>{content.sections.visit.title}</h2>
+                <h3 className={styles.blockTitle}>{content.sections.visit.title}</h3>
                 {content.sections.visit.lines.map((line) => (
                   <p key={line} className={styles.blockBody}>
                     {line}
@@ -101,7 +101,7 @@ export default function ContactPage() {
               </section>
 
               <section className={styles.block}>
-                <h2 className={styles.blockTitle}>{content.sections.hours.title}</h2>
+                <h3 className={styles.blockTitle}>{content.sections.hours.title}</h3>
                 {content.sections.hours.lines.map((line) => (
                   <p key={line} className={styles.blockBody}>
                     {line}
@@ -110,7 +110,7 @@ export default function ContactPage() {
               </section>
 
               <section className={styles.block}>
-                <h2 className={styles.blockTitle}>{content.sections.contact.title}</h2>
+                <h3 className={styles.blockTitle}>{content.sections.contact.title}</h3>
                 <ul className={styles.contactList}>
                   <li className={styles.contactItem}>
                     <Image src="/icons/icon_phone_contact.png" alt="" width={16} height={16} />
@@ -146,14 +146,14 @@ export default function ContactPage() {
                 referrerPolicy="no-referrer-when-downgrade"
                 title="Korkeila Helsinki map"
               />
-              <a
+              {/* <a
                 className={styles.mapLink}
                 href="https://maps.app.goo.gl/oBCVEZcfPiPovWjq9"
                 target="_blank"
                 rel="noreferrer"
               >
                 {content.sections.mapLink}
-              </a>
+              </a> */}
             </div>
           </div>
         </Container>

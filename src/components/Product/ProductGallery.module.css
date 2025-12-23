@@ -1,31 +1,49 @@
-.grid {
+﻿.grid {
   display: grid;
-  grid-template-columns: 1fr 1fr;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
   grid-template-areas:
     "a b"
     "c d"
     "e e";
   gap: 0;
   border: 1px solid color-mix(in srgb, var(--color-line), transparent 75%);
+  background: #ffffff;
 }
 
 .cell {
   border-right: 1px solid color-mix(in srgb, var(--color-line), transparent 75%);
   border-bottom: 1px solid color-mix(in srgb, var(--color-line), transparent 75%);
+  display: flex;
 }
 
 .cell:nth-child(2n) {
   border-right: none;
 }
 
+.cellButton {
+  border: none;
+  background: transparent;
+  padding: 0;
+  width: 100%;
+  height: 100%;
+  text-align: left;
+  cursor: pointer;
+  display: flex;
+}
+
 .media {
   position: relative;
-  background: #fff;
+  background: #ffffff;
   min-height: 220px;
+  width: 100%;
+  height: 100%;
+  flex: 1;
+  box-sizing: border-box;
 }
 
 .image {
   object-fit: contain;
+  object-position: center;
 }
 
 .square {
@@ -46,20 +64,28 @@
 
 .video {
   grid-area: e;
+  border-right: none;
 }
 
-.square .media,
-.circle .media,
-.wide .media {
-  min-height: 220px;
+.square .media {
+  min-height: 520px;
+  padding: 34px 26px;
 }
 
 .tall .media {
-  min-height: 460px;
+  min-height: 520px;
+}
+
+.circle .media,
+.wide .media {
+  padding: 18px;
+  aspect-ratio: 1 / 1;
+  min-height: 0;
 }
 
 .video .media {
-  min-height: 240px;
+  min-height: 300px;
+  padding: 12px 18px;
 }
 
 .tall .image {
@@ -95,6 +121,147 @@
   transform: translateX(2px);
 }
 
+.modalBackdrop {
+  position: fixed;
+  inset: 0;
+  z-index: 80;
+  display: grid;
+  place-items: center;
+  padding: 18px;
+}
+
+.modalBackdropBtn {
+  position: absolute;
+  inset: 0;
+  border: 0;
+  background: rgba(15, 23, 42, 0.6);
+}
+
+.modal {
+  position: relative;
+  width: min(980px, 100%);
+  height: 82vh;
+  max-height: 760px;
+  background: #ffffff;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+  overflow: hidden;
+  display: grid;
+  grid-template-rows: auto 1fr;
+}
+
+.modalHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 12px;
+  border-bottom: 1px solid var(--color-border);
+  background: #ffffff;
+  gap: 12px;
+}
+
+.modalTitle {
+  font-family: var(--font-heading);
+  font-weight: 600;
+  letter-spacing: 1px;
+  text-transform: uppercase;
+  font-size: 12px;
+  color: var(--color-heading);
+}
+
+.modalActions {
+  display: flex;
+  gap: 8px;
+}
+
+.actionButton {
+  border: 1px solid var(--color-border);
+  background: #f8f8f8;
+  padding: 6px 10px;
+  font-size: 11px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  font-family: var(--font-body);
+  cursor: pointer;
+}
+
+.modalBody {
+  position: relative;
+  background: #ffffff;
+  height: 100%;
+  min-height: 0;
+}
+
+.modalMedia {
+  position: relative;
+  width: 100%;
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  overflow: hidden;
+  background: #ffffff;
+  min-height: 0;
+}
+
+.modalMedia.zoomed {
+  overflow: auto;
+  align-items: flex-start;
+  justify-content: flex-start;
+  padding: 12px;
+}
+
+.modalImage {
+  max-width: 100%;
+  max-height: 100%;
+  transition: transform 200ms ease;
+  cursor: zoom-in;
+}
+
+.modalMedia.zoomed .modalImage {
+  transform: scale(1.8);
+  transform-origin: top left;
+  cursor: zoom-out;
+}
+
+.modalVideo {
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
+  background: #000000;
+}
+
+.navButton {
+  position: absolute;
+  top: 50%;
+  transform: translateY(-50%);
+  width: 36px;
+  height: 36px;
+  border-radius: 999px;
+  border: 1px solid var(--color-border);
+  background: rgba(255, 255, 255, 0.92);
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  font-size: 22px;
+  line-height: 1;
+  color: #1f2937;
+}
+
+.navIcon {
+  width: 18px;
+  height: 18px;
+  display: block;
+}
+
+.navPrev {
+  left: 12px;
+}
+
+.navNext {
+  right: 12px;
+}
+
 @media (max-width: 980px) {
   .grid {
     grid-template-columns: 1fr;
@@ -108,5 +275,42 @@
 
   .cell {
     border-right: none;
+  }
+
+  .square .media,
+  .tall .media {
+    min-height: 320px;
+    padding: 24px 18px;
+  }
+
+  .video .media {
+    min-height: 200px;
+  }
+}
+
+@media (max-width: 720px) {
+  .modalBackdrop {
+    padding: 0;
+  }
+
+  .modal {
+    width: 100%;
+    height: 100%;
+    border-radius: 0;
+  }
+
+  .modalHeader {
+    padding: 10px;
+  }
+
+  .actionButton {
+    padding: 6px 8px;
+    font-size: 10px;
+  }
+
+  .navButton {
+    width: 32px;
+    height: 32px;
+    font-size: 20px;
   }
 }

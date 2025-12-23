@@ -5,7 +5,7 @@
 }
 
 .main {
-  padding: 0 0 120px;
+  padding: 0 0 80px;
 }
 
 .topLine {
@@ -29,14 +29,11 @@
   letter-spacing: 2.4px;
   color: #606062;
   text-transform: uppercase;
-  font-size: 20px;
 }
 
 .lead {
   margin: 0;
   color: var(--color-muted);
-  font-size: 14px;
-  line-height: 1.65;
 }
 
 
@@ -54,15 +51,13 @@
 
 .block {
   display: grid;
-  gap: 8px;
 }
 
 .blockTitle {
   margin: 0;
   font-family: var(--font-heading);
-  font-weight: 400;
+  font-weight: 500;
   color: var(--color-heading);
-  font-size: 18px;
   display: grid;
   gap: 4px;
 }
@@ -71,8 +66,6 @@
 .blockBody {
   margin: 0;
   color: var(--color-muted);
-  font-size: 14px;
-  line-height: 1.6;
 }
 
 .cta {
@@ -86,6 +79,7 @@
   display: grid;
   gap: 4px;
   text-align: left;
+  margin-block: 10px;
 }
 
 
@@ -94,7 +88,6 @@
   padding: 0;
   margin: 0;
   display: grid;
-  gap: 10px;
 }
 
 .contactItem {
@@ -111,16 +104,16 @@
 }
 
 .map {
-  border: 1px solid var(--color-border);
+  /* border: 1px solid var(--color-border); */
   background: #f8f8f8;
-  padding: 8px;
   display: grid;
   gap: 10px;
+  height: 100%;
 }
 
 .mapFrame {
   width: 100%;
-  height: 360px;
+  height: 100%;
   display: block;
 }
 

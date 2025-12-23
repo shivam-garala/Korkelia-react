@@ -39,7 +39,7 @@ export default function AboutPage() {
         <Container>
           <div className={styles.topLine} aria-hidden />
           <div className={styles.header}>
-            <h1 className={styles.heading}>{content.heading}</h1>
+            <h2 className={styles.heading}>{content.heading}</h2>
             <div className={styles.copy}>
               {content.paragraphs.map((paragraph) => (
                 <p key={paragraph}>{paragraph}</p>
@@ -50,7 +50,7 @@ export default function AboutPage() {
           <div className={styles.imageWrap}>
             <Image
               className={styles.image}
-              src="/aboutus/FINAL%20LOGO_NEW.jpg"
+              src="/aboutus/FINAL%20LOGO_NEW.png"
               alt="Korkeila Helsinki"
               width={640}
               height={420}

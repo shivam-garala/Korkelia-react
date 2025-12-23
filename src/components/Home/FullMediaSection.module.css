@@ -1,6 +1,6 @@
 .section {
   position: relative;
-  min-height: 95vh;
+  min-height: 100vh;
   overflow: hidden;
   background: #000000;
 }
@@ -104,14 +104,32 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  position: relative;
   font-family: var(--font-heading);
   font-weight: 600;
   letter-spacing: 1.3px;
   text-transform: uppercase;
   text-decoration: none;
-  border-bottom: 2px solid var(--color-primary);
-  padding-bottom: 4px;
+  padding-bottom: 6px;
   color: #ffffff;
+}
+
+.cta::after {
+  content: "";
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  width: 100%;
+  height: 4px;
+  background: var(--color-primary);
+  transform: scaleX(0);
+  transform-origin: left;
+  transition: transform 220ms ease;
+}
+
+.cta:hover::after,
+.cta:focus-visible::after {
+  transform: scaleX(1);
 }
 
 .toneLight {
