@@ -19,7 +19,6 @@ const diamondCuts = [
 export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
   const qualityId = useId();
   const clarityId = useId();
-  const metalTypeId = useId();
   const sizeId = useId();
   const [cut, setCut] = useState("round");
   const [quality, setQuality] = useState("natural");
@@ -31,6 +30,47 @@ export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
   const [engraving, setEngraving] = useState("");
 
   const carats = useMemo(() => ["0.05", "0.10", "0.20", "0.30", "0.50"], []);
+  const dropdownStyles = useMemo(
+    () => ({
+      control: (base, state) => ({
+        ...base,
+        minHeight: 30,
+        height: 30,
+        borderColor: "var(--color-primary)",
+        boxShadow: state.isFocused ? "0 0 0 1px var(--color-primary)" : "none",
+        ":hover": {
+          borderColor: "var(--color-primary)",
+        },
+      }),
+      menu: (base) => ({
+        ...base,
+        fontFamily: "var(--font-body)",
+      }),
+      menuList: (base) => ({
+        ...base,
+        padding: "4px",
+      }),
+      option: (base, state) => ({
+        ...base,
+        padding: "6px 8px",
+        fontSize: "9px",
+        fontFamily: "var(--font-body)",
+        letterSpacing: "0.6px",
+        textTransform: "uppercase",
+        lineHeight: 1.2,
+        backgroundColor: state.isSelected
+          ? "var(--color-primary-soft)"
+          : state.isFocused
+          ? "color-mix(in srgb, var(--color-primary), transparent 85%)"
+          : "transparent",
+        color: "var(--color-heading)",
+        ":active": {
+          backgroundColor: "var(--color-primary-soft)",
+        },
+      }),
+    }),
+    []
+  );
   const qualityOptions = useMemo(
     () => [
       { value: "natural", label: "NATURAL BRILLIANT" },
@@ -66,7 +106,7 @@ export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
 
   return (
     <aside className={styles.panel}>
-      <h1 className={styles.title}>{title}</h1>
+      <h2 className={styles.title}>{title}</h2>
       <p className={styles.copy}>
         Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas
         ullamcorper, facilisis euismod elit. Fusce vel leo fermentum eget.
@@ -90,33 +130,38 @@ export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
             </button>
           ))}
         </div>
+        <div className={styles.divider} aria-hidden />
 
         <div className={styles.gridFields}>
-          <div>
-            <div className={styles.fieldTitle}>DIAMOND QUALITY</div>
-            <Select
+          <div className={styles.fieldTitle}>DIAMOND QUALITY</div>
+          <div style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
+            <div>
+              <Select
               className={styles.select}
               classNamePrefix="customizer"
               instanceId={qualityId}
+              styles={dropdownStyles}
               value={qualityOptions.find((opt) => opt.value === quality) ?? null}
               options={qualityOptions}
               onChange={(option) => setQuality(option?.value ?? "")}
               isSearchable={false}
             />
-          </div>
-          <div>
-            <div className={styles.fieldTitle}>&nbsp;</div>
-            <Select
+            </div>
+            <div>
+              <Select
               className={styles.select}
               classNamePrefix="customizer"
               instanceId={clarityId}
+              styles={dropdownStyles}
               value={clarityOptions.find((opt) => opt.value === clarity) ?? null}
               options={clarityOptions}
               onChange={(option) => setClarity(option?.value ?? "")}
               isSearchable={false}
             />
+            </div>
           </div>
         </div>
+        <div className={styles.divider} aria-hidden />
 
         <div className={styles.fieldTitle}>DIAMOND CARAT WEIGHT</div>
         <div className={styles.pills}>
@@ -131,6 +176,7 @@ export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
             </button>
           ))}
         </div>
+        <div className={styles.divider} aria-hidden />
 
         <div className={styles.fieldTitle}>SELECT METAL COLOR</div>
         <div className={styles.metalRow}>
@@ -151,26 +197,32 @@ export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
             </button>
           ))}
         </div>
+        <div className={styles.divider} aria-hidden />
 
         <div className={styles.gridFields}>
           <div>
             <div className={styles.fieldTitle}>METAL TYPE</div>
-            <Select
-              className={styles.select}
-              classNamePrefix="customizer"
-              instanceId={metalTypeId}
-              value={metalTypeOptions.find((opt) => opt.value === metalType) ?? null}
-              options={metalTypeOptions}
-              onChange={(option) => setMetalType(option?.value ?? "")}
-              isSearchable={false}
-            />
+            <div className={styles.pills}>
+              {metalTypeOptions.map((option) => (
+                <button
+                  key={option.value}
+                  type="button"
+                  className={`${styles.pill} ${metalType === option.value ? styles.pillActive : ""}`}
+                  onClick={() => setMetalType(option.value)}
+                >
+                  {option.label}
+                </button>
+              ))}
+            </div>
           </div>
+          <div className={styles.divider} aria-hidden />
           <div>
             <div className={styles.fieldTitle}>RING SIZE</div>
             <Select
               className={styles.select}
               classNamePrefix="customizer"
               instanceId={sizeId}
+              styles={dropdownStyles}
               value={sizeOptions.find((opt) => opt.value === size) ?? null}
               options={sizeOptions}
               onChange={(option) => setSize(option?.value ?? "")}
@@ -179,6 +231,7 @@ export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
             />
           </div>
         </div>
+        <div className={styles.divider} aria-hidden />
 
         <div className={styles.fieldTitle}>ENGRAVING (Optional)</div>
         <div className={styles.engraveRow}>
@@ -192,6 +245,7 @@ export default function ProductCustomizer({ title = "PRODUCT NAME" }) {
             SUBMIT
           </button>
         </div>
+        <div className={styles.divider} aria-hidden />
 
         <button className={styles.enquire} type="button">
           ENQUIRE NOW

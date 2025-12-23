@@ -4,10 +4,6 @@
   font-family: var(--font-body);
 }
 
-.main {
-  padding: 0 0 120px;
-}
-
 .topLine {
   height: 1px;
   background: color-mix(in srgb, var(--color-primary), transparent 55%);
@@ -29,7 +25,6 @@
   letter-spacing: 2.4px;
   color: #606062;
   text-transform: uppercase;
-  font-size: 20px;
 }
 
 .copy {

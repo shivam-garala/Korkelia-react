@@ -3,6 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useState } from "react";
+import { usePathname } from "next/navigation";
 import styles from "./NavMenuOverlay.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 
@@ -27,6 +28,9 @@ function Icon({ path, className, style }) {
 export default function NavMenuOverlay({ open, onClose }) {
   const [productsOpen, setProductsOpen] = useState(false);
   const { t } = useI18n();
+  const pathname = usePathname();
+  const isActive = (href) =>
+    pathname === href || (href !== "/" && pathname?.startsWith(`${href}/`));
 
   useEffect(() => {
     if (!open) return;
@@ -79,12 +83,20 @@ export default function NavMenuOverlay({ open, onClose }) {
           <div className={styles.divider} aria-hidden="true" />
           <ul className={styles.menu}>
             <li className={styles.item}>
-              <Link className={styles.link} href="/" onClick={onClose}>
+              <Link
+                className={`${styles.link} ${isActive("/") ? styles.activeLink : ""}`}
+                href="/"
+                onClick={onClose}
+              >
                 {t("menu.home")}
               </Link>
             </li>
             <li className={styles.item}>
-              <Link className={styles.link} href="/about" onClick={onClose}>
+              <Link
+                className={`${styles.link} ${isActive("/about") ? styles.activeLink : ""}`}
+                href="/about"
+                onClick={onClose}
+              >
                 {t("menu.about")}
               </Link>
             </li>
@@ -131,12 +143,20 @@ export default function NavMenuOverlay({ open, onClose }) {
               ) : null}
             </li>
             <li className={styles.item}>
-              <Link className={styles.link} href="/diamond-difference" onClick={onClose}>
+              <Link
+                className={`${styles.link} ${isActive("/diamond-difference") ? styles.activeLink : ""}`}
+                href="/diamond-difference"
+                onClick={onClose}
+              >
                 {t("menu.diamondDifference")}
               </Link>
             </li>
             <li className={styles.item}>
-              <Link className={styles.link} href="/diamond-guide" onClick={onClose}>
+              <Link
+                className={`${styles.link} ${isActive("/diamond-guide") ? styles.activeLink : ""}`}
+                href="/diamond-guide"
+                onClick={onClose}
+              >
                 {t("menu.diamondGuide")}
               </Link>
             </li>
@@ -146,7 +166,11 @@ export default function NavMenuOverlay({ open, onClose }) {
               </Link>
             </li> */}
             <li className={styles.item}>
-              <Link className={styles.link} href="/contact" onClick={onClose}>
+              <Link
+                className={`${styles.link} ${isActive("/contact") ? styles.activeLink : ""}`}
+                href="/contact"
+                onClick={onClose}
+              >
                 {t("menu.contact")}
               </Link>
             </li>

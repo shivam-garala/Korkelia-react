@@ -14,7 +14,13 @@ export default async function ProductDetailsPage({ params }) {
     { key: "b", variant: "tall", src: "/productdetails/2.jpg" },
     { key: "c", variant: "circle", src: "/productdetails/3.jpg" },
     { key: "d", variant: "wide", src: "/productdetails/4.jpg" },
-    { key: "e", variant: "video", src: "/productdetails/4.jpg", badge: "play" },
+    {
+      key: "e",
+      variant: "video",
+      src: "/productdetails/4.jpg",
+      badge: "play",
+      videoSrc: "/productdetails/Rose%20Anim%20Kastehelmi%20Mq%20Rd%201725.mp4",
+    },
   ];
   const related = [
     { id: "r1", name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/2" },
@@ -34,13 +40,15 @@ export default async function ProductDetailsPage({ params }) {
           </div>
           <div className={styles.topLine} aria-hidden />
 
-          <div className={styles.layout}>
-            <div className={styles.gallery}>
-              <ProductGallery items={galleryItems} />
-            </div>
+          <div className={styles.layoutContainer}>
+            <div className={styles.layout}>
+              <div className={styles.gallery}>
+                <ProductGallery items={galleryItems} />
+              </div>
 
-            <div className={styles.customizer}>
-              <ProductCustomizer title={`PRODUCT NAME ${id ? `#${id}` : ""}`} />
+              <div className={styles.customizer}>
+                <ProductCustomizer title={`PRODUCT NAME ${id ? `#${id}` : ""}`} />
+              </div>
             </div>
           </div>
 
@@ -49,7 +57,6 @@ export default async function ProductDetailsPage({ params }) {
             <div className={styles.relatedGrid}>
               <ProductGrid products={related} columns={3} />
             </div>
-            <div className={styles.bottomLine} aria-hidden />
           </div>
         </Container>
       </main>

@@ -5,7 +5,7 @@
 }
 
 .main {
-  padding: 0 0 96px;
+  padding: 0 0 30px;
 }
 
 .topRow {
@@ -41,6 +41,11 @@
   align-items: start;
 }
 
+.layoutContainer {
+  max-width: 1280px;
+  margin: 0 auto;
+}
+
 .gallery {
   position: relative;
 }
@@ -62,7 +67,6 @@
   font-weight: 400;
   letter-spacing: 2.4px;
   color: var(--color-heading);
-  font-size: 14px;
   text-transform: uppercase;
 }
 

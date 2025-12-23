@@ -1,4 +1,4 @@
-"use client";
+﻿"use client";
 
 import { useMemo, useState } from "react";
 import SiteFooter from "../../components/Home/SiteFooter.jsx";
@@ -16,9 +16,29 @@ const initialForm = {
   country: "",
   email: "",
   phone: "",
-  date: "",
-  slot: "",
+  appointment: "",
   details: "",
+};
+
+const getOrdinalSuffix = (day) => {
+  if (day % 100 >= 11 && day % 100 <= 13) return "th";
+  switch (day % 10) {
+    case 1:
+      return "st";
+    case 2:
+      return "nd";
+    case 3:
+      return "rd";
+    default:
+      return "th";
+  }
+};
+
+const formatDateLabel = (date) => {
+  const day = date.getDate();
+  const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date);
+  const weekday = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
+  return `${day}${getOrdinalSuffix(day)} ${month} | ${weekday}`;
 };
 
 export default function AppointmentPage() {
@@ -32,12 +52,12 @@ export default function AppointmentPage() {
           firstName: "Etunimi",
           lastName: "Sukunimi",
           country: "Maa",
-          email: "Sähköpostiosoite",
+          email: "Sahkopostiosoite",
           phone: "Puhelinnumero (sis. maakoodin)",
-          date: "Valitse Päivämäärä",
-          slot: "Valitse Aikaväli",
-          slotPlaceholder: "Valitse aikaväli",
-          details: "Kuvaile koru, josta olet kiinnostunut.",
+          appointment: "Varaa aikaikkuna",
+          appointmentPlaceholder: "Valitse paiva ja aikavali",
+          details: "Kuvaile koru, josta olet kiinnostunut",
+          submit: "Laheta",
         }
       : {
           heading: "MAKE AN APPOINTMENT",
@@ -46,11 +66,11 @@ export default function AppointmentPage() {
           lastName: "Last Name",
           country: "Country",
           email: "Email",
-          phone: "Phone Number (including country code)",
-          date: "Select Date",
-          slot: "Select Time Slot",
-          slotPlaceholder: "Select a time slot",
-          details: "Please describe the jewelry item you are interested in.",
+          phone: "Phone Number (With Country Code)",
+          appointment: "Book a time slot",
+          appointmentPlaceholder: "Select a Date & Time Slot",
+          details: "Please describe the jewelry item you are interested in",
+          submit: "Submit",
         };
   const [form, setForm] = useState(initialForm);
   const slotOptions = useMemo(
@@ -61,6 +81,27 @@ export default function AppointmentPage() {
       { value: "16-18", label: "16:00 - 18:00" },
     ],
     []
+  );
+  const dateOptions = useMemo(() => {
+    const today = new Date();
+    return Array.from({ length: 7 }, (_, index) => {
+      const date = new Date(today);
+      date.setDate(today.getDate() + index);
+      return {
+        value: date.toISOString().slice(0, 10),
+        label: formatDateLabel(date),
+      };
+    });
+  }, []);
+  const appointmentOptions = useMemo(
+    () =>
+      dateOptions.flatMap((date) =>
+        slotOptions.map((slot) => ({
+          value: `${date.value}|${slot.value}`,
+          label: `${date.label} | ${slot.label}`,
+        }))
+      ),
+    [dateOptions, slotOptions]
   );
 
   const handleChange = (event) => {
@@ -75,7 +116,7 @@ export default function AppointmentPage() {
         <Container>
           <div className={styles.topLine} aria-hidden />
           <div className={styles.header}>
-            <h1 className={styles.heading}>{labels.heading}</h1>
+            <h2 className={styles.heading}>{labels.heading}</h2>
             {labels.subtitle ? <p className={styles.subtitle}>{labels.subtitle}</p> : null}
           </div>
 
@@ -84,21 +125,18 @@ export default function AppointmentPage() {
               <TextField
                 label={labels.firstName}
                 name="firstName"
-                placeholder="John"
                 value={form.firstName}
                 onChange={handleChange}
               />
               <TextField
                 label={labels.lastName}
                 name="lastName"
-                placeholder="Smith"
                 value={form.lastName}
                 onChange={handleChange}
               />
               <TextField
                 label={labels.country}
                 name="country"
-                placeholder="Finland"
                 value={form.country}
                 onChange={handleChange}
               />
@@ -106,7 +144,6 @@ export default function AppointmentPage() {
                 label={labels.email}
                 name="email"
                 type="email"
-                placeholder="name@example.com"
                 autoComplete="email"
                 value={form.email}
                 onChange={handleChange}
@@ -114,24 +151,16 @@ export default function AppointmentPage() {
               <TextField
                 label={labels.phone}
                 name="phone"
-                placeholder="+358 50 000 0000"
                 value={form.phone}
                 onChange={handleChange}
               />
-              <TextField
-                label={labels.date}
-                name="date"
-                type="date"
-                value={form.date}
-                onChange={handleChange}
-              />
               <SelectField
-                label={labels.slot}
-                name="slot"
-                placeholder={labels.slotPlaceholder}
-                value={form.slot}
+                label={labels.appointment}
+                name="appointment"
+                placeholder={labels.appointmentPlaceholder}
+                value={form.appointment}
                 onChange={handleChange}
-                options={slotOptions}
+                options={appointmentOptions}
               />
               <label className={`${fieldStyles.field} ${styles.fullRow}`}>
                 <span className={fieldStyles.label}>{labels.details}</span>
@@ -143,6 +172,11 @@ export default function AppointmentPage() {
                   onChange={handleChange}
                 />
               </label>
+            </div>
+            <div className={styles.actions}>
+              <button type="submit" className={styles.submitButton}>
+                {labels.submit}
+              </button>
             </div>
           </form>
         </Container>

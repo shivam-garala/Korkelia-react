@@ -1,10 +1,10 @@
 .field {
   display: grid;
   gap: 6px;
-  font-size: 12px;
-  font-weight: 700;
+  font-size: 16px;
+  font-weight: 300;
   color: var(--color-heading);
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
 }
 
 .label {
@@ -41,4 +41,3 @@
 .select::-ms-expand {
   display: none;
 }
-

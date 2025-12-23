@@ -90,7 +90,7 @@ export default function DiamondGuidePage() {
         <Container>
           <div className={styles.topLine} aria-hidden />
           <div className={styles.header}>
-            <h1 className={styles.heading}>{header.heading}</h1>
+            <h2 className={styles.heading}>{header.heading}</h2>
             <p className={styles.subtitle}>{header.subtitle}</p>
             {header.copy.map((paragraph) => (
               <p key={paragraph} className={styles.copy}>

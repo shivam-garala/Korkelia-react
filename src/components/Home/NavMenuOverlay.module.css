@@ -130,10 +130,16 @@
   padding: 0;
   font: inherit;
   cursor: pointer;
+  font-size: 18px;
+  font-weight: 500;
 }
 
 .link:hover {
   color: #38766b;
+}
+
+.activeLink {
+  color: var(--color-primary);
 }
 
 .muted {
@@ -159,8 +165,9 @@
   text-decoration: none;
   color: var(--color-menu-text);
   font-weight: 500;
-  font-size: 15px;
-  letter-spacing: 0.4px;
+  font-size: 18px;
+  letter-spacing: 0.6px;
+  font-family: var(--font-body);
 }
 
 .subLink:hover {
