@@ -39,6 +39,18 @@ export const fetchDiamondRate = createAsyncThunk(
   }
 );
 
+export const fetchDiamondRateDropdown = createAsyncThunk(
+  "diamondRate/fetchDropdown",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosClient.get("/api/diamondRate/dropdown");
+      return data;
+    } catch (error) {
+      return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
+    }
+  }
+);
+
 export const createDiamondRate = createAsyncThunk(
   "diamondRate/create",
   async (payload, { rejectWithValue }) => {
@@ -118,6 +130,11 @@ const diamondRateSlice = createSlice({
       })
       .addCase(fetchDiamondRate.fulfilled, (state, action) => {
         state.selected = action.payload?.data ?? null;
+      })
+      .addCase(fetchDiamondRateDropdown.fulfilled, (state, action) => {
+        state.items = Array.isArray(action.payload)
+          ? action.payload
+          : action.payload?.data ?? [];
       })
       .addCase(createDiamondRate.fulfilled, (state, action) => {
         const created = action.payload?.data ?? action.payload;

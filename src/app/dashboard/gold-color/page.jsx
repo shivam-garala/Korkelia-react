@@ -283,12 +283,7 @@ export default function GoldColorPage() {
         }}
         footer={
           <div className={styles.formActions}>
-            <Button
-              variant={editingId ? "primary" : "primarySoft"}
-              type="submit"
-              form="gold-color-form"
-              disabled={loading}
-            >
+            <Button variant="primarySoft" type="submit" form="gold-color-form" disabled={loading}>
               {editingId ? "Update" : "Create"}
             </Button>
             <Button

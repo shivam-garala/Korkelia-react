@@ -41,6 +41,18 @@ export const fetchCategoryMaster = createAsyncThunk(
   }
 );
 
+export const fetchCategoryDropdown = createAsyncThunk(
+  "categoryMaster/fetchDropdown",
+  async (_, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosClient.get("/api/categoryMaster/dropdown");
+      return data;
+    } catch (error) {
+      return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
+    }
+  }
+);
+
 export const createCategoryMaster = createAsyncThunk(
   "categoryMaster/create",
   async (payload, { rejectWithValue }) => {
@@ -118,6 +130,11 @@ const categoryMasterSlice = createSlice({
       })
       .addCase(fetchCategoryMaster.fulfilled, (state, action) => {
         state.selected = action.payload?.data ?? null;
+      })
+      .addCase(fetchCategoryDropdown.fulfilled, (state, action) => {
+        state.items = Array.isArray(action.payload)
+          ? action.payload
+          : action.payload?.data ?? [];
       })
       .addCase(createCategoryMaster.fulfilled, (state, action) => {
         const created = action.payload?.data ?? action.payload;

@@ -4,8 +4,10 @@ import styles from "./CategoryGrid.module.css";
 
 export default function CategoryGrid({
   title = "CATEGORIES",
-  categories,
+  categories = [],
 }) {
+  const isRemoteSrc = (src) => /^https?:\/\//i.test(src);
+
   return (
     <section className={styles.section}>
       <div className={styles.inner}>
@@ -18,7 +20,11 @@ export default function CategoryGrid({
               href={category.href}
             >
               <div className={styles.media} aria-hidden>
-                <Image className={styles.image} src={category.imageSrc} alt="" fill />
+                {isRemoteSrc(category.imageSrc) ? (
+                  <img className={styles.image} src={category.imageSrc} alt={category.label ?? ""} />
+                ) : (
+                  <Image className={styles.image} src={category.imageSrc} alt={category.label ?? ""} fill />
+                )}
               </div>
               <p className={styles.label}>{category.label}</p>
             </Link>

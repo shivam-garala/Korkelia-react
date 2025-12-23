@@ -8,7 +8,8 @@ import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import DataTable from "../../../components/ui/DataTable.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
-import SelectField from "../../../components/ui/SelectField.jsx";
+import Select from "react-select";
+import TextField from "../../../components/ui/TextField.jsx";
 import fieldStyles from "../../../components/ui/Fields.module.css";
 import Button from "../../../components/ui/Button.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
@@ -22,12 +23,11 @@ import {
   updateProduct,
 } from "../../../store/slices/productSlice.js";
 import {
-  fetchCategoryMasters,
+  fetchCategoryDropdown,
   selectCategoryMasters,
 } from "../../../store/slices/categoryMasterSlice.js";
 import {
   fetchSubCategories,
-  fetchSubCategoriesByCategory,
   selectSubCategories,
 } from "../../../store/slices/subCategorySlice.js";
 import {
@@ -52,6 +52,41 @@ function normalizeDisplayValue(value) {
   if (value === false || value === "false" || value === 0 || value === "0") return "0";
   if (value === null || value === undefined) return "";
   return String(value);
+}
+
+function extractProductNames(item) {
+  const list = pickValue(item, [
+    "product_name_array",
+    "productNameArray",
+    "product_names",
+    "productNames",
+    "product_translations",
+    "productTranslations",
+  ]);
+  let nameEn = "";
+  let nameFi = "";
+
+  if (Array.isArray(list)) {
+    list.forEach((entry) => {
+      const languageId = String(
+        pickValue(entry, ["language_id", "languageId", "lang_id", "langId"]) ??
+          pickValue(entry?.language, ["id", "language_id", "languageId", "lang_id", "langId"]) ??
+          ""
+      );
+      const languageName = String(
+        pickValue(entry?.language, ["language_name", "languageName", "name", "label"]) ?? ""
+      ).toLowerCase();
+      const name = pickValue(entry, ["product_name", "productName", "name", "label"]);
+      if (!name) return;
+      if (languageId === "1" || languageName === "english") nameEn = String(name);
+      if (languageId === "2" || languageName === "finnish") nameFi = String(name);
+    });
+  }
+
+  const fallbackName = pickValue(item, ["product_name", "productName", "name"]);
+  if (!nameEn && fallbackName) nameEn = String(fallbackName);
+
+  return { nameEn, nameFi };
 }
 
 export default function ProductPage() {
@@ -85,6 +120,13 @@ export default function ProductPage() {
     }
     return "U";
   }, [userEmail, userName]);
+  const portalTarget = typeof window !== "undefined" ? document.body : null;
+  const selectMenuStyles = useMemo(
+    () => ({
+      menuPortal: (base) => ({ ...base, zIndex: 9999 }),
+    }),
+    []
+  );
 
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
@@ -98,6 +140,8 @@ export default function ProductPage() {
   const [subCategoryName, setSubCategoryName] = useState("");
   const [styleId, setStyleId] = useState("");
   const [styleName, setStyleName] = useState("");
+  const [productNameEn, setProductNameEn] = useState("");
+  const [productNameFi, setProductNameFi] = useState("");
   const [isDisplay, setIsDisplay] = useState("1");
   const [imageFile, setImageFile] = useState(null);
   const [fileInputKey, setFileInputKey] = useState(0);
@@ -110,7 +154,7 @@ export default function ProductPage() {
   });
 
   useEffect(() => {
-    dispatch(fetchCategoryMasters());
+    dispatch(fetchCategoryDropdown());
     dispatch(fetchSubCategories());
     dispatch(fetchStyleMasters());
     dispatch(fetchProducts());
@@ -123,7 +167,7 @@ export default function ProductPage() {
         const id = pickValue(item, ["id", "category_id", "categoryId"]);
         const label = pickValue(item, ["category_name", "categoryName", "name", "label"]);
         if (id === null || id === undefined || label === null || label === undefined) return null;
-        return { id: String(id), label: String(label) };
+        return { value: String(id), label: String(label) };
       })
       .filter(Boolean);
   }, [categories]);
@@ -137,7 +181,7 @@ export default function ProductPage() {
         const parentId = pickValue(item, ["category_id", "categoryId", "category"]);
         if (id === null || id === undefined || label === null || label === undefined) return null;
         return {
-          id: String(id),
+          value: String(id),
           label: String(label),
           categoryId: parentId !== null && parentId !== undefined ? String(parentId) : "",
         };
@@ -157,10 +201,18 @@ export default function ProductPage() {
         const id = pickValue(item, ["id", "style_id", "styleId"]);
         const label = pickValue(item, ["style_name", "styleName", "name", "label"]);
         if (id === null || id === undefined || label === null || label === undefined) return null;
-        return { id: String(id), label: String(label) };
+        return { value: String(id), label: String(label) };
       })
       .filter(Boolean);
   }, [stylesList]);
+
+  const displayOptions = useMemo(
+    () => [
+      { value: "1", label: "Yes" },
+      { value: "0", label: "No" },
+    ],
+    []
+  );
 
   const tableRows = useMemo(() => {
     const rows = Array.isArray(items) ? items : [];
@@ -174,21 +226,21 @@ export default function ProductPage() {
         item?.category?.categoryName ??
         item?.category?.name ??
         pickValue(item, ["category_name", "categoryName", "category_label", "categoryLabel", "name"]) ??
-        categoryOptions.find((option) => String(option.id) === String(rawCategoryId))?.label ??
+        categoryOptions.find((option) => String(option.value) === String(rawCategoryId))?.label ??
         (rawCategoryId !== null && rawCategoryId !== undefined ? String(rawCategoryId) : "-");
       const subCategoryLabel =
         item?.sub_category?.sub_category_name ??
         item?.sub_category?.subCategoryName ??
         item?.sub_category?.name ??
         pickValue(item, ["sub_category_name", "subCategoryName", "sub_category_label", "subCategoryLabel"]) ??
-        subCategoryOptions.find((option) => String(option.id) === String(rawSubCategoryId))?.label ??
+        subCategoryOptions.find((option) => String(option.value) === String(rawSubCategoryId))?.label ??
         (rawSubCategoryId !== null && rawSubCategoryId !== undefined ? String(rawSubCategoryId) : "-");
       const styleLabel =
         item?.style?.style_name ??
         item?.style?.styleName ??
         item?.style?.name ??
         pickValue(item, ["style_name", "styleName", "style_label", "styleLabel", "name"]) ??
-        styleOptions.find((option) => String(option.id) === String(rawStyleId))?.label ??
+        styleOptions.find((option) => String(option.value) === String(rawStyleId))?.label ??
         (rawStyleId !== null && rawStyleId !== undefined ? String(rawStyleId) : "-");
       const rawDisplay = pickValue(item, ["is_display", "isDisplay", "display", "display_status"]);
       const displayValue = normalizeDisplayValue(rawDisplay);
@@ -240,6 +292,8 @@ export default function ProductPage() {
     setSubCategoryName("");
     setStyleId("");
     setStyleName("");
+    setProductNameEn("");
+    setProductNameFi("");
     setIsDisplay("1");
     setImageFile(null);
     setFileInputKey((prev) => prev + 1);
@@ -251,26 +305,27 @@ export default function ProductPage() {
     const rawCategoryId = pickValue(row, ["category_id", "categoryId", "category"]);
     const rawSubCategoryId = pickValue(row, ["sub_category_id", "subCategoryId", "subCategory"]);
     const rawStyleId = pickValue(row, ["style_id", "styleId", "style"]);
+    const { nameEn, nameFi } = extractProductNames(row);
     const resolvedCategoryName =
       row?.category?.category_name ??
       row?.category?.categoryName ??
       row?.category?.name ??
       pickValue(row, ["category_name", "categoryName", "name"]) ??
-      categoryOptions.find((option) => String(option.id) === String(rawCategoryId))?.label ??
+      categoryOptions.find((option) => String(option.value) === String(rawCategoryId))?.label ??
       "";
     const resolvedSubCategoryName =
-      row?.sub_category?.sub_category_name ??
-      row?.sub_category?.subCategoryName ??
-      row?.sub_category?.name ??
+      row?.subCategory?.sub_category_name ??
+      row?.subCategory?.subCategoryName ??
+      row?.subCategory?.name ??
       pickValue(row, ["sub_category_name", "subCategoryName", "name"]) ??
-      subCategoryOptions.find((option) => String(option.id) === String(rawSubCategoryId))?.label ??
+      subCategoryOptions.find((option) => String(option.value) === String(rawSubCategoryId))?.label ??
       "";
     const resolvedStyleName =
       row?.style?.style_name ??
       row?.style?.styleName ??
       row?.style?.name ??
       pickValue(row, ["style_name", "styleName", "name"]) ??
-      styleOptions.find((option) => String(option.id) === String(rawStyleId))?.label ??
+      styleOptions.find((option) => String(option.value) === String(rawStyleId))?.label ??
       "";
     const rawDisplay = pickValue(row, ["is_display", "isDisplay", "display", "display_status"]);
 
@@ -281,12 +336,11 @@ export default function ProductPage() {
     setSubCategoryName(resolvedSubCategoryName ? String(resolvedSubCategoryName) : "");
     setStyleId(rawStyleId !== undefined && rawStyleId !== null ? String(rawStyleId) : "");
     setStyleName(resolvedStyleName ? String(resolvedStyleName) : "");
+    setProductNameEn(nameEn);
+    setProductNameFi(nameFi);
     setIsDisplay(normalizeDisplayValue(rawDisplay) || "1");
     setImageFile(null);
     setFileInputKey((prev) => prev + 1);
-    if (rawCategoryId !== undefined && rawCategoryId !== null) {
-      dispatch(fetchSubCategoriesByCategory(rawCategoryId));
-    }
     setModalOpen(true);
   };
 
@@ -298,6 +352,14 @@ export default function ProductPage() {
     if (subCategoryName) payload.append("sub_category_name", subCategoryName);
     if (styleId) payload.append("style_id", styleId);
     if (styleName) payload.append("style_name", styleName);
+    if (productNameEn) {
+      payload.append("product_name_array[0][product_name]", productNameEn);
+      payload.append("product_name_array[0][language_id]", "1");
+    }
+    if (productNameFi) {
+      payload.append("product_name_array[1][product_name]", productNameFi);
+      payload.append("product_name_array[1][language_id]", "2");
+    }
     if (imageFile) payload.append("image", imageFile);
     if (isDisplay !== "") payload.append("is_display", String(isDisplay));
     return payload;
@@ -305,6 +367,17 @@ export default function ProductPage() {
 
   const submit = async (event) => {
     event.preventDefault();
+
+    if (!categoryId || !subCategoryId || !styleId) {
+      window.alert("Select category, sub category, and style.");
+      return;
+    }
+
+    if (!productNameEn || !productNameFi) {
+      window.alert("Add product name for both languages.");
+      return;
+    }
+
     const payload = buildPayload();
 
     const action = editingId ? updateProduct({ id: editingId, payload }) : createProduct(payload);
@@ -425,7 +498,7 @@ export default function ProductPage() {
         }}
         footer={
           <div className={styles.formActions}>
-            <Button variant={editingId ? "primary" : "primarySoft"} type="submit" form="product-form" disabled={loading}>
+            <Button variant="primarySoft" type="submit" form="product-form" disabled={loading}>
               {editingId ? "Update" : "Create"}
             </Button>
             <Button
@@ -444,156 +517,226 @@ export default function ProductPage() {
       >
         <form id="product-form" className={styles.form} onSubmit={submit}>
           {editingId ? (
-            <div className={styles.formRow3}>
-              <SelectField
-                label="Category"
-                value={categoryId}
-                onChange={(e) => {
-                  const nextId = e.target.value;
-                  const selected = categoryOptions.find((option) => option.id === nextId);
-                  setCategoryId(nextId);
-                  setCategoryName(selected?.label ?? "");
-                  setSubCategoryId("");
-                  setSubCategoryName("");
-                  if (nextId) dispatch(fetchSubCategoriesByCategory(nextId));
-                }}
-                required
-                disabled={!categoryOptions.length}
-                placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
-                options={categoryOptions.map((option) => ({ value: option.id, label: option.label }))}
-              />
-              <SelectField
-                label="Sub Category"
-                value={subCategoryId}
-                onChange={(e) => {
-                  const nextId = e.target.value;
-                  const selected = filteredSubCategoryOptions.find((option) => option.id === nextId);
-                  setSubCategoryId(nextId);
-                  setSubCategoryName(selected?.label ?? "");
-                }}
-                required
-                disabled={!filteredSubCategoryOptions.length}
-                placeholder={
-                  filteredSubCategoryOptions.length
-                    ? "Select sub category"
-                    : "Loading sub categories..."
-                }
-                options={filteredSubCategoryOptions.map((option) => ({
-                  value: option.id,
-                  label: option.label,
-                }))}
-              />
-              <SelectField
-                label="Style"
-                value={styleId}
-                onChange={(e) => {
-                  const nextId = e.target.value;
-                  const selected = styleOptions.find((option) => option.id === nextId);
-                  setStyleId(nextId);
-                  setStyleName(selected?.label ?? "");
-                }}
-                required
-                disabled={!styleOptions.length}
-                placeholder={styleOptions.length ? "Select style" : "Loading styles..."}
-                options={styleOptions.map((option) => ({ value: option.id, label: option.label }))}
-              />
-              <label className={fieldStyles.field}>
-                <span className={fieldStyles.label}>Image</span>
-                <input
-                  key={fileInputKey}
-                  className={fieldStyles.control}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-                />
-              </label>
-              <SelectField
-                label="Display"
-                value={isDisplay}
-                onChange={(e) => setIsDisplay(e.target.value)}
-                required
-                options={[
-                  { value: "1", label: "Yes" },
-                  { value: "0", label: "No" },
-                ]}
-              />
-            </div>
-          ) : (
-            <div className={styles.formRow3}>
-              <SelectField
-                label="Category"
-                value={categoryId}
-                onChange={(e) => {
-                  const nextId = e.target.value;
-                  const selected = categoryOptions.find((option) => option.id === nextId);
-                  setCategoryId(nextId);
-                  setCategoryName(selected?.label ?? "");
-                  setSubCategoryId("");
-                  setSubCategoryName("");
-                  if (nextId) dispatch(fetchSubCategoriesByCategory(nextId));
-                }}
-                required
-                disabled={!categoryOptions.length}
-                placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
-                options={categoryOptions.map((option) => ({ value: option.id, label: option.label }))}
-              />
-              <SelectField
-                label="Sub Category"
-                value={subCategoryId}
-                onChange={(e) => {
-                  const nextId = e.target.value;
-                  const selected = filteredSubCategoryOptions.find((option) => option.id === nextId);
-                  setSubCategoryId(nextId);
-                  setSubCategoryName(selected?.label ?? "");
-                }}
-                required
-                disabled={!filteredSubCategoryOptions.length}
-                placeholder={
-                  filteredSubCategoryOptions.length
-                    ? "Select sub category"
-                    : "Loading sub categories..."
-                }
-                options={filteredSubCategoryOptions.map((option) => ({
-                  value: option.id,
-                  label: option.label,
-                }))}
-              />
-              <SelectField
-                label="Style"
-                value={styleId}
-                onChange={(e) => {
-                  const nextId = e.target.value;
-                  const selected = styleOptions.find((option) => option.id === nextId);
-                  setStyleId(nextId);
-                  setStyleName(selected?.label ?? "");
-                }}
-                required
-                disabled={!styleOptions.length}
-                placeholder={styleOptions.length ? "Select style" : "Loading styles..."}
-                options={styleOptions.map((option) => ({ value: option.id, label: option.label }))}
-              />
-              <label className={fieldStyles.field}>
-                <span className={fieldStyles.label}>Image</span>
-                <input
-                  key={fileInputKey}
-                  className={fieldStyles.control}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+            <>
+              <div className={styles.formRow3}>
+                <label className={fieldStyles.field}>
+                  <span className={fieldStyles.label}>Category</span>
+                  <Select
+                    className={styles.select}
+                    classNamePrefix="adminSelect"
+                    value={categoryOptions.find((option) => option.value === categoryId) ?? null}
+                    onChange={(option) => {
+                      const nextId = option?.value ?? "";
+                      const selected = categoryOptions.find((opt) => opt.value === nextId);
+                      setCategoryId(nextId);
+                      setCategoryName(selected?.label ?? "");
+                      setSubCategoryId("");
+                      setSubCategoryName("");
+                    }}
+                    isDisabled={!categoryOptions.length}
+                    placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
+                    options={categoryOptions}
+                    menuPortalTarget={portalTarget}
+                    menuPosition="fixed"
+                    styles={selectMenuStyles}
+                  />
+                </label>
+                <label className={fieldStyles.field}>
+                  <span className={fieldStyles.label}>Sub Category</span>
+                  <Select
+                    className={styles.select}
+                    classNamePrefix="adminSelect"
+                    value={filteredSubCategoryOptions.find((option) => option.value === subCategoryId) ?? null}
+                    onChange={(option) => {
+                      const nextId = option?.value ?? "";
+                      const selected = filteredSubCategoryOptions.find((opt) => opt.value === nextId);
+                      setSubCategoryId(nextId);
+                      setSubCategoryName(selected?.label ?? "");
+                    }}
+                    isDisabled={!filteredSubCategoryOptions.length}
+                    placeholder={
+                      filteredSubCategoryOptions.length
+                        ? "Select sub category"
+                        : "Loading sub categories..."
+                    }
+                    options={filteredSubCategoryOptions}
+                    menuPortalTarget={portalTarget}
+                    menuPosition="fixed"
+                    styles={selectMenuStyles}
+                  />
+                </label>
+                <label className={fieldStyles.field}>
+                  <span className={fieldStyles.label}>Style</span>
+                  <Select
+                    className={styles.select}
+                    classNamePrefix="adminSelect"
+                    value={styleOptions.find((option) => option.value === styleId) ?? null}
+                    onChange={(option) => {
+                      const nextId = option?.value ?? "";
+                      const selected = styleOptions.find((opt) => opt.value === nextId);
+                      setStyleId(nextId);
+                      setStyleName(selected?.label ?? "");
+                    }}
+                    isDisabled={!styleOptions.length}
+                    placeholder={styleOptions.length ? "Select style" : "Loading styles..."}
+                    options={styleOptions}
+                    menuPortalTarget={portalTarget}
+                    menuPosition="fixed"
+                    styles={selectMenuStyles}
+                  />
+                </label>
+              </div>
+              <div className={styles.formRow2}>
+                <TextField
+                  label="Product Name (English)"
+                  value={productNameEn}
+                  onChange={(e) => setProductNameEn(e.target.value)}
                   required
                 />
-              </label>
-              <SelectField
-                label="Display"
-                value={isDisplay}
-                onChange={(e) => setIsDisplay(e.target.value)}
-                required
-                options={[
-                  { value: "1", label: "Yes" },
-                  { value: "0", label: "No" },
-                ]}
-              />
-            </div>
+                <TextField
+                  label="Product Name (Finnish)"
+                  value={productNameFi}
+                  onChange={(e) => setProductNameFi(e.target.value)}
+                  required
+                />
+              </div>
+              <div className={styles.formRow3}>
+                <label className={fieldStyles.field}>
+                  <span className={fieldStyles.label}>Image</span>
+                  <input
+                    key={fileInputKey}
+                    className={fieldStyles.control}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                  />
+                </label>
+                <label className={fieldStyles.field}>
+                  <span className={fieldStyles.label}>Display</span>
+                  <Select
+                    className={styles.select}
+                    classNamePrefix="adminSelect"
+                    value={displayOptions.find((option) => option.value === isDisplay) ?? null}
+                    onChange={(option) => setIsDisplay(option?.value ?? "")}
+                    options={displayOptions}
+                    menuPortalTarget={portalTarget}
+                    menuPosition="fixed"
+                    styles={selectMenuStyles}
+                  />
+                </label>
+              </div>
+            </>
+          ) : (
+            <>
+              <div className={styles.formRow3}>
+                <label className={fieldStyles.field}>
+                  <span className={fieldStyles.label}>Category</span>
+                  <Select
+                    className={styles.select}
+                    classNamePrefix="adminSelect"
+                    value={categoryOptions.find((option) => option.value === categoryId) ?? null}
+                    onChange={(option) => {
+                      const nextId = option?.value ?? "";
+                      const selected = categoryOptions.find((opt) => opt.value === nextId);
+                      setCategoryId(nextId);
+                      setCategoryName(selected?.label ?? "");
+                      setSubCategoryId("");
+                      setSubCategoryName("");
+                    }}
+                    isDisabled={!categoryOptions.length}
+                    placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
+                    options={categoryOptions}
+                    menuPortalTarget={portalTarget}
+                    menuPosition="fixed"
+                    styles={selectMenuStyles}
+                  />
+                </label>
+                <label className={fieldStyles.field}>
+                  <span className={fieldStyles.label}>Sub Category</span>
+                  <Select
+                    className={styles.select}
+                    classNamePrefix="adminSelect"
+                    value={filteredSubCategoryOptions.find((option) => option.value === subCategoryId) ?? null}
+                    onChange={(option) => {
+                      const nextId = option?.value ?? "";
+                      const selected = filteredSubCategoryOptions.find((opt) => opt.value === nextId);
+                      setSubCategoryId(nextId);
+                      setSubCategoryName(selected?.label ?? "");
+                    }}
+                    isDisabled={!filteredSubCategoryOptions.length}
+                    placeholder={
+                      filteredSubCategoryOptions.length
+                        ? "Select sub category"
+                        : "Loading sub categories..."
+                    }
+                    options={filteredSubCategoryOptions}
+                    menuPortalTarget={portalTarget}
+                    menuPosition="fixed"
+                    styles={selectMenuStyles}
+                  />
+                </label>
+                <label className={fieldStyles.field}>
+                  <span className={fieldStyles.label}>Style</span>
+                  <Select
+                    className={styles.select}
+                    classNamePrefix="adminSelect"
+                    value={styleOptions.find((option) => option.value === styleId) ?? null}
+                    onChange={(option) => {
+                      const nextId = option?.value ?? "";
+                      const selected = styleOptions.find((opt) => opt.value === nextId);
+                      setStyleId(nextId);
+                      setStyleName(selected?.label ?? "");
+                    }}
+                    isDisabled={!styleOptions.length}
+                    placeholder={styleOptions.length ? "Select style" : "Loading styles..."}
+                    options={styleOptions}
+                    menuPortalTarget={portalTarget}
+                    menuPosition="fixed"
+                    styles={selectMenuStyles}
+                  />
+                </label>
+              </div>
+              <div className={styles.formRow2}>
+                <TextField
+                  label="Product Name (English)"
+                  value={productNameEn}
+                  onChange={(e) => setProductNameEn(e.target.value)}
+                  required
+                />
+                <TextField
+                  label="Product Name (Finnish)"
+                  value={productNameFi}
+                  onChange={(e) => setProductNameFi(e.target.value)}
+                  required
+                />
+              </div>
+              <div className={styles.formRow3}>
+                <label className={fieldStyles.field}>
+                  <span className={fieldStyles.label}>Image</span>
+                  <input
+                    key={fileInputKey}
+                    className={fieldStyles.control}
+                    type="file"
+                    accept="image/*"
+                    onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                    required
+                  />
+                </label>
+                <label className={fieldStyles.field}>
+                  <span className={fieldStyles.label}>Display</span>
+                  <Select
+                    className={styles.select}
+                    classNamePrefix="adminSelect"
+                    value={displayOptions.find((option) => option.value === isDisplay) ?? null}
+                    onChange={(option) => setIsDisplay(option?.value ?? "")}
+                    options={displayOptions}
+                    menuPortalTarget={portalTarget}
+                    menuPosition="fixed"
+                    styles={selectMenuStyles}
+                  />
+                </label>
+              </div>
+            </>
           )}
         </form>
       </Modal>

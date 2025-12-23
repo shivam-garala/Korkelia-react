@@ -68,7 +68,8 @@ export default function MetalMasterPage() {
   const [editingId, setEditingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [metalName, setMetalName] = useState("");
-  const [filters, setFilters] = useState({ no: "", metal_name: "" });
+  const [metalCode, setMetalCode] = useState("");
+  const [filters, setFilters] = useState({ no: "", metal_name: "", metal_code: "" });
 
   useEffect(() => {
     dispatch(fetchMetalMasters());
@@ -82,6 +83,7 @@ export default function MetalMasterPage() {
         no: index + 1,
         id,
         metal_name: pickValue(item, ["metal_name", "metalName", "name"]) ?? "-",
+        metal_code: pickValue(item, ["metal_code", "metalCode", "code"]) ?? "-",
         _raw: item,
       };
     });
@@ -91,21 +93,24 @@ export default function MetalMasterPage() {
     const normalize = (value) => String(value ?? "").trim().toLowerCase();
     const noQuery = normalize(filters.no);
     const nameQuery = normalize(filters.metal_name);
-    if (!noQuery && !nameQuery) return tableRows;
+    const codeQuery = normalize(filters.metal_code);
+    if (!noQuery && !nameQuery && !codeQuery) return tableRows;
 
     return tableRows.filter((row) => {
       const noMatches = noQuery
         ? normalize(row.no).includes(noQuery) || normalize(row.id).includes(noQuery)
         : true;
       const nameMatches = nameQuery ? normalize(row.metal_name).includes(nameQuery) : true;
-      return noMatches && nameMatches;
+      const codeMatches = codeQuery ? normalize(row.metal_code).includes(codeQuery) : true;
+      return noMatches && nameMatches && codeMatches;
     });
-  }, [filters.metal_name, filters.no, tableRows]);
+  }, [filters.metal_code, filters.metal_name, filters.no, tableRows]);
 
 
   const openCreate = () => {
     setEditingId(null);
     setMetalName("");
+    setMetalCode("");
     setModalOpen(true);
   };
 
@@ -113,12 +118,13 @@ export default function MetalMasterPage() {
     const rawId = pickValue(row, ["id", "metal_id", "metalId"]);
     setEditingId(rawId ?? null);
     setMetalName(String(pickValue(row, ["metal_name", "metalName", "name"]) ?? ""));
+    setMetalCode(String(pickValue(row, ["metal_code", "metalCode", "code"]) ?? ""));
     setModalOpen(true);
   };
 
   const submit = async (event) => {
     event.preventDefault();
-    const payload = { metal_name: metalName };
+    const payload = { metal_name: metalName, metal_code: metalCode };
 
     const action = editingId ? updateMetalMaster({ id: editingId, payload }) : createMetalMaster(payload);
 
@@ -145,6 +151,7 @@ export default function MetalMasterPage() {
   const columns = [
     { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
     { key: "metal_name", header: "Metal Name", filterable: true, filterPlaceholder: "Search Name" },
+    { key: "metal_code", header: "Metal Code", filterable: true, filterPlaceholder: "Search Code" },
     {
       key: "actions",
       header: "Action",
@@ -231,7 +238,7 @@ export default function MetalMasterPage() {
         }}
         footer={
           <div className={styles.formActions}>
-            <Button variant={editingId ? "primary" : "primarySoft"} type="submit" form="metal-form" disabled={loading}>
+            <Button variant="primarySoft" type="submit" form="metal-form" disabled={loading}>
               {editingId ? "Update" : "Create"}
             </Button>
             <Button
@@ -252,6 +259,12 @@ export default function MetalMasterPage() {
               label="Metal Name"
               value={metalName}
               onChange={(e) => setMetalName(e.target.value)}
+              required
+            />
+            <TextField
+              label="Metal Code"
+              value={metalCode}
+              onChange={(e) => setMetalCode(e.target.value)}
               required
             />
           </div>

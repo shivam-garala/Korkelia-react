@@ -295,7 +295,7 @@ export default function SubCategoryMasterPage() {
         }}
         footer={
           <div className={styles.formActions}>
-            <Button variant={editingId ? "primary" : "primarySoft"} type="submit" form="sub-category-form" disabled={loading}>
+            <Button variant="primarySoft" type="submit" form="sub-category-form" disabled={loading}>
               {editingId ? "Update" : "Create"}
             </Button>
             <Button

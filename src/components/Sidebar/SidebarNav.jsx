@@ -7,7 +7,7 @@ import styles from "./SidebarNav.module.css";
 
 export const sidebarSections = [
   {
-    title: "User & Access Management",
+    title: "User Management",
     items: [
       { label: "User Management", href: "/dashboard/user", icon: "user" },
     ],
@@ -18,7 +18,7 @@ export const sidebarSections = [
       { label: "Metal Master", href: "/dashboard/metal-master", icon: "box" },
       { label: "Metal Rate", href: "/dashboard/gold-rate", icon: "chart" },
       { label: "Karat", href: "/dashboard/karat-master", icon: "bank" },
-      { label: "Gold Color", href: "/dashboard/gold-color", icon: "grid" },
+      // { label: "Gold Color", href: "/dashboard/gold-color", icon: "grid" },
     ],
   },
   {
@@ -40,7 +40,7 @@ export const sidebarSections = [
     ],
   },
   {
-    title: "Product & Design Management",
+    title: "Product Management",
     items: [
       { label: "Products", href: "/dashboard/product", icon: "cart" },
       // { label: "Design", href: "/dashboard/design", icon: "briefcase" },

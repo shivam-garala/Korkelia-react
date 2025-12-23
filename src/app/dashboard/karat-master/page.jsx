@@ -231,7 +231,7 @@ export default function KaratMasterPage() {
         }}
         footer={
           <div className={styles.formActions}>
-            <Button variant={editingId ? "primary" : "primarySoft"} type="submit" form="karat-form" disabled={loading}>
+            <Button variant="primarySoft" type="submit" form="karat-form" disabled={loading}>
               {editingId ? "Update" : "Create"}
             </Button>
             <Button

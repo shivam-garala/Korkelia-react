@@ -6,17 +6,18 @@
     "c d"
     "e e";
   gap: 0;
-  border: 1px solid color-mix(in srgb, var(--color-line), transparent 75%);
+  /* border: 1px solid color-mix(in srgb, var(--color-line), transparent 75%); */
   background: #ffffff;
 }
 
 .cell {
-  border-right: 1px solid color-mix(in srgb, var(--color-line), transparent 75%);
-  border-bottom: 1px solid color-mix(in srgb, var(--color-line), transparent 75%);
+  /* border-right: 1px solid color-mix(in srgb, var(--color-line), transparent 75%); */
+  border: 1px solid color-mix(in srgb, var(--color-line), transparent 75%);
+  /* border-bottom: 1px solid color-mix(in srgb, var(--color-line), transparent 75%); */
   display: flex;
 }
 
-.cell:nth-child(2n) {
+.cell:nth-child(2) {
   border-right: none;
 }
 
@@ -64,7 +65,6 @@
 
 .video {
   grid-area: e;
-  border-right: none;
 }
 
 .square .media {

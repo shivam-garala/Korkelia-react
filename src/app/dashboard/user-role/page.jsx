@@ -121,7 +121,7 @@ export default function UserRolePage() {
                   </label>
                 </div>
                 <div className={styles.formActions}>
-                  <Button variant={editingId ? "primary" : "primarySoft"} type="submit" disabled={loading}>
+                  <Button variant="primarySoft" type="submit" disabled={loading}>
                     {editingId ? "Update" : "Create"}
                   </Button>
                   <Button

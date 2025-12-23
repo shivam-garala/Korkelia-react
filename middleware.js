@@ -1,5 +1,5 @@
 import { NextResponse } from "next/server";
-import { isProtectedPath, isPublicPath } from "./src/routes/routes";
+import { isProtectedPath } from "./src/routes/routes";
 
 export function middleware(request) {
   const token = request.cookies.get("authToken")?.value;
@@ -9,7 +9,7 @@ export function middleware(request) {
     return NextResponse.redirect(new URL("/login", request.url));
   }
 
-  if (isPublicPath(pathname) && token) {
+  if (pathname.startsWith("/login") && token) {
     return NextResponse.redirect(new URL("/admin", request.url));
   }
 
