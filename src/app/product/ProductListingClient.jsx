@@ -15,11 +15,13 @@ export default function ProductListingClient() {
   const { language } = useI18n();
   const searchParams = useSearchParams();
   const categoryId = searchParams.get("category_id") ?? "1";
+  const categoryName = searchParams.get("category_name");
   const languageId = language === "fi" ? "2" : "1";
   const [subCategories, setSubCategories] = useState([]);
   const [products, setProducts] = useState([]);
+  const [productsLoading, setProductsLoading] = useState(true);
   const [sortFilter, setSortFilter] = useState("featured");
-  const [subCategoryFilter, setSubCategoryFilter] = useState("");
+  const [subCategoryFilter, setSubCategoryFilter] = useState([]);
 
   const sortOptions = useMemo(
     () => [
@@ -72,6 +74,7 @@ export default function ProductListingClient() {
       process.env.NEXT_PUBLIC_BASE_API_URL ??
       process.env.NEXT_PUBLIC_API_URL ??
       "";
+    if (active) setProductsLoading(true);
 
     const normalizeImage = (image) => {
       if (!image) return "/productlisting/White_Pers_Palladim_4mm_0001.png";
@@ -107,6 +110,8 @@ export default function ProductListingClient() {
       } catch (error) {
         if (active) setProducts([]);
         console.error("Product list load failed", error);
+      } finally {
+        if (active) setProductsLoading(false);
       }
     };
 
@@ -118,10 +123,9 @@ export default function ProductListingClient() {
 
   const displayedProducts = useMemo(() => {
     let list = products;
-    if (subCategoryFilter) {
-      list = list.filter(
-        (item) => String(item.subCategoryId) === String(subCategoryFilter)
-      );
+    if (subCategoryFilter.length) {
+      const selected = new Set(subCategoryFilter.map((value) => String(value)));
+      list = list.filter((item) => selected.has(String(item.subCategoryId)));
     }
 
     if (sortFilter === "price-asc" || sortFilter === "price-desc") {
@@ -148,7 +152,7 @@ export default function ProductListingClient() {
       <main className={styles.main}>
         <Container>
           <div className={styles.topLine} aria-hidden />
-          <h1 className={styles.heading}>RINGS</h1>
+          <h1 className={styles.heading}>{categoryName || "RINGS"}</h1>
 
           <FiltersBar
             leftLabel="Sub Category"
@@ -159,10 +163,14 @@ export default function ProductListingClient() {
             onRightChange={setSortFilter}
             leftOptions={subCategoryOptions}
             rightOptions={sortOptions}
+            leftMulti
           />
 
           <div className={styles.gridWrap}>
             <ProductGrid products={displayedProducts} columns={3} />
+            {!productsLoading && displayedProducts.length === 0 ? (
+              <div className={styles.emptyState}>No products found in this category.</div>
+            ) : null}
           </div>
         </Container>
       </main>

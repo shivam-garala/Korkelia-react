@@ -10,6 +10,14 @@ import axiosClient from "../lib/axiosClient.js";
 import { useI18n } from "../providers/I18nProvider.jsx";
 import styles from "./home.module.css";
 
+const buildCategoryHref = (id, label) => {
+  const nameParam = label ? `&category_name=${encodeURIComponent(label)}` : "";
+  if (id) {
+    return `/product?category_id=${encodeURIComponent(id)}${nameParam}`;
+  }
+  return label ? `/product?category_name=${encodeURIComponent(label)}` : "/product";
+};
+
 export default function HomeClient() {
   const { t, language } = useI18n();
   const [categories, setCategories] = useState([]);
@@ -17,14 +25,26 @@ export default function HomeClient() {
   const languageId = language === "fi" ? "2" : "1";
   const fallbackCategories = useMemo(
     () => [
-      { label: t("home.categories.items.rings"), href: "/product", imageSrc: "/homepage/category.jpg" },
-      { label: t("home.categories.items.bracelets"), href: "/product", imageSrc: "/homepage/category.jpg" },
       {
-        label: t("home.categories.items.necklaces"),
-        href: "/product",
+        label: t("home.categories.items.rings"),
+        href: buildCategoryHref("", t("home.categories.items.rings")),
         imageSrc: "/homepage/category.jpg",
       },
-      { label: t("home.categories.items.earrings"), href: "/product", imageSrc: "/homepage/category.jpg" },
+      {
+        label: t("home.categories.items.bracelets"),
+        href: buildCategoryHref("", t("home.categories.items.bracelets")),
+        imageSrc: "/homepage/category.jpg",
+      },
+      {
+        label: t("home.categories.items.necklaces"),
+        href: buildCategoryHref("", t("home.categories.items.necklaces")),
+        imageSrc: "/homepage/category.jpg",
+      },
+      {
+        label: t("home.categories.items.earrings"),
+        href: buildCategoryHref("", t("home.categories.items.earrings")),
+        imageSrc: "/homepage/category.jpg",
+      },
     ],
     [t]
   );
@@ -57,7 +77,7 @@ export default function HomeClient() {
             return {
               id: id ?? label,
               label,
-              href: id ? `/product?category_id=${encodeURIComponent(id)}` : "/product",
+              href: buildCategoryHref(id ?? "", label),
               imageSrc: normalizeImage(item?.image),
             };
           })

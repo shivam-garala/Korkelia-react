@@ -8,19 +8,23 @@ import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import DataTable from "../../../components/ui/DataTable.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
-import SelectField from "../../../components/ui/SelectField.jsx";
+import AdminSelectField from "../../../components/ui/AdminSelectField.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import Button from "../../../components/ui/Button.jsx";
+import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import styles from "./page.module.css";
 import layout from "../../../styles/workspace.module.css";
 import {
   createMetalRate,
+  deleteMetalRate,
   fetchKarats,
+  fetchMetalRate,
   fetchMetalRates,
   selectKarats,
   selectMetalRates,
   selectMetalRatesError,
   selectMetalRatesLoading,
+  updateMetalRate,
 } from "../../../store/slices/metalRateSlice.js";
 import {
   fetchMetalMasters,
@@ -70,6 +74,8 @@ export default function GoldRatePage() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [editingId, setEditingId] = useState(null);
+  const [deleteTarget, setDeleteTarget] = useState(null);
   const [metalId, setMetalId] = useState("");
   const [karatId, setKaratId] = useState("");
   const [rate, setRate] = useState("");
@@ -159,29 +165,90 @@ export default function GoldRatePage() {
   }, [filters.karat, filters.metal, filters.no, filters.rate, tableRows]);
 
 
-  const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
-    { key: "metal", header: "Metal", filterable: true, filterPlaceholder: "Search Metal" },
-    { key: "karat", header: "Karat", filterable: true, filterPlaceholder: "Search Karat" },
-    { key: "rate", header: "Rate", filterable: true, filterPlaceholder: "Search Rate" },
-  ];
-
   const openCreate = () => {
+    setEditingId(null);
     setMetalId("");
     setKaratId("");
     setRate("");
     setModalOpen(true);
   };
 
-  const submitCreate = async (event) => {
+  const openEdit = async (row) => {
+    const rawId = pickValue(row, ["id", "rate_id", "metal_rate_id", "metalRateId"]);
+    const rawMetalId = pickValue(row, ["metal_id", "metalId", "metal"]);
+    const rawKaratId = pickValue(row, ["karat_id", "karatId", "karat"]);
+    const rawRate = pickValue(row, ["rate", "metal_rate", "metalRate", "value"]);
+
+    setEditingId(rawId ?? null);
+    setMetalId(rawMetalId !== null && rawMetalId !== undefined ? String(rawMetalId) : "");
+    setKaratId(rawKaratId !== null && rawKaratId !== undefined ? String(rawKaratId) : "");
+    setRate(rawRate !== null && rawRate !== undefined ? String(rawRate) : "");
+    setModalOpen(true);
+
+    if (rawId !== null && rawId !== undefined) {
+      const result = await dispatch(fetchMetalRate(rawId));
+      if (!result?.error) {
+        const payload =
+          result.payload?.data?.data ?? result.payload?.data ?? result.payload;
+        if (payload && typeof payload === "object") {
+          const freshMetalId = pickValue(payload, ["metal_id", "metalId", "metal"]);
+          const freshKaratId = pickValue(payload, ["karat_id", "karatId", "karat"]);
+          const freshRate = pickValue(payload, ["rate", "metal_rate", "metalRate", "value"]);
+          setMetalId(freshMetalId !== null && freshMetalId !== undefined ? String(freshMetalId) : "");
+          setKaratId(freshKaratId !== null && freshKaratId !== undefined ? String(freshKaratId) : "");
+          setRate(freshRate !== null && freshRate !== undefined ? String(freshRate) : "");
+        }
+      }
+    }
+  };
+
+  const submit = async (event) => {
     event.preventDefault();
     const payload = { karat_id: Number(karatId), metal_id: Number(metalId), rate: Number(rate) };
-    const result = await dispatch(createMetalRate(payload));
+    const action = editingId
+      ? updateMetalRate({ id: editingId, payload })
+      : createMetalRate(payload);
+    const result = await dispatch(action);
     if (!result?.error) {
       setModalOpen(false);
+      setEditingId(null);
       dispatch(fetchMetalRates());
     }
   };
+
+  const handleDelete = (id) => {
+    if (!id) return;
+    setDeleteTarget(id);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget) return;
+    await dispatch(deleteMetalRate(deleteTarget));
+    dispatch(fetchMetalRates());
+    setDeleteTarget(null);
+  };
+
+  const columns = [
+    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "metal", header: "Metal", filterable: true, filterPlaceholder: "Search Metal" },
+    { key: "karat", header: "Karat", filterable: true, filterPlaceholder: "Search Karat" },
+    { key: "rate", header: "Rate", filterable: true, filterPlaceholder: "Search Rate" },
+    {
+      key: "actions",
+      header: "Action",
+      filterable: false,
+      render: (row) => (
+        <div className={styles.actions}>
+          <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
+            Edit
+          </Button>
+          <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
+            Delete
+          </Button>
+        </div>
+      ),
+    },
+  ];
 
   return (
     <div className={layout.page}>
@@ -245,22 +312,31 @@ export default function GoldRatePage() {
 
       <Modal
         open={modalOpen}
-        title="Add Metal Rate"
-        onClose={() => setModalOpen(false)}
+        title={editingId ? "Update Metal Rate" : "Add Metal Rate"}
+        onClose={() => {
+          setModalOpen(false);
+          setEditingId(null);
+        }}
         footer={
           <div className={styles.formActions}>
             <Button variant="primarySoft" type="submit" form="metal-rate-form" disabled={loading}>
-              Save
+              {editingId ? "Update" : "Save"}
             </Button>
-            <Button variant="secondary" onClick={() => setModalOpen(false)}>
+            <Button
+              variant="secondary"
+              onClick={() => {
+                setModalOpen(false);
+                setEditingId(null);
+              }}
+            >
               Cancel
             </Button>
           </div>
         }
       >
-        <form id="metal-rate-form" className={styles.form} onSubmit={submitCreate}>
+        <form id="metal-rate-form" className={styles.form} onSubmit={submit}>
           <div className={styles.formRow}>
-            <SelectField
+            <AdminSelectField
               label="Metal"
               value={metalId}
               onChange={(e) => setMetalId(e.target.value)}
@@ -269,7 +345,7 @@ export default function GoldRatePage() {
               placeholder={metalOptions.length ? "Select metal" : "Loading metals..."}
               options={metalOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
             />
-            <SelectField
+            <AdminSelectField
               label="Karat"
               value={karatId}
               onChange={(e) => setKaratId(e.target.value)}
@@ -290,7 +366,14 @@ export default function GoldRatePage() {
           </div>
         </form>
       </Modal>
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title="Delete Metal Rate"
+        message="Delete this metal rate? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={confirmDelete}
+        onClose={() => setDeleteTarget(null)}
+      />
     </div>
   );
 }
-

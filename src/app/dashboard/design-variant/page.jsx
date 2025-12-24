@@ -8,10 +8,11 @@ import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import DataTable from "../../../components/ui/DataTable.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
-import SelectField from "../../../components/ui/SelectField.jsx";
+import AdminSelectField from "../../../components/ui/AdminSelectField.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
+import fieldStyles from "../../../components/ui/Fields.module.css";
 import {
   createDesignVariant,
   deleteDesignVariant,
@@ -44,6 +45,19 @@ function pickValue(obj, keys) {
     if (value !== undefined && value !== null) return value;
   }
   return null;
+}
+
+function normalizeDetailList(details) {
+  if (Array.isArray(details)) return details;
+  if (typeof details === "string") {
+    try {
+      const parsed = JSON.parse(details);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+  return [];
 }
 
 function formatDetailSummary(details) {
@@ -135,6 +149,8 @@ export default function DesignVariantPage() {
   const [markUp, setMarkUp] = useState("");
   const [description, setDescription] = useState("");
   const [detailRows, setDetailRows] = useState([]);
+  const [imageFiles, setImageFiles] = useState([]);
+  const [fileInputKey, setFileInputKey] = useState(0);
   const [filters, setFilters] = useState({
     no: "",
     product: "",
@@ -240,10 +256,10 @@ export default function DesignVariantPage() {
         pickValue(item, ["metal_rate_name", "metalRateName"]) ??
         metalRateOptions.find((opt) => String(opt.id) === String(rawMetalRateId))?.label ??
         (rawMetalRateId !== null && rawMetalRateId !== undefined ? String(rawMetalRateId) : "-");
-      const detailList =
+      const detailList = normalizeDetailList(
         pickValue(item, ["diamond_design_detail", "diamond_design_details", "diamond_details"]) ??
-        item?.diamond_design_detail ??
-        [];
+          item?.diamond_design_detail
+      );
 
       return {
         no: index + 1,
@@ -252,7 +268,7 @@ export default function DesignVariantPage() {
         metal_rate: metalRateLabel ?? "-",
         weight: pickValue(item, ["weight"]) ?? "-",
         mark_up: pickValue(item, ["mark_up", "markUp"]) ?? "-",
-        details: formatDetailSummary(Array.isArray(detailList) ? detailList : []),
+        details: formatDetailSummary(detailList),
         _raw: item,
       };
     });
@@ -290,6 +306,8 @@ export default function DesignVariantPage() {
     setMarkUp("");
     setDescription("");
     setDetailRows([]);
+    setImageFiles([]);
+    setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
   };
 
@@ -300,10 +318,10 @@ export default function DesignVariantPage() {
     const rawMetalRateId = pickValue(row, ["metal_rate_id", "metalRateId"]);
     const rawMetalRateName = pickValue(row, ["metal_rate_name", "metalRateName"]);
     const rawCategoryId = pickValue(row, ["category_id", "categoryId", "category_master_id"]);
-    const detailList =
+    const detailList = normalizeDetailList(
       pickValue(row, ["diamond_design_detail", "diamond_design_details", "diamond_details"]) ??
-      row?.diamond_design_detail ??
-      [];
+        row?.diamond_design_detail
+    );
 
     setEditingId(rawId ?? null);
     setCategoryId(rawCategoryId !== null && rawCategoryId !== undefined ? String(rawCategoryId) : "");
@@ -315,19 +333,19 @@ export default function DesignVariantPage() {
     setMarkUp(String(pickValue(row, ["mark_up", "markUp"]) ?? ""));
     setDescription(String(pickValue(row, ["description"]) ?? ""));
     setDetailRows(
-      Array.isArray(detailList)
-        ? detailList.map((detail, idx) => ({
-            key: `${Date.now()}-${idx}`,
-            cutId: String(pickValue(detail, ["cut_id", "cutId"]) ?? ""),
-            cutCode: String(pickValue(detail, ["cut_code", "cutCode", "code"]) ?? ""),
-            diamondRateId: String(pickValue(detail, ["diamond_rate_id", "diamondRateId"]) ?? ""),
-            diamondRateName: String(
-              pickValue(detail, ["diamond_rate_name", "diamondRateName", "rate_name", "name"]) ?? ""
-            ),
-            pcs: String(pickValue(detail, ["pcs", "pieces", "diamond_pcs"]) ?? ""),
-          }))
-        : []
+      detailList.map((detail, idx) => ({
+        key: `${Date.now()}-${idx}`,
+        cutId: String(pickValue(detail, ["cut_id", "cutId"]) ?? ""),
+        cutCode: String(pickValue(detail, ["cut_code", "cutCode", "code"]) ?? ""),
+        diamondRateId: String(pickValue(detail, ["diamond_rate_id", "diamondRateId"]) ?? ""),
+        diamondRateName: String(
+          pickValue(detail, ["diamond_rate_name", "diamondRateName", "rate_name", "name"]) ?? ""
+        ),
+        pcs: String(pickValue(detail, ["pcs", "pieces", "diamond_pcs"]) ?? ""),
+      }))
     );
+    setImageFiles([]);
+    setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
   };
 
@@ -376,29 +394,35 @@ export default function DesignVariantPage() {
       return;
     }
 
+    if (!editingId && imageFiles.length === 0) {
+      window.alert("Add at least one image.");
+      return;
+    }
+
     const selectedProduct = productOptions.find((opt) => opt.id === productId);
     const selectedMetalRate = metalRateOptions.find((opt) => opt.id === metalRateId);
+    const detailPayload = detailRows.map((row) => {
+      const cutOption = cutOptions.find((opt) => opt.id === row.cutId);
+      const diamondOption = diamondRateOptions.find((opt) => opt.id === row.diamondRateId);
+      return {
+        cut_id: row.cutId,
+        cut_code: row.cutCode || cutOption?.code || cutOption?.label || "",
+        diamond_rate_id: row.diamondRateId,
+        diamond_rate_name: row.diamondRateName || diamondOption?.label || "",
+        pcs: row.pcs,
+      };
+    });
 
-    const payload = {
-      product_id: productId,
-      product_name: productName || selectedProduct?.label || "",
-      metal_rate_id: metalRateId,
-      metal_rate_name: metalRateName || selectedMetalRate?.label || "",
-      weight,
-      mark_up: markUp,
-      description,
-      diamond_design_detail: detailRows.map((row) => {
-        const cutOption = cutOptions.find((opt) => opt.id === row.cutId);
-        const diamondOption = diamondRateOptions.find((opt) => opt.id === row.diamondRateId);
-        return {
-          cut_id: row.cutId,
-          cut_code: row.cutCode || cutOption?.code || cutOption?.label || "",
-          diamond_rate_id: row.diamondRateId,
-          diamond_rate_name: row.diamondRateName || diamondOption?.label || "",
-          pcs: row.pcs,
-        };
-      }),
-    };
+    const payload = new FormData();
+    payload.append("product_id", productId);
+    payload.append("product_name", productName || selectedProduct?.label || "");
+    payload.append("metal_rate_id", metalRateId);
+    payload.append("metal_rate_name", metalRateName || selectedMetalRate?.label || "");
+    if (weight !== "") payload.append("weight", String(weight));
+    if (markUp !== "") payload.append("mark_up", String(markUp));
+    if (description) payload.append("description", description);
+    payload.append("diamond_design_detail", JSON.stringify(detailPayload));
+    imageFiles.forEach((file) => payload.append("images", file));
 
     const action = editingId
       ? updateDesignVariant({ id: editingId, payload })
@@ -408,6 +432,8 @@ export default function DesignVariantPage() {
     if (!result?.error) {
       setModalOpen(false);
       setEditingId(null);
+      setImageFiles([]);
+      setFileInputKey((prev) => prev + 1);
       dispatch(fetchDesignVariants());
     }
   };
@@ -532,7 +558,7 @@ export default function DesignVariantPage() {
       >
         <form id="design-variant-form" className={crudStyles.form} onSubmit={submit}>
           <div className={crudStyles.formRow3}>
-            <SelectField
+            <AdminSelectField
               label="Category"
               value={categoryId}
               onChange={(e) => {
@@ -545,7 +571,7 @@ export default function DesignVariantPage() {
               placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
               options={categoryOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
             />
-            <SelectField
+            <AdminSelectField
               label="Product"
               value={productId}
               onChange={(e) => {
@@ -559,7 +585,7 @@ export default function DesignVariantPage() {
               placeholder={filteredProductOptions.length ? "Select product" : "Loading products..."}
               options={filteredProductOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
             />
-            <SelectField
+            <AdminSelectField
               label="Metal Rate"
               value={metalRateId}
               onChange={(e) => {
@@ -600,6 +626,19 @@ export default function DesignVariantPage() {
               onChange={(e) => setDescription(e.target.value)}
             />
           </div>
+          <div className={styles.fieldRow}>
+            <label className={fieldStyles.field}>
+              <span className={fieldStyles.label}>Images</span>
+              <input
+                key={fileInputKey}
+                className={fieldStyles.control}
+                type="file"
+                accept="image/*"
+                multiple
+                onChange={(e) => setImageFiles(Array.from(e.target.files ?? []))}
+              />
+            </label>
+          </div>
 
           <div className={styles.detailHeader}>Diamond Details</div>
           <div className={styles.detailList}>
@@ -611,7 +650,7 @@ export default function DesignVariantPage() {
             </div>
             {detailRows.map((row) => (
               <div key={row.key} className={styles.detailRow}>
-                <SelectField
+                <AdminSelectField
                   label=""
                   value={row.cutId}
                   onChange={(e) => {
@@ -624,7 +663,7 @@ export default function DesignVariantPage() {
                   placeholder={cutOptions.length ? "Select cut" : "Loading cuts..."}
                   options={cutOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
                 />
-                <SelectField
+                <AdminSelectField
                   label=""
                   value={row.diamondRateId}
                   onChange={(e) => {

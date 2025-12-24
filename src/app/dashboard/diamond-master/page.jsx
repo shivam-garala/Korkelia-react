@@ -69,9 +69,7 @@ export default function DiamondMasterPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
 
   const [carat, setCarat] = useState("");
-  const [sizeFrom, setSizeFrom] = useState("");
-  const [sizeTo, setSizeTo] = useState("");
-  const [filters, setFilters] = useState({ no: "", carat: "", size_from: "", size_to: "" });
+  const [filters, setFilters] = useState({ no: "", carat: "" });
 
   useEffect(() => {
     dispatch(fetchDiamondMasters());
@@ -85,8 +83,6 @@ export default function DiamondMasterPage() {
         no: index + 1,
         id,
         carat: pickValue(item, ["carat"]) ?? "-",
-        size_from: pickValue(item, ["size_from", "sizeFrom"]) ?? "-",
-        size_to: pickValue(item, ["size_to", "sizeTo"]) ?? "-",
         _raw: item,
       };
     });
@@ -96,27 +92,21 @@ export default function DiamondMasterPage() {
     const normalize = (value) => String(value ?? "").trim().toLowerCase();
     const noQuery = normalize(filters.no);
     const caratQuery = normalize(filters.carat);
-    const fromQuery = normalize(filters.size_from);
-    const toQuery = normalize(filters.size_to);
-    if (!noQuery && !caratQuery && !fromQuery && !toQuery) return tableRows;
+    if (!noQuery && !caratQuery) return tableRows;
 
     return tableRows.filter((row) => {
       const noMatches = noQuery
         ? normalize(row.no).includes(noQuery) || normalize(row.id).includes(noQuery)
         : true;
       const caratMatches = caratQuery ? normalize(row.carat).includes(caratQuery) : true;
-      const fromMatches = fromQuery ? normalize(row.size_from).includes(fromQuery) : true;
-      const toMatches = toQuery ? normalize(row.size_to).includes(toQuery) : true;
-      return noMatches && caratMatches && fromMatches && toMatches;
+      return noMatches && caratMatches;
     });
-  }, [filters.carat, filters.no, filters.size_from, filters.size_to, tableRows]);
+  }, [filters.carat, filters.no, tableRows]);
 
 
   const openCreate = () => {
     setEditingId(null);
     setCarat("");
-    setSizeFrom("");
-    setSizeTo("");
     setModalOpen(true);
   };
 
@@ -124,8 +114,6 @@ export default function DiamondMasterPage() {
     const rawId = pickValue(row, ["id", "diamond_id", "diamondId"]);
     setEditingId(rawId ?? null);
     setCarat(String(pickValue(row, ["carat"]) ?? ""));
-    setSizeFrom(String(pickValue(row, ["size_from", "sizeFrom"]) ?? ""));
-    setSizeTo(String(pickValue(row, ["size_to", "sizeTo"]) ?? ""));
     setModalOpen(true);
   };
 
@@ -133,8 +121,6 @@ export default function DiamondMasterPage() {
     event.preventDefault();
     const payload = {
       carat: Number(carat),
-      size_from: Number(sizeFrom),
-      size_to: Number(sizeTo),
     };
 
     const action = editingId
@@ -164,8 +150,6 @@ export default function DiamondMasterPage() {
   const columns = [
     { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
     { key: "carat", header: "Carat", filterable: true, filterPlaceholder: "Search Carat" },
-    { key: "size_from", header: "Size From", filterable: true, filterPlaceholder: "Search From" },
-    { key: "size_to", header: "Size To", filterable: true, filterPlaceholder: "Search To" },
     {
       key: "actions",
       header: "Action",
@@ -268,31 +252,13 @@ export default function DiamondMasterPage() {
         }
       >
         <form id="diamond-form" className={styles.form} onSubmit={submit}>
-          <div className={styles.formRow3}>
+          <div className={styles.formRow2}>
             <TextField
               label="Carat"
               type="number"
               step="0.01"
               value={carat}
               onChange={(e) => setCarat(e.target.value)}
-              required
-              preventWheel
-            />
-            <TextField
-              label="Size From"
-              type="number"
-              step="0.01"
-              value={sizeFrom}
-              onChange={(e) => setSizeFrom(e.target.value)}
-              required
-              preventWheel
-            />
-            <TextField
-              label="Size To"
-              type="number"
-              step="0.01"
-              value={sizeTo}
-              onChange={(e) => setSizeTo(e.target.value)}
               required
               preventWheel
             />
@@ -310,4 +276,3 @@ export default function DiamondMasterPage() {
     </div>
   );
 }
-

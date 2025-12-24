@@ -47,7 +47,7 @@ export default async function ProductDetailsPage({ params }) {
               </div>
 
               <div className={styles.customizer}>
-                <ProductCustomizer title={`PRODUCT NAME ${id ? `#${id}` : ""}`} />
+                <ProductCustomizer title={`PRODUCT NAME ${id ? `#${id}` : ""}`} productId={id ?? ""} />
               </div>
             </div>
           </div>
@@ -64,4 +64,3 @@ export default async function ProductDetailsPage({ params }) {
     </div>
   );
 }
-

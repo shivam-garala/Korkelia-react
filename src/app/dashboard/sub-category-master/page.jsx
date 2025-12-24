@@ -8,7 +8,7 @@ import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import DataTable from "../../../components/ui/DataTable.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
-import SelectField from "../../../components/ui/SelectField.jsx";
+import AdminSelectField from "../../../components/ui/AdminSelectField.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
@@ -312,7 +312,7 @@ export default function SubCategoryMasterPage() {
       >
         <form id="sub-category-form" className={styles.form} onSubmit={submit}>
           <div className={styles.formRow3}>
-            <SelectField
+            <AdminSelectField
               label="Category"
               value={categoryId}
               onChange={(e) => setCategoryId(e.target.value)}
@@ -347,4 +347,3 @@ export default function SubCategoryMasterPage() {
     </div>
   );
 }
-

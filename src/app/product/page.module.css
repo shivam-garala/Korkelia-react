@@ -27,3 +27,11 @@
 .gridWrap {
   margin-top: 62px;
 }
+
+.emptyState {
+  margin-top: 24px;
+  text-align: center;
+  color: var(--color-muted);
+  font-size: 14px;
+  letter-spacing: 0.4px;
+}

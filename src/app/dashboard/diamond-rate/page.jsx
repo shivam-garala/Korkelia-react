@@ -8,7 +8,7 @@ import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import DataTable from "../../../components/ui/DataTable.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
-import SelectField from "../../../components/ui/SelectField.jsx";
+import AdminSelectField from "../../../components/ui/AdminSelectField.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
@@ -49,13 +49,7 @@ function pickValue(obj, keys) {
 function formatDiamondMasterLabel(item, fallbackId) {
   if (!item) return fallbackId !== undefined && fallbackId !== null ? String(fallbackId) : "-";
   const carat = pickValue(item, ["carat"]);
-  const sizeFrom = pickValue(item, ["size_from", "sizeFrom"]);
-  const sizeTo = pickValue(item, ["size_to", "sizeTo"]);
-  const caratLabel = carat !== null && carat !== undefined ? `Carat ${carat}` : "Carat -";
-  if (sizeFrom !== null || sizeTo !== null) {
-    return `${caratLabel} (${sizeFrom ?? "-"}-${sizeTo ?? "-"})`;
-  }
-  return caratLabel;
+  return carat !== null && carat !== undefined ? String(carat) : "-";
 }
 
 export default function DiamondRatePage() {
@@ -279,7 +273,7 @@ export default function DiamondRatePage() {
 
   const columns = [
     { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
-    { key: "diamond_master", header: "Diamond Master", filterable: true, filterPlaceholder: "Search Diamond" },
+    { key: "diamond_master", header: "Carat", filterable: true, filterPlaceholder: "Search Carat" },
     { key: "diamond_type", header: "Diamond Type", filterable: true, filterPlaceholder: "Search Type" },
     { key: "clarity", header: "Clarity", filterable: true, filterPlaceholder: "Search Clarity" },
     { key: "rate", header: "Rate", filterable: true, filterPlaceholder: "Search Rate" },
@@ -387,16 +381,16 @@ export default function DiamondRatePage() {
       >
         <form id="diamond-rate-form" className={styles.form} onSubmit={submit}>
           <div className={styles.formRow3}>
-            <SelectField
-              label="Diamond Master"
+            <AdminSelectField
+              label="Carat"
               value={diamondMasterId}
               onChange={(e) => setDiamondMasterId(e.target.value)}
               required
               disabled={!diamondMasterOptions.length}
-              placeholder={diamondMasterOptions.length ? "Select diamond" : "Loading diamonds..."}
+              placeholder={diamondMasterOptions.length ? "Select carat" : "Loading carats..."}
               options={diamondMasterOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
             />
-            <SelectField
+            <AdminSelectField
               label="Diamond Type"
               value={diamondTypeId}
               onChange={(e) => setDiamondTypeId(e.target.value)}
@@ -405,7 +399,7 @@ export default function DiamondRatePage() {
               placeholder={diamondTypeOptions.length ? "Select type" : "Loading types..."}
               options={diamondTypeOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
             />
-            <SelectField
+            <AdminSelectField
               label="Clarity"
               value={clarityId}
               onChange={(e) => setClarityId(e.target.value)}

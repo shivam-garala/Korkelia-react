@@ -8,7 +8,7 @@ import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import DataTable from "../../../components/ui/DataTable.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
-import SelectField from "../../../components/ui/SelectField.jsx";
+import AdminSelectField from "../../../components/ui/AdminSelectField.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
@@ -378,7 +378,7 @@ export default function StyleMasterPage() {
       >
         <form id="style-form" className={styles.form} onSubmit={submit}>
           <div className={styles.formRow3}>
-            <SelectField
+            <AdminSelectField
               label="Category"
               value={categoryId}
               onChange={(e) => {
@@ -392,7 +392,7 @@ export default function StyleMasterPage() {
               placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
               options={categoryOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
             />
-            <SelectField
+            <AdminSelectField
               label="Sub Category"
               value={subCategoryId}
               onChange={(e) => setSubCategoryId(e.target.value)}
@@ -429,4 +429,3 @@ export default function StyleMasterPage() {
     </div>
   );
 }
-
