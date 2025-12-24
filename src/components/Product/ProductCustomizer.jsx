@@ -77,6 +77,15 @@ export default function ProductCustomizer({
   title = "PRODUCT NAME",
   productId = "",
   designId: designIdProp = "",
+  defaultProductName = "",
+  defaultTotalPrice = "",
+  defaultDesignTranslation = "",
+  defaultMetalId = "",
+  defaultKaratId = "",
+  defaultDiamondTypeId = "",
+  defaultClarityId = "",
+  defaultCarat = "",
+  defaultCutId = "",
 }) {
   const { language } = useI18n();
   const qualityId = useId();
@@ -398,7 +407,16 @@ export default function ProductCustomizer({
 
   useEffect(() => {
     setDefaultsApplied(false);
-  }, [productId, designId]);
+  }, [
+    productId,
+    designId,
+    defaultMetalId,
+    defaultKaratId,
+    defaultDiamondTypeId,
+    defaultClarityId,
+    defaultCarat,
+    defaultCutId,
+  ]);
 
   useEffect(() => {
     let active = true;
@@ -412,8 +430,23 @@ export default function ProductCustomizer({
 
     const params = new URLSearchParams({
       product_id: String(productId),
+      design_id: String(designId),
     });
-    params.set("design_id", String(designId));
+    const hasAllDetails =
+      selectedMetalId &&
+      selectedKaratId &&
+      selectedQualityId &&
+      selectedClarityId &&
+      selectedCarat &&
+      selectedCutId;
+    if (hasAllDetails) {
+      params.set("metal_id", String(selectedMetalId));
+      params.set("karat_id", String(selectedKaratId));
+      params.set("diamond_type_id", String(selectedQualityId));
+      params.set("clarity_id", String(selectedClarityId));
+      params.set("carat", String(selectedCarat));
+      params.set("cut_id", String(selectedCutId));
+    }
 
     setVariantLoading(true);
     const loadVariant = async () => {
@@ -437,10 +470,16 @@ export default function ProductCustomizer({
   }, [
     productId,
     designId,
+    selectedMetalId,
+    selectedKaratId,
+    selectedQualityId,
+    selectedClarityId,
+    selectedCarat,
+    selectedCutId,
   ]);
 
   useEffect(() => {
-    if (defaultsApplied || !variantDetails) return;
+    if (defaultsApplied || !filterData) return;
     if (
       !cutOptions.length ||
       !qualityOptions.length ||
@@ -452,67 +491,38 @@ export default function ProductCustomizer({
       return;
     }
 
-    const primaryDetail = Array.isArray(variantDetails?.diamond_details)
-      ? variantDetails.diamond_details[0]
-      : null;
-    const nextCutId =
-      primaryDetail?.cut_master_id ??
-      primaryDetail?.cut_master?.id ??
-      null;
-    const nextDiamondRate = primaryDetail?.diamond_rate ?? null;
-    const nextQualityId =
-      nextDiamondRate?.diamond_type_id ??
-      nextDiamondRate?.diamond_type?.id ??
-      null;
-    const nextClarityId =
-      nextDiamondRate?.clarity_id ??
-      nextDiamondRate?.clarity?.id ??
-      null;
-    const nextCaratValue =
-      nextDiamondRate?.diamond_master?.carat ??
-      nextDiamondRate?.diamond_master_id?.carat ??
-      null;
-    const nextMetalId =
-      variantDetails?.metal_rate?.metal_id ??
-      variantDetails?.metal_rate?.metal?.id ??
-      null;
-    const nextKaratId =
-      variantDetails?.metal_rate?.karat_id ??
-      variantDetails?.metal_rate?.karat?.id ??
-      null;
-
     if (
-      nextCutId !== null &&
-      cutOptions.some((opt) => String(opt.id) === String(nextCutId))
+      defaultCutId &&
+      cutOptions.some((opt) => String(opt.id) === String(defaultCutId))
     ) {
-      setCut(String(nextCutId));
+      setCut(String(defaultCutId));
     }
     if (
-      nextQualityId !== null &&
-      qualityOptions.some((opt) => String(opt.value) === String(nextQualityId))
+      defaultDiamondTypeId &&
+      qualityOptions.some((opt) => String(opt.value) === String(defaultDiamondTypeId))
     ) {
-      setQuality(String(nextQualityId));
+      setQuality(String(defaultDiamondTypeId));
     }
     if (
-      nextClarityId !== null &&
-      clarityOptions.some((opt) => String(opt.value) === String(nextClarityId))
+      defaultClarityId &&
+      clarityOptions.some((opt) => String(opt.value) === String(defaultClarityId))
     ) {
-      setClarity(String(nextClarityId));
+      setClarity(String(defaultClarityId));
     }
     if (
-      nextMetalId !== null &&
-      metalOptions.some((opt) => String(opt.value) === String(nextMetalId))
+      defaultMetalId &&
+      metalOptions.some((opt) => String(opt.value) === String(defaultMetalId))
     ) {
-      setMetal(String(nextMetalId));
+      setMetal(String(defaultMetalId));
     }
     if (
-      nextKaratId !== null &&
-      metalTypeOptions.some((opt) => String(opt.value) === String(nextKaratId))
+      defaultKaratId &&
+      metalTypeOptions.some((opt) => String(opt.value) === String(defaultKaratId))
     ) {
-      setMetalType(String(nextKaratId));
+      setMetalType(String(defaultKaratId));
     }
-    if (nextCaratValue !== null) {
-      const normalizedCarat = String(nextCaratValue);
+    if (defaultCarat) {
+      const normalizedCarat = String(defaultCarat);
       if (caratOptions.includes(normalizedCarat)) {
         setCarat(normalizedCarat);
       }
@@ -523,31 +533,81 @@ export default function ProductCustomizer({
     caratOptions,
     clarityOptions,
     cutOptions,
+    defaultCarat,
+    defaultClarityId,
+    defaultCutId,
+    defaultDiamondTypeId,
+    defaultKaratId,
+    defaultMetalId,
     defaultsApplied,
+    filterData,
     metalOptions,
     metalTypeOptions,
     qualityOptions,
-    variantDetails,
   ]);
 
   const variantPrice =
     variantDetails?.total_price ??
     variantDetails?.price ??
     variantDetails?.rate ??
-    variantDetails?.metal_rate ??
+    variantDetails?.metal_rate?.rate ??
+    defaultTotalPrice ??
     null;
+  const resolvedProductName =
+    variantDetails?.product?.product_name ??
+    variantDetails?.product_name ??
+    defaultProductName ??
+    variantDetails?.product?.name ??
+    title;
+  const designTranslations =
+    variantDetails?.design_translation ??
+    variantDetails?.design_translations ??
+    variantDetails?.designTranslations ??
+    null;
+  let translationCopy = "";
+  if (Array.isArray(designTranslations)) {
+    const match = designTranslations.find((entry) => {
+      const entryLangId =
+        String(entry?.language_id ?? entry?.language?.id ?? "");
+      const entryLangName = String(
+        entry?.language?.language_name ?? entry?.language_name ?? ""
+      ).toLowerCase();
+      return (
+        entryLangId === languageId ||
+        entryLangName === (language === "fi" ? "finnish" : "english")
+      );
+    });
+    translationCopy =
+      match?.description ??
+      match?.design_variant_name ??
+      match?.name ??
+      match?.label ??
+      "";
+  } else if (designTranslations && typeof designTranslations === "object") {
+    translationCopy =
+      designTranslations.description ??
+      designTranslations.design_variant_name ??
+      designTranslations.name ??
+      "";
+  } else if (typeof designTranslations === "string") {
+    translationCopy = designTranslations;
+  }
+
+  if (!translationCopy && defaultDesignTranslation) {
+    translationCopy = defaultDesignTranslation;
+  }
 
   return (
     <aside className={styles.panel}>
-      <h2 className={styles.title}>{title}</h2>
+      <h2 className={styles.title}>{resolvedProductName}</h2>
       {/* {variantLoading ? (
         <p className={styles.variantStatus}>Updating selection...</p>
       ) : variantPrice ? (
         <p className={styles.variantStatus}>Price: {variantPrice}</p>
       ) : null} */}
       <p className={styles.copy}>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas
-        ullamcorper, facilisis euismod elit. Fusce vel leo fermentum eget.
+        {translationCopy ||
+          "Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas ullamcorper, facilisis euismod elit."}
       </p>
 
       <div className={styles.section}>

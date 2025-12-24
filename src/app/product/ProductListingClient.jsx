@@ -17,6 +17,7 @@ export default function ProductListingClient() {
   const categoryId = searchParams.get("category_id") ?? "1";
   const categoryName = searchParams.get("category_name");
   const languageId = language === "fi" ? "2" : "1";
+  const languageName = language === "fi" ? "finnish" : "english";
   const [subCategories, setSubCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
@@ -95,18 +96,94 @@ export default function ProductListingClient() {
           .map((item) => {
             const id = item?.id ?? item?.product_id ?? null;
             if (!id) return null;
+            const design =
+              item?.design ??
+              item?.design_variant ??
+              item?.designVariant ??
+              null;
             const designId =
+              design?.id ??
               item?.design_id ??
               item?.designId ??
               item?.design_variant_id ??
               item?.designVariantId ??
               "";
+            const metalRate = design?.metal_rate ?? null;
+            const primaryDetail = Array.isArray(design?.diamond_details)
+              ? design.diamond_details[0]
+              : null;
+            const diamondRate = primaryDetail?.diamond_rate ?? null;
+            const designTranslations =
+              design?.design_translation ??
+              design?.design_translations ??
+              design?.designTranslations ??
+              null;
+            let translationText = "";
+            if (Array.isArray(designTranslations)) {
+              const match = designTranslations.find((entry) => {
+                const entryLangId = String(
+                  entry?.language_id ?? entry?.language?.id ?? ""
+                );
+                const entryLangName = String(
+                  entry?.language?.language_name ?? entry?.language_name ?? ""
+                ).toLowerCase();
+                return entryLangId === languageId || entryLangName === languageName;
+              });
+              translationText =
+                match?.description ??
+                match?.design_variant_name ??
+                match?.name ??
+                match?.label ??
+                "";
+            } else if (designTranslations && typeof designTranslations === "object") {
+              translationText =
+                designTranslations.description ??
+                designTranslations.design_variant_name ??
+                designTranslations.name ??
+                "";
+            } else if (typeof designTranslations === "string") {
+              translationText = designTranslations;
+            }
+            const query = new URLSearchParams();
+            if (designId) query.set("design_id", String(designId));
+            if (metalRate?.metal_id) query.set("metal_id", String(metalRate.metal_id));
+            if (metalRate?.karat_id) query.set("karat_id", String(metalRate.karat_id));
+            if (diamondRate?.diamond_type_id) {
+              query.set("diamond_type_id", String(diamondRate.diamond_type_id));
+            }
+            if (diamondRate?.clarity_id) {
+              query.set("clarity_id", String(diamondRate.clarity_id));
+            }
+            const caratValue =
+              diamondRate?.diamond_master?.carat ??
+              diamondRate?.diamond_master_id?.carat ??
+              null;
+            if (caratValue !== null && caratValue !== undefined) {
+              query.set("carat", String(caratValue));
+            }
+            if (primaryDetail?.cut_master_id) {
+              query.set("cut_id", String(primaryDetail.cut_master_id));
+            }
+            if (item?.product_name) {
+              query.set("product_name", String(item.product_name));
+            } else if (item?.name) {
+              query.set("product_name", String(item.name));
+            }
+            const priceValue = item?.total_price ?? design?.total_price ?? "";
+            if (priceValue) {
+              query.set("total_price", String(priceValue));
+            }
+            if (translationText) {
+              query.set("design_translation", String(translationText));
+            }
             return {
               id,
               name: item?.product_name ?? item?.name ?? "PRODUCT",
               price: item?.total_price ?? null,
               imageSrc: normalizeImage(item?.image),
-              href: designId ? `/product/${id}?design_id=${encodeURIComponent(designId)}` : `/product/${id}`,
+              href: query.toString()
+                ? `/product/${id}?${query.toString()}`
+                : `/product/${id}`,
               subCategoryId: String(item?.sub_category_id ?? ""),
             };
           })

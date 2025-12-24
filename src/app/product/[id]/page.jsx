@@ -10,6 +10,15 @@ import styles from "./page.module.css";
 export default async function ProductDetailsPage({ params, searchParams }) {
   const { id } = await params;
   const designId = searchParams?.design_id ?? "";
+  const defaultMetalId = searchParams?.metal_id ?? "";
+  const defaultKaratId = searchParams?.karat_id ?? "";
+  const defaultDiamondTypeId = searchParams?.diamond_type_id ?? "";
+  const defaultClarityId = searchParams?.clarity_id ?? "";
+  const defaultCarat = searchParams?.carat ?? "";
+  const defaultCutId = searchParams?.cut_id ?? "";
+  const defaultProductName = searchParams?.product_name ?? "";
+  const defaultTotalPrice = searchParams?.total_price ?? "";
+  const defaultDesignTranslation = searchParams?.design_translation ?? "";
   const galleryItems = [
     { key: "a", variant: "square", src: "/productdetails/1.jpg" },
     { key: "b", variant: "tall", src: "/productdetails/2.jpg" },
@@ -52,6 +61,15 @@ export default async function ProductDetailsPage({ params, searchParams }) {
                   title={`PRODUCT NAME ${id ? `#${id}` : ""}`}
                   productId={id ?? ""}
                   designId={designId}
+                  defaultProductName={defaultProductName}
+                  defaultTotalPrice={defaultTotalPrice}
+                  defaultDesignTranslation={defaultDesignTranslation}
+                  defaultMetalId={defaultMetalId}
+                  defaultKaratId={defaultKaratId}
+                  defaultDiamondTypeId={defaultDiamondTypeId}
+                  defaultClarityId={defaultClarityId}
+                  defaultCarat={defaultCarat}
+                  defaultCutId={defaultCutId}
                 />
               </div>
             </div>
