@@ -31,7 +31,7 @@
   --font-nata-sans: "Nata Sans", sans-serif;
   --font-marcellus: "Marcellus", serif;
 
-  /* Fonts */
+  /* Fonts- */
   --font-body: var(--font-nata-sans), sans-serif;
   --font-heading: var(--font-marcellus), serif;
 }
