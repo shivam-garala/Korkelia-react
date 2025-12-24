@@ -199,6 +199,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  overscroll-behavior: contain;
   -webkit-overflow-scrolling: touch;
 }
 
@@ -357,22 +358,8 @@
 }
 
 @media (max-width: 960px) {
-  :global(html),
-  :global(body) {
-    height: auto;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-
   .page {
     grid-template-columns: 1fr;
-    min-height: 100vh;
-    height: auto;
-  }
-
-  .main {
-    min-height: 100vh;
-    height: auto;
   }
 
   .headerBar {
@@ -381,54 +368,5 @@
 
   .content {
     padding: 16px;
-    overflow: visible;
-  }
-}
-
-@media (max-height: 640px) and (orientation: landscape) {
-  :global(html),
-  :global(body) {
-    height: auto;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-
-  .page {
-    grid-template-columns: 1fr;
-    min-height: 100vh;
-    height: auto;
-  }
-
-  .main {
-    min-height: 100vh;
-    height: auto;
-  }
-
-  .content {
-    overflow: visible;
-  }
-}
-
-@media (pointer: coarse) {
-  :global(html),
-  :global(body) {
-    height: auto;
-    overflow-x: hidden;
-    overflow-y: auto;
-  }
-
-  .page {
-    grid-template-columns: 1fr;
-    min-height: 100vh;
-    height: auto;
-  }
-
-  .main {
-    min-height: 100vh;
-    height: auto;
-  }
-
-  .content {
-    overflow: visible;
   }
 }
