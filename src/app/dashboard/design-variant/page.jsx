@@ -100,6 +100,39 @@ function resolveProductLabel(item) {
   );
 }
 
+function extractDesignDescriptions(item) {
+  const list = pickValue(item, [
+    "design_name_array",
+    "designNameArray",
+    "design_names",
+    "designNames",
+  ]);
+  let descriptionEn = "";
+  let descriptionFi = "";
+
+  if (Array.isArray(list)) {
+    list.forEach((entry) => {
+      const languageId = String(
+        pickValue(entry, ["language_id", "languageId", "lang_id", "langId"]) ??
+          pickValue(entry?.language, ["id", "language_id", "languageId", "lang_id", "langId"]) ??
+          ""
+      );
+      const languageName = String(
+        pickValue(entry?.language, ["language_name", "languageName", "name", "label"]) ?? ""
+      ).toLowerCase();
+      const description = pickValue(entry, ["description", "design_description", "designDescription"]);
+      if (!description) return;
+      if (languageId === "1" || languageName === "english") descriptionEn = String(description);
+      if (languageId === "2" || languageName === "finnish") descriptionFi = String(description);
+    });
+  }
+
+  const fallbackDescription = pickValue(item, ["description", "design_description", "designDescription"]);
+  if (!descriptionEn && fallbackDescription) descriptionEn = String(fallbackDescription);
+
+  return { descriptionEn, descriptionFi };
+}
+
 export default function DesignVariantPage() {
   const pathname = usePathname();
   const router = useRouter();
@@ -147,7 +180,8 @@ export default function DesignVariantPage() {
   const [metalRateName, setMetalRateName] = useState("");
   const [weight, setWeight] = useState("");
   const [markUp, setMarkUp] = useState("");
-  const [description, setDescription] = useState("");
+  const [descriptionEn, setDescriptionEn] = useState("");
+  const [descriptionFi, setDescriptionFi] = useState("");
   const [detailRows, setDetailRows] = useState([]);
   const [imageFiles, setImageFiles] = useState([]);
   const [fileInputKey, setFileInputKey] = useState(0);
@@ -304,7 +338,8 @@ export default function DesignVariantPage() {
     setMetalRateName("");
     setWeight("");
     setMarkUp("");
-    setDescription("");
+    setDescriptionEn("");
+    setDescriptionFi("");
     setDetailRows([]);
     setImageFiles([]);
     setFileInputKey((prev) => prev + 1);
@@ -322,6 +357,8 @@ export default function DesignVariantPage() {
       pickValue(row, ["diamond_design_detail", "diamond_design_details", "diamond_details"]) ??
         row?.diamond_design_detail
     );
+    const { descriptionEn: nextDescriptionEn, descriptionFi: nextDescriptionFi } =
+      extractDesignDescriptions(row);
 
     setEditingId(rawId ?? null);
     setCategoryId(rawCategoryId !== null && rawCategoryId !== undefined ? String(rawCategoryId) : "");
@@ -331,7 +368,8 @@ export default function DesignVariantPage() {
     setMetalRateName(rawMetalRateName ? String(rawMetalRateName) : "");
     setWeight(String(pickValue(row, ["weight"]) ?? ""));
     setMarkUp(String(pickValue(row, ["mark_up", "markUp"]) ?? ""));
-    setDescription(String(pickValue(row, ["description"]) ?? ""));
+    setDescriptionEn(nextDescriptionEn);
+    setDescriptionFi(nextDescriptionFi);
     setDetailRows(
       detailList.map((detail, idx) => ({
         key: `${Date.now()}-${idx}`,
@@ -386,6 +424,11 @@ export default function DesignVariantPage() {
       return;
     }
 
+    if (!descriptionEn || !descriptionFi) {
+      window.alert("Add description for both languages.");
+      return;
+    }
+
     const missingDetails = detailRows.some(
       (row) => !row.cutId || !row.diamondRateId || !row.pcs
     );
@@ -420,7 +463,14 @@ export default function DesignVariantPage() {
     payload.append("metal_rate_name", metalRateName || selectedMetalRate?.label || "");
     if (weight !== "") payload.append("weight", String(weight));
     if (markUp !== "") payload.append("mark_up", String(markUp));
-    if (description) payload.append("description", description);
+    if (descriptionEn) {
+      payload.append("design_name_array[0][description]", descriptionEn);
+      payload.append("design_name_array[0][language_id]", "1");
+    }
+    if (descriptionFi) {
+      payload.append("design_name_array[1][description]", descriptionFi);
+      payload.append("design_name_array[1][language_id]", "2");
+    }
     payload.append("diamond_design_detail", JSON.stringify(detailPayload));
     imageFiles.forEach((file) => payload.append("images", file));
 
@@ -620,10 +670,19 @@ export default function DesignVariantPage() {
               required
               preventWheel
             />
+          </div>
+          <div className={crudStyles.formRow2}>
             <TextField
-              label="Description"
-              value={description}
-              onChange={(e) => setDescription(e.target.value)}
+              label="Description (English)"
+              value={descriptionEn}
+              onChange={(e) => setDescriptionEn(e.target.value)}
+              required
+            />
+            <TextField
+              label="Description (Finnish)"
+              value={descriptionFi}
+              onChange={(e) => setDescriptionFi(e.target.value)}
+              required
             />
           </div>
           <div className={styles.fieldRow}>

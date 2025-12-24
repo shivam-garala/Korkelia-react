@@ -73,7 +73,11 @@ const metalColorByCode = {
   PT: "#d4d4d8",
 };
 
-export default function ProductCustomizer({ title = "PRODUCT NAME", productId = "" }) {
+export default function ProductCustomizer({
+  title = "PRODUCT NAME",
+  productId = "",
+  designId: designIdProp = "",
+}) {
   const { language } = useI18n();
   const qualityId = useId();
   const clarityId = useId();
@@ -81,6 +85,7 @@ export default function ProductCustomizer({ title = "PRODUCT NAME", productId = 
   const [filterData, setFilterData] = useState(null);
   const [variantDetails, setVariantDetails] = useState(null);
   const [variantLoading, setVariantLoading] = useState(false);
+  const [defaultsApplied, setDefaultsApplied] = useState(false);
   const [cut, setCut] = useState("round");
   const [quality, setQuality] = useState("natural");
   const [clarity, setClarity] = useState("fvs");
@@ -126,7 +131,14 @@ export default function ProductCustomizer({ title = "PRODUCT NAME", productId = 
       : fallbackCutOptions;
     return list
       .map((item) => {
-        const rawId = item?.id ?? item?.code ?? item?.name ?? item?.label ?? "";
+        const rawId =
+          item?.id ??
+          item?.cut_id ??
+          item?.cutId ??
+          item?.code ??
+          item?.name ??
+          item?.label ??
+          "";
         const rawLabel =
           item?.name ?? item?.label ?? item?.code ?? String(rawId ?? "");
         const id = String(rawId ?? "").trim();
@@ -153,7 +165,13 @@ export default function ProductCustomizer({ title = "PRODUCT NAME", productId = 
       : fallbackQualityOptions;
     return list
       .map((item) => {
-        const rawValue = item?.id ?? item?.code ?? item?.value ?? "";
+        const rawValue =
+          item?.id ??
+          item?.diamond_type_id ??
+          item?.diamondTypeId ??
+          item?.code ??
+          item?.value ??
+          "";
         const rawLabel = item?.name ?? item?.label ?? item?.code ?? "";
         const value = String(rawValue ?? "").trim();
         const label = String(rawLabel ?? value ?? "").trim();
@@ -172,7 +190,13 @@ export default function ProductCustomizer({ title = "PRODUCT NAME", productId = 
       : fallbackClarityOptions;
     return list
       .map((item) => {
-        const rawValue = item?.id ?? item?.value ?? item?.name ?? "";
+        const rawValue =
+          item?.id ??
+          item?.clarity_id ??
+          item?.clarityId ??
+          item?.value ??
+          item?.name ??
+          "";
         const rawLabel = item?.name ?? item?.label ?? String(rawValue ?? "");
         const value = String(rawValue ?? "").trim();
         const label = String(rawLabel ?? value ?? "").trim();
@@ -205,7 +229,15 @@ export default function ProductCustomizer({ title = "PRODUCT NAME", productId = 
       : fallbackMetalOptions;
     return list
       .map((item) => {
-        const rawValue = item?.id ?? item?.value ?? item?.code ?? item?.name;
+        const rawValue =
+          item?.id ??
+          item?.metal_id ??
+          item?.metalId ??
+          item?.metal_rate_id ??
+          item?.metalRateId ??
+          item?.value ??
+          item?.code ??
+          item?.name;
         const rawLabel = item?.name ?? item?.label ?? item?.code ?? rawValue;
         const value = String(rawValue ?? "").trim();
         const label = String(rawLabel ?? "").trim();
@@ -360,23 +392,17 @@ export default function ProductCustomizer({ title = "PRODUCT NAME", productId = 
   const selectedKaratId =
     metalTypeOptions.find((opt) => opt.value === metalType)?.value ?? "";
   const selectedCarat = carat ? String(carat) : "";
-  const designId =
-    filterData?.design_id ??
-    filterData?.designId ??
-    filterData?.design?.id ??
-    "";
+  const designId = designIdProp
+    ? designIdProp
+    : filterData?.design_id ?? filterData?.designId ?? filterData?.design?.id ?? "";
+
+  useEffect(() => {
+    setDefaultsApplied(false);
+  }, [productId, designId]);
 
   useEffect(() => {
     let active = true;
-    if (
-      !productId ||
-      !selectedMetalId ||
-      !selectedKaratId ||
-      !selectedQualityId ||
-      !selectedClarityId ||
-      !selectedCarat ||
-      !selectedCutId
-    ) {
+    if (!productId || !designId) {
       setVariantDetails(null);
       setVariantLoading(false);
       return () => {
@@ -386,14 +412,8 @@ export default function ProductCustomizer({ title = "PRODUCT NAME", productId = 
 
     const params = new URLSearchParams({
       product_id: String(productId),
-      metal_id: String(selectedMetalId),
-      karat_id: String(selectedKaratId),
-      diamond_type_id: String(selectedQualityId),
-      clarity_id: String(selectedClarityId),
-      carat: String(selectedCarat),
-      cut_id: String(selectedCutId),
     });
-    if (designId) params.set("design_id", String(designId));
+    params.set("design_id", String(designId));
 
     setVariantLoading(true);
     const loadVariant = async () => {
@@ -416,13 +436,98 @@ export default function ProductCustomizer({ title = "PRODUCT NAME", productId = 
     };
   }, [
     productId,
-    selectedMetalId,
-    selectedKaratId,
-    selectedQualityId,
-    selectedClarityId,
-    selectedCarat,
-    selectedCutId,
     designId,
+  ]);
+
+  useEffect(() => {
+    if (defaultsApplied || !variantDetails) return;
+    if (
+      !cutOptions.length ||
+      !qualityOptions.length ||
+      !clarityOptions.length ||
+      !caratOptions.length ||
+      !metalOptions.length ||
+      !metalTypeOptions.length
+    ) {
+      return;
+    }
+
+    const primaryDetail = Array.isArray(variantDetails?.diamond_details)
+      ? variantDetails.diamond_details[0]
+      : null;
+    const nextCutId =
+      primaryDetail?.cut_master_id ??
+      primaryDetail?.cut_master?.id ??
+      null;
+    const nextDiamondRate = primaryDetail?.diamond_rate ?? null;
+    const nextQualityId =
+      nextDiamondRate?.diamond_type_id ??
+      nextDiamondRate?.diamond_type?.id ??
+      null;
+    const nextClarityId =
+      nextDiamondRate?.clarity_id ??
+      nextDiamondRate?.clarity?.id ??
+      null;
+    const nextCaratValue =
+      nextDiamondRate?.diamond_master?.carat ??
+      nextDiamondRate?.diamond_master_id?.carat ??
+      null;
+    const nextMetalId =
+      variantDetails?.metal_rate?.metal_id ??
+      variantDetails?.metal_rate?.metal?.id ??
+      null;
+    const nextKaratId =
+      variantDetails?.metal_rate?.karat_id ??
+      variantDetails?.metal_rate?.karat?.id ??
+      null;
+
+    if (
+      nextCutId !== null &&
+      cutOptions.some((opt) => String(opt.id) === String(nextCutId))
+    ) {
+      setCut(String(nextCutId));
+    }
+    if (
+      nextQualityId !== null &&
+      qualityOptions.some((opt) => String(opt.value) === String(nextQualityId))
+    ) {
+      setQuality(String(nextQualityId));
+    }
+    if (
+      nextClarityId !== null &&
+      clarityOptions.some((opt) => String(opt.value) === String(nextClarityId))
+    ) {
+      setClarity(String(nextClarityId));
+    }
+    if (
+      nextMetalId !== null &&
+      metalOptions.some((opt) => String(opt.value) === String(nextMetalId))
+    ) {
+      setMetal(String(nextMetalId));
+    }
+    if (
+      nextKaratId !== null &&
+      metalTypeOptions.some((opt) => String(opt.value) === String(nextKaratId))
+    ) {
+      setMetalType(String(nextKaratId));
+    }
+    if (nextCaratValue !== null) {
+      const normalizedCarat = String(nextCaratValue);
+      if (caratOptions.includes(normalizedCarat)) {
+        setCarat(normalizedCarat);
+      }
+    }
+
+    setDefaultsApplied(true);
+  }, [
+    caratOptions,
+    clarityOptions,
+    cutOptions,
+    defaultsApplied,
+    metalOptions,
+    metalTypeOptions,
+    qualityOptions,
+    variantDetails,
   ]);
 
   const variantPrice =

@@ -43,6 +43,12 @@ body {
   overflow-y: auto;
 }
 
+html.admin-scroll-lock,
+body.admin-scroll-lock {
+  height: 100%;
+  overflow: hidden;
+}
+
 body {
   color: var(--foreground);
   background: var(--background);

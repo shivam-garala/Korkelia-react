@@ -7,8 +7,9 @@ import ProductGallery from "../../../components/Product/ProductGallery.jsx";
 import ProductGrid from "../../../components/Product/ProductGrid.jsx";
 import styles from "./page.module.css";
 
-export default async function ProductDetailsPage({ params }) {
+export default async function ProductDetailsPage({ params, searchParams }) {
   const { id } = await params;
+  const designId = searchParams?.design_id ?? "";
   const galleryItems = [
     { key: "a", variant: "square", src: "/productdetails/1.jpg" },
     { key: "b", variant: "tall", src: "/productdetails/2.jpg" },
@@ -47,7 +48,11 @@ export default async function ProductDetailsPage({ params }) {
               </div>
 
               <div className={styles.customizer}>
-                <ProductCustomizer title={`PRODUCT NAME ${id ? `#${id}` : ""}`} productId={id ?? ""} />
+                <ProductCustomizer
+                  title={`PRODUCT NAME ${id ? `#${id}` : ""}`}
+                  productId={id ?? ""}
+                  designId={designId}
+                />
               </div>
             </div>
           </div>
