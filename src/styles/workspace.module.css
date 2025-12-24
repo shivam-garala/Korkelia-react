@@ -199,6 +199,7 @@
   flex: 1;
   min-height: 0;
   overflow-y: auto;
+  -webkit-overflow-scrolling: touch;
 }
 
 :global(.adminSelect__control) {
@@ -356,8 +357,22 @@
 }
 
 @media (max-width: 960px) {
+  :global(html),
+  :global(body) {
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
   .page {
     grid-template-columns: 1fr;
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .main {
+    min-height: 100vh;
+    height: auto;
   }
 
   .headerBar {
@@ -366,5 +381,6 @@
 
   .content {
     padding: 16px;
+    overflow: visible;
   }
 }
