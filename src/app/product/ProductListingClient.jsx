@@ -95,12 +95,18 @@ export default function ProductListingClient() {
           .map((item) => {
             const id = item?.id ?? item?.product_id ?? null;
             if (!id) return null;
+            const designId =
+              item?.design_id ??
+              item?.designId ??
+              item?.design_variant_id ??
+              item?.designVariantId ??
+              "";
             return {
               id,
               name: item?.product_name ?? item?.name ?? "PRODUCT",
               price: item?.total_price ?? null,
               imageSrc: normalizeImage(item?.image),
-              href: `/product/${id}`,
+              href: designId ? `/product/${id}?design_id=${encodeURIComponent(designId)}` : `/product/${id}`,
               subCategoryId: String(item?.sub_category_id ?? ""),
             };
           })

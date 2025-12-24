@@ -60,6 +60,16 @@ export default function SidebarNav({ activePath }) {
     return () => window.removeEventListener("sidebar:toggle", handleToggle);
   }, []);
 
+  useEffect(() => {
+    if (typeof document === "undefined") return;
+    document.body.classList.add("admin-scroll-lock");
+    document.documentElement.classList.add("admin-scroll-lock");
+    return () => {
+      document.body.classList.remove("admin-scroll-lock");
+      document.documentElement.classList.remove("admin-scroll-lock");
+    };
+  }, []);
+
   return (
     <nav className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}>
       {sidebarSections.map((section) => (

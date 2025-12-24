@@ -31,7 +31,7 @@
   --font-nata-sans: "Nata Sans", sans-serif;
   --font-marcellus: "Marcellus", serif;
 
-  /* Fonts */
+  /* Fonts- */
   --font-body: var(--font-nata-sans), sans-serif;
   --font-heading: var(--font-marcellus), serif;
 }
@@ -41,6 +41,12 @@ body {
   max-width: 100vw;
   overflow-x: hidden;
   overflow-y: auto;
+}
+
+html.admin-scroll-lock,
+body.admin-scroll-lock {
+  height: 100%;
+  overflow: hidden;
 }
 
 body {
