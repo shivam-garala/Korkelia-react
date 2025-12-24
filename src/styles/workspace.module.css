@@ -408,3 +408,27 @@
     overflow: visible;
   }
 }
+
+@media (pointer: coarse) {
+  :global(html),
+  :global(body) {
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .page {
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .main {
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .content {
+    overflow: visible;
+  }
+}
