@@ -384,3 +384,27 @@
     overflow: visible;
   }
 }
+
+@media (max-height: 640px) and (orientation: landscape) {
+  :global(html),
+  :global(body) {
+    height: auto;
+    overflow-x: hidden;
+    overflow-y: auto;
+  }
+
+  .page {
+    grid-template-columns: 1fr;
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .main {
+    min-height: 100vh;
+    height: auto;
+  }
+
+  .content {
+    overflow: visible;
+  }
+}
