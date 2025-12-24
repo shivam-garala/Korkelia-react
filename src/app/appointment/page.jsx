@@ -16,7 +16,8 @@ const initialForm = {
   country: "",
   email: "",
   phone: "",
-  appointment: "",
+  appointmentDate: "",
+  appointmentSlot: "",
   details: "",
 };
 
@@ -54,8 +55,10 @@ export default function AppointmentPage() {
           country: "Maa",
           email: "Sahkopostiosoite",
           phone: "Puhelinnumero (sis. maakoodin)",
-          appointment: "Varaa aikaikkuna",
-          appointmentPlaceholder: "Valitse paiva ja aikavali",
+          appointmentDate: "Valitse paiva",
+          appointmentDatePlaceholder: "Valitse paiva",
+          appointmentSlot: "Valitse aikavali",
+          appointmentSlotPlaceholder: "Valitse aikavali",
           details: "Kuvaile koru, josta olet kiinnostunut",
           submit: "Laheta",
         }
@@ -67,8 +70,10 @@ export default function AppointmentPage() {
           country: "Country",
           email: "Email",
           phone: "Phone Number (With Country Code)",
-          appointment: "Book a time slot",
-          appointmentPlaceholder: "Select a Date & Time Slot",
+          appointmentDate: "Select Date",
+          appointmentDatePlaceholder: "Select a date",
+          appointmentSlot: "Select Time Slot",
+          appointmentSlotPlaceholder: "Select a time slot",
           details: "Please describe the jewelry item you are interested in",
           submit: "Submit",
         };
@@ -93,17 +98,6 @@ export default function AppointmentPage() {
       };
     });
   }, []);
-  const appointmentOptions = useMemo(
-    () =>
-      dateOptions.flatMap((date) =>
-        slotOptions.map((slot) => ({
-          value: `${date.value}|${slot.value}`,
-          label: `${date.label} | ${slot.label}`,
-        }))
-      ),
-    [dateOptions, slotOptions]
-  );
-
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -155,12 +149,20 @@ export default function AppointmentPage() {
                 onChange={handleChange}
               />
               <SelectField
-                label={labels.appointment}
-                name="appointment"
-                placeholder={labels.appointmentPlaceholder}
-                value={form.appointment}
+                label={labels.appointmentDate}
+                name="appointmentDate"
+                placeholder={labels.appointmentDatePlaceholder}
+                value={form.appointmentDate}
                 onChange={handleChange}
-                options={appointmentOptions}
+                options={dateOptions}
+              />
+              <SelectField
+                label={labels.appointmentSlot}
+                name="appointmentSlot"
+                placeholder={labels.appointmentSlotPlaceholder}
+                value={form.appointmentSlot}
+                onChange={handleChange}
+                options={slotOptions}
               />
               <label className={`${fieldStyles.field} ${styles.fullRow}`}>
                 <span className={fieldStyles.label}>{labels.details}</span>

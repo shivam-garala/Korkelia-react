@@ -93,6 +93,11 @@
   gap: 10px;
 }
 
+.actions {
+  display: flex;
+  gap: 6px;
+}
+
 @media (max-width: 860px) {
   .formRow {
     grid-template-columns: 1fr;

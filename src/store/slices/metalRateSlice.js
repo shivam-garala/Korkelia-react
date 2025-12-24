@@ -39,6 +39,20 @@ export const fetchMetalRates = createAsyncThunk(
   }
 );
 
+export const fetchMetalRate = createAsyncThunk(
+  "metalRates/fetchOne",
+  async (id, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosClient.get(
+        `/api/metalRateMaster/readOne/${encodeURIComponent(id)}`
+      );
+      return { id, data };
+    } catch (error) {
+      return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
+    }
+  }
+);
+
 export const createMetalRate = createAsyncThunk(
   "metalRates/create",
   async (payload, { rejectWithValue }) => {
@@ -51,9 +65,39 @@ export const createMetalRate = createAsyncThunk(
   }
 );
 
+export const updateMetalRate = createAsyncThunk(
+  "metalRates/update",
+  async ({ id, payload }, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosClient.put(
+        `/api/metalRateMaster/update/${encodeURIComponent(id)}`,
+        payload ?? {}
+      );
+      return { id, data };
+    } catch (error) {
+      return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
+    }
+  }
+);
+
+export const deleteMetalRate = createAsyncThunk(
+  "metalRates/delete",
+  async (id, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosClient.delete(
+        `/api/metalRateMaster/delete/${encodeURIComponent(id)}`
+      );
+      return { id, data };
+    } catch (error) {
+      return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
+    }
+  }
+);
+
 const initialState = {
   items: [],
   karats: [],
+  selected: null,
   loading: false,
   error: null,
 };
@@ -87,9 +131,21 @@ const metalRateSlice = createSlice({
         state.loading = false;
         state.error = action.payload ?? "Failed to load metal rates.";
       })
+      .addCase(fetchMetalRate.fulfilled, (state, action) => {
+        state.selected = action.payload?.data?.data ?? action.payload?.data ?? null;
+      })
       .addCase(createMetalRate.fulfilled, (state, action) => {
         const created = action.payload?.data ?? action.payload;
         if (created) state.items = [created, ...state.items];
+      })
+      .addCase(updateMetalRate.fulfilled, (state, action) => {
+        const updated = action.payload?.data?.data ?? action.payload?.data;
+        if (!updated) return;
+        const index = state.items.findIndex((item) => String(item?.id) === String(action.payload.id));
+        if (index >= 0) state.items[index] = updated;
+      })
+      .addCase(deleteMetalRate.fulfilled, (state, action) => {
+        state.items = state.items.filter((item) => String(item?.id) !== String(action.payload.id));
       })
       .addMatcher(
         (action) =>
@@ -107,5 +163,6 @@ export const selectMetalRates = (state) => state.metalRates.items;
 export const selectKarats = (state) => state.metalRates.karats;
 export const selectMetalRatesLoading = (state) => state.metalRates.loading;
 export const selectMetalRatesError = (state) => state.metalRates.error;
+export const selectSelectedMetalRate = (state) => state.metalRates.selected;
 
 export default metalRateSlice.reducer;

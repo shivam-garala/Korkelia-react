@@ -1,8 +1,26 @@
 "use client";
 
 import { useId } from "react";
-import Select from "react-select";
+import Select, { components } from "react-select";
 import styles from "./FiltersBar.module.css";
+
+function CheckboxOption(props) {
+  const { isSelected, label } = props;
+  return (
+    <components.Option {...props}>
+      <div className={styles.optionRow}>
+        <input
+          className={styles.optionCheckbox}
+          type="checkbox"
+          checked={isSelected}
+          readOnly
+          tabIndex={-1}
+        />
+        <span className={styles.optionLabel}>{label}</span>
+      </div>
+    </components.Option>
+  );
+}
 
 export default function FiltersBar({
   leftLabel,
@@ -13,10 +31,18 @@ export default function FiltersBar({
   onRightChange,
   leftOptions = [],
   rightOptions = [],
+  leftMulti = false,
 }) {
   const leftId = useId();
   const rightId = useId();
-  const leftSelected = leftOptions.find((opt) => opt.value === leftValue) ?? null;
+  const leftValues = Array.isArray(leftValue)
+    ? leftValue
+    : leftValue
+    ? [leftValue]
+    : [];
+  const leftSelected = leftMulti
+    ? leftOptions.filter((opt) => leftValues.includes(opt.value))
+    : leftOptions.find((opt) => opt.value === leftValue) ?? null;
   const rightSelected = rightOptions.find((opt) => opt.value === rightValue) ?? null;
 
   return (
@@ -29,7 +55,20 @@ export default function FiltersBar({
           value={leftSelected}
           placeholder={leftLabel}
           options={leftOptions}
-          onChange={(option) => onLeftChange?.(option?.value ?? "")}
+          onChange={(option) => {
+            if (!leftMulti) {
+              onLeftChange?.(option?.value ?? "");
+              return;
+            }
+            const values = Array.isArray(option)
+              ? option.map((opt) => opt.value)
+              : [];
+            onLeftChange?.(values);
+          }}
+          isMulti={leftMulti}
+          closeMenuOnSelect={!leftMulti}
+          hideSelectedOptions={false}
+          components={leftMulti ? { Option: CheckboxOption } : undefined}
           isSearchable={false}
         />
       </div>
