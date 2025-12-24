@@ -28,7 +28,10 @@ import {
   updateDesignVariant,
 } from "../../../store/slices/designVariantSlice.js";
 import { fetchCutMasters, selectCutMasters } from "../../../store/slices/cutMasterSlice.js";
-import { fetchDiamondRates, selectDiamondRates } from "../../../store/slices/diamondRateSlice.js";
+import {
+  fetchDiamondRateDropdown,
+  selectDiamondRates,
+} from "../../../store/slices/diamondRateSlice.js";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks.js";
 import { clearCredentials, selectEmail, selectUserName } from "../../../store/authSlice.js";
 import layout from "../../../styles/workspace.module.css";
@@ -54,6 +57,33 @@ function formatDetailSummary(details) {
     })
     .filter(Boolean)
     .join(", ");
+}
+
+function resolveProductLabel(item) {
+  const translations = pickValue(item, ["product_translations", "productTranslations", "product_name_array"]);
+  if (Array.isArray(translations)) {
+    const english = translations.find((entry) => {
+      const languageId = String(
+        pickValue(entry, ["language_id", "languageId"]) ??
+          pickValue(entry?.language, ["id", "language_id", "languageId"]) ??
+          ""
+      );
+      const languageName = String(
+        pickValue(entry?.language, ["language_name", "languageName", "name"]) ?? ""
+      ).toLowerCase();
+      return languageId === "1" || languageName === "english";
+    });
+    const label =
+      pickValue(english, ["product_name", "productName", "name"]) ??
+      pickValue(translations[0], ["product_name", "productName", "name"]);
+    if (label) return String(label);
+  }
+
+  return (
+    pickValue(item, ["product_name", "productName", "name", "label"]) ??
+    pickValue(item?.product, ["product_name", "productName", "name"]) ??
+    ""
+  );
 }
 
 export default function DesignVariantPage() {
@@ -119,7 +149,7 @@ export default function DesignVariantPage() {
     dispatch(fetchMetalRateDropdown());
     dispatch(fetchCategoryDropdown());
     dispatch(fetchCutMasters());
-    dispatch(fetchDiamondRates());
+    dispatch(fetchDiamondRateDropdown());
   }, [dispatch]);
 
   const categoryOptions = useMemo(() => {
@@ -139,7 +169,7 @@ export default function DesignVariantPage() {
     return list
       .map((item) => {
         const id = pickValue(item, ["id", "product_id", "productId"]);
-        const label = pickValue(item, ["product_name", "productName", "name", "label"]);
+        const label = resolveProductLabel(item);
         const catId = pickValue(item, ["category_id", "categoryId", "category_master_id", "categoryMasterId"]);
         if (id === null || id === undefined || label === null || label === undefined) return null;
         return { id: String(id), label: String(label), categoryId: catId ?? "" };
@@ -183,7 +213,13 @@ export default function DesignVariantPage() {
     return list
       .map((item) => {
         const id = pickValue(item, ["id", "diamond_rate_id", "diamondRateId"]);
-        const label = pickValue(item, ["diamond_rate_name", "diamondRateName", "rate_name", "name", "label"]);
+        const label = pickValue(item, [
+          "diamond_rate_name",
+          "diamondRateName",
+          "rate_name",
+          "name",
+          "label",
+        ]);
         if (id === null || id === undefined || label === null || label === undefined) return null;
         return { id: String(id), label: String(label) };
       })
@@ -340,21 +376,28 @@ export default function DesignVariantPage() {
       return;
     }
 
+    const selectedProduct = productOptions.find((opt) => opt.id === productId);
+    const selectedMetalRate = metalRateOptions.find((opt) => opt.id === metalRateId);
+
     const payload = {
       product_id: productId,
-      product_name: productName,
+      product_name: productName || selectedProduct?.label || "",
       metal_rate_id: metalRateId,
-      metal_rate_name: metalRateName,
+      metal_rate_name: metalRateName || selectedMetalRate?.label || "",
       weight,
       mark_up: markUp,
       description,
-      diamond_design_detail: detailRows.map((row) => ({
-        cut_id: row.cutId,
-        cut_code: row.cutCode,
-        diamond_rate_id: row.diamondRateId,
-        diamond_rate_name: row.diamondRateName,
-        pcs: row.pcs,
-      })),
+      diamond_design_detail: detailRows.map((row) => {
+        const cutOption = cutOptions.find((opt) => opt.id === row.cutId);
+        const diamondOption = diamondRateOptions.find((opt) => opt.id === row.diamondRateId);
+        return {
+          cut_id: row.cutId,
+          cut_code: row.cutCode || cutOption?.code || cutOption?.label || "",
+          diamond_rate_id: row.diamondRateId,
+          diamond_rate_name: row.diamondRateName || diamondOption?.label || "",
+          pcs: row.pcs,
+        };
+      }),
     };
 
     const action = editingId
@@ -388,21 +431,18 @@ export default function DesignVariantPage() {
     { key: "weight", header: "Weight", filterable: true, filterPlaceholder: "Search Weight" },
     { key: "mark_up", header: "Mark Up", filterable: true, filterPlaceholder: "Search Mark Up" },
     { key: "details", header: "Diamond Detail", filterable: false },
-    {
-      key: "actions",
-      header: "Action",
-      filterable: false,
-      render: (row) => (
-        <div className={crudStyles.actions}>
-          <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
-            Edit
-          </Button>
-          <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
-            Delete
-          </Button>
-        </div>
-      ),
-    },
+    // {
+    //   key: "actions",
+    //   header: "Action",
+    //   filterable: false,
+    //   render: (row) => (
+    //     <div className={crudStyles.actions}>
+    //       <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
+    //         Delete
+    //       </Button>
+    //     </div>
+    //   ),
+    // },
   ];
 
   return (
@@ -475,12 +515,7 @@ export default function DesignVariantPage() {
         }}
         footer={
           <div className={crudStyles.formActions}>
-            <Button
-              variant={editingId ? "primary" : "primarySoft"}
-              type="submit"
-              form="design-variant-form"
-              disabled={loading}
-            >
+            <Button variant="primarySoft" type="submit" form="design-variant-form" disabled={loading}>
               {editingId ? "Update" : "Create"}
             </Button>
             <Button

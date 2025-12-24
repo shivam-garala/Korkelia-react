@@ -250,7 +250,7 @@ export default function UserPage() {
         }}
         footer={
           <div className={styles.formActions}>
-            <Button variant={editingId ? "primary" : "primarySoft"} type="submit" form="user-modal-form" disabled={loading}>
+            <Button variant="primarySoft" type="submit" form="user-modal-form" disabled={loading}>
               {editingId ? "Update" : "Create"}
             </Button>
             <Button

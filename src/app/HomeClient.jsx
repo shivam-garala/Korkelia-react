@@ -1,15 +1,80 @@
 "use client";
 
+import { useEffect, useMemo, useState } from "react";
 import CategoryGrid from "../components/Home/CategoryGrid.jsx";
 import FullMediaSection from "../components/Home/FullMediaSection.jsx";
 import Hero from "../components/Home/Hero.jsx";
 import SiteFooter from "../components/Home/SiteFooter.jsx";
 import SiteHeader from "../components/Home/SiteHeader.jsx";
+import axiosClient from "../lib/axiosClient.js";
 import { useI18n } from "../providers/I18nProvider.jsx";
 import styles from "./home.module.css";
 
 export default function HomeClient() {
-  const { t } = useI18n();
+  const { t, language } = useI18n();
+  const [categories, setCategories] = useState([]);
+
+  const languageId = language === "fi" ? "2" : "1";
+  const fallbackCategories = useMemo(
+    () => [
+      { label: t("home.categories.items.rings"), href: "/product", imageSrc: "/homepage/category.jpg" },
+      { label: t("home.categories.items.bracelets"), href: "/product", imageSrc: "/homepage/category.jpg" },
+      {
+        label: t("home.categories.items.necklaces"),
+        href: "/product",
+        imageSrc: "/homepage/category.jpg",
+      },
+      { label: t("home.categories.items.earrings"), href: "/product", imageSrc: "/homepage/category.jpg" },
+    ],
+    [t]
+  );
+
+  useEffect(() => {
+    let active = true;
+    const apiBase =
+      process.env.NEXT_PUBLIC_BASE_API_URL ??
+      process.env.NEXT_PUBLIC_API_URL ??
+      "";
+
+    const normalizeImage = (image) => {
+      if (!image) return "/homepage/category.jpg";
+      if (/^https?:\/\//i.test(image) || image.startsWith("/")) return image;
+      if (!apiBase) return image;
+      return `${apiBase.replace(/\/$/, "")}/${image.replace(/^\//, "")}`;
+    };
+
+    const loadCategories = async () => {
+      try {
+        const { data } = await axiosClient.get(
+          `/api/categoryMaster/home-page?language_id=${encodeURIComponent(languageId)}`
+        );
+        const list = Array.isArray(data) ? data : data?.data ?? [];
+        const mapped = list
+          .map((item) => {
+            const id = item?.id ?? item?.category_id ?? null;
+            const label = item?.category_name ?? item?.name ?? "";
+            if (!label) return null;
+            return {
+              id: id ?? label,
+              label,
+              href: id ? `/product?category_id=${encodeURIComponent(id)}` : "/product",
+              imageSrc: normalizeImage(item?.image),
+            };
+          })
+          .filter(Boolean);
+
+        if (active) setCategories(mapped);
+      } catch (error) {
+        if (active) setCategories([]);
+        console.error("Home categories load failed", error);
+      }
+    };
+
+    loadCategories();
+    return () => {
+      active = false;
+    };
+  }, [languageId]);
 
   return (
     <div className={styles.page}>
@@ -27,16 +92,7 @@ export default function HomeClient() {
 
         <CategoryGrid
           title={t("home.categories.title")}
-          categories={[
-            { label: t("home.categories.items.rings"), href: "/product", imageSrc: "/homepage/category.jpg" },
-            { label: t("home.categories.items.bracelets"), href: "/product", imageSrc: "/homepage/category.jpg" },
-            {
-              label: t("home.categories.items.necklaces"),
-              href: "/product",
-              imageSrc: "/homepage/category.jpg",
-            },
-            { label: t("home.categories.items.earrings"), href: "/product", imageSrc: "/homepage/category.jpg" },
-          ]}
+          categories={categories.length ? categories : fallbackCategories}
         />
 
         <FullMediaSection

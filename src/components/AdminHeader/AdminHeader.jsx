@@ -44,7 +44,7 @@ export default function AdminHeader({
             Search
           </button>
         ) : null}
-        <LanguageDropdown triggerClassName={styles.adminLanguageDropdown} />
+        {/* <LanguageDropdown triggerClassName={styles.adminLanguageDropdown} /> */}
         {actions}
         <button
           className={styles.avatarRing}

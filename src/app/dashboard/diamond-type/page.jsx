@@ -240,7 +240,7 @@ export default function DiamondTypePage() {
         }}
         footer={
           <div className={styles.formActions}>
-            <Button variant={editingId ? "primary" : "primarySoft"} type="submit" form="diamond-type-form" disabled={loading}>
+            <Button variant="primarySoft" type="submit" form="diamond-type-form" disabled={loading}>
               {editingId ? "Update" : "Create"}
             </Button>
             <Button
