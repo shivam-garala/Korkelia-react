@@ -2,8 +2,15 @@
 
 import axios from "axios";
 import Cookies from "js-cookie";
+import { toast } from "react-toastify";
 
 console.log(process.env.NEXT_PUBLIC_API_URL);
+
+const isAdminRoute = () => {
+  if (typeof window === "undefined") return false;
+  const path = window.location?.pathname ?? "";
+  return path.startsWith("/dashboard") || path.startsWith("/admin") || path === "/login";
+};
 
 const axiosClient = axios.create({
   baseURL:
@@ -35,7 +42,19 @@ axiosClient.interceptors.request.use(
 );
 
 axiosClient.interceptors.response.use(
-  (response) => response,
+  (response) => {
+    const message = response?.data?.message;
+    const success = response?.data?.success;
+    if (
+      isAdminRoute() &&
+      success === true &&
+      typeof message === "string" &&
+      message.trim()
+    ) {
+      toast.success(message);
+    }
+    return response;
+  },
   async (error) => {
     const status = error.response?.status;
     const message = error.response?.data?.message;
@@ -52,9 +71,8 @@ axiosClient.interceptors.response.use(
       status === 409 ||
       status === 500
     ) {
-      if (typeof window !== "undefined" && message) {
-        // Swap to a toast library later; keep it simple and transparent for now.
-        console.error("API error:", message);
+      if (isAdminRoute() && message) {
+        toast.error(message);
       }
     }
 

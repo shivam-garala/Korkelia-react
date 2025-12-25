@@ -110,7 +110,6 @@ export default function UserRolePage() {
               </div>
             </div>
 
-            {error ? <div className={styles.error}>{String(error)}</div> : null}
 
             {formOpen ? (
               <form className={styles.form} onSubmit={submitForm}>
@@ -170,6 +169,5 @@ export default function UserRolePage() {
     </div>
   );
 }
-
 
 

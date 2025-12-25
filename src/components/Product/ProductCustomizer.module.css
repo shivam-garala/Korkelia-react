@@ -111,7 +111,7 @@
 .priceValue {
   font-size: 20px;
   letter-spacing: 0.8px;
-  color: var(--color-primary);
+  /* color: var(--color-primary); */
   font-weight: 600;
 }
 

@@ -7,9 +7,10 @@ import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import AdminHeader from "../../../components/AdminHeader/AdminHeader.jsx";
 import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
-import DataTable from "../../../components/ui/DataTable.jsx";
+import DataTable from "../../../components/ui/DataTableSuspense.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
 import Button from "../../../components/ui/Button.jsx";
+import { toast } from "react-toastify";
 import { clearCredentials, selectUserName, selectEmail } from "../../../store/authSlice.js";
 import {
   createDesign,
@@ -536,7 +537,7 @@ export default function DesignPage() {
     if (saving) return;
 
     if (!categoryOption || !styleOption || !selectedCutOptions.length || !selectedCaratOptions.length) {
-      window.alert("Please select category, style, cut(s), and carat(s).");
+      toast.error("Please select category, style, cut(s), and carat(s).");
       return;
     }
 
@@ -545,7 +546,7 @@ export default function DesignPage() {
       return value === undefined || value === null || String(value).trim() === "";
     });
     if (missingPcs) {
-      window.alert("Enter PCS for each detail row.");
+      toast.error("Enter PCS for each detail row.");
       return;
     }
 
@@ -646,7 +647,6 @@ export default function DesignPage() {
               </div>
             </div>
 
-            {error ? <div className={crudStyles.error}>{String(error)}</div> : null}
 
             <DataTable
               columns={columns}

@@ -6,7 +6,7 @@ import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import AdminHeader from "../../../components/AdminHeader/AdminHeader.jsx";
 import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
-import DataTable from "../../../components/ui/DataTable.jsx";
+import DataTable from "../../../components/ui/DataTableSuspense.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import Button from "../../../components/ui/Button.jsx";
@@ -193,7 +193,6 @@ export default function DiamondClarityPage() {
               </div>
             </div>
 
-            {error ? <div className={styles.error}>{String(error)}</div> : null}
 
             <DataTable
               columns={columns}
@@ -270,4 +269,3 @@ export default function DiamondClarityPage() {
     </div>
   );
 }
-

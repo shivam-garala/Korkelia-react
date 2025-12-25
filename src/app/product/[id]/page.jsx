@@ -49,7 +49,7 @@ export default async function ProductDetailsPage({ params, searchParams }) {
           {/* <div className={styles.layoutContainer}> */}
             <div className={styles.layout}>
               <div className={styles.gallery}>
-                <ProductGallery items={galleryItems} />
+                <ProductGallery items={galleryItems} productId={id ?? ""} />
               </div>
 
               <div className={styles.customizer}>

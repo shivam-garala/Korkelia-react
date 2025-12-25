@@ -2,16 +2,97 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
+import Skeleton from "../../app/components/ui/Skeleton.jsx";
 import styles from "./ProductGallery.module.css";
 
 const isVideoItem = (item) =>
   Boolean(item?.videoSrc) || item?.type === "video" || item?.variant === "video" || item?.badge === "play";
 
-export default function ProductGallery({ items = [] }) {
-  const slides = useMemo(() => items.filter(Boolean), [items]);
+const readCachedProduct = (productId) => {
+  if (typeof window === "undefined") return null;
+  if (!productId) return null;
+  try {
+    const raw = window.sessionStorage.getItem("product_list_cache");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed[String(productId)] ?? null;
+  } catch (error) {
+    console.error("Product cache read failed", error);
+    return null;
+  }
+};
+
+const resolveImageSrc = (image) => {
+  if (!image) return "";
+  if (typeof image === "string") {
+    if (/^https?:\/\//i.test(image) || image.startsWith("/")) return image;
+  }
+  const apiBase =
+    process.env.NEXT_PUBLIC_BASE_API_URL ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    "";
+  const cleaned = typeof image === "string" ? image : "";
+  if (!apiBase || !cleaned) return cleaned;
+  return `${apiBase.replace(/\/$/, "")}/${cleaned.replace(/^\//, "")}`;
+};
+
+export default function ProductGallery({ items = [], productId = "" }) {
+  const [cachedProduct, setCachedProduct] = useState(null);
+  const variants = useMemo(
+    () => ["square", "tall", "circle", "wide", "video"],
+    []
+  );
+
+  useEffect(() => {
+    setCachedProduct(readCachedProduct(productId));
+  }, [productId]);
+
+  const cachedItems = useMemo(() => {
+    const design =
+      cachedProduct?.design ??
+      cachedProduct?.design_variant ??
+      cachedProduct?.designVariant ??
+      null;
+    const images = Array.isArray(design?.images) ? design.images : [];
+    const mapped = images
+      .map((image, index) => {
+        const src = resolveImageSrc(
+          image?.image_url ??
+            image?.url ??
+            image?.image ??
+            image?.image_name ??
+            image
+        );
+        if (!src) return null;
+        return {
+          key: image?.id ?? image?.image_id ?? src ?? index,
+          variant: variants[index % variants.length],
+          src,
+        };
+      })
+      .filter(Boolean);
+
+    if (mapped.length) return mapped;
+
+    const fallbackSrc = resolveImageSrc(
+      cachedProduct?.image ??
+        design?.image ??
+        design?.product?.image ??
+        ""
+    );
+    if (!fallbackSrc) return [];
+    return [{ key: "fallback", variant: "square", src: fallbackSrc }];
+  }, [cachedProduct, variants]);
+
+  const slides = useMemo(() => {
+    const base = Array.isArray(items) ? items.filter(Boolean) : [];
+    return cachedItems.length ? cachedItems : base;
+  }, [items, cachedItems]);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [zoomed, setZoomed] = useState(false);
+  const [loadedMap, setLoadedMap] = useState({});
   const touchStartX = useRef(null);
 
   const openAt = useCallback((index) => {
@@ -62,6 +143,10 @@ export default function ProductGallery({ items = [] }) {
     setZoomed(false);
   }, [activeIndex]);
 
+  useEffect(() => {
+    setLoadedMap({});
+  }, [slides]);
+
   const active = slides[activeIndex];
   const isVideo = isVideoItem(active);
 
@@ -86,7 +171,19 @@ export default function ProductGallery({ items = [] }) {
           <div key={item.key ?? item.src ?? index} className={`${styles.cell} ${styles[item.variant] ?? ""}`}>
             <button type="button" className={styles.cellButton} onClick={() => openAt(index)}>
               <div className={styles.media} aria-hidden>
-                <Image className={styles.image} src={item.src} alt="" fill sizes="(max-width: 980px) 100vw, 50vw" />
+                {!loadedMap[index] ? (
+                  <Skeleton className={styles.mediaSkeleton} width="100%" height="100%" />
+                ) : null}
+                <Image
+                  className={`${styles.image} ${loadedMap[index] ? styles.imageLoaded : styles.imageHidden}`}
+                  src={item.src}
+                  alt=""
+                  fill
+                  sizes="(max-width: 980px) 100vw, 50vw"
+                  onLoadingComplete={() =>
+                    setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                  }
+                />
                 {item.badge === "play" ? <div className={styles.play} aria-hidden /> : null}
               </div>
             </button>

@@ -6,13 +6,14 @@ import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import AdminHeader from "../../../components/AdminHeader/AdminHeader.jsx";
 import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
-import DataTable from "../../../components/ui/DataTable.jsx";
+import DataTable from "../../../components/ui/DataTableSuspense.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
 import AdminSelectField from "../../../components/ui/AdminSelectField.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import fieldStyles from "../../../components/ui/Fields.module.css";
+import { toast } from "react-toastify";
 import {
   createDesignVariant,
   deleteDesignVariant,
@@ -460,17 +461,17 @@ export default function DesignVariantPage() {
     event.preventDefault();
 
     if (!productId || !metalRateId) {
-      window.alert("Select product and metal rate.");
+      toast.error("Select product and metal rate.");
       return;
     }
 
     if (!designNameEn || !designNameFi) {
-      window.alert("Add design variant name for both languages.");
+      toast.error("Add design variant name for both languages.");
       return;
     }
 
     if (!descriptionEn || !descriptionFi) {
-      window.alert("Add description for both languages.");
+      toast.error("Add description for both languages.");
       return;
     }
 
@@ -478,12 +479,12 @@ export default function DesignVariantPage() {
       (row) => !row.cutId || !row.diamondRateId || !row.pcs
     );
     if (missingDetails) {
-      window.alert("Fill cut, diamond rate, and pcs for each detail row.");
+      toast.error("Fill cut, diamond rate, and pcs for each detail row.");
       return;
     }
 
     if (!editingId && imageFiles.length === 0) {
-      window.alert("Add at least one image.");
+      toast.error("Add at least one image.");
       return;
     }
 
@@ -603,7 +604,6 @@ export default function DesignVariantPage() {
               </div>
             </div>
 
-            {error ? <div className={crudStyles.error}>{String(error)}</div> : null}
 
             <DataTable
               columns={columns}

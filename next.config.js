@@ -16,6 +16,14 @@ const nextConfig = {
       process.env.NEXT_PUBLIC_API_URL ??
       process.env.NEXT_BASE_API_URL,
   },
+  images: {
+    remotePatterns: [
+      {
+        protocol: "https",
+        hostname: "d42za7xj4jbwi.cloudfront.net",
+      },
+    ],
+  },
   turbopack: {
     resolveAlias: {
       "@": path.resolve(__dirname, "src"),
