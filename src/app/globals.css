@@ -7,7 +7,7 @@
   --foreground: #373435;
 
   /* Brand / UI tokens */
-  --color-primary: #f3817d;
+  --color-primary: #38766b;
   --color-primary-soft: rgba(56, 118, 107, 0.12);
   --color-surface: #ffffff;
   --color-border: #e6e7e8;
@@ -19,7 +19,7 @@
   --color-heading: #373435;
   --color-line: #d4d4d4;
   --color-category-line: #74616d;
-  --color-icon: #f3817d;
+  --color-icon: #38766b;
   --color-footer-text: #727376;
   --color-menu-text: #373435;
   --color-product-detail-line: #e6e7e8;
