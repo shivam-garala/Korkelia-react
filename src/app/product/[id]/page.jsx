@@ -46,7 +46,7 @@ export default async function ProductDetailsPage({ params, searchParams }) {
           </div>
           <div className={styles.topLine} aria-hidden />
 
-          <div className={styles.layoutContainer}>
+          {/* <div className={styles.layoutContainer}> */}
             <div className={styles.layout}>
               <div className={styles.gallery}>
                 <ProductGallery items={galleryItems} />
@@ -65,7 +65,7 @@ export default async function ProductDetailsPage({ params, searchParams }) {
                 />
               </div>
             </div>
-          </div>
+          {/* </div> */}
 
           <div className={styles.related}>
             <h2 className={styles.relatedTitle}>RELATED PRODUCTS</h2>

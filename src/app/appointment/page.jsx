@@ -21,27 +21,6 @@ const initialForm = {
   details: "",
 };
 
-const getOrdinalSuffix = (day) => {
-  if (day % 100 >= 11 && day % 100 <= 13) return "th";
-  switch (day % 10) {
-    case 1:
-      return "st";
-    case 2:
-      return "nd";
-    case 3:
-      return "rd";
-    default:
-      return "th";
-  }
-};
-
-const formatDateLabel = (date) => {
-  const day = date.getDate();
-  const month = new Intl.DateTimeFormat("en-US", { month: "long" }).format(date);
-  const weekday = new Intl.DateTimeFormat("en-US", { weekday: "long" }).format(date);
-  return `${day}${getOrdinalSuffix(day)} ${month} | ${weekday}`;
-};
-
 export default function AppointmentPage() {
   const { language } = useI18n();
   const languageKey = language === "fi" ? "fi" : "en";
@@ -87,17 +66,6 @@ export default function AppointmentPage() {
     ],
     []
   );
-  const dateOptions = useMemo(() => {
-    const today = new Date();
-    return Array.from({ length: 7 }, (_, index) => {
-      const date = new Date(today);
-      date.setDate(today.getDate() + index);
-      return {
-        value: date.toISOString().slice(0, 10),
-        label: formatDateLabel(date),
-      };
-    });
-  }, []);
   const handleChange = (event) => {
     const { name, value } = event.target;
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -148,13 +116,12 @@ export default function AppointmentPage() {
                 value={form.phone}
                 onChange={handleChange}
               />
-              <SelectField
+              <TextField
                 label={labels.appointmentDate}
                 name="appointmentDate"
-                placeholder={labels.appointmentDatePlaceholder}
+                type="date"
                 value={form.appointmentDate}
                 onChange={handleChange}
-                options={dateOptions}
               />
               <SelectField
                 label={labels.appointmentSlot}

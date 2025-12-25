@@ -464,11 +464,6 @@ export default function DesignVariantPage() {
       return;
     }
 
-    if (!detailRows.length) {
-      window.alert("Add at least one diamond detail row.");
-      return;
-    }
-
     if (!designNameEn || !designNameFi) {
       window.alert("Add design variant name for both languages.");
       return;

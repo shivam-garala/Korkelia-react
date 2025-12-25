@@ -5,11 +5,11 @@
 }
 
 .title {
-  margin: 20px 0 10px;
+  margin: 0 0 10px;
   font-weight: 500;
   letter-spacing: 1px;
   text-transform: uppercase;
-  font-family: var(--font-heading);
+  font-family: var(--font-body);
 }
 
 .copy {
@@ -20,8 +20,7 @@
 }
 
 .variantStatus {
-  margin: 10px 0 0;
-  font-size: 11px;
+  font-size: 20px;
   letter-spacing: 0.8px;
   text-transform: uppercase;
   color: var(--color-heading);
@@ -43,7 +42,7 @@
 
 .fieldTitle {
   margin-bottom: 6px;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 0.9px;
   text-transform: uppercase;
   color: color-mix(in srgb, var(--color-heading), #ffffff 25%);
@@ -110,7 +109,7 @@
 }
 
 .priceValue {
-  font-size: 14px;
+  font-size: 20px;
   letter-spacing: 0.8px;
   color: var(--color-primary);
   font-weight: 600;
@@ -138,7 +137,7 @@
 
 :global(.customizer__value-container) {
   padding: 0 8px;
-  height: 30px;
+  height: 28px;
   display: flex;
   align-items: center;
   box-sizing: border-box;
@@ -161,7 +160,7 @@
 :global(.customizer__single-value),
 :global(.customizer__placeholder) {
   color: var(--color-heading);
-  font-size: 9px;
+  font-size: 12px;
   letter-spacing: 0.6px;
   text-transform: uppercase;
   font-family: var(--font-body);
@@ -191,7 +190,7 @@
 
 :global(.customizer__option) {
   padding: 6px 8px;
-  font-size: 8px;
+  font-size: 12px;
   letter-spacing: 0.6px;
   text-transform: uppercase;
   font-family: var(--font-body);
@@ -214,12 +213,13 @@
 
 .pill {
   min-width: 32px;
+  padding-inline: 5px;
   height: 30px;
   border-radius: 2px;
   border: 1px solid var(--color-primary);
   background: #fff;
   color: var(--color-primary);
-  font-size: 9px;
+  font-size: 12px;
   cursor: pointer;
 }
 
@@ -245,7 +245,7 @@
   padding: 4px 6px;
   border-radius: 2px;
   cursor: pointer;
-  font-size: 9px;
+  font-size: 12px;
   color: var(--color-muted);
 }
 
@@ -268,6 +268,7 @@
 
 .dotLabel {
   letter-spacing: 0.8px;
+  font-size: 9px;
   text-transform: uppercase;
 }
 
@@ -283,7 +284,7 @@
   padding: 0 6px;
   border-radius: 2px;
   border: 1px solid var(--color-primary);
-  font-size: 9px;
+  font-size: 12px;
 }
 
 .input:focus {
@@ -300,13 +301,13 @@
   background: var(--color-border);
   font-weight: 600;
   letter-spacing: 0.8px;
-  font-size: 9px;
+  font-size: 12px;
   color: var(--color-heading);
   cursor: pointer;
 }
 
 .enquire {
-  height: 28px;
+  height: 30px;
   width: 140px;
   border-radius: 2px;
   border: 1px solid var(--color-primary);
@@ -314,7 +315,7 @@
   color: #fff;
   font-weight: 700;
   letter-spacing: 1px;
-  font-size: 9px;
+  font-size: 12px;
   cursor: pointer;
 }
 
