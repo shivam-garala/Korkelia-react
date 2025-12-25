@@ -220,6 +220,7 @@ export default function DesignVariantPage() {
     metal_rate: "",
     weight: "",
     mark_up: "",
+    price: "",
   });
 
   useEffect(() => {
@@ -319,6 +320,7 @@ export default function DesignVariantPage() {
         pickValue(item, ["metal_rate_name", "metalRateName"]) ??
         metalRateOptions.find((opt) => String(opt.id) === String(rawMetalRateId))?.label ??
         (rawMetalRateId !== null && rawMetalRateId !== undefined ? String(rawMetalRateId) : "-");
+      const priceValue = pickValue(item, ["total_price", "totalPrice"]);
       const detailList = normalizeDetailList(
         pickValue(item, ["diamond_design_detail", "diamond_design_details", "diamond_details"]) ??
           item?.diamond_design_detail
@@ -331,6 +333,7 @@ export default function DesignVariantPage() {
         metal_rate: metalRateLabel ?? "-",
         weight: pickValue(item, ["weight"]) ?? "-",
         mark_up: pickValue(item, ["mark_up", "markUp"]) ?? "-",
+        price: priceValue ?? "-",
         details: formatDetailSummary(detailList),
         _raw: item,
       };
@@ -344,7 +347,17 @@ export default function DesignVariantPage() {
     const metalRateQuery = normalize(filters.metal_rate);
     const weightQuery = normalize(filters.weight);
     const markUpQuery = normalize(filters.mark_up);
-    if (!noQuery && !productQuery && !metalRateQuery && !weightQuery && !markUpQuery) return tableRows;
+    const priceQuery = normalize(filters.price);
+    if (
+      !noQuery &&
+      !productQuery &&
+      !metalRateQuery &&
+      !weightQuery &&
+      !markUpQuery &&
+      !priceQuery
+    ) {
+      return tableRows;
+    }
 
     return tableRows.filter((row) => {
       const noMatches = noQuery
@@ -354,9 +367,18 @@ export default function DesignVariantPage() {
       const metalRateMatches = metalRateQuery ? normalize(row.metal_rate).includes(metalRateQuery) : true;
       const weightMatches = weightQuery ? normalize(row.weight).includes(weightQuery) : true;
       const markUpMatches = markUpQuery ? normalize(row.mark_up).includes(markUpQuery) : true;
-      return noMatches && productMatches && metalRateMatches && weightMatches && markUpMatches;
+      const priceMatches = priceQuery ? normalize(row.price).includes(priceQuery) : true;
+      return noMatches && productMatches && metalRateMatches && weightMatches && markUpMatches && priceMatches;
     });
-  }, [filters.mark_up, filters.metal_rate, filters.no, filters.product, filters.weight, tableRows]);
+  }, [
+    filters.mark_up,
+    filters.metal_rate,
+    filters.no,
+    filters.price,
+    filters.product,
+    filters.weight,
+    tableRows,
+  ]);
 
   const openCreate = () => {
     setEditingId(null);
@@ -483,11 +505,6 @@ export default function DesignVariantPage() {
       return;
     }
 
-    if (!editingId && imageFiles.length === 0) {
-      toast.error("Add at least one image.");
-      return;
-    }
-
     const selectedProduct = productOptions.find((opt) => opt.id === productId);
     const selectedMetalRate = metalRateOptions.find((opt) => opt.id === metalRateId);
     const detailPayload = detailRows.map((row) => {
@@ -556,6 +573,7 @@ export default function DesignVariantPage() {
     { key: "metal_rate", header: "Metal Rate", filterable: true, filterPlaceholder: "Search Metal Rate" },
     { key: "weight", header: "Weight", filterable: true, filterPlaceholder: "Search Weight" },
     { key: "mark_up", header: "Mark Up", filterable: true, filterPlaceholder: "Search Mark Up" },
+    { key: "price", header: "Price", filterable: true, filterPlaceholder: "Search Price" },
     { key: "details", header: "Diamond Detail", filterable: false },
     {
       key: "actions",

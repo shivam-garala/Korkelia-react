@@ -1,6 +1,7 @@
 'use client';
 
 import Image from "next/image";
+import { useEffect, useState } from "react";
 import LanguageDropdown from "../LanguageDropdown/LanguageDropdown.jsx";
 import Icon from "../ui/Icon.jsx";
 import styles from "../../styles/workspace.module.css";
@@ -11,11 +12,19 @@ export default function AdminHeader({
   avatarText = "U",
   actions = null,
 }) {
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
   const handleMenuClick = () => {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("sidebar:toggle"));
     }
   };
+
+  const displayAvatarText = mounted ? avatarText || "U" : "U";
 
   return (
     <header className={styles.headerBar}>
@@ -51,7 +60,7 @@ export default function AdminHeader({
           onClick={onProfile}
           aria-label="Open profile"
         >
-          <span className={styles.avatarRingInner}>{avatarText || "U"}</span>
+          <span className={styles.avatarRingInner}>{displayAvatarText}</span>
         </button>
       </div>
     </header>
