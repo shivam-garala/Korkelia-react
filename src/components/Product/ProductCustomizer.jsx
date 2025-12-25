@@ -3,6 +3,7 @@
 import Image from "next/image";
 import { useEffect, useId, useMemo, useState } from "react";
 import Select from "react-select";
+import { toast } from "react-toastify";
 import axiosClient from "../../lib/axiosClient.js";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import styles from "./ProductCustomizer.module.css";
@@ -190,6 +191,33 @@ const readCachedProduct = (productId) => {
   } catch (error) {
     console.error("Product cache read failed", error);
     return null;
+  }
+};
+
+const updateCacheWithVariant = (productId, variantDetails) => {
+  if (typeof window === "undefined" || !productId || !variantDetails) return;
+  try {
+    const raw = window.sessionStorage.getItem("product_list_cache");
+    const cache = raw ? JSON.parse(raw) : {};
+    if (typeof cache !== "object") return;
+    
+    const existingProduct = cache[String(productId)] || {};
+    
+    // Merge variant details into the product cache
+    // Store variantDetails as design since ProductGallery looks for design.images
+    cache[String(productId)] = {
+      ...existingProduct,
+      design: variantDetails,
+      design_variant: variantDetails,
+      designVariant: variantDetails,
+    };
+    
+    window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
+    
+    // Dispatch custom event to notify ProductGallery of cache update
+    window.dispatchEvent(new CustomEvent("productCacheUpdated", { detail: { productId } }));
+  } catch (error) {
+    console.error("Product cache update failed", error);
   }
 };
 
@@ -709,10 +737,15 @@ export default function ProductCustomizer({
         active = false;
       };
     }
+    // Check if selected metal is Platinum by finding it in metalOptions
+    const selectedMetalOption = metalOptions.find((opt) => opt.value === selectedMetalId);
+    const isSelectedMetalPlatinum = selectedMetalOption?.label?.toLowerCase() === "platinum" || 
+                                     selectedMetalOption?.label?.toLowerCase().includes("platinum");
+
     if (
       !productId ||
       !selectedMetalId ||
-      !selectedKaratId ||
+      (!isSelectedMetalPlatinum && !selectedKaratId) ||
       !selectedQualityId ||
       !selectedClarityId ||
       !selectedCarat ||
@@ -728,12 +761,15 @@ export default function ProductCustomizer({
     const params = new URLSearchParams({
       product_id: String(productId),
       metal_id: String(selectedMetalId),
-      karat_id: String(selectedKaratId),
       diamond_type_id: String(selectedQualityId),
       clarity_id: String(selectedClarityId),
       carat: String(selectedCarat),
       cut_id: String(selectedCutId),
     });
+    // Only add karat_id if metal is not Platinum
+    if (!isSelectedMetalPlatinum && selectedKaratId) {
+      params.set("karat_id", String(selectedKaratId));
+    }
 
     setVariantLoading(true);
     const loadVariant = async () => {
@@ -743,7 +779,15 @@ export default function ProductCustomizer({
         );
         if (active) setVariantDetails(data?.data ?? data ?? null);
       } catch (error) {
-        if (active) setVariantDetails(null);
+        if (active) {
+          setVariantDetails(null);
+          const errorMessage =
+            error?.response?.data?.message ??
+            error?.response?.data?.error ??
+            error?.message ??
+            "Failed to load variant details. Please try again.";
+          toast.error(errorMessage);
+        }
         console.error("Variant details load failed", error);
       } finally {
         if (active) setVariantLoading(false);
@@ -763,7 +807,31 @@ export default function ProductCustomizer({
     selectedCarat,
     selectedCutId,
     variantEnabled,
+    metalOptions,
   ]);
+
+  // Update sessionStorage cache when variantDetails changes
+  useEffect(() => {
+    if (variantDetails && productId) {
+      updateCacheWithVariant(productId, variantDetails);
+    }
+  }, [variantDetails, productId]);
+
+  // Check if current metal is Platinum
+  const isPlatinum = useMemo(() => {
+    // First check from variantDetails or productDetails if available
+    const metalRate = variantEnabled
+      ? variantDetails?.metal_rate
+      : productDetails?.design?.metal_rate ?? productDetails?.design_variant?.metal_rate ?? productDetails?.designVariant?.metal_rate;
+    const metalNameFromDetails = metalRate?.metal?.metal_name ?? "";
+    if (metalNameFromDetails) {
+      return normalizeString(metalNameFromDetails).toLowerCase() === "platinum";
+    }
+    // Fallback: check from selected metal option
+    const selectedMetalOption = metalOptions.find((opt) => opt.value === metal);
+    const metalNameFromOption = selectedMetalOption?.label ?? "";
+    return normalizeString(metalNameFromOption).toLowerCase() === "platinum";
+  }, [variantEnabled, variantDetails, productDetails, metalOptions, metal]);
 
   const variantPrice =
     variantDetails?.total_price ??
@@ -883,25 +951,29 @@ export default function ProductCustomizer({
         <div className={styles.divider} aria-hidden />
 
         <div className={styles.gridFields}>
-          <div>
-            <div className={styles.fieldTitle}>{labels.metalType}</div>
-            <div className={styles.pills}>
-              {metalTypeOptions.map((option) => (
-                <button
-                  key={option.value}
-                  type="button"
-                  className={`${styles.pill} ${metalType === option.value ? styles.pillActive : ""}`}
-                  onClick={() => {
-                    setVariantEnabled(true);
-                    setMetalType(option.value);
-                  }}
-                >
-                  {option.label}
-                </button>
-              ))}
-            </div>
-          </div>
-          <div className={styles.divider} aria-hidden />
+          {!isPlatinum ? (
+            <>
+              <div>
+                <div className={styles.fieldTitle}>{labels.metalType}</div>
+                <div className={styles.pills}>
+                  {metalTypeOptions.map((option) => (
+                    <button
+                      key={option.value}
+                      type="button"
+                      className={`${styles.pill} ${metalType === option.value ? styles.pillActive : ""}`}
+                      onClick={() => {
+                        setVariantEnabled(true);
+                        setMetalType(option.value);
+                      }}
+                    >
+                      {option.label}
+                    </button>
+                  ))}
+                </div>
+              </div>
+              <div className={styles.divider} aria-hidden />
+            </>
+          ) : null}
           <div>
             <div className={styles.fieldTitle}>{labels.ringSize}</div>
             <Select
