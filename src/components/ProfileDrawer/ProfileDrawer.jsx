@@ -1,5 +1,6 @@
 'use client';
 
+import { useEffect, useState } from "react";
 import styles from "./ProfileDrawer.module.css";
 
 const navItems = [
@@ -18,7 +19,13 @@ export default function ProfileDrawer({
   email = "",
   onLogout,
 }) {
-  const displayName = name || "User";
+  const [mounted, setMounted] = useState(false);
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
+
+  const displayName = mounted ? name || "User" : "User";
   const initials = displayName
     .split(" ")
     .map((part) => part.trim()?.[0])
@@ -26,6 +33,7 @@ export default function ProfileDrawer({
     .join("")
     .slice(0, 2)
     .toUpperCase();
+  const displayInitials = mounted ? initials || "U" : "U";
 
   return (
     <div className={`${styles.overlay} ${open ? styles.open : ""}`}>
@@ -37,10 +45,10 @@ export default function ProfileDrawer({
         </header>
 
         <div className={styles.profile}>
-          <div className={styles.avatarLg}>{initials || "U"}</div>
+          <div className={styles.avatarLg}>{displayInitials}</div>
           <div className={styles.person}>
             <p className={styles.name}>{displayName}</p>
-            {email ? <p className={styles.email}>{email}</p> : null}
+            {mounted && email ? <p className={styles.email}>{email}</p> : null}
           </div>
         </div>
 

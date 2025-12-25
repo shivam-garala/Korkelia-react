@@ -12,6 +12,11 @@ const isAdminRoute = () => {
   return path.startsWith("/dashboard") || path.startsWith("/admin") || path === "/login";
 };
 
+const isMutationMethod = (method) => {
+  const normalized = String(method ?? "").toLowerCase();
+  return normalized === "post" || normalized === "put" || normalized === "patch" || normalized === "delete";
+};
+
 const axiosClient = axios.create({
   baseURL:
     process.env.NEXT_PUBLIC_API_URL ??
@@ -45,8 +50,10 @@ axiosClient.interceptors.response.use(
   (response) => {
     const message = response?.data?.message;
     const success = response?.data?.success;
+    const method = response?.config?.method;
     if (
       isAdminRoute() &&
+      isMutationMethod(method) &&
       success === true &&
       typeof message === "string" &&
       message.trim()
@@ -58,6 +65,7 @@ axiosClient.interceptors.response.use(
   async (error) => {
     const status = error.response?.status;
     const message = error.response?.data?.message;
+    const method = error?.config?.method;
 
     if (status === 401 || status === 440) {
       Cookies.remove("authToken");
@@ -71,7 +79,7 @@ axiosClient.interceptors.response.use(
       status === 409 ||
       status === 500
     ) {
-      if (isAdminRoute() && message) {
+      if (isAdminRoute() && isMutationMethod(method) && message) {
         toast.error(message);
       }
     }
