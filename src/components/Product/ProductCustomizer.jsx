@@ -159,6 +159,37 @@ export default function ProductCustomizer({
   const [size, setSize] = useState("");
   const [engraving, setEngraving] = useState("");
 
+  const labels =
+    language === "fi"
+      ? {
+          customizedForYou: "Räätälöity sinulle",
+          selectDiamondCut: "Valitse timantin hionta",
+          diamondQuality: "Timantin laatu",
+          diamondCaratWeight: "Timantin karaattipaino",
+          selectMetalColor: "Valitse metallin väri",
+          metalType: "Metallin tyyppi",
+          ringSize: "Sormuksen koko",
+          price: "Hinta",
+          engraving: "Kaiverrus (valinnainen)",
+          engravingPlaceholder: "Ole hyvä ja rajoita sanamäärä 10 merkkiin",
+          submit: "Lähetä",
+          enquireNow: "Kysy nyt",
+        }
+      : {
+          customizedForYou: "CUSTOMIZED FOR YOU",
+          selectDiamondCut: "SELECT DIAMOND CUT",
+          diamondQuality: "DIAMOND QUALITY",
+          diamondCaratWeight: "DIAMOND CARAT WEIGHT",
+          selectMetalColor: "SELECT METAL COLOR",
+          metalType: "METAL TYPE",
+          ringSize: "RING SIZE",
+          price: "PRICE",
+          engraving: "ENGRAVING (Optional)",
+          engravingPlaceholder: "Please limit word count to 10 characters",
+          submit: "SUBMIT",
+          enquireNow: "ENQUIRE NOW",
+        };
+
   const languageId = language === "fi" ? "2" : "1";
 
   useEffect(() => {
@@ -419,11 +450,11 @@ export default function ProductCustomizer({
       option: (base, state) => ({
         ...base,
         padding: "6px 8px",
-        fontSize: "9px",
+        fontSize: "12px",
         fontFamily: "var(--font-body)",
         letterSpacing: "0.6px",
         textTransform: "uppercase",
-        lineHeight: 1.2,
+        lineHeight: 1.5,
         backgroundColor: state.isSelected
           ? "var(--color-primary-soft)"
           : state.isFocused
@@ -433,6 +464,22 @@ export default function ProductCustomizer({
         ":active": {
           backgroundColor: "var(--color-primary-soft)",
         },
+      }),
+      singleValue: (base) => ({
+        ...base,
+        fontSize: "12px",
+        fontFamily: "var(--font-body)",
+        letterSpacing: "0.6px",
+        textTransform: "uppercase",
+        color: "var(--color-heading)",
+      }),
+      placeholder: (base) => ({
+        ...base,
+        fontSize: "12px",
+        fontFamily: "var(--font-body)",
+        letterSpacing: "0.6px",
+        textTransform: "uppercase",
+        color: "var(--color-heading)",
       }),
     }),
     []
@@ -609,8 +656,8 @@ export default function ProductCustomizer({
       ) : null}
 
       <div className={styles.section}>
-        <div className={styles.sectionTitle}>CUSTOMIZED FOR YOU</div>
-        <div className={styles.fieldTitle}>SELECT DIAMOND CUT</div>
+        <div className={styles.sectionTitle}>{labels.customizedForYou}</div>
+        <div className={styles.fieldTitle}>{labels.selectDiamondCut}</div>
         <div className={styles.cuts}>
           {cutOptions.map((item) => (
             <button
@@ -632,7 +679,7 @@ export default function ProductCustomizer({
         <div className={styles.divider} aria-hidden />
 
         <div className={styles.gridFields}>
-          <div className={styles.fieldTitle}>DIAMOND QUALITY</div>
+        <div className={styles.fieldTitle}>{labels.diamondQuality}</div>
           <div style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
             <div>
               <Select
@@ -668,7 +715,7 @@ export default function ProductCustomizer({
         </div>
         <div className={styles.divider} aria-hidden />
 
-        <div className={styles.fieldTitle}>DIAMOND CARAT WEIGHT</div>
+        <div className={styles.fieldTitle}>{labels.diamondCaratWeight}</div>
         <div className={styles.pills}>
           {caratOptions.map((value) => (
             <button
@@ -686,7 +733,7 @@ export default function ProductCustomizer({
         </div>
         <div className={styles.divider} aria-hidden />
 
-        <div className={styles.fieldTitle}>SELECT METAL COLOR</div>
+        <div className={styles.fieldTitle}>{labels.selectMetalColor}</div>
         <div className={styles.metalRow}>
           {metalOptions.map((item) => (
             <button
@@ -707,7 +754,7 @@ export default function ProductCustomizer({
 
         <div className={styles.gridFields}>
           <div>
-            <div className={styles.fieldTitle}>METAL TYPE</div>
+            <div className={styles.fieldTitle}>{labels.metalType}</div>
             <div className={styles.pills}>
               {metalTypeOptions.map((option) => (
                 <button
@@ -726,7 +773,7 @@ export default function ProductCustomizer({
           </div>
           <div className={styles.divider} aria-hidden />
           <div>
-            <div className={styles.fieldTitle}>RING SIZE</div>
+            <div className={styles.fieldTitle}>{labels.ringSize}</div>
             <Select
               className={styles.select}
               classNamePrefix="customizer"
@@ -742,9 +789,9 @@ export default function ProductCustomizer({
         </div>
         <div className={styles.divider} aria-hidden />
         <div className={styles.priceBlock}>
-          <div className={styles.priceLabel}>PRICE</div>
+          {/* <div className={styles.priceLabel}>{labels.price}</div> */}
           {variantLoading ? (
-            <div className={styles.variantStatus}>Updating selection...</div>
+            <div className={styles.variantStatus}>...</div>
           ) : displayPrice ? (
             <div className={styles.priceValue}>{displayPrice}</div>
           ) : null}
@@ -752,22 +799,22 @@ export default function ProductCustomizer({
         </div>
         <div className={styles.divider} aria-hidden />
 
-        <div className={styles.fieldTitle}>ENGRAVING (Optional)</div>
+        <div className={styles.fieldTitle}>{labels.engraving}</div>
         <div className={styles.engraveRow}>
           <input
             className={styles.input}
             value={engraving}
             onChange={(e) => setEngraving(e.target.value)}
-            placeholder="Please limit word count to 10 characters"
+            placeholder={labels.engravingPlaceholder}
           />
           <button className={styles.submit} type="button">
-            SUBMIT
+            {labels.submit}
           </button>
         </div>
         <div className={styles.divider} aria-hidden />
 
         <button className={styles.enquire} type="button">
-          ENQUIRE NOW
+          {labels.enquireNow}
         </button>
       </div>
     </aside>

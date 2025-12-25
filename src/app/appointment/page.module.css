@@ -32,12 +32,20 @@
 .subtitle {
   margin: 8px 0 0;
   color: var(--color-muted);
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .form {
   max-width: 860px;
   margin: 0 auto;
+  font-size: 15px;
+  line-height: 1.5;
+}
+
+.form :global(.field),
+.form :global(.label) {
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .formGrid {

@@ -41,21 +41,20 @@
   align-items: start;
 }
 
-.layoutContainer {
+/* .layoutContainer {
   max-width: 1280px;
   margin: 0 auto;
-}
+} */
 
 .gallery {
   position: relative;
 }
 
 .customizer {
-  padding-top: 4px;
+  max-width: 380px;
 }
 
 .related {
-  margin-top: 60px;
   padding-top: 34px;
   border-top: 1px solid color-mix(in srgb, var(--color-line), transparent 55%);
 }
