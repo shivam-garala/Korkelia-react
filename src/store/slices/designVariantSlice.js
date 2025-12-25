@@ -55,7 +55,7 @@ export const updateDesignVariant = createAsyncThunk(
   "designVariant/update",
   async ({ id, payload }, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.post(
+      const { data } = await axiosClient.put(
         `/api/design/update/${encodeURIComponent(id)}`,
         payload ?? {}
       );
