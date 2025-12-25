@@ -17,6 +17,7 @@ import {
   createDesignVariant,
   deleteDesignVariant,
   fetchCategoryDropdown,
+  fetchDesignVariant,
   fetchDesignVariants,
   fetchMetalRateDropdown,
   fetchProductDropdown,
@@ -100,13 +101,16 @@ function resolveProductLabel(item) {
   );
 }
 
-function extractDesignDescriptions(item) {
+function extractVariantTranslations(item) {
   const list = pickValue(item, [
+    "translations",
     "design_name_array",
     "designNameArray",
     "design_names",
     "designNames",
   ]);
+  let nameEn = "";
+  let nameFi = "";
   let descriptionEn = "";
   let descriptionFi = "";
 
@@ -120,17 +124,39 @@ function extractDesignDescriptions(item) {
       const languageName = String(
         pickValue(entry?.language, ["language_name", "languageName", "name", "label"]) ?? ""
       ).toLowerCase();
+      const name = pickValue(entry, [
+        "design_variant_name",
+        "designVariantName",
+        "product_name",
+        "productName",
+        "name",
+        "label",
+      ]);
       const description = pickValue(entry, ["description", "design_description", "designDescription"]);
-      if (!description) return;
-      if (languageId === "1" || languageName === "english") descriptionEn = String(description);
-      if (languageId === "2" || languageName === "finnish") descriptionFi = String(description);
+      if (languageId === "1" || languageName === "english") {
+        if (name) nameEn = String(name);
+        if (description) descriptionEn = String(description);
+      }
+      if (languageId === "2" || languageName === "finnish") {
+        if (name) nameFi = String(name);
+        if (description) descriptionFi = String(description);
+      }
     });
   }
 
+  const fallbackName = pickValue(item, [
+    "design_variant_name",
+    "designVariantName",
+    "product_name",
+    "productName",
+    "name",
+    "label",
+  ]);
+  if (!nameEn && fallbackName) nameEn = String(fallbackName);
   const fallbackDescription = pickValue(item, ["description", "design_description", "designDescription"]);
   if (!descriptionEn && fallbackDescription) descriptionEn = String(fallbackDescription);
 
-  return { descriptionEn, descriptionFi };
+  return { nameEn, nameFi, descriptionEn, descriptionFi };
 }
 
 export default function DesignVariantPage() {
@@ -180,6 +206,8 @@ export default function DesignVariantPage() {
   const [metalRateName, setMetalRateName] = useState("");
   const [weight, setWeight] = useState("");
   const [markUp, setMarkUp] = useState("");
+  const [designNameEn, setDesignNameEn] = useState("");
+  const [designNameFi, setDesignNameFi] = useState("");
   const [descriptionEn, setDescriptionEn] = useState("");
   const [descriptionFi, setDescriptionFi] = useState("");
   const [detailRows, setDetailRows] = useState([]);
@@ -338,6 +366,8 @@ export default function DesignVariantPage() {
     setMetalRateName("");
     setWeight("");
     setMarkUp("");
+    setDesignNameEn("");
+    setDesignNameFi("");
     setDescriptionEn("");
     setDescriptionFi("");
     setDetailRows([]);
@@ -346,19 +376,32 @@ export default function DesignVariantPage() {
     setModalOpen(true);
   };
 
-  const openEdit = (row) => {
+  const openEdit = async (row) => {
     const rawId = pickValue(row, ["id", "design_id", "designId"]);
-    const rawProductId = pickValue(row, ["product_id", "productId"]);
-    const rawProductName = pickValue(row, ["product_name", "productName"]);
-    const rawMetalRateId = pickValue(row, ["metal_rate_id", "metalRateId"]);
-    const rawMetalRateName = pickValue(row, ["metal_rate_name", "metalRateName"]);
-    const rawCategoryId = pickValue(row, ["category_id", "categoryId", "category_master_id"]);
+    if (!rawId) return;
+
+    const result = await dispatch(fetchDesignVariant(rawId));
+    const response = result?.payload?.data ?? result?.payload ?? null;
+    const source =
+      response && typeof response === "object"
+        ? response?.data ?? response
+        : row;
+
+    const rawProductId = pickValue(source, ["product_id", "productId"]);
+    const rawProductName = pickValue(source, ["product_name", "productName"]);
+    const rawMetalRateId = pickValue(source, ["metal_rate_id", "metalRateId"]);
+    const rawMetalRateName = pickValue(source, ["metal_rate_name", "metalRateName"]);
+    const rawCategoryId = pickValue(source, ["category_id", "categoryId", "category_master_id"]);
     const detailList = normalizeDetailList(
-      pickValue(row, ["diamond_design_detail", "diamond_design_details", "diamond_details"]) ??
-        row?.diamond_design_detail
+      pickValue(source, ["diamond_design_detail", "diamond_design_details", "diamond_details"]) ??
+        source?.diamond_design_detail
     );
-    const { descriptionEn: nextDescriptionEn, descriptionFi: nextDescriptionFi } =
-      extractDesignDescriptions(row);
+    const {
+      nameEn: nextDesignNameEn,
+      nameFi: nextDesignNameFi,
+      descriptionEn: nextDescriptionEn,
+      descriptionFi: nextDescriptionFi,
+    } = extractVariantTranslations(source);
 
     setEditingId(rawId ?? null);
     setCategoryId(rawCategoryId !== null && rawCategoryId !== undefined ? String(rawCategoryId) : "");
@@ -366,8 +409,10 @@ export default function DesignVariantPage() {
     setProductName(rawProductName ? String(rawProductName) : "");
     setMetalRateId(rawMetalRateId !== null && rawMetalRateId !== undefined ? String(rawMetalRateId) : "");
     setMetalRateName(rawMetalRateName ? String(rawMetalRateName) : "");
-    setWeight(String(pickValue(row, ["weight"]) ?? ""));
-    setMarkUp(String(pickValue(row, ["mark_up", "markUp"]) ?? ""));
+    setWeight(String(pickValue(source, ["weight"]) ?? ""));
+    setMarkUp(String(pickValue(source, ["mark_up", "markUp"]) ?? ""));
+    setDesignNameEn(nextDesignNameEn);
+    setDesignNameFi(nextDesignNameFi);
     setDescriptionEn(nextDescriptionEn);
     setDescriptionFi(nextDescriptionFi);
     setDetailRows(
@@ -424,6 +469,11 @@ export default function DesignVariantPage() {
       return;
     }
 
+    if (!designNameEn || !designNameFi) {
+      window.alert("Add design variant name for both languages.");
+      return;
+    }
+
     if (!descriptionEn || !descriptionFi) {
       window.alert("Add description for both languages.");
       return;
@@ -463,11 +513,15 @@ export default function DesignVariantPage() {
     payload.append("metal_rate_name", metalRateName || selectedMetalRate?.label || "");
     if (weight !== "") payload.append("weight", String(weight));
     if (markUp !== "") payload.append("mark_up", String(markUp));
-    if (descriptionEn) {
+    if (designNameEn) {
+      payload.append("design_name_array[0][design_variant_name]", designNameEn);
+      payload.append("design_name_array[0][product_name]", designNameEn);
       payload.append("design_name_array[0][description]", descriptionEn);
       payload.append("design_name_array[0][language_id]", "1");
     }
-    if (descriptionFi) {
+    if (designNameFi) {
+      payload.append("design_name_array[1][design_variant_name]", designNameFi);
+      payload.append("design_name_array[1][product_name]", designNameFi);
       payload.append("design_name_array[1][description]", descriptionFi);
       payload.append("design_name_array[1][language_id]", "2");
     }
@@ -507,18 +561,21 @@ export default function DesignVariantPage() {
     { key: "weight", header: "Weight", filterable: true, filterPlaceholder: "Search Weight" },
     { key: "mark_up", header: "Mark Up", filterable: true, filterPlaceholder: "Search Mark Up" },
     { key: "details", header: "Diamond Detail", filterable: false },
-    // {
-    //   key: "actions",
-    //   header: "Action",
-    //   filterable: false,
-    //   render: (row) => (
-    //     <div className={crudStyles.actions}>
-    //       <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
-    //         Delete
-    //       </Button>
-    //     </div>
-    //   ),
-    // },
+    {
+      key: "actions",
+      header: "Action",
+      filterable: false,
+      render: (row) => (
+        <div className={crudStyles.actions}>
+          <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
+            Edit
+          </Button>
+          <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
+            Delete
+          </Button>
+        </div>
+      ),
+    },
   ];
 
   return (
@@ -607,8 +664,8 @@ export default function DesignVariantPage() {
         }
       >
         <form id="design-variant-form" className={crudStyles.form} onSubmit={submit}>
-          <div className={crudStyles.formRow3}>
-            <AdminSelectField
+          <div className={crudStyles.formRow2}>
+            {/* <AdminSelectField
               label="Category"
               value={categoryId}
               onChange={(e) => {
@@ -620,7 +677,7 @@ export default function DesignVariantPage() {
               disabled={!categoryOptions.length}
               placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
               options={categoryOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
-            />
+            /> */}
             <AdminSelectField
               label="Product"
               value={productId}
@@ -651,7 +708,7 @@ export default function DesignVariantPage() {
             />
           </div>
 
-          <div className={crudStyles.formRow3}>
+          <div className={crudStyles.formRow2}>
             <TextField
               label="Weight"
               type="number"
@@ -669,6 +726,20 @@ export default function DesignVariantPage() {
               onChange={(e) => setMarkUp(e.target.value)}
               required
               preventWheel
+            />
+          </div>
+          <div className={crudStyles.formRow2}>
+            <TextField
+              label="Design Variant Name (English)"
+              value={designNameEn}
+              onChange={(e) => setDesignNameEn(e.target.value)}
+              required
+            />
+            <TextField
+              label="Design Variant Name (Finnish)"
+              value={designNameFi}
+              onChange={(e) => setDesignNameFi(e.target.value)}
+              required
             />
           </div>
           <div className={crudStyles.formRow2}>
