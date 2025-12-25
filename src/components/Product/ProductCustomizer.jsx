@@ -111,6 +111,74 @@ const resolveDesignTranslation = (translation, languageId) => {
   return "";
 };
 
+const resolveTranslationName = (translation, languageId) => {
+  if (!translation) return "";
+  if (typeof translation === "string") return normalizeString(translation);
+  if (Array.isArray(translation)) {
+    const match = translation.find((entry) => {
+      const entryLangId = normalizeString(entry?.language_id ?? entry?.language?.id);
+      return entryLangId && entryLangId === normalizeString(languageId);
+    });
+    const candidate = match?.design_variant_name ?? match?.name ?? match?.label ?? "";
+    return normalizeString(candidate);
+  }
+  if (typeof translation === "object") {
+    const candidate =
+      translation?.design_variant_name ?? translation?.name ?? translation?.label ?? "";
+    return normalizeString(candidate);
+  }
+  return "";
+};
+
+const resolveTranslationDescription = (translation, languageId) => {
+  if (!translation) return "";
+  if (typeof translation === "string") return normalizeString(translation);
+  if (Array.isArray(translation)) {
+    const match = translation.find((entry) => {
+      const entryLangId = normalizeString(entry?.language_id ?? entry?.language?.id);
+      return entryLangId && entryLangId === normalizeString(languageId);
+    });
+    const candidate = match?.description ?? "";
+    return normalizeString(candidate);
+  }
+  if (typeof translation === "object") {
+    const candidate = translation?.description ?? "";
+    return normalizeString(candidate);
+  }
+  return "";
+};
+
+const resolveListingDefaults = (details) => {
+  const design =
+    details?.design ??
+    details?.design_variant ??
+    details?.designVariant ??
+    null;
+  const metalRate = design?.metal_rate ?? null;
+  const diamondDetail = Array.isArray(design?.diamond_details)
+    ? design.diamond_details[0]
+    : null;
+  const diamondRate = diamondDetail?.diamond_rate ?? null;
+  return {
+    cut: normalizeString(
+      diamondDetail?.cut_master_id ?? diamondDetail?.cut_master?.id ?? ""
+    ),
+    quality: normalizeString(diamondRate?.diamond_type_id ?? ""),
+    clarity: normalizeString(diamondRate?.clarity_id ?? ""),
+    carat: normalizeString(
+      diamondRate?.diamond_master?.carat ??
+        diamondRate?.diamond_master_id?.carat ??
+        ""
+    ),
+    metal: normalizeString(
+      metalRate?.metal_id ?? metalRate?.metal?.id ?? ""
+    ),
+    karat: normalizeString(
+      metalRate?.karat_id ?? metalRate?.karat?.id ?? ""
+    ),
+  };
+};
+
 const readCachedProduct = (productId) => {
   if (typeof window === "undefined") return null;
   try {
@@ -144,6 +212,7 @@ export default function ProductCustomizer({
   const [variantDetails, setVariantDetails] = useState(null);
   const [variantLoading, setVariantLoading] = useState(false);
   const [variantEnabled, setVariantEnabled] = useState(false);
+  const [defaultsApplied, setDefaultsApplied] = useState(false);
   const [cut, setCut] = useState(() => normalizeWithFallback(defaultCutId, "round"));
   const [quality, setQuality] = useState(() =>
     normalizeWithFallback(defaultDiamondTypeId, "natural")
@@ -193,6 +262,7 @@ export default function ProductCustomizer({
   const languageId = language === "fi" ? "2" : "1";
 
   useEffect(() => {
+    setDefaultsApplied(false);
     if (!productId) {
       setProductDetails(null);
       return;
@@ -200,6 +270,54 @@ export default function ProductCustomizer({
     const cached = readCachedProduct(productId);
     setProductDetails(cached);
   }, [productId]);
+
+  const listingDefaults = useMemo(
+    () => resolveListingDefaults(productDetails),
+    [productDetails]
+  );
+
+  const hasDefaultCut = Boolean(normalizeString(defaultCutId));
+  const hasDefaultQuality = Boolean(normalizeString(defaultDiamondTypeId));
+  const hasDefaultClarity = Boolean(normalizeString(defaultClarityId));
+  const hasDefaultCarat = Boolean(normalizeString(defaultCarat));
+  const hasDefaultMetal = Boolean(normalizeString(defaultMetalId));
+  const hasDefaultKarat = Boolean(normalizeString(defaultKaratId));
+
+  useEffect(() => {
+    if (!productDetails || defaultsApplied || variantEnabled) return;
+
+    if (!hasDefaultCut && listingDefaults.cut) {
+      setCut(listingDefaults.cut);
+    }
+    if (!hasDefaultQuality && listingDefaults.quality) {
+      setQuality(listingDefaults.quality);
+    }
+    if (!hasDefaultClarity && listingDefaults.clarity) {
+      setClarity(listingDefaults.clarity);
+    }
+    if (!hasDefaultCarat && listingDefaults.carat) {
+      setCarat(listingDefaults.carat);
+    }
+    if (!hasDefaultMetal && listingDefaults.metal) {
+      setMetal(listingDefaults.metal);
+    }
+    if (!hasDefaultKarat && listingDefaults.karat) {
+      setMetalType(listingDefaults.karat);
+    }
+
+    setDefaultsApplied(true);
+  }, [
+    productDetails,
+    defaultsApplied,
+    variantEnabled,
+    listingDefaults,
+    hasDefaultCut,
+    hasDefaultQuality,
+    hasDefaultClarity,
+    hasDefaultCarat,
+    hasDefaultMetal,
+    hasDefaultKarat,
+  ]);
 
   useEffect(() => {
     let active = true;
@@ -230,9 +348,7 @@ export default function ProductCustomizer({
   }, [languageId, productId]);
 
   const cutOptions = useMemo(() => {
-    const list = Array.isArray(filterData?.cuts)
-      ? filterData.cuts
-      : fallbackCutOptions;
+    const list = Array.isArray(filterData?.cuts) ? filterData.cuts : [];
     return list
       .map((item) => {
         const rawId =
@@ -270,7 +386,7 @@ export default function ProductCustomizer({
   const qualityOptions = useMemo(() => {
     const list = Array.isArray(filterData?.diamond_types)
       ? filterData.diamond_types
-      : fallbackQualityOptions;
+      : [];
     return list
       .map((item) => {
         const rawValue =
@@ -298,9 +414,7 @@ export default function ProductCustomizer({
   }, [filterData]);
 
   const clarityOptions = useMemo(() => {
-    const list = Array.isArray(filterData?.clarities)
-      ? filterData.clarities
-      : fallbackClarityOptions;
+    const list = Array.isArray(filterData?.clarities) ? filterData.clarities : [];
     return list
       .map((item) => {
         const rawValue =
@@ -328,9 +442,7 @@ export default function ProductCustomizer({
   }, [filterData]);
 
   const caratOptions = useMemo(() => {
-    const list = Array.isArray(filterData?.carats)
-      ? filterData.carats
-      : fallbackCarats;
+    const list = Array.isArray(filterData?.carats) ? filterData.carats : [];
     return list
       .map((item) => {
         const value =
@@ -346,9 +458,7 @@ export default function ProductCustomizer({
   }, [filterData]);
 
   const metalOptions = useMemo(() => {
-    const list = Array.isArray(filterData?.metals)
-      ? filterData.metals
-      : fallbackMetalOptions;
+    const list = Array.isArray(filterData?.metals) ? filterData.metals : [];
     return list
       .map((item) => {
         const rawValue =
@@ -380,9 +490,7 @@ export default function ProductCustomizer({
   }, [filterData]);
 
   const metalTypeOptions = useMemo(() => {
-    const list = Array.isArray(filterData?.karats)
-      ? filterData.karats
-      : fallbackMetalTypeOptions;
+    const list = Array.isArray(filterData?.karats) ? filterData.karats : [];
     return list
       .map((item) => {
         const rawId =
@@ -412,9 +520,7 @@ export default function ProductCustomizer({
   }, [filterData]);
 
   const sizeOptions = useMemo(() => {
-    const list = Array.isArray(filterData?.ring_sizes)
-      ? filterData.ring_sizes
-      : fallbackSizeOptions;
+    const list = Array.isArray(filterData?.ring_sizes) ? filterData.ring_sizes : [];
     return list
       .map((item) => {
         const rawValue = item?.value ?? item?.size ?? item?.id ?? "";
@@ -547,12 +653,36 @@ export default function ProductCustomizer({
     metalTypeOptions.find((opt) => opt.value === metalType)?.value ?? "";
   const selectedCarat = carat ? String(carat) : "";
 
+  const variantTitle =
+    variantEnabled
+      ? resolveTranslationName(
+          variantDetails?.design_translation ??
+            variantDetails?.design_translations ??
+            variantDetails?.translations,
+          languageId
+        ) ||
+        normalizeString(variantDetails?.design_variant_name) ||
+        normalizeString(variantDetails?.product_name)
+      : "";
+  const variantDescription =
+    variantEnabled
+      ? resolveTranslationDescription(
+          variantDetails?.design_translation ??
+            variantDetails?.design_translations ??
+            variantDetails?.translations,
+          languageId
+        ) ||
+        normalizeString(variantDetails?.description ?? "")
+      : "";
+
   const productTitle =
+    variantTitle ||
     normalizeString(productDetails?.product_name) ||
     normalizeString(productDetails?.design?.design_variant_name) ||
     normalizeString(title) ||
     "PRODUCT NAME";
   const productDescription =
+    variantDescription ||
     resolveDesignTranslation(
       productDetails?.design?.design_translation ??
         productDetails?.design_translation ??

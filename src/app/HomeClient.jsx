@@ -21,6 +21,7 @@ const buildCategoryHref = (id, label) => {
 export default function HomeClient() {
   const { t, language } = useI18n();
   const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(true);
 
   const languageId = language === "fi" ? "2" : "1";
   const fallbackCategories = useMemo(
@@ -57,7 +58,7 @@ export default function HomeClient() {
       "";
 
     const normalizeImage = (image) => {
-      if (!image) return "/homepage/category.jpg";
+      if (!image) return "/productlisting/no_image.jpg";
       if (/^https?:\/\//i.test(image) || image.startsWith("/")) return image;
       if (!apiBase) return image;
       return `${apiBase.replace(/\/$/, "")}/${image.replace(/^\//, "")}`;
@@ -65,6 +66,7 @@ export default function HomeClient() {
 
     const loadCategories = async () => {
       try {
+        if (active) setCategoriesLoading(true);
         const { data } = await axiosClient.get(
           `/api/categoryMaster/home-page?language_id=${encodeURIComponent(languageId)}`
         );
@@ -87,6 +89,8 @@ export default function HomeClient() {
       } catch (error) {
         if (active) setCategories([]);
         console.error("Home categories load failed", error);
+      } finally {
+        if (active) setCategoriesLoading(false);
       }
     };
 
@@ -113,6 +117,7 @@ export default function HomeClient() {
         <CategoryGrid
           title={t("home.categories.title")}
           categories={categories.length ? categories : fallbackCategories}
+          loading={categoriesLoading}
         />
 
         <FullMediaSection

@@ -1,16 +1,16 @@
-import Image from "next/image";
 import Link from "next/link";
 import styles from "./ProductCard.module.css";
 
 export default function ProductCard({ href, imageSrc, name, price }) {
-  const isRemoteSrc = /^https?:\/\//i.test(imageSrc);
+  const resolvedSrc = imageSrc || "/productlisting/no_image.jpg";
+  const isRemoteSrc = /^https?:\/\//i.test(resolvedSrc);
   const content = (
     <>
       <div className={styles.media} aria-hidden>
         {isRemoteSrc ? (
-          <img className={styles.image} src={imageSrc} alt={name ?? ""} />
+          <img className={styles.image} src={resolvedSrc} alt={name ?? ""} />
         ) : (
-          <Image className={styles.image} src={imageSrc} alt={name ?? ""} fill />
+          <img className={styles.image} src={resolvedSrc} alt={name ?? ""} />
         )}
       </div>
       <div className={styles.rule} aria-hidden />

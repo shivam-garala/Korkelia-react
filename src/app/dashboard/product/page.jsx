@@ -6,13 +6,14 @@ import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import AdminHeader from "../../../components/AdminHeader/AdminHeader.jsx";
 import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
-import DataTable from "../../../components/ui/DataTable.jsx";
+import DataTable from "../../../components/ui/DataTableSuspense.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
 import Select from "react-select";
 import TextField from "../../../components/ui/TextField.jsx";
 import fieldStyles from "../../../components/ui/Fields.module.css";
 import Button from "../../../components/ui/Button.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
+import { toast } from "react-toastify";
 import {
   createProduct,
   deleteProduct,
@@ -369,12 +370,12 @@ export default function ProductPage() {
     event.preventDefault();
 
     if (!categoryId || !subCategoryId || !styleId) {
-      window.alert("Select category, sub category, and style.");
+      toast.error("Select category, sub category, and style.");
       return;
     }
 
     if (!productNameEn || !productNameFi) {
-      window.alert("Add product name for both languages.");
+      toast.error("Add product name for both languages.");
       return;
     }
 
@@ -456,7 +457,6 @@ export default function ProductPage() {
               </div>
             </div>
 
-            {error ? <div className={styles.error}>{String(error)}</div> : null}
 
             <DataTable
               columns={columns}
@@ -751,4 +751,3 @@ export default function ProductPage() {
     </div>
   );
 }
-

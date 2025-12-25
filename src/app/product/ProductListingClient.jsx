@@ -94,7 +94,7 @@ export default function ProductListingClient() {
     if (active) setProductsLoading(true);
 
     const normalizeImage = (image) => {
-      if (!image) return "/productlisting/White_Pers_Palladim_4mm_0001.png";
+      if (!image) return "/productlisting/no_image.jpg";
       if (/^https?:\/\//i.test(image) || image.startsWith("/")) return image;
       if (!apiBase) return image;
       return `${apiBase.replace(/\/$/, "")}/${image.replace(/^\//, "")}`;
@@ -224,7 +224,7 @@ export default function ProductListingClient() {
           />
 
           <div className={styles.gridWrap}>
-            <ProductGrid products={displayedProducts} columns={3} />
+            <ProductGrid products={displayedProducts} columns={3} loading={productsLoading} />
             {!productsLoading && displayedProducts.length === 0 ? (
               <div className={styles.emptyState}>No products found in this category.</div>
             ) : null}
