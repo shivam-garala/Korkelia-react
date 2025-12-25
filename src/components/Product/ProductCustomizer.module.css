@@ -15,8 +15,8 @@
 .copy {
   margin: 0 0 18px;
   color: var(--color-muted);
-  font-size: 11px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .variantStatus {

@@ -45,7 +45,24 @@ export default function ProductGallery({ items = [], productId = "" }) {
   );
 
   useEffect(() => {
-    setCachedProduct(readCachedProduct(productId));
+    const updateCachedProduct = () => {
+      setCachedProduct(readCachedProduct(productId));
+    };
+    
+    // Initial load
+    updateCachedProduct();
+    
+    // Listen for cache updates
+    const handleCacheUpdate = (event) => {
+      if (event.detail?.productId === productId || !event.detail?.productId) {
+        updateCachedProduct();
+      }
+    };
+    
+    window.addEventListener("productCacheUpdated", handleCacheUpdate);
+    return () => {
+      window.removeEventListener("productCacheUpdated", handleCacheUpdate);
+    };
   }, [productId]);
 
   const cachedItems = useMemo(() => {

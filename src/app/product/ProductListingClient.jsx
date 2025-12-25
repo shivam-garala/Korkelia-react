@@ -32,22 +32,43 @@ export default function ProductListingClient() {
   const { language } = useI18n();
   const searchParams = useSearchParams();
   const categoryId = searchParams.get("category_id") ?? "1";
-  const categoryName = searchParams.get("category_name");
+  const categoryNameFromParams = searchParams.get("category_name");
   const languageId = language === "fi" ? "2" : "1";
   const [subCategories, setSubCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
+  const [categoryName, setCategoryName] = useState(categoryNameFromParams || "RINGS");
   const [sortFilter, setSortFilter] = useState("featured");
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
+
+  const labels = useMemo(
+    () =>
+      language === "fi"
+        ? {
+            subCategory: "Alakategoria",
+            sortByPrice: "Lajittele hinnan mukaan",
+            lowToHigh: "Halvin ensin",
+            highToLow: "Kallein ensin",
+            noProducts: "Tässä kategoriassa ei löytynyt tuotteita.",
+          }
+        : {
+            subCategory: "Sub Category",
+            sortByPrice: "Sort By Price",
+            lowToHigh: "Low to High",
+            highToLow: "High to Low",
+            noProducts: "No products found in this category.",
+          },
+    [language]
+  );
 
   const sortOptions = useMemo(
     () => [
       // { value: "featured", label: "Featured" },
       // { value: "newest", label: "Newest" },
-      { value: "price-asc", label: "Low to High" },
-      { value: "price-desc", label: "High to Low" },
+      { value: "price-asc", label: labels.lowToHigh },
+      { value: "price-desc", label: labels.highToLow },
     ],
-    []
+    [labels]
   );
 
   useEffect(() => {
@@ -109,6 +130,22 @@ export default function ProductListingClient() {
         );
         const list = Array.isArray(data) ? data : data?.data ?? [];
         cacheProductList(list);
+        
+        // Extract category name directly from first product's design.product.category.category_name
+        if (active && list.length > 0) {
+          const categoryNameFromApi = list[0]?.design?.product?.category?.category_name;
+          if (categoryNameFromApi) {
+            setCategoryName(categoryNameFromApi);
+          } else if (categoryNameFromParams) {
+            setCategoryName(categoryNameFromParams);
+          } else {
+            setCategoryName("RINGS");
+          }
+        } else if (active && list.length === 0) {
+          // If no products, fallback to params or default
+          setCategoryName(categoryNameFromParams || "RINGS");
+        }
+        
         const mapped = list
           .map((item) => {
             const id = item?.id ?? item?.product_id ?? null;
@@ -209,11 +246,11 @@ export default function ProductListingClient() {
       <main className={styles.main}>
         <Container>
           <div className={styles.topLine} aria-hidden />
-          <h1 className={styles.heading}>{categoryName || "RINGS"}</h1>
+          <h1 className={styles.heading}>{categoryName}</h1>
 
           <FiltersBar
-            leftLabel="Sub Category"
-            rightLabel="Sort By Price"
+            leftLabel={labels.subCategory}
+            rightLabel={labels.sortByPrice}
             leftValue={subCategoryFilter}
             rightValue={sortFilter}
             onLeftChange={setSubCategoryFilter}
@@ -226,7 +263,7 @@ export default function ProductListingClient() {
           <div className={styles.gridWrap}>
             <ProductGrid products={displayedProducts} columns={3} loading={productsLoading} />
             {!productsLoading && displayedProducts.length === 0 ? (
-              <div className={styles.emptyState}>No products found in this category.</div>
+              <div className={styles.emptyState}>{labels.noProducts}</div>
             ) : null}
           </div>
         </Container>
