@@ -73,29 +73,102 @@ const metalColorByCode = {
   PT: "#d4d4d8",
 };
 
+const normalizeString = (value) => {
+  if (value === null || value === undefined) return "";
+  return String(value).trim();
+};
+
+const normalizeWithFallback = (value, fallback) => {
+  const normalized = normalizeString(value);
+  return normalized || fallback;
+};
+
+const resolveDesignTranslation = (translation, languageId) => {
+  if (!translation) return "";
+  if (typeof translation === "string") return normalizeString(translation);
+  if (Array.isArray(translation)) {
+    const match = translation.find((entry) => {
+      const entryLangId = normalizeString(entry?.language_id ?? entry?.language?.id);
+      return entryLangId && entryLangId === normalizeString(languageId);
+    });
+    const candidate =
+      match?.description ??
+      match?.design_variant_name ??
+      match?.name ??
+      match?.label ??
+      "";
+    return normalizeString(candidate);
+  }
+  if (typeof translation === "object") {
+    const candidate =
+      translation?.description ??
+      translation?.design_variant_name ??
+      translation?.name ??
+      translation?.label ??
+      "";
+    return normalizeString(candidate);
+  }
+  return "";
+};
+
+const readCachedProduct = (productId) => {
+  if (typeof window === "undefined") return null;
+  try {
+    const raw = window.sessionStorage.getItem("product_list_cache");
+    if (!raw) return null;
+    const parsed = JSON.parse(raw);
+    if (!parsed || typeof parsed !== "object") return null;
+    return parsed[String(productId)] ?? null;
+  } catch (error) {
+    console.error("Product cache read failed", error);
+    return null;
+  }
+};
+
 export default function ProductCustomizer({
   title = "PRODUCT NAME",
   productId = "",
-  designId: designIdProp = "",
+  defaultMetalId = "",
+  defaultKaratId = "",
+  defaultDiamondTypeId = "",
+  defaultClarityId = "",
+  defaultCarat = "",
+  defaultCutId = "",
 }) {
   const { language } = useI18n();
   const qualityId = useId();
   const clarityId = useId();
   const sizeId = useId();
   const [filterData, setFilterData] = useState(null);
+  const [productDetails, setProductDetails] = useState(null);
   const [variantDetails, setVariantDetails] = useState(null);
   const [variantLoading, setVariantLoading] = useState(false);
-  const [defaultsApplied, setDefaultsApplied] = useState(false);
-  const [cut, setCut] = useState("round");
-  const [quality, setQuality] = useState("natural");
-  const [clarity, setClarity] = useState("fvs");
-  const [carat, setCarat] = useState("0.05");
-  const [metal, setMetal] = useState("white");
-  const [metalType, setMetalType] = useState("14k");
+  const [variantEnabled, setVariantEnabled] = useState(false);
+  const [cut, setCut] = useState(() => normalizeWithFallback(defaultCutId, "round"));
+  const [quality, setQuality] = useState(() =>
+    normalizeWithFallback(defaultDiamondTypeId, "natural")
+  );
+  const [clarity, setClarity] = useState(() =>
+    normalizeWithFallback(defaultClarityId, "fvs")
+  );
+  const [carat, setCarat] = useState(() => normalizeWithFallback(defaultCarat, "0.05"));
+  const [metal, setMetal] = useState(() => normalizeWithFallback(defaultMetalId, "white"));
+  const [metalType, setMetalType] = useState(() =>
+    normalizeWithFallback(defaultKaratId, "14k")
+  );
   const [size, setSize] = useState("");
   const [engraving, setEngraving] = useState("");
 
   const languageId = language === "fi" ? "2" : "1";
+
+  useEffect(() => {
+    if (!productId) {
+      setProductDetails(null);
+      return;
+    }
+    const cached = readCachedProduct(productId);
+    setProductDetails(cached);
+  }, [productId]);
 
   useEffect(() => {
     let active = true;
@@ -132,19 +205,23 @@ export default function ProductCustomizer({
     return list
       .map((item) => {
         const rawId =
-          item?.id ??
           item?.cut_id ??
+          item?.id ??
           item?.cutId ??
           item?.code ??
           item?.name ??
           item?.label ??
           "";
         const rawLabel =
-          item?.name ?? item?.label ?? item?.code ?? String(rawId ?? "");
-        const id = String(rawId ?? "").trim();
-        const label = String(rawLabel ?? "").trim();
+          item?.cut_name ??
+          item?.name ??
+          item?.label ??
+          item?.code ??
+          String(rawId ?? "");
+        const id = normalizeString(rawId);
+        const label = normalizeString(rawLabel);
         if (!id && !label) return null;
-        const codeKey = String(item?.code ?? "").toUpperCase();
+        const codeKey = String(item?.cut_code ?? item?.code ?? "").toUpperCase();
         const nameKey = label.toUpperCase();
         const src =
           cutImageByCode[codeKey] ||
@@ -166,15 +243,20 @@ export default function ProductCustomizer({
     return list
       .map((item) => {
         const rawValue =
-          item?.id ??
           item?.diamond_type_id ??
+          item?.id ??
           item?.diamondTypeId ??
           item?.code ??
           item?.value ??
           "";
-        const rawLabel = item?.name ?? item?.label ?? item?.code ?? "";
-        const value = String(rawValue ?? "").trim();
-        const label = String(rawLabel ?? value ?? "").trim();
+        const rawLabel =
+          item?.diamond_type_name ??
+          item?.name ??
+          item?.label ??
+          item?.code ??
+          "";
+        const value = normalizeString(rawValue);
+        const label = normalizeString(rawLabel ?? value);
         if (!value && !label) return null;
         return {
           value: value || label,
@@ -191,15 +273,20 @@ export default function ProductCustomizer({
     return list
       .map((item) => {
         const rawValue =
-          item?.id ??
           item?.clarity_id ??
+          item?.id ??
           item?.clarityId ??
+          item?.code ??
           item?.value ??
           item?.name ??
           "";
-        const rawLabel = item?.name ?? item?.label ?? String(rawValue ?? "");
-        const value = String(rawValue ?? "").trim();
-        const label = String(rawLabel ?? value ?? "").trim();
+        const rawLabel =
+          item?.clarity_name ??
+          item?.name ??
+          item?.label ??
+          String(rawValue ?? "");
+        const value = normalizeString(rawValue);
+        const label = normalizeString(rawLabel ?? value);
         if (!value && !label) return null;
         return {
           value: value || label,
@@ -215,10 +302,14 @@ export default function ProductCustomizer({
       : fallbackCarats;
     return list
       .map((item) => {
-        const value = item?.carat ?? item?.value ?? item;
-        if (value === null || value === undefined) return null;
-        const label = String(value);
-        return label.trim() ? label : null;
+        const value =
+          item?.carat_name ??
+          item?.name ??
+          item?.carat ??
+          item?.value ??
+          item;
+        const label = normalizeString(value);
+        return label ? label : null;
       })
       .filter(Boolean);
   }, [filterData]);
@@ -230,19 +321,22 @@ export default function ProductCustomizer({
     return list
       .map((item) => {
         const rawValue =
-          item?.id ??
           item?.metal_id ??
+          item?.id ??
           item?.metalId ??
-          item?.metal_rate_id ??
-          item?.metalRateId ??
           item?.value ??
           item?.code ??
           item?.name;
-        const rawLabel = item?.name ?? item?.label ?? item?.code ?? rawValue;
-        const value = String(rawValue ?? "").trim();
-        const label = String(rawLabel ?? "").trim();
+        const rawLabel =
+          item?.metal_name ??
+          item?.name ??
+          item?.label ??
+          item?.code ??
+          rawValue;
+        const value = normalizeString(rawValue);
+        const label = normalizeString(rawLabel);
         if (!value && !label) return null;
-        const codeKey = String(item?.code ?? "").toUpperCase();
+        const codeKey = String(item?.metal_code ?? item?.code ?? "").toUpperCase();
         const color =
           item?.color ?? metalColorByCode[codeKey] ?? "#e5e7eb";
         return {
@@ -260,10 +354,23 @@ export default function ProductCustomizer({
       : fallbackMetalTypeOptions;
     return list
       .map((item) => {
-        const rawId = item?.id ?? item?.karat_id ?? item?.karatId ?? null;
-        const rawLabel = item?.karat ?? item?.value ?? rawId ?? "";
-        const label = String(rawLabel ?? "").trim();
-        const value = rawId !== null && rawId !== undefined ? String(rawId) : label;
+        const rawId =
+          item?.karat_id ??
+          item?.id ??
+          item?.karatId ??
+          item?.code ??
+          item?.value ??
+          null;
+        const rawLabel =
+          item?.karat_name ??
+          item?.karat ??
+          item?.name ??
+          item?.label ??
+          item?.value ??
+          rawId ??
+          "";
+        const label = normalizeString(rawLabel);
+        const value = rawId !== null && rawId !== undefined ? normalizeString(rawId) : label;
         if (!value) return null;
         return {
           value,
@@ -281,8 +388,8 @@ export default function ProductCustomizer({
       .map((item) => {
         const rawValue = item?.value ?? item?.size ?? item?.id ?? "";
         const rawLabel = item?.size ?? item?.label ?? item?.value ?? rawValue;
-        const value = String(rawValue ?? "").trim();
-        const label = String(rawLabel ?? "").trim();
+        const value = normalizeString(rawValue);
+        const label = normalizeString(rawLabel);
         if (!value && !label) return null;
         return { value: value || label, label: label || value };
       })
@@ -392,17 +499,48 @@ export default function ProductCustomizer({
   const selectedKaratId =
     metalTypeOptions.find((opt) => opt.value === metalType)?.value ?? "";
   const selectedCarat = carat ? String(carat) : "";
-  const designId = designIdProp
-    ? designIdProp
-    : filterData?.design_id ?? filterData?.designId ?? filterData?.design?.id ?? "";
 
-  useEffect(() => {
-    setDefaultsApplied(false);
-  }, [productId, designId]);
+  const productTitle =
+    normalizeString(productDetails?.product_name) ||
+    normalizeString(productDetails?.design?.design_variant_name) ||
+    normalizeString(title) ||
+    "PRODUCT NAME";
+  const productDescription =
+    resolveDesignTranslation(
+      productDetails?.design?.design_translation ??
+        productDetails?.design_translation ??
+        productDetails?.design?.design_translations ??
+        productDetails?.design_translations ??
+        productDetails?.design?.description ??
+        productDetails?.description,
+      languageId
+    ) ||
+    normalizeString(productDetails?.design?.design_variant_name) ||
+    normalizeString(productDetails?.product_name) ||
+    "";
+  const productBasePrice =
+    normalizeString(productDetails?.total_price) ||
+    normalizeString(productDetails?.design?.total_price) ||
+    "";
 
   useEffect(() => {
     let active = true;
-    if (!productId || !designId) {
+    if (!variantEnabled) {
+      setVariantDetails(null);
+      setVariantLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+    if (
+      !productId ||
+      !selectedMetalId ||
+      !selectedKaratId ||
+      !selectedQualityId ||
+      !selectedClarityId ||
+      !selectedCarat ||
+      !selectedCutId
+    ) {
       setVariantDetails(null);
       setVariantLoading(false);
       return () => {
@@ -412,8 +550,13 @@ export default function ProductCustomizer({
 
     const params = new URLSearchParams({
       product_id: String(productId),
+      metal_id: String(selectedMetalId),
+      karat_id: String(selectedKaratId),
+      diamond_type_id: String(selectedQualityId),
+      clarity_id: String(selectedClarityId),
+      carat: String(selectedCarat),
+      cut_id: String(selectedCutId),
     });
-    params.set("design_id", String(designId));
 
     setVariantLoading(true);
     const loadVariant = async () => {
@@ -436,98 +579,13 @@ export default function ProductCustomizer({
     };
   }, [
     productId,
-    designId,
-  ]);
-
-  useEffect(() => {
-    if (defaultsApplied || !variantDetails) return;
-    if (
-      !cutOptions.length ||
-      !qualityOptions.length ||
-      !clarityOptions.length ||
-      !caratOptions.length ||
-      !metalOptions.length ||
-      !metalTypeOptions.length
-    ) {
-      return;
-    }
-
-    const primaryDetail = Array.isArray(variantDetails?.diamond_details)
-      ? variantDetails.diamond_details[0]
-      : null;
-    const nextCutId =
-      primaryDetail?.cut_master_id ??
-      primaryDetail?.cut_master?.id ??
-      null;
-    const nextDiamondRate = primaryDetail?.diamond_rate ?? null;
-    const nextQualityId =
-      nextDiamondRate?.diamond_type_id ??
-      nextDiamondRate?.diamond_type?.id ??
-      null;
-    const nextClarityId =
-      nextDiamondRate?.clarity_id ??
-      nextDiamondRate?.clarity?.id ??
-      null;
-    const nextCaratValue =
-      nextDiamondRate?.diamond_master?.carat ??
-      nextDiamondRate?.diamond_master_id?.carat ??
-      null;
-    const nextMetalId =
-      variantDetails?.metal_rate?.metal_id ??
-      variantDetails?.metal_rate?.metal?.id ??
-      null;
-    const nextKaratId =
-      variantDetails?.metal_rate?.karat_id ??
-      variantDetails?.metal_rate?.karat?.id ??
-      null;
-
-    if (
-      nextCutId !== null &&
-      cutOptions.some((opt) => String(opt.id) === String(nextCutId))
-    ) {
-      setCut(String(nextCutId));
-    }
-    if (
-      nextQualityId !== null &&
-      qualityOptions.some((opt) => String(opt.value) === String(nextQualityId))
-    ) {
-      setQuality(String(nextQualityId));
-    }
-    if (
-      nextClarityId !== null &&
-      clarityOptions.some((opt) => String(opt.value) === String(nextClarityId))
-    ) {
-      setClarity(String(nextClarityId));
-    }
-    if (
-      nextMetalId !== null &&
-      metalOptions.some((opt) => String(opt.value) === String(nextMetalId))
-    ) {
-      setMetal(String(nextMetalId));
-    }
-    if (
-      nextKaratId !== null &&
-      metalTypeOptions.some((opt) => String(opt.value) === String(nextKaratId))
-    ) {
-      setMetalType(String(nextKaratId));
-    }
-    if (nextCaratValue !== null) {
-      const normalizedCarat = String(nextCaratValue);
-      if (caratOptions.includes(normalizedCarat)) {
-        setCarat(normalizedCarat);
-      }
-    }
-
-    setDefaultsApplied(true);
-  }, [
-    caratOptions,
-    clarityOptions,
-    cutOptions,
-    defaultsApplied,
-    metalOptions,
-    metalTypeOptions,
-    qualityOptions,
-    variantDetails,
+    selectedMetalId,
+    selectedKaratId,
+    selectedQualityId,
+    selectedClarityId,
+    selectedCarat,
+    selectedCutId,
+    variantEnabled,
   ]);
 
   const variantPrice =
@@ -536,19 +594,19 @@ export default function ProductCustomizer({
     variantDetails?.rate ??
     variantDetails?.metal_rate ??
     null;
+  const displayPrice = variantPrice ?? (productBasePrice || null);
 
   return (
     <aside className={styles.panel}>
-      <h2 className={styles.title}>{title}</h2>
+      <h2 className={styles.title}>{productTitle}</h2>
       {/* {variantLoading ? (
         <p className={styles.variantStatus}>Updating selection...</p>
       ) : variantPrice ? (
         <p className={styles.variantStatus}>Price: {variantPrice}</p>
       ) : null} */}
-      <p className={styles.copy}>
-        Lorem ipsum dolor sit amet, consectetur adipiscing elit. Maecenas
-        ullamcorper, facilisis euismod elit. Fusce vel leo fermentum eget.
-      </p>
+      {productDescription ? (
+        <p className={styles.copy}>{productDescription}</p>
+      ) : null}
 
       <div className={styles.section}>
         <div className={styles.sectionTitle}>CUSTOMIZED FOR YOU</div>
@@ -559,7 +617,10 @@ export default function ProductCustomizer({
               key={item.id}
               type="button"
               className={`${styles.cut} ${cut === item.id ? styles.cutActive : ""}`}
-              onClick={() => setCut(item.id)}
+              onClick={() => {
+                setVariantEnabled(true);
+                setCut(item.id);
+              }}
             >
               <div className={styles.cutIcon} aria-hidden>
                 <Image src={item.src} alt="" width={28} height={28} />
@@ -581,7 +642,10 @@ export default function ProductCustomizer({
               styles={dropdownStyles}
               value={qualityOptions.find((opt) => opt.value === quality) ?? null}
               options={qualityOptions}
-              onChange={(option) => setQuality(option?.value ?? "")}
+              onChange={(option) => {
+                setVariantEnabled(true);
+                setQuality(option?.value ?? "");
+              }}
               isSearchable={false}
             />
             </div>
@@ -593,7 +657,10 @@ export default function ProductCustomizer({
               styles={dropdownStyles}
               value={clarityOptions.find((opt) => opt.value === clarity) ?? null}
               options={clarityOptions}
-              onChange={(option) => setClarity(option?.value ?? "")}
+              onChange={(option) => {
+                setVariantEnabled(true);
+                setClarity(option?.value ?? "");
+              }}
               isSearchable={false}
             />
             </div>
@@ -608,7 +675,10 @@ export default function ProductCustomizer({
               key={value}
               type="button"
               className={`${styles.pill} ${carat === value ? styles.pillActive : ""}`}
-              onClick={() => setCarat(value)}
+              onClick={() => {
+                setVariantEnabled(true);
+                setCarat(value);
+              }}
             >
               {value}
             </button>
@@ -623,7 +693,10 @@ export default function ProductCustomizer({
               key={item.value}
               type="button"
               className={`${styles.metal} ${metal === item.value ? styles.metalActive : ""}`}
-              onClick={() => setMetal(item.value)}
+              onClick={() => {
+                setVariantEnabled(true);
+                setMetal(item.value);
+              }}
             >
               <span className={styles.dot} style={{ background: item.color }} aria-hidden />
               <span className={styles.dotLabel}>{item.label}</span>
@@ -641,7 +714,10 @@ export default function ProductCustomizer({
                   key={option.value}
                   type="button"
                   className={`${styles.pill} ${metalType === option.value ? styles.pillActive : ""}`}
-                  onClick={() => setMetalType(option.value)}
+                  onClick={() => {
+                    setVariantEnabled(true);
+                    setMetalType(option.value);
+                  }}
                 >
                   {option.label}
                 </button>
@@ -669,8 +745,8 @@ export default function ProductCustomizer({
           <div className={styles.priceLabel}>PRICE</div>
           {variantLoading ? (
             <div className={styles.variantStatus}>Updating selection...</div>
-          ) : variantPrice ? (
-            <div className={styles.priceValue}>{variantPrice}</div>
+          ) : displayPrice ? (
+            <div className={styles.priceValue}>{displayPrice}</div>
           ) : null}
           {/* <div className={styles.priceValue}>{variantPrice ?? "--"}</div> */}
         </div>

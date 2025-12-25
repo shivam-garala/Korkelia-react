@@ -11,6 +11,23 @@ import axiosClient from "../../lib/axiosClient.js";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
+const cacheProductList = (items) => {
+  if (typeof window === "undefined") return;
+  try {
+    const existing = window.sessionStorage.getItem("product_list_cache");
+    const parsed = existing ? JSON.parse(existing) : {};
+    const cache = parsed && typeof parsed === "object" ? parsed : {};
+    items.forEach((item) => {
+      const id = item?.id ?? item?.product_id ?? null;
+      if (!id) return;
+      cache[String(id)] = item;
+    });
+    window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
+  } catch (error) {
+    console.error("Product cache write failed", error);
+  }
+};
+
 export default function ProductListingClient() {
   const { language } = useI18n();
   const searchParams = useSearchParams();
@@ -91,22 +108,56 @@ export default function ProductListingClient() {
           )}&category_id=${encodeURIComponent(categoryId)}`
         );
         const list = Array.isArray(data) ? data : data?.data ?? [];
+        cacheProductList(list);
         const mapped = list
           .map((item) => {
             const id = item?.id ?? item?.product_id ?? null;
             if (!id) return null;
+            const design =
+              item?.design ??
+              item?.design_variant ??
+              item?.designVariant ??
+              null;
             const designId =
+              design?.id ??
               item?.design_id ??
               item?.designId ??
               item?.design_variant_id ??
               item?.designVariantId ??
               "";
+            const metalRate = design?.metal_rate ?? null;
+            const primaryDetail = Array.isArray(design?.diamond_details)
+              ? design.diamond_details[0]
+              : null;
+            const diamondRate = primaryDetail?.diamond_rate ?? null;
+            const query = new URLSearchParams();
+            if (designId) query.set("design_id", String(designId));
+            if (metalRate?.metal_id) query.set("metal_id", String(metalRate.metal_id));
+            if (metalRate?.karat_id) query.set("karat_id", String(metalRate.karat_id));
+            if (diamondRate?.diamond_type_id) {
+              query.set("diamond_type_id", String(diamondRate.diamond_type_id));
+            }
+            if (diamondRate?.clarity_id) {
+              query.set("clarity_id", String(diamondRate.clarity_id));
+            }
+            const caratValue =
+              diamondRate?.diamond_master?.carat ??
+              diamondRate?.diamond_master_id?.carat ??
+              null;
+            if (caratValue !== null && caratValue !== undefined) {
+              query.set("carat", String(caratValue));
+            }
+            if (primaryDetail?.cut_master_id) {
+              query.set("cut_id", String(primaryDetail.cut_master_id));
+            }
             return {
               id,
               name: item?.product_name ?? item?.name ?? "PRODUCT",
               price: item?.total_price ?? null,
               imageSrc: normalizeImage(item?.image),
-              href: designId ? `/product/${id}?design_id=${encodeURIComponent(designId)}` : `/product/${id}`,
+              href: query.toString()
+                ? `/product/${id}?${query.toString()}`
+                : `/product/${id}`,
               subCategoryId: String(item?.sub_category_id ?? ""),
             };
           })

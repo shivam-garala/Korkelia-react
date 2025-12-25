@@ -75,7 +75,7 @@
 .cutIcon {
   width: 34px;
   height: 34px;
-  border: 1px solid color-mix(in srgb, var(--color-line), transparent 65%);
+  /* border: 1px solid color-mix(in srgb, var(--color-line), transparent 65%); */
   display: grid;
   place-items: center;
   border-radius: 2px;
