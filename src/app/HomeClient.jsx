@@ -129,7 +129,7 @@ export default function HomeClient() {
           subtitle={t("home.diamondGuide.subtitle")}
           description={t("home.diamondGuide.description")}
           ctaLabel={t("home.cta.discover")}
-          href="/diamond-guide"
+          href="/diamond-difference"
         />
 
         <FullMediaSection
@@ -141,7 +141,7 @@ export default function HomeClient() {
           subtitle={t("home.diamondDifference.subtitle")}
           description={t("home.diamondDifference.description")}
           ctaLabel={t("home.cta.discover")}
-          href="/diamond-difference"
+          href="/diamond-guide"
         />
 
         <FullMediaSection
