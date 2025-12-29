@@ -34,7 +34,7 @@ export default function Hero({
       </div>
       <div className={styles.content}>
         <div className={styles.contentInner}>
-          {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
+          {/* {eyebrow ? <p className={styles.eyebrow}>{eyebrow}</p> : null}
           {title ? <h1 className={styles.title}>{title}</h1> : null}
           {subcopy ? <p className={styles.subcopy}>{subcopy}</p> : null}
           <div className={styles.ctaRow}>
@@ -48,7 +48,7 @@ export default function Hero({
                 {secondaryCta.label}
               </Link>
             ) : null}
-          </div>
+          </div> */}
         </div>
       </div>
     </section>

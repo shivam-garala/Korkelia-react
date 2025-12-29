@@ -25,7 +25,7 @@
 .subtitle {
   margin: 0;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .layout {
@@ -41,7 +41,7 @@
 
 .categoryHeading {
   margin: 0 0 10px;
-  font-size: 14px;
+  font-size: 15px;
   font-weight: 800;
   color: var(--color-heading);
   font-family: var(--font-heading);
@@ -120,7 +120,7 @@
   border: 1px solid color-mix(in srgb, var(--color-line), transparent 35%);
   color: var(--color-line);
   font-weight: 800;
-  font-size: 12px;
+  font-size: 15px;
 }
 
 @media (max-width: 960px) {

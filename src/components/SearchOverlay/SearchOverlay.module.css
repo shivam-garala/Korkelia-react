@@ -33,7 +33,7 @@
 .input {
   border: none;
   outline: none;
-  font-size: 16px;
+  font-size: 15px;
   background: transparent;
   color: var(--foreground);
 }
@@ -81,7 +81,7 @@
 .path {
   margin: 0;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .tag {

@@ -99,8 +99,8 @@
 
 .subtitle {
   color: rgba(96, 97, 98, 0.78);
-  line-height: 1.6;
-  font-size: 13px;
+  line-height: 1.5;
+  font-size: 15px;
   margin-bottom: 16px;
 }
 
@@ -112,7 +112,7 @@
 .label {
   display: grid;
   gap: 6px;
-  font-size: 12px;
+  font-size: 15px;
   color: rgba(96, 97, 98, 0.86);
 }
 
@@ -193,7 +193,7 @@
   margin-top: 10px;
   display: block;
   text-align: center;
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(116, 97, 109, 0.78);
   text-decoration: none;
 }
@@ -209,7 +209,7 @@
 
 .message {
   text-align: center;
-  font-size: 13px;
+  font-size: 15px;
   color: rgba(81, 117, 107, 0.95);
 }
 
@@ -224,7 +224,7 @@
 }
 
 .status {
-  font-size: 12px;
+  font-size: 15px;
   color: rgba(96, 97, 98, 0.76);
 }
 

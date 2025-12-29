@@ -24,7 +24,7 @@
 .code {
   margin: 0;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 .content {
@@ -54,7 +54,7 @@
 .panelBody {
   padding: 12px 14px;
   color: var(--foreground);
-  line-height: 1.6;
+  line-height: 1.5;
 }
 
 .imageList {
@@ -99,7 +99,7 @@
 .imageInfo {
   margin: 0;
   color: var(--color-muted);
-  font-size: 13px;
+  font-size: 15px;
 }
 
 @media (max-width: 1080px) {

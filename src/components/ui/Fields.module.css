@@ -1,7 +1,7 @@
 .field {
   display: grid;
   gap: 6px;
-  font-size: 16px;
+  font-size: 15px;
   font-weight: 300;
   color: var(--color-heading);
   font-family: var(--font-body);

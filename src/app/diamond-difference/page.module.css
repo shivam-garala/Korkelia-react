@@ -51,7 +51,7 @@
   border: none;
   padding: 12px 8px;
   text-align: center;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 1.6px;
   text-transform: uppercase;
   color: var(--color-heading);
@@ -80,7 +80,7 @@
 
 .panelTitle {
   margin: 0;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 2px;
   text-transform: uppercase;
   color: var(--color-heading);
@@ -89,8 +89,8 @@
 
 .panelBody {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.7;
+  font-size: 15px;
+  line-height: 1.5;
   color: var(--color-muted);
 }
 
@@ -100,8 +100,8 @@
   display: grid;
   gap: 6px;
   color: var(--color-muted);
-  font-size: 13px;
-  line-height: 1.6;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 

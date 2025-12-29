@@ -2,6 +2,10 @@
 @tailwind components;
 @tailwind utilities;
 
+@import "swiper/css";
+@import "swiper/css/navigation";
+@import "swiper/css/thumbs";
+
 :root {
   --background: #ffffff;
   --foreground: #373435;

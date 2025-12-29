@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import AdminHeader from "../../../components/AdminHeader/AdminHeader.jsx";
@@ -60,6 +60,11 @@ function normalizeDetailList(details) {
     }
   }
   return [];
+}
+
+function isVideoAsset(value) {
+  if (!value) return false;
+  return /\.(mp4|webm|mov|m4v)$/i.test(String(value));
 }
 
 function formatDetailSummary(details) {
@@ -212,7 +217,10 @@ export default function DesignVariantPage() {
   const [descriptionEn, setDescriptionEn] = useState("");
   const [descriptionFi, setDescriptionFi] = useState("");
   const [detailRows, setDetailRows] = useState([]);
-  const [imageFiles, setImageFiles] = useState([]);
+  const [imageFiles, setImageFiles] = useState(() => Array(4).fill(null));
+  const [videoFile, setVideoFile] = useState(null);
+  const [existingImages, setExistingImages] = useState([]);
+  const [listingSelection, setListingSelection] = useState("");
   const [fileInputKey, setFileInputKey] = useState(0);
   const [filters, setFilters] = useState({
     no: "",
@@ -394,7 +402,10 @@ export default function DesignVariantPage() {
     setDescriptionEn("");
     setDescriptionFi("");
     setDetailRows([]);
-    setImageFiles([]);
+    setImageFiles(Array(4).fill(null));
+    setVideoFile(null);
+    setExistingImages([]);
+    setListingSelection("");
     setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
   };
@@ -419,6 +430,30 @@ export default function DesignVariantPage() {
       pickValue(source, ["diamond_design_detail", "diamond_design_details", "diamond_details"]) ??
         source?.diamond_design_detail
     );
+    const imageList = normalizeDetailList(
+      pickValue(source, ["images", "design_images", "designImages", "designImagesList"]) ??
+        source?.images
+    );
+    let nextListingSelection = "";
+    if (Array.isArray(imageList)) {
+      const listingItem = imageList.find(
+        (img) => Number(pickValue(img, ["is_product_listing", "isProductListing"]) ?? 0) === 1
+      );
+      if (listingItem) {
+        const listingSrc =
+          pickValue(listingItem, ["image_url", "url", "src"]) ??
+          pickValue(listingItem, ["image", "file_name", "filename"]);
+        if (isVideoAsset(listingSrc)) {
+          nextListingSelection = "video";
+        } else {
+          const orderValue = Number(pickValue(listingItem, ["order", "sort_order"]));
+          const slotIndex = Number.isFinite(orderValue) ? orderValue - 1 : -1;
+          if (slotIndex >= 0 && slotIndex < 4) {
+            nextListingSelection = `image-${slotIndex}`;
+          }
+        }
+      }
+    }
     const {
       nameEn: nextDesignNameEn,
       nameFi: nextDesignNameFi,
@@ -441,8 +476,10 @@ export default function DesignVariantPage() {
     setDetailRows(
       detailList.map((detail, idx) => ({
         key: `${Date.now()}-${idx}`,
+        id: pickValue(detail, ["id", "detail_id", "diamond_design_detail_id"]) ?? null,
         cutId: String(pickValue(detail, ["cut_id", "cutId"]) ?? ""),
         cutCode: String(pickValue(detail, ["cut_code", "cutCode", "code"]) ?? ""),
+        cutName: String(pickValue(detail, ["cut_name", "cutName", "name"]) ?? ""),
         diamondRateId: String(pickValue(detail, ["diamond_rate_id", "diamondRateId"]) ?? ""),
         diamondRateName: String(
           pickValue(detail, ["diamond_rate_name", "diamondRateName", "rate_name", "name"]) ?? ""
@@ -450,7 +487,25 @@ export default function DesignVariantPage() {
         pcs: String(pickValue(detail, ["pcs", "pieces", "diamond_pcs"]) ?? ""),
       }))
     );
-    setImageFiles([]);
+    setImageFiles(Array(4).fill(null));
+    setVideoFile(null);
+    setExistingImages(
+      Array.isArray(imageList)
+        ? imageList.map((img, idx) => {
+            const imageUrl = pickValue(img, ["image_url", "url", "src"]) ?? null;
+            const imageName = pickValue(img, ["image", "file_name", "filename"]) ?? null;
+            return {
+              id: pickValue(img, ["id", "image_id"]) ?? null,
+              image: imageName,
+              image_url: imageUrl,
+              order: pickValue(img, ["order", "sort_order"]) ?? idx + 1,
+              is_product_listing: pickValue(img, ["is_product_listing", "isProductListing"]) ?? 0,
+              isVideo: isVideoAsset(imageUrl ?? imageName),
+            };
+          })
+        : []
+    );
+    setListingSelection(nextListingSelection);
     setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
   };
@@ -460,14 +515,50 @@ export default function DesignVariantPage() {
       ...prev,
       {
         key: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
+        id: null,
         cutId: "",
         cutCode: "",
+        cutName: "",
         diamondRateId: "",
         diamondRateName: "",
         pcs: "",
       },
     ]);
   };
+
+  const updateImageFile = useCallback((index, file) => {
+    setImageFiles((prev) => {
+      const next = [...prev];
+      next[index] = file;
+      return next;
+    });
+  }, []);
+
+  const updateVideoFile = useCallback((file) => {
+    setVideoFile(file);
+  }, []);
+
+  const previewSlots = useMemo(() => {
+    const slots = Array(4).fill(null);
+    const list = Array.isArray(existingImages) ? existingImages : [];
+    list.forEach((img, index) => {
+      if (img?.isVideo) return;
+      const orderValue = Number(img?.order);
+      const slotIndex = Number.isFinite(orderValue) ? orderValue - 1 : -1;
+      if (slotIndex >= 0 && slotIndex < 4 && !slots[slotIndex]) {
+        slots[slotIndex] = img;
+      }
+      if (slotIndex < 0 && index < 4 && !slots[index]) {
+        slots[index] = img;
+      }
+    });
+    return slots;
+  }, [existingImages]);
+
+  const previewVideo = useMemo(() => {
+    const list = Array.isArray(existingImages) ? existingImages : [];
+    return list.find((img) => img?.isVideo) ?? null;
+  }, [existingImages]);
 
   const updateDetailRow = (key, updates) => {
     setDetailRows((prev) =>
@@ -510,13 +601,16 @@ export default function DesignVariantPage() {
     const detailPayload = detailRows.map((row) => {
       const cutOption = cutOptions.find((opt) => opt.id === row.cutId);
       const diamondOption = diamondRateOptions.find((opt) => opt.id === row.diamondRateId);
-      return {
+      const detail = {
         cut_id: row.cutId,
         cut_code: row.cutCode || cutOption?.code || cutOption?.label || "",
+        cut_name: row.cutName || cutOption?.label || "",
         diamond_rate_id: row.diamondRateId,
         diamond_rate_name: row.diamondRateName || diamondOption?.label || "",
         pcs: row.pcs,
       };
+      if (row.id) detail.id = row.id;
+      return detail;
     });
 
     const payload = new FormData();
@@ -526,6 +620,7 @@ export default function DesignVariantPage() {
     payload.append("metal_rate_name", metalRateName || selectedMetalRate?.label || "");
     if (weight !== "") payload.append("weight", String(weight));
     if (markUp !== "") payload.append("mark_up", String(markUp));
+    if (descriptionEn) payload.append("description", descriptionEn);
     if (designNameEn) {
       payload.append("design_name_array[0][design_variant_name]", designNameEn);
       payload.append("design_name_array[0][product_name]", designNameEn);
@@ -539,7 +634,29 @@ export default function DesignVariantPage() {
       payload.append("design_name_array[1][language_id]", "2");
     }
     payload.append("diamond_design_detail", JSON.stringify(detailPayload));
-    imageFiles.forEach((file) => payload.append("images", file));
+    const designImages = [];
+    imageFiles.forEach((file, index) => {
+      if (!file) return;
+      designImages.push({
+        image: file.name,
+        order: index + 1,
+        is_product_listing: listingSelection === `image-${index}` ? 1 : 0,
+      });
+    });
+    if (videoFile) {
+      designImages.push({
+        image: videoFile.name,
+        order: 5,
+        is_product_listing: listingSelection === "video" ? 1 : 0,
+      });
+    }
+    if (designImages.length) {
+      payload.append("design_images", JSON.stringify(designImages));
+    }
+    if (videoFile) {
+      payload.append("images", videoFile);
+    }
+    imageFiles.filter(Boolean).forEach((file) => payload.append("images", file));
 
     const action = editingId
       ? updateDesignVariant({ id: editingId, payload })
@@ -770,17 +887,78 @@ export default function DesignVariantPage() {
             />
           </div>
           <div className={styles.fieldRow}>
-            <label className={fieldStyles.field}>
-              <span className={fieldStyles.label}>Images</span>
+            {[0, 1, 2, 3].map((index) => (
+              <div key={`image-${index}`} className={fieldStyles.field}>
+                <div className={styles.mediaLabelRow}>
+                  <label
+                    className={fieldStyles.label}
+                    htmlFor={`image-${index}-${fileInputKey}`}
+                  >
+                    Image {index + 1}
+                  </label>
+                  <label className={styles.listingToggle}>
+                    <input
+                      className={styles.listingRadio}
+                      type="radio"
+                      name="listing-media"
+                      checked={listingSelection === `image-${index}`}
+                      onChange={() => setListingSelection(`image-${index}`)}
+                    />
+                    <span className={styles.listingLabel}>Set as listing</span>
+                  </label>
+                </div>
+                <input
+                  key={`image-${index}-${fileInputKey}`}
+                  id={`image-${index}-${fileInputKey}`}
+                  className={fieldStyles.control}
+                  type="file"
+                  accept="image/*"
+                  onChange={(e) => updateImageFile(index, e.target.files?.[0] ?? null)}
+                />
+                {previewSlots[index]?.image_url ? (
+                  <div className={styles.mediaPreview}>
+                    <img
+                      className={styles.previewImage}
+                      src={previewSlots[index].image_url}
+                      alt=""
+                      loading="lazy"
+                    />
+                  </div>
+                ) : null}
+              </div>
+            ))}
+            <div className={fieldStyles.field}>
+              <div className={styles.mediaLabelRow}>
+                <label className={fieldStyles.label} htmlFor={`video-${fileInputKey}`}>
+                  Video
+                </label>
+                <label className={styles.listingToggle}>
+                  <input
+                    className={styles.listingRadio}
+                    type="radio"
+                    name="listing-media"
+                    checked={listingSelection === "video"}
+                    onChange={() => setListingSelection("video")}
+                  />
+                  <span className={styles.listingLabel}>Set as listing</span>
+                </label>
+              </div>
               <input
-                key={fileInputKey}
+                key={`video-${fileInputKey}`}
+                id={`video-${fileInputKey}`}
                 className={fieldStyles.control}
                 type="file"
-                accept="image/*"
-                multiple
-                onChange={(e) => setImageFiles(Array.from(e.target.files ?? []))}
+                accept="video/*"
+                onChange={(e) => updateVideoFile(e.target.files?.[0] ?? null)}
               />
-            </label>
+              {previewVideo?.image_url ? (
+                <div className={styles.mediaPreview}>
+                  <video className={styles.previewVideo} controls>
+                    <source src={previewVideo.image_url} />
+                  </video>
+                </div>
+              ) : null}
+            </div>
           </div>
 
           <div className={styles.detailHeader}>Diamond Details</div>
@@ -799,7 +977,11 @@ export default function DesignVariantPage() {
                   onChange={(e) => {
                     const nextId = e.target.value;
                     const selected = cutOptions.find((opt) => opt.id === nextId);
-                    updateDetailRow(row.key, { cutId: nextId, cutCode: selected?.code ?? "" });
+                    updateDetailRow(row.key, {
+                      cutId: nextId,
+                      cutCode: selected?.code ?? "",
+                      cutName: selected?.label ?? "",
+                    });
                   }}
                   required
                   disabled={!cutOptions.length}

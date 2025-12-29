@@ -105,7 +105,7 @@ export default function HomeClient() {
       <SiteHeader />
       <main className={styles.main}>
         <Hero
-          videoSrc="/productdetails/Rose%20Anim%20Kastehelmi%20Mq%20Rd%201725.mp4"
+          videoSrc="/homepage/Rings_in_Motion.mp4"
           posterSrc="/homepage/banner_1.jpg"
           eyebrow={t("home.hero.eyebrow")}
           title={t("home.hero.title")}
@@ -121,6 +121,18 @@ export default function HomeClient() {
         />
 
         <FullMediaSection
+          mediaType="video"
+          mediaSrc="/homepage/diamond_guid.mp4"
+          posterSrc="/homepage/banner_2.jpg"
+          eyebrow={t("home.diamondDifference.eyebrow")}
+          title={t("home.diamondDifference.title")}
+          subtitle={t("home.diamondDifference.subtitle")}
+          description={t("home.diamondDifference.description")}
+          ctaLabel={t("home.cta.discover")}
+          href="/diamond-guide"
+        />
+
+        <FullMediaSection
           mediaType="image"
           mediaSrc="/homepage/banner_1.jpg"
           posterSrc="/homepage/banner_1.jpg"
@@ -132,17 +144,7 @@ export default function HomeClient() {
           href="/diamond-difference"
         />
 
-        <FullMediaSection
-          mediaType="image"
-          mediaSrc="/homepage/banner_2.jpg"
-          posterSrc="/homepage/banner_2.jpg"
-          eyebrow={t("home.diamondDifference.eyebrow")}
-          title={t("home.diamondDifference.title")}
-          subtitle={t("home.diamondDifference.subtitle")}
-          description={t("home.diamondDifference.description")}
-          ctaLabel={t("home.cta.discover")}
-          href="/diamond-guide"
-        />
+        
 
         <FullMediaSection
           mediaType="image"

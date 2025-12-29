@@ -26,12 +26,12 @@
 
 .label {
   font-weight: 700;
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .chevron {
   color: var(--color-icon);
-  font-size: 12px;
+  font-size: 15px;
 }
 
 .menu {

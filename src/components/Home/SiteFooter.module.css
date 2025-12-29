@@ -23,7 +23,7 @@
 
 .brandTitle {
   margin: 0 0 12px;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 1.2px;
   font-weight: 400;
   text-transform: uppercase;
@@ -31,13 +31,13 @@
 
 .brandCopy {
   margin: 0;
-  font-size: 13px;
-  line-height: 1.7;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 .infoTitle {
   margin: 0 0 12px;
-  font-size: 13px;
+  font-size: 15px;
   letter-spacing: 1.2px;
   font-weight: 400;
   text-transform: uppercase;
@@ -46,14 +46,13 @@
 
 .infoLinks {
   display: grid;
-  gap: 6px;
   justify-items: end;
 }
 
 .link {
   color: var(--color-footer-text-contrast);
   font-weight: 400;
-  font-size: 13px;
+  font-size: 15px;
   text-decoration: none;
 }
 
@@ -74,7 +73,7 @@
 }
 
 .meta {
-  font-size: 13px;
+  font-size: 15px;
   line-height: 1.5;
   display: grid;
   gap: 2px;
