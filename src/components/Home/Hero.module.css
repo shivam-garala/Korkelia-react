@@ -2,7 +2,7 @@
   position: relative;
   width: 100vw;
   height: auto;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 16 / 9;
   display: grid;
   background: #ffffff;
   overflow: hidden;
@@ -25,7 +25,7 @@
 .video {
   width: 100%;
   height: auto;
-  aspect-ratio: 3 / 2;
+  aspect-ratio: 16 / 9;
   object-fit: cover;
   display: block;
   filter: brightness(1.06) contrast(1.04);
