@@ -115,19 +115,6 @@
   height: 100px;
   display: block;
 }
-/* 
-.brandText {
-  font-weight: 500;
-  letter-spacing: 3px;
-  font-size: 34px;
-  line-height: 1.5;
-} */
-/* 
-.brandCity {
-  font-size: 15px;
-  letter-spacing: 3px;
-  color: var(--color-muted);
-} */
 
 .iconBtn {
   width: 44px;
@@ -166,11 +153,6 @@
   .topRight {
     display: none;
   }
-
-  /* .brandText {
-    font-size: 26px;
-    letter-spacing: 2px;
-  } */
 
   .brandLogo {
     height: 100px;
