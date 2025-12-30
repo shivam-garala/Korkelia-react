@@ -127,9 +127,12 @@
 
 @media (max-width: 720px) {
   .hero {
-    min-height: 58vh;
+    height: 50vh;
   }
-  
+
+  .video {
+    height: 50vh;
+  }
   .content {
     padding: 0 18px 40px;
   }
