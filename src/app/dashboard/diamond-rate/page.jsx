@@ -276,7 +276,7 @@ export default function DiamondRatePage() {
     { key: "diamond_master", header: "Carat", filterable: true, filterPlaceholder: "Search Carat" },
     { key: "diamond_type", header: "Diamond Type", filterable: true, filterPlaceholder: "Search Type" },
     { key: "clarity", header: "Clarity", filterable: true, filterPlaceholder: "Search Clarity" },
-    { key: "rate", header: "Rate", filterable: true, filterPlaceholder: "Search Rate" },
+    { key: "rate", header: "Rate Per Carat", filterable: true, filterPlaceholder: "Search Rate Per Carat" },
     {
       key: "actions",
       header: "Action",

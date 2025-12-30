@@ -224,8 +224,8 @@ export default function ProductCustomizer({
       ? {
           customizedForYou: "Räätälöity sinulle",
           selectDiamondCut: "Valitse timantin hionta",
-          diamondQuality: "Timantin laatu",
-          diamondCaratWeight: "Timantin karaattipaino",
+          diamondQuality: "Timanttityyppi",
+          diamondCaratWeight: "TIMANTTI KARAATTI",
           selectMetalColor: "Valitse metallin väri",
           metalType: "Metallin tyyppi",
           ringSize: "Sormuksen koko",
@@ -238,8 +238,8 @@ export default function ProductCustomizer({
       : {
           customizedForYou: "CUSTOMIZED FOR YOU",
           selectDiamondCut: "SELECT DIAMOND CUT",
-          diamondQuality: "DIAMOND QUALITY",
-          diamondCaratWeight: "DIAMOND CARAT WEIGHT",
+          diamondQuality: "DIAMOND TYPE",
+          diamondCaratWeight: "DIAMOND CARAT",
           selectMetalColor: "SELECT METAL COLOR",
           metalType: "METAL TYPE",
           ringSize: "RING SIZE",
