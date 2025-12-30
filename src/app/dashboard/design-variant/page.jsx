@@ -212,6 +212,7 @@ export default function DesignVariantPage() {
   const [metalRateName, setMetalRateName] = useState("");
   const [weight, setWeight] = useState("");
   const [markUp, setMarkUp] = useState("");
+  const [priceFlag, setPriceFlag] = useState("no");
   const [designNameEn, setDesignNameEn] = useState("");
   const [designNameFi, setDesignNameFi] = useState("");
   const [descriptionEn, setDescriptionEn] = useState("");
@@ -397,6 +398,7 @@ export default function DesignVariantPage() {
     setMetalRateName("");
     setWeight("");
     setMarkUp("");
+    setPriceFlag("no");
     setDesignNameEn("");
     setDesignNameFi("");
     setDescriptionEn("");
@@ -469,23 +471,31 @@ export default function DesignVariantPage() {
     setMetalRateName(rawMetalRateName ? String(rawMetalRateName) : "");
     setWeight(String(pickValue(source, ["weight"]) ?? ""));
     setMarkUp(String(pickValue(source, ["mark_up", "markUp"]) ?? ""));
+    const rawPriceFlag = pickValue(source, ["price_flag", "priceFlag", "purchase_flag", "purchaseFlag", "is_purchase", "isPurchase"]);
+    const priceFlagValue = rawPriceFlag === 1 || rawPriceFlag === "1" || String(rawPriceFlag).toLowerCase() === "yes" ? "yes" : "no";
+    setPriceFlag(priceFlagValue);
     setDesignNameEn(nextDesignNameEn);
     setDesignNameFi(nextDesignNameFi);
     setDescriptionEn(nextDescriptionEn);
     setDescriptionFi(nextDescriptionFi);
     setDetailRows(
-      detailList.map((detail, idx) => ({
-        key: `${Date.now()}-${idx}`,
-        id: pickValue(detail, ["id", "detail_id", "diamond_design_detail_id"]) ?? null,
-        cutId: String(pickValue(detail, ["cut_id", "cutId"]) ?? ""),
-        cutCode: String(pickValue(detail, ["cut_code", "cutCode", "code"]) ?? ""),
-        cutName: String(pickValue(detail, ["cut_name", "cutName", "name"]) ?? ""),
-        diamondRateId: String(pickValue(detail, ["diamond_rate_id", "diamondRateId"]) ?? ""),
-        diamondRateName: String(
-          pickValue(detail, ["diamond_rate_name", "diamondRateName", "rate_name", "name"]) ?? ""
-        ),
-        pcs: String(pickValue(detail, ["pcs", "pieces", "diamond_pcs"]) ?? ""),
-      }))
+      detailList.map((detail, idx) => {
+        const rawIsCenter = pickValue(detail, ["is_center", "isCenter"]);
+        const isCenterValue = rawIsCenter === 1 || rawIsCenter === "1" ? "1" : "0";
+        return {
+          key: `${Date.now()}-${idx}`,
+          id: pickValue(detail, ["id", "detail_id", "diamond_design_detail_id"]) ?? null,
+          cutId: String(pickValue(detail, ["cut_id", "cutId"]) ?? ""),
+          cutCode: String(pickValue(detail, ["cut_code", "cutCode", "code"]) ?? ""),
+          cutName: String(pickValue(detail, ["cut_name", "cutName", "name"]) ?? ""),
+          diamondRateId: String(pickValue(detail, ["diamond_rate_id", "diamondRateId"]) ?? ""),
+          diamondRateName: String(
+            pickValue(detail, ["diamond_rate_name", "diamondRateName", "rate_name", "name"]) ?? ""
+          ),
+          pcs: String(pickValue(detail, ["pcs", "pieces", "diamond_pcs"]) ?? ""),
+          isCenter: isCenterValue,
+        };
+      })
     );
     setImageFiles(Array(4).fill(null));
     setVideoFile(null);
@@ -522,6 +532,7 @@ export default function DesignVariantPage() {
         diamondRateId: "",
         diamondRateName: "",
         pcs: "",
+        isCenter: "0",
       },
     ]);
   };
@@ -608,6 +619,7 @@ export default function DesignVariantPage() {
         diamond_rate_id: row.diamondRateId,
         diamond_rate_name: row.diamondRateName || diamondOption?.label || "",
         pcs: row.pcs,
+        is_center: row.isCenter === "1" ? 1 : 0,
       };
       if (row.id) detail.id = row.id;
       return detail;
@@ -620,6 +632,7 @@ export default function DesignVariantPage() {
     payload.append("metal_rate_name", metalRateName || selectedMetalRate?.label || "");
     if (weight !== "") payload.append("weight", String(weight));
     if (markUp !== "") payload.append("mark_up", String(markUp));
+    payload.append("price_flag", priceFlag === "yes" ? "1" : "0");
     if (descriptionEn) payload.append("description", descriptionEn);
     if (designNameEn) {
       payload.append("design_name_array[0][design_variant_name]", designNameEn);
@@ -858,6 +871,33 @@ export default function DesignVariantPage() {
               preventWheel
             />
           </div>
+          <div className={styles.priceFlagRow}>
+            <div className={fieldStyles.field}>
+              <label className={fieldStyles.label}>Price Flag</label>
+              <div className={styles.radioGroup}>
+                <label className={`${styles.radioOption} ${priceFlag === "yes" ? styles.radioOptionChecked : ""}`}>
+                  <input
+                    type="radio"
+                    name="price-flag"
+                    value="yes"
+                    checked={priceFlag === "yes"}
+                    onChange={(e) => setPriceFlag(e.target.value)}
+                  />
+                  <span className={styles.radioLabel}>Yes</span>
+                </label>
+                <label className={`${styles.radioOption} ${priceFlag === "no" ? styles.radioOptionChecked : ""}`}>
+                  <input
+                    type="radio"
+                    name="price-flag"
+                    value="no"
+                    checked={priceFlag === "no"}
+                    onChange={(e) => setPriceFlag(e.target.value)}
+                  />
+                  <span className={styles.radioLabel}>No</span>
+                </label>
+              </div>
+            </div>
+          </div>
           <div className={crudStyles.formRow2}>
             <TextField
               label="Design Variant Name (English)"
@@ -967,6 +1007,7 @@ export default function DesignVariantPage() {
               <span>Cut</span>
               <span>Diamond Rate</span>
               <span>Pcs</span>
+              <span>Type</span>
               <span />
             </div>
             {detailRows.map((row) => (
@@ -1012,6 +1053,17 @@ export default function DesignVariantPage() {
                   onChange={(e) => updateDetailRow(row.key, { pcs: e.target.value })}
                   required
                   preventWheel
+                />
+                <AdminSelectField
+                  label=""
+                  value={row.isCenter}
+                  onChange={(e) => updateDetailRow(row.key, { isCenter: e.target.value })}
+                  required
+                  placeholder="Select type"
+                  options={[
+                    { value: "0", label: "Other" },
+                    { value: "1", label: "Center" },
+                  ]}
                 />
                 <div className={styles.rowActions}>
                   <Button
