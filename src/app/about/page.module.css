@@ -31,8 +31,8 @@
   display: grid;
   gap: 16px;
   color: var(--color-muted);
-  font-size: 13px;
-  line-height: 1.7;
+  font-size: 15px;
+  line-height: 1.5;
 }
 
 

@@ -73,7 +73,7 @@
   padding: 6px 14px;
   background: var(--color-primary);
   color: #ffffff;
-  font-size: 12px;
+  font-size: 15px;
   letter-spacing: 1.4px;
   text-transform: uppercase;
   display: grid;
@@ -95,7 +95,7 @@
   align-items: center;
   gap: 10px;
   color: var(--color-muted);
-  font-size: 14px;
+  font-size: 15px;
 }
 
 .contactText {
@@ -118,7 +118,7 @@
 }
 
 .mapLink {
-  font-size: 12px;
+  font-size: 15px;
   color: var(--color-primary);
   text-transform: uppercase;
   letter-spacing: 1.2px;

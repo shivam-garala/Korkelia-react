@@ -32,7 +32,6 @@
 }
 
 .optionLabel {
-  /* font-size: 8px; */
   letter-spacing: 0.6px;
   text-transform: uppercase;
   font-family: var(--font-body);
@@ -80,7 +79,6 @@
 :global(.filters__placeholder) {
   color: var(--color-heading);
   font-family: var(--font-body);
-  /* font-size: 9px; */
   letter-spacing: 0.6px;
   text-transform: uppercase;
   line-height: 1.1;
@@ -108,8 +106,6 @@
 } */
 
 :global(.filters__option) {
-  /* padding: 6px 8px; */
-  /* font-size: 8px; */
   letter-spacing: 0.6px;
   text-transform: uppercase;
   font-family: var(--font-body);
@@ -133,7 +129,6 @@
 }
 
 :global(.filters__multi-value__label) {
-  /* font-size: 8px; */
   letter-spacing: 0.6px;
   text-transform: uppercase;
   color: var(--color-heading);

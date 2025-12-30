@@ -22,7 +22,7 @@
 }
 
 .detailRowHeader {
-  font-size: 12px;
+  font-size: 15px;
   color: var(--color-muted);
   text-transform: uppercase;
   letter-spacing: 0.6px;
@@ -35,6 +35,50 @@
 
 .addRow {
   margin-top: 10px;
+}
+
+.listingToggle {
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.listingRadio {
+  width: 14px;
+  height: 14px;
+}
+
+.listingLabel {
+  line-height: 1.2;
+}
+
+.mediaLabelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.mediaPreview {
+  margin-top: 8px;
+  border: 1px solid var(--color-border);
+  padding: 6px;
+  background: #ffffff;
+}
+
+.previewImage {
+  display: block;
+  width: 100%;
+  max-height: 120px;
+  object-fit: contain;
+}
+
+.previewVideo {
+  display: block;
+  width: 100%;
+  max-height: 140px;
 }
 
 @media (max-width: 900px) {

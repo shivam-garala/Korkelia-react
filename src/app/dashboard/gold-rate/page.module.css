@@ -72,7 +72,7 @@
 .formLabel {
   display: grid;
   gap: 6px;
-  font-size: 12px;
+  font-size: 15px;
   font-weight: 700;
   color: var(--color-heading);
   font-family: var(--font-heading);

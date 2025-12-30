@@ -8,43 +8,6 @@ import axiosClient from "../../lib/axiosClient.js";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import styles from "./ProductCustomizer.module.css";
 
-const fallbackCutOptions = [
-  { id: "round", label: "ROUND", src: "/diamondcuts/round_cut.png" },
-  { id: "pear", label: "PEAR", src: "/diamondcuts/pear_cut.png" },
-  { id: "cushion", label: "CUSHION", src: "/diamondcuts/cusion.png" },
-  { id: "radiant", label: "RADIANT", src: "/diamondcuts/radiant.png" },
-  { id: "oval", label: "OVAL", src: "/diamondcuts/oval.png" },
-  { id: "emerald", label: "EMERALD", src: "/diamondcuts/emreld.png" },
-  { id: "princess", label: "PRINCESS", src: "/diamondcuts/princess.png" },
-  { id: "marquise", label: "MARQUISE", src: "/diamondcuts/marqus.png" },
-];
-const fallbackQualityOptions = [
-  { value: "natural", label: "NATURAL BRILLIANT" },
-  { value: "lab", label: "LAB GROWN" },
-];
-const fallbackClarityOptions = [
-  { value: "fvs", label: "FVS" },
-  { value: "vs1", label: "VS1" },
-  { value: "si1", label: "SI1" },
-];
-const fallbackCarats = ["0.05", "0.10", "0.20", "0.30", "0.50"];
-const fallbackMetalOptions = [
-  { value: "white", label: "WHITE", color: "#f4f4f5" },
-  { value: "yellow", label: "YELLOW", color: "#eab308" },
-  { value: "rose", label: "ROSE", color: "#fca5a5" },
-  { value: "platinum", label: "PLATINUM", color: "#d4d4d8" },
-];
-const fallbackMetalTypeOptions = [
-  { value: "14k", label: "14K" },
-  { value: "18k", label: "18K" },
-  { value: "22k", label: "22K" },
-];
-const fallbackSizeOptions = [
-  { value: "5", label: "5" },
-  { value: "6", label: "6" },
-  { value: "7", label: "7" },
-  { value: "8", label: "8" },
-];
 const cutImageByCode = {
   RD: "/diamondcuts/round_cut.png",
   PR: "/diamondcuts/princess.png",
