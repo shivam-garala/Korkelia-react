@@ -5,11 +5,18 @@ import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { Swiper, SwiperSlide } from "swiper/react";
 import { Navigation, Thumbs } from "swiper/modules";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
-import Skeleton from "../../app/components/ui/Skeleton.jsx";
 import styles from "./ProductGallery.module.css";
 
+const isVideoSrc = (value) => {
+  if (!value || typeof value !== "string") return false;
+  return /\.(mp4|webm|ogg)(\?.*)?$/i.test(value);
+};
+
 const isVideoItem = (item) =>
-  Boolean(item?.videoSrc) || item?.type === "video" || item?.variant === "video" || item?.badge === "play";
+  Boolean(item?.videoSrc) ||
+  item?.type === "video" ||
+  item?.badge === "play" ||
+  (item?.variant === "video" && isVideoSrc(item?.src));
 
 const readCachedProduct = (productId) => {
   if (typeof window === "undefined") return null;
@@ -40,12 +47,16 @@ const resolveImageSrc = (image) => {
   return `${apiBase.replace(/\/$/, "")}/${cleaned.replace(/^\//, "")}`;
 };
 
-export default function ProductGallery({ items = [], productId = "" }) {
+const fallbackImageSrc = "/productdetails/no_image.jpg";
+
+export default function ProductGallery({ items, productId = "" }) {
   const [cachedProduct, setCachedProduct] = useState(null);
-  const variants = useMemo(
-    () => ["square", "tall", "circle", "wide", "video"],
+  const imageVariants = useMemo(
+    () => ["square", "tall", "circle", "wide"],
     []
   );
+  const hasItems = Array.isArray(items);
+  const hasResponse = cachedProduct !== null || (items !== null && items !== undefined);
 
   useEffect(() => {
     const updateCachedProduct = () => {
@@ -84,12 +95,29 @@ export default function ProductGallery({ items = [], productId = "" }) {
             image?.image_name ??
             image
         );
-        if (!src) return null;
-        return {
-          key: image?.id ?? image?.image_id ?? src ?? index,
-          variant: variants[index % variants.length],
-          src,
+        const videoSrc = resolveImageSrc(image?.videoSrc ?? "");
+        const isVideo =
+          Boolean(videoSrc) ||
+          image?.type === "video" ||
+          image?.badge === "play" ||
+          isVideoSrc(src);
+        const resolvedVideoSrc = videoSrc || (isVideoSrc(src) ? src : "");
+        const resolvedSrc = src || (isVideo ? fallbackImageSrc : "");
+        if (!resolvedSrc && !resolvedVideoSrc) return null;
+        const variant =
+          isVideo
+            ? "video"
+            : image?.variant && image.variant !== "video"
+            ? image.variant
+            : imageVariants[index % imageVariants.length];
+        const next = {
+          key: image?.id ?? image?.image_id ?? resolvedSrc ?? resolvedVideoSrc ?? index,
+          variant,
+          src: resolvedSrc,
+          badge: isVideo ? image?.badge ?? "play" : image?.badge,
         };
+        if (resolvedVideoSrc) next.videoSrc = resolvedVideoSrc;
+        return next;
       })
       .filter(Boolean);
 
@@ -102,13 +130,90 @@ export default function ProductGallery({ items = [], productId = "" }) {
         ""
     );
     if (!fallbackSrc) return [];
+    if (isVideoSrc(fallbackSrc)) {
+      return [
+        {
+          key: "fallback",
+          variant: "video",
+          src: fallbackImageSrc,
+          videoSrc: fallbackSrc,
+          badge: "play",
+        },
+      ];
+    }
     return [{ key: "fallback", variant: "square", src: fallbackSrc }];
-  }, [cachedProduct, variants]);
+  }, [cachedProduct, imageVariants]);
+
+  const baseItems = useMemo(() => {
+    if (!hasItems) return [];
+    return items
+      .map((item, index) => {
+        if (!item) return null;
+        if (typeof item === "string") {
+          const src = resolveImageSrc(item);
+          if (!src) return null;
+          if (isVideoSrc(src)) {
+            return {
+              key: src,
+              variant: "video",
+              src: fallbackImageSrc,
+              videoSrc: src,
+              badge: "play",
+            };
+          }
+          return { key: src, variant: imageVariants[index % imageVariants.length], src };
+        }
+        const src = resolveImageSrc(
+          item?.src ??
+            item?.image ??
+            item?.imageSrc ??
+            item?.url ??
+            item?.image_url ??
+            item?.image_name ??
+            ""
+        );
+        const videoSrc = resolveImageSrc(item?.videoSrc ?? "");
+        const isVideo = Boolean(videoSrc) || isVideoItem(item) || isVideoSrc(src);
+        const resolvedVideoSrc = videoSrc || (isVideoSrc(src) ? src : "");
+        const resolvedSrc = src || (isVideo ? fallbackImageSrc : "");
+        if (!resolvedSrc && !resolvedVideoSrc) return null;
+        const variant =
+          isVideo
+            ? "video"
+            : item?.variant && item.variant !== "video"
+            ? item.variant
+            : imageVariants[index % imageVariants.length];
+        const next = {
+          ...item,
+          key: item?.key ?? item?.id ?? resolvedSrc ?? resolvedVideoSrc ?? index,
+          variant,
+          src: resolvedSrc,
+        };
+        if (resolvedVideoSrc) next.videoSrc = resolvedVideoSrc;
+        if (isVideo && !next.badge) next.badge = "play";
+        return next;
+      })
+      .filter(Boolean);
+  }, [hasItems, items, imageVariants]);
 
   const slides = useMemo(() => {
-    const base = Array.isArray(items) ? items.filter(Boolean) : [];
-    return cachedItems.length ? cachedItems : base;
-  }, [items, cachedItems]);
+    const base = cachedItems.length ? cachedItems : baseItems;
+    if (base.length) return base;
+    if (!hasResponse) return [];
+    return [{ key: "no-image", variant: "square", src: fallbackImageSrc }];
+  }, [baseItems, cachedItems, hasResponse]);
+
+  const showSkeleton = !hasResponse;
+  const skeletonSlides = useMemo(
+    () =>
+      imageVariants.map((variant, index) => ({
+        key: `skeleton-${variant}-${index}`,
+        variant,
+        isSkeleton: true,
+      })),
+    [imageVariants]
+  );
+  const displaySlides = showSkeleton ? skeletonSlides : slides;
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -261,32 +366,58 @@ export default function ProductGallery({ items = [], productId = "" }) {
 
   return (
     <>
-      <div className={styles.galleryWrap}>
+        <div className={styles.galleryWrap}>
         <div className={styles.grid} ref={galleryRef} onScroll={handleGalleryScroll}>
-          {slides.map((item, index) => (
+          {displaySlides.map((item, index) => (
             <div
               key={item.key ?? item.src ?? index}
               className={`${styles.cell} ${styles[item.variant] ?? ""}`}
               data-gallery-slide="true"
             >
-              <button type="button" className={styles.cellButton} onClick={() => openAt(index)}>
-                <div className={styles.media} aria-hidden>
-                  {!loadedMap[index] ? (
-                    <Skeleton className={styles.mediaSkeleton} width="100%" height="100%" />
-                  ) : null}
-                  <Image
-                    className={`${styles.image} ${loadedMap[index] ? styles.imageLoaded : styles.imageHidden}`}
-                    src={item.src}
-                    alt=""
-                    fill
-                    sizes="(max-width: 980px) 100vw, 50vw"
-                    onLoadingComplete={() =>
-                      setLoadedMap((prev) => ({ ...prev, [index]: true }))
-                    }
-                  />
-                  {item.badge === "play" ? <div className={styles.play} aria-hidden /> : null}
+              {item.isSkeleton ? (
+                <div className={styles.cellButton} aria-hidden="true">
+                  <div className={styles.media} aria-hidden>
+                    <div className={styles.mediaLoader} />
+                  </div>
                 </div>
-              </button>
+              ) : (
+                <button type="button" className={styles.cellButton} onClick={() => openAt(index)}>
+                  <div className={styles.media} aria-hidden>
+                    {!loadedMap[index] ? (
+                      <div className={styles.mediaLoader} />
+                    ) : null}
+                    {isVideoItem(item) ? (
+                      <video
+                        className={`${styles.inlineVideo} ${loadedMap[index] ? styles.imageLoaded : styles.imageHidden}`}
+                        autoPlay
+                        muted
+                        loop
+                        playsInline
+                        poster={item.src}
+                        onLoadedData={() =>
+                          setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                        }
+                      >
+                        <source src={item.videoSrc ?? item.src} />
+                      </video>
+                    ) : (
+                      <Image
+                        className={`${styles.image} ${loadedMap[index] ? styles.imageLoaded : styles.imageHidden}`}
+                        src={item.src}
+                        alt=""
+                        fill
+                        sizes="(max-width: 980px) 100vw, 50vw"
+                        onLoadingComplete={() =>
+                          setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                        }
+                      />
+                    )}
+                    {/* {!isVideoItem(item) && item.badge === "play" ? (
+                      <div className={styles.play} aria-hidden />
+                    ) : null} */}
+                  </div>
+                </button>
+              )}
             </div>
           ))}
         </div>
@@ -365,6 +496,9 @@ export default function ProductGallery({ items = [], productId = "" }) {
                         <div className={styles.modalMedia}>
                           <video
                             className={styles.modalVideo}
+                            autoPlay
+                            muted
+                            loop
                             controls
                             playsInline
                             poster={item.src}
@@ -412,14 +546,6 @@ export default function ProductGallery({ items = [], productId = "" }) {
                                 <button
                                   type="button"
                                   className={styles.zoomControlBtn}
-                                  onClick={() => zoomOut()}
-                                  aria-label="Zoom out"
-                                >
-                                  -
-                                </button>
-                                <button
-                                  type="button"
-                                  className={styles.zoomControlBtn}
                                   onClick={() => {
                                     resetTransform();
                                     setIsZoomed(false);
@@ -430,6 +556,14 @@ export default function ProductGallery({ items = [], productId = "" }) {
                                     <path d="M21 12a9 9 0 1 1-3.3-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
                                     <path d="M21 4v5h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
                                   </svg>
+                                </button>
+                                <button
+                                  type="button"
+                                  className={styles.zoomControlBtn}
+                                  onClick={() => zoomOut()}
+                                  aria-label="Zoom out"
+                                >
+                                  -
                                 </button>
                               </div>
                               <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
@@ -451,14 +585,19 @@ export default function ProductGallery({ items = [], productId = "" }) {
               {slides.length > 1 ? (
                 <Swiper
                   onSwiper={setThumbsSwiper}
-                  slidesPerView={5}
-                  spaceBetween={12}
+                  slidesPerView="auto"
+                  spaceBetween={0}
                   watchSlidesProgress
                   className={styles.thumbSwiper}
                 >
                   {slides.map((item, index) => (
                     <SwiperSlide key={item.key ?? item.src ?? index} className={styles.thumbSlide}>
-                      <img className={styles.thumbImage} src={item.src} alt="" loading="lazy" />
+                      <div className={styles.thumbBox}>
+                        <img className={styles.thumbImage} src={item.src} alt="" loading="lazy" />
+                        {isVideoItem(item) ? (
+                          <span className={styles.thumbVideoBadge} aria-hidden="true" />
+                        ) : null}
+                      </div>
                     </SwiperSlide>
                   ))}
                 </Swiper>
