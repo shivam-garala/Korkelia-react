@@ -31,9 +31,10 @@ const cacheProductList = (items) => {
 export default function ProductListingClient() {
   const { language } = useI18n();
   const searchParams = useSearchParams();
-  const categoryId = searchParams.get("category_id") ?? "1";
+  const categoryIdParam = searchParams.get("category_id");
   const categoryNameFromParams = searchParams.get("category_name");
   const languageId = language === "fi" ? "2" : "1";
+  const [categoryId, setCategoryId] = useState(categoryIdParam ?? "");
   const [subCategories, setSubCategories] = useState([]);
   const [products, setProducts] = useState([]);
   const [productsLoading, setProductsLoading] = useState(true);
@@ -74,6 +75,45 @@ export default function ProductListingClient() {
   useEffect(() => {
     let active = true;
 
+    const resolveCategoryId = async () => {
+      if (categoryIdParam) {
+        if (active) setCategoryId(categoryIdParam);
+        return;
+      }
+      if (!categoryNameFromParams) {
+        if (active) setCategoryId("1");
+        return;
+      }
+      try {
+        const { data } = await axiosClient.get(
+          `/api/categoryMaster/home-page?language_id=${encodeURIComponent(languageId)}`
+        );
+        const list = Array.isArray(data) ? data : data?.data ?? [];
+        const normalizedName = String(categoryNameFromParams).trim().toLowerCase();
+        const match = list.find((item) => {
+          const label = item?.category_name ?? item?.name ?? "";
+          return String(label).trim().toLowerCase() === normalizedName;
+        });
+        const resolvedId = match?.id ?? match?.category_id ?? null;
+        if (active) setCategoryId(resolvedId ? String(resolvedId) : "1");
+      } catch (error) {
+        if (active) setCategoryId("1");
+        console.error("Category resolve failed", error);
+      }
+    };
+
+    resolveCategoryId();
+    return () => {
+      active = false;
+    };
+  }, [categoryIdParam, categoryNameFromParams, languageId]);
+
+  useEffect(() => {
+    let active = true;
+    if (!categoryId) return () => {
+      active = false;
+    };
+
     const loadSubCategories = async () => {
       try {
         const { data } = await axiosClient.get(
@@ -108,6 +148,9 @@ export default function ProductListingClient() {
 
   useEffect(() => {
     let active = true;
+    if (!categoryId) return () => {
+      active = false;
+    };
     const apiBase =
       process.env.NEXT_PUBLIC_BASE_API_URL ??
       process.env.NEXT_PUBLIC_API_URL ??
