@@ -61,6 +61,7 @@
   font-weight: 500;
   color: var(--color-heading);
   letter-spacing: 1.2px;
+  font-size: 18px;
   text-transform: uppercase;
   font-family: var(--font-heading);
 }

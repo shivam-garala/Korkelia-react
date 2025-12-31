@@ -2,10 +2,11 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import styles from "./NavMenuOverlay.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
+import axiosClient from "../../lib/axiosClient.js";
 
 function Icon({ path, className, style }) {
   return (
@@ -27,10 +28,46 @@ function Icon({ path, className, style }) {
 
 export default function NavMenuOverlay({ open, onClose }) {
   const [productsOpen, setProductsOpen] = useState(false);
-  const { t } = useI18n();
+  const [categories, setCategories] = useState([]);
+  const [categoriesLoading, setCategoriesLoading] = useState(false);
+  const { t, language } = useI18n();
   const pathname = usePathname();
+  const languageId = language === "fi" ? "2" : "1";
+  const categoriesLoadedRef = useRef({});
   const isActive = (href) =>
     pathname === href || (href !== "/" && pathname?.startsWith(`${href}/`));
+
+  const buildCategoryHref = (id, label) => {
+    const nameParam = label ? `&category_name=${encodeURIComponent(label)}` : "";
+    if (id) {
+      return `/product?category_id=${encodeURIComponent(id)}${nameParam}`;
+    }
+    return label ? `/product?category_name=${encodeURIComponent(label)}` : "/product";
+  };
+
+  const fallbackCategories = useMemo(
+    () => [
+      {
+        id: "",
+        label: t("menu.productsSub.rings"),
+      },
+      {
+        id: "",
+        label: t("menu.productsSub.bracelets"),
+      },
+      {
+        id: "",
+        label: t("menu.productsSub.necklaces"),
+      },
+      {
+        id: "",
+        label: t("menu.productsSub.earrings"),
+      },
+    ],
+    [t]
+  );
+
+  const displayedCategories = categories.length ? categories : fallbackCategories;
 
   useEffect(() => {
     if (!open) return;
@@ -43,6 +80,45 @@ export default function NavMenuOverlay({ open, onClose }) {
       document.documentElement.style.overflow = prevHtml;
     };
   }, [open]);
+
+  useEffect(() => {
+    if (!open) return;
+    if (categoriesLoadedRef.current[languageId]) return;
+    let active = true;
+
+    const loadCategories = async () => {
+      try {
+        if (active) setCategoriesLoading(true);
+        const { data } = await axiosClient.get(
+          `/api/categoryMaster/home-page?language_id=${encodeURIComponent(languageId)}`
+        );
+        const list = Array.isArray(data) ? data : data?.data ?? [];
+        const mapped = list
+          .map((item) => {
+            const id = item?.id ?? item?.category_id ?? null;
+            const label = item?.category_name ?? item?.name ?? "";
+            if (!id || !label) return null;
+            return { id, label, href: buildCategoryHref(id, label) };
+          })
+          .filter(Boolean);
+
+        if (active) {
+          setCategories(mapped);
+          categoriesLoadedRef.current[languageId] = true;
+        }
+      } catch (error) {
+        if (active) setCategories([]);
+        console.error("Menu categories load failed", error);
+      } finally {
+        if (active) setCategoriesLoading(false);
+      }
+    };
+
+    loadCategories();
+    return () => {
+      active = false;
+    };
+  }, [languageId, open]);
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -127,18 +203,25 @@ export default function NavMenuOverlay({ open, onClose }) {
               </div>
               {productsOpen ? (
                 <div id="products-submenu" className={styles.subMenu}>
-                  <Link className={styles.subLink} href="/product" onClick={onClose}>
-                    {t("menu.productsSub.rings")}
-                  </Link>
-                  <Link className={styles.subLink} href="/product" onClick={onClose}>
-                    {t("menu.productsSub.bracelets")}
-                  </Link>
-                  <Link className={styles.subLink} href="/product" onClick={onClose}>
-                    {t("menu.productsSub.necklaces")}
-                  </Link>
-                  <Link className={styles.subLink} href="/product" onClick={onClose}>
-                    {t("menu.productsSub.earrings")}
-                  </Link>
+                  {categoriesLoading ? (
+                    <div className={styles.subLoading}>Loading...</div>
+                  ) : (
+                    displayedCategories.map((category) => {
+                      const href =
+                        category.href ??
+                        buildCategoryHref(category.id ?? "", category.label ?? "");
+                      return (
+                        <Link
+                          key={String(category.id ?? category.label)}
+                          className={styles.subLink}
+                          href={href}
+                          onClick={onClose}
+                        >
+                          {category.label}
+                        </Link>
+                      );
+                    })
+                  )}
                 </div>
               ) : null}
             </li>

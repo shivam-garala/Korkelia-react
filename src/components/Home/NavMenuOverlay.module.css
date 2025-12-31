@@ -161,6 +161,13 @@
   gap: 10px;
 }
 
+.subLoading {
+  font-size: 16px;
+  color: var(--color-menu-text);
+  opacity: 0.7;
+  letter-spacing: 0.4px;
+}
+
 .subLink {
   text-decoration: none;
   color: var(--color-menu-text);

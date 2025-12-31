@@ -144,8 +144,6 @@ export default function HomeClient() {
           href="/diamond-difference"
         />
 
-        
-
         <FullMediaSection
           mediaType="image"
           mediaSrc="/homepage/banner_3.jpg"
