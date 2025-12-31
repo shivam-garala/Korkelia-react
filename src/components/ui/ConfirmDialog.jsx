@@ -2,6 +2,7 @@
 
 import Modal from "./Modal.jsx";
 import Button from "./Button.jsx";
+import styles from "./ConfirmDialog.module.css";
 
 export default function ConfirmDialog({
   open,
@@ -18,8 +19,9 @@ export default function ConfirmDialog({
       open={open}
       title={title}
       onClose={onClose}
+      className={styles.modal}
       footer={
-        <div style={{display: "flex", gap: "16px", justifyContent: "flex-end"}}>
+        <div className={styles.footer}>
           <Button variant={confirmVariant} onClick={onConfirm}>
             {confirmLabel}
           </Button>
@@ -29,7 +31,7 @@ export default function ConfirmDialog({
         </div>
       }
     >
-      {message}
+      <div className={styles.message}>{message}</div>
     </Modal>
   );
 }

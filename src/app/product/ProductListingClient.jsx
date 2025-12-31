@@ -232,7 +232,11 @@ export default function ProductListingClient() {
             }
             return {
               id,
-              name: item?.product_name ?? item?.name ?? "PRODUCT",
+              name:
+                design?.design_translation?.design_variant_name ??
+                item?.product_name ??
+                item?.name ??
+                "PRODUCT",
               price: item?.total_price ?? null,
               imageSrc: normalizeImage(item?.image),
               href: query.toString()

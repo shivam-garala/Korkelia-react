@@ -1,0 +1,49 @@
+.simpleWrap {
+  min-height: calc(100vh - var(--admin-header-height, 0px) - 48px);
+  display: grid;
+  grid-template-rows: 1fr auto;
+  align-items: center;
+  justify-items: center;
+  gap: 18px;
+}
+
+.centerBlock {
+  text-align: center;
+  display: grid;
+  gap: 6px;
+  justify-items: center;
+}
+
+.eyebrow {
+  margin: 0;
+  font-size: 12px;
+  letter-spacing: 0.8px;
+  text-transform: uppercase;
+  color: var(--color-muted);
+  font-family: var(--font-body);
+}
+
+.title {
+  margin: 0;
+  font-size: 30px;
+  color: var(--color-heading);
+  font-family: var(--font-heading);
+  font-weight: 500;
+}
+
+.subtitle {
+  margin: 0;
+  color: var(--color-muted);
+  line-height: 1.5;
+}
+
+.footerLogo {
+  padding-bottom: 8px;
+  opacity: 0.85;
+}
+
+.logoImage {
+  width: min(180px, 60vw);
+  height: auto;
+  display: block;
+}
