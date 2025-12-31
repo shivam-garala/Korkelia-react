@@ -80,6 +80,7 @@
   line-height: 1.1;
   font-family: var(--font-heading);
   text-transform: uppercase;
+  white-space: pre-line;
 }
 
 .subtitle {

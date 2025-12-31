@@ -8,3 +8,30 @@
   display: grid;
   gap: 0;
 }
+
+.diamondGuideSection {
+  min-height: 100vh;
+}
+
+@media (max-width: 900px) {
+  .diamondGuideSection.diamondGuideSection {
+    height: auto;
+    min-height: auto;
+  }
+
+  .diamondGuideMedia {
+    position: relative;
+    height: auto;
+  }
+
+  .diamondGuideVideo {
+    width: 100vw;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .diamondGuideContent {
+    position: absolute;
+    inset: 0;
+  }
+}
