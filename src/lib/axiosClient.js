@@ -9,7 +9,7 @@ console.log(process.env.NEXT_PUBLIC_API_URL);
 const isAdminRoute = () => {
   if (typeof window === "undefined") return false;
   const path = window.location?.pathname ?? "";
-  return path.startsWith("/dashboard") || path.startsWith("/admin") || path === "/login";
+  return path.startsWith("/dashboard") || path === "/login";
 };
 
 const isMutationMethod = (method) => {

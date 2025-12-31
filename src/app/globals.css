@@ -77,7 +77,7 @@ input[type="month"],
 input[type="week"],
 select,
 textarea {
-  border-radius: 0 !important;
+  border-radius: 8px !important;
 }
 
 h1,

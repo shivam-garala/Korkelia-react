@@ -11,8 +11,11 @@ import Modal from "../../../components/ui/Modal.jsx";
 import AdminSelectField from "../../../components/ui/AdminSelectField.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import Button from "../../../components/ui/Button.jsx";
+import RadioGroup from "../../../components/ui/RadioGroup.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
+import axiosClient from "../../../lib/axiosClient.js";
 import fieldStyles from "../../../components/ui/Fields.module.css";
+import radioStyles from "../../../components/ui/RadioGroup.module.css";
 import { toast } from "react-toastify";
 import {
   createDesignVariant,
@@ -223,6 +226,8 @@ export default function DesignVariantPage() {
   const [existingImages, setExistingImages] = useState([]);
   const [listingSelection, setListingSelection] = useState("");
   const [fileInputKey, setFileInputKey] = useState(0);
+  const [imageDeletingId, setImageDeletingId] = useState(null);
+  const [imageDeleteTarget, setImageDeleteTarget] = useState(null);
   const [filters, setFilters] = useState({
     no: "",
     product: "",
@@ -549,6 +554,44 @@ export default function DesignVariantPage() {
     setVideoFile(file);
   }, []);
 
+  const handleDeleteImage = useCallback(
+    async (image) => {
+      const imageId = image?.id ?? null;
+      if (!imageId) return;
+      const stringId = String(imageId);
+      if (imageDeletingId === stringId) return;
+      try {
+        setImageDeletingId(stringId);
+        await axiosClient.delete(`/api/design/delete-image/${stringId}`);
+        setExistingImages((prev) =>
+          prev.filter((item) => String(item?.id ?? "") !== stringId)
+        );
+        setListingSelection((prev) => {
+          if (image?.isVideo && prev === "video") return "";
+          const orderValue = Number(image?.order);
+          const slotIndex = Number.isFinite(orderValue) ? orderValue - 1 : -1;
+          if (slotIndex >= 0 && slotIndex < 4) {
+            const slotKey = `image-${slotIndex}`;
+            if (prev === slotKey) return "";
+          }
+          return prev;
+        });
+      } catch (error) {
+        toast.error("Delete failed. Please try again.");
+        console.error("Delete image failed", error);
+      } finally {
+        setImageDeletingId(null);
+        setImageDeleteTarget(null);
+      }
+    },
+    [imageDeletingId]
+  );
+
+  const requestImageDelete = useCallback((image) => {
+    if (!image?.id) return;
+    setImageDeleteTarget(image);
+  }, []);
+
   const previewSlots = useMemo(() => {
     const slots = Array(4).fill(null);
     const list = Array.isArray(existingImages) ? existingImages : [];
@@ -872,31 +915,16 @@ export default function DesignVariantPage() {
             />
           </div>
           <div className={styles.priceFlagRow}>
-            <div className={fieldStyles.field}>
-              <label className={fieldStyles.label}>Price Flag</label>
-              <div className={styles.radioGroup}>
-                <label className={`${styles.radioOption} ${priceFlag === "yes" ? styles.radioOptionChecked : ""}`}>
-                  <input
-                    type="radio"
-                    name="price-flag"
-                    value="yes"
-                    checked={priceFlag === "yes"}
-                    onChange={(e) => setPriceFlag(e.target.value)}
-                  />
-                  <span className={styles.radioLabel}>Yes</span>
-                </label>
-                <label className={`${styles.radioOption} ${priceFlag === "no" ? styles.radioOptionChecked : ""}`}>
-                  <input
-                    type="radio"
-                    name="price-flag"
-                    value="no"
-                    checked={priceFlag === "no"}
-                    onChange={(e) => setPriceFlag(e.target.value)}
-                  />
-                  <span className={styles.radioLabel}>No</span>
-                </label>
-              </div>
-            </div>
+            <RadioGroup
+              label="Price Flag"
+              name="price-flag"
+              value={priceFlag}
+              onChange={setPriceFlag}
+              options={[
+                { value: "yes", label: "Yes" },
+                { value: "no", label: "No" },
+              ]}
+            />
           </div>
           <div className={crudStyles.formRow2}>
             <TextField
@@ -936,15 +964,27 @@ export default function DesignVariantPage() {
                   >
                     Image {index + 1}
                   </label>
-                  <label className={styles.listingToggle}>
+                  <label
+                    className={[
+                      radioStyles.option,
+                      styles.listingOption,
+                      listingSelection === `image-${index}` ? radioStyles.optionChecked : "",
+                    ].join(" ")}
+                  >
                     <input
-                      className={styles.listingRadio}
+                      className={radioStyles.input}
                       type="radio"
                       name="listing-media"
                       checked={listingSelection === `image-${index}`}
                       onChange={() => setListingSelection(`image-${index}`)}
                     />
-                    <span className={styles.listingLabel}>Set as listing</span>
+                    <span
+                      className={[radioStyles.indicator, styles.listingIndicator].join(" ")}
+                      aria-hidden
+                    />
+                    <span className={[radioStyles.text, styles.listingText].join(" ")}>
+                      Set as listing
+                    </span>
                   </label>
                 </div>
                 <input
@@ -963,6 +1003,22 @@ export default function DesignVariantPage() {
                       alt=""
                       loading="lazy"
                     />
+                    {previewSlots[index]?.id ? (
+                      <div className={styles.mediaActions}>
+                        <Button
+                          variant="danger"
+                          size="sm"
+                          type="button"
+                          disabled={imageDeletingId === String(previewSlots[index].id)}
+                          onClick={() => requestImageDelete(previewSlots[index])}
+                          icon="delete"
+                          iconOnly
+                          className={styles.mediaDelete}
+                        >
+                          Delete
+                        </Button>
+                      </div>
+                    ) : null}
                   </div>
                 ) : null}
               </div>
@@ -972,15 +1028,27 @@ export default function DesignVariantPage() {
                 <label className={fieldStyles.label} htmlFor={`video-${fileInputKey}`}>
                   Video
                 </label>
-                <label className={styles.listingToggle}>
+                <label
+                  className={[
+                    radioStyles.option,
+                    styles.listingOption,
+                    listingSelection === "video" ? radioStyles.optionChecked : "",
+                  ].join(" ")}
+                >
                   <input
-                    className={styles.listingRadio}
+                    className={radioStyles.input}
                     type="radio"
                     name="listing-media"
                     checked={listingSelection === "video"}
                     onChange={() => setListingSelection("video")}
                   />
-                  <span className={styles.listingLabel}>Set as listing</span>
+                  <span
+                    className={[radioStyles.indicator, styles.listingIndicator].join(" ")}
+                    aria-hidden
+                  />
+                  <span className={[radioStyles.text, styles.listingText].join(" ")}>
+                    Set as listing
+                  </span>
                 </label>
               </div>
               <input
@@ -996,12 +1064,39 @@ export default function DesignVariantPage() {
                   <video className={styles.previewVideo} controls>
                     <source src={previewVideo.image_url} />
                   </video>
+                  {previewVideo?.id ? (
+                    <div className={styles.mediaActions}>
+                      <Button
+                        variant="danger"
+                        size="sm"
+                        type="button"
+                        disabled={imageDeletingId === String(previewVideo.id)}
+                        onClick={() => requestImageDelete(previewVideo)}
+                        icon="delete"
+                        iconOnly
+                        className={styles.mediaDelete}
+                      >
+                        Delete
+                      </Button>
+                    </div>
+                  ) : null}
                 </div>
               ) : null}
             </div>
           </div>
 
-          <div className={styles.detailHeader}>Diamond Details</div>
+          <div className={styles.detailHeaderRow}>
+            <div className={styles.detailHeader}>Diamond Details</div>
+            <Button
+              variant="secondary"
+              size="sm"
+              type="button"
+              className={styles.detailAddButton}
+              onClick={addDetailRow}
+            >
+              Add Diamond Detail
+            </Button>
+          </div>
           <div className={styles.detailList}>
             <div className={`${styles.detailRow} ${styles.detailRowHeader}`}>
               <span>Cut</span>
@@ -1080,11 +1175,6 @@ export default function DesignVariantPage() {
               </div>
             ))}
           </div>
-          <div className={styles.addRow}>
-            <Button variant="secondary" type="button" onClick={addDetailRow}>
-              Add Diamond Detail
-            </Button>
-          </div>
         </form>
       </Modal>
       <ConfirmDialog
@@ -1094,6 +1184,14 @@ export default function DesignVariantPage() {
         confirmLabel="Delete"
         onConfirm={confirmDelete}
         onClose={() => setDeleteTarget(null)}
+      />
+      <ConfirmDialog
+        open={Boolean(imageDeleteTarget)}
+        title="Delete Image"
+        message="Delete this image? This action cannot be undone."
+        confirmLabel="Delete"
+        onConfirm={() => handleDeleteImage(imageDeleteTarget)}
+        onClose={() => setImageDeleteTarget(null)}
       />
     </div>
   );

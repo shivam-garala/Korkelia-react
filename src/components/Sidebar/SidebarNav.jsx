@@ -71,32 +71,40 @@ export default function SidebarNav({ activePath }) {
   }, []);
 
   return (
-    <nav className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}>
-      {sidebarSections.map((section) => (
-        <div key={section.title} className={styles.section}>
-          <p className={styles.sectionTitle}>{section.title}</p>
-          <ul className={styles.list}>
-            {section.items.map((item) => {
-              const active =
-                activePath === item.href ||
-                activePath?.startsWith(`${item.href}/`);
-              return (
-                <li key={item.href}>
-                  <Link
-                    href={item.href}
-                    className={`${styles.link} ${active ? styles.active : ""}`}
-                  >
-                    <span className={styles.icon}>
-                      <Icon className={styles.iconSvg} name={item.icon} size={16} />
-                    </span>
-                    <span className={styles.label}>{item.label}</span>
-                  </Link>
-                </li>
-              );
-            })}
-          </ul>
-        </div>
-      ))}
-    </nav>
+    <>
+      <button
+        type="button"
+        className={`${styles.backdrop} ${collapsed ? "" : styles.backdropOpen}`}
+        aria-label="Close menu"
+        onClick={() => setCollapsed(true)}
+      />
+      <nav className={`${styles.sidebar} ${collapsed ? styles.collapsed : ""}`}>
+        {sidebarSections.map((section) => (
+          <div key={section.title} className={styles.section}>
+            <p className={styles.sectionTitle}>{section.title}</p>
+            <ul className={styles.list}>
+              {section.items.map((item) => {
+                const active =
+                  activePath === item.href ||
+                  activePath?.startsWith(`${item.href}/`);
+                return (
+                  <li key={item.href}>
+                    <Link
+                      href={item.href}
+                      className={`${styles.link} ${active ? styles.active : ""}`}
+                    >
+                      <span className={styles.icon}>
+                        <Icon className={styles.iconSvg} name={item.icon} size={16} />
+                      </span>
+                      <span className={styles.label}>{item.label}</span>
+                    </Link>
+                  </li>
+                );
+              })}
+            </ul>
+          </div>
+        ))}
+      </nav>
+    </>
   );
 }

@@ -16,7 +16,6 @@ export default function StoreProvider({ children }) {
     if (!pathname) return false;
     return (
       pathname.startsWith("/dashboard") ||
-      pathname.startsWith("/admin") ||
       pathname.startsWith("/product") ||
       pathname === "/login"
     );

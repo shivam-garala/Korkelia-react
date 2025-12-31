@@ -1,19 +1,16 @@
 'use client';
 
-import Link from "next/link";
 import { useMemo, useState } from "react";
-import { usePathname, useRouter } from "next/navigation";
+import { useRouter, usePathname } from "next/navigation";
 import SidebarNav from "../../components/Sidebar/SidebarNav.jsx";
-import LanguageDropdown from "../../components/LanguageDropdown/LanguageDropdown.jsx";
+import AdminHeader from "../../components/AdminHeader/AdminHeader.jsx";
+import NotificationDrawer from "../../components/NotificationDrawer/NotificationDrawer.jsx";
 import ProfileDrawer from "../../components/ProfileDrawer/ProfileDrawer.jsx";
-import { protectedRoutes } from "../../routes/routes.js";
-import { clearCredentials, selectUserName, selectEmail } from "../../store/authSlice.js";
+import SearchOverlay from "../../components/SearchOverlay/SearchOverlay.jsx";
 import { useAppDispatch, useAppSelector } from "../../store/hooks.js";
+import { clearCredentials, selectEmail, selectUserName } from "../../store/authSlice.js";
 import styles from "../../styles/workspace.module.css";
-
-const dashboardLinks = protectedRoutes.filter((route) =>
-  route.path.startsWith("/dashboard")
-);
+import pageStyles from "./page.module.css";
 
 export default function DashboardPage() {
   const router = useRouter();
@@ -40,50 +37,36 @@ export default function DashboardPage() {
     }
     return "U";
   }, [userEmail, userName]);
+  const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
+  const [searchOpen, setSearchOpen] = useState(false);
+  const displayName = useMemo(() => userName?.split(" ")[0] || "Admin", [userName]);
 
   return (
     <div className={styles.page}>
       <SidebarNav activePath={pathname} />
 
       <div className={styles.main}>
-        <header className={styles.headerBar}>
-          <div className={styles.team}>
-            <div className={styles.badge}>Team 1 · Free</div>
-            <span style={{ color: "#9ca3af", fontSize: 14 }}>▼</span>
-          </div>
-          <div className={styles.actionsRow}>
-            <LanguageDropdown />
-            {/* <button className={styles.ghostIcon}>⚙️</button> */}
-            {/* <button className={styles.ghostIcon}>🔔</button> */}
-            <button
-              className={styles.avatarRing}
-              onClick={() => setProfileOpen(true)}
-              aria-label="Open profile"
-            >
-              <span className={styles.avatarRingInner}>{avatarInitials}</span>
-            </button>
-          </div>
-        </header>
+        <AdminHeader
+          onSearch={() => setSearchOpen(true)}
+          onProfile={() => setProfileOpen(true)}
+          avatarText={avatarInitials}
+        />
 
         <main className={styles.content}>
-          <div className={styles.titleRow}>
-            <h1 className={styles.pageTitle}>Dashboard</h1>
-          </div>
-          <p className={styles.subtitle}>
-            Guarded layout inspired by the reference design. Sidebar is static
-            (SSR) and the content area spans the remaining width.
-          </p>
-          <div className={styles.grid}>
-            {dashboardLinks.map((link) => (
-              <Link key={link.id} href={link.path} className={styles.tile}>
-                <p className={styles.tileLabel}>{link.name}</p>
-                <p className={styles.tilePath}>{link.path}</p>
-              </Link>
-            ))}
+          <div className={pageStyles.simpleWrap}>
+            <div className={pageStyles.centerBlock}>
+              <p className={pageStyles.eyebrow}>Admin Workspace</p>
+              <h1 className={pageStyles.title}>Dashboard</h1>
+              <p className={pageStyles.subtitle}>Welcome back, {displayName}.</p>
+            </div>
+            <div className={pageStyles.footerLogo} aria-hidden>
+              <img className={pageStyles.logoImage} src="/logo/footer_logo.png" alt="" />
+            </div>
           </div>
         </main>
       </div>
+      <NotificationDrawer open={notifOpen} onClose={() => setNotifOpen(false)} />
       <ProfileDrawer
         open={profileOpen}
         onClose={() => setProfileOpen(false)}
@@ -99,7 +82,7 @@ export default function DashboardPage() {
           router.push("/login");
         }}
       />
+      <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
     </div>
   );
 }
-

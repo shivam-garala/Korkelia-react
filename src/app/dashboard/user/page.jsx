@@ -103,10 +103,16 @@ export default function UserPage() {
     };
 
     if (editingId) {
-      await dispatch(updateUser({ id: editingId, payload }));
-    } else {
-      await dispatch(createUser(payload));
+      const result = await dispatch(updateUser({ id: editingId, payload }));
+      if (!result?.error) {
+        dispatch(fetchUsers());
+        setModalOpen(false);
+        setEditingId(null);
+      }
+      return;
     }
+
+    await dispatch(createUser(payload));
     setModalOpen(false);
     setEditingId(null);
   };

@@ -1,0 +1,14 @@
+.modal {
+  width: min(300px, 100%);
+}
+
+.footer {
+  display: flex;
+  gap: 12px;
+  justify-content: flex-end;
+}
+
+.message {
+  font-size: 14px;
+  color: var(--color-heading);
+}

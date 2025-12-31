@@ -10,7 +10,7 @@ export function middleware(request) {
   }
 
   if (pathname.startsWith("/login") && token) {
-    return NextResponse.redirect(new URL("/admin", request.url));
+    return NextResponse.redirect(new URL("/dashboard", request.url));
   }
 
   return NextResponse.next();

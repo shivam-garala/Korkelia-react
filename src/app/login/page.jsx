@@ -106,7 +106,7 @@ export default function LoginPage() {
           email: resolvedEmail,
         })
       );
-      router.push("/admin");
+      router.push("/dashboard");
     } catch (error) {
       const data = error?.response?.data ?? null;
       const errorMessage =

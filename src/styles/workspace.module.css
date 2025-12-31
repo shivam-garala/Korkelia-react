@@ -199,17 +199,19 @@
 
 :global(.adminSelect__control) {
   min-height: 40px;
-  border-radius: 0 !important;
-  border: 1px solid var(--color-primary);
+  border-radius: 8px !important;
+  border: 1px solid var(--color-border) !important;
+  /* border-color: var(--color-border) ; */
   box-shadow: none;
   font-family: var(--font-body);
-  background: var(--background);
+  background: var(--color-surface);
   color: var(--color-heading);
 }
 
 :global(.adminSelect__control--is-focused) {
-  border-color: var(--color-primary);
-  box-shadow: 0 0 0 1px var(--color-primary);
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 1px var(--color-primary) !important;
+  outline: none;
 }
 
 :global(.adminSelect__control:hover) {
@@ -235,10 +237,11 @@
 }
 
 :global(.adminSelect__menu) {
-  /* border-radius: 10px !important; */
+  border-radius: 8px !important;
   border: 1px solid var(--color-border);
   box-shadow: var(--shadow-soft);
   font-family: var(--font-body);
+  background: var(--color-surface);
 }
 
 :global(.adminSelect__menu-list) {
@@ -246,7 +249,7 @@
 }
 
 :global(.adminSelect__option) {
-  /* border-radius: 10px !important; */
+  border-radius: 8px !important;
   font-family: var(--font-body);
   letter-spacing: 0.6px;
   text-transform: uppercase;
@@ -254,17 +257,17 @@
 }
 
 :global(.adminSelect__option--is-focused) {
-  background: color-mix(in srgb, var(--color-primary), transparent 85%);
-  color: var(--color-heading);
+  background: color-mix(in srgb, var(--color-primary), transparent 85%) !important;
+  color: var(--color-heading) !important;
 }
 
 :global(.adminSelect__option--is-selected) {
-  background: var(--color-primary-soft);
-  color: var(--color-heading);
+  background: var(--color-primary-soft) !important;
+  color: var(--color-heading) !important;
 }
 
 :global(.adminSelect__option:active) {
-  background: var(--color-primary-soft);
+  background: var(--color-primary-soft) !important;
 }
 
 :global(.adminSelect__menu-portal) {
