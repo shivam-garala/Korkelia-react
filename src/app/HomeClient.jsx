@@ -22,6 +22,7 @@ export default function HomeClient() {
   const { t, language } = useI18n();
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
+  const [isDesktop, setIsDesktop] = useState(false);
 
   const languageId = language === "fi" ? "2" : "1";
   const fallbackCategories = useMemo(
@@ -100,6 +101,22 @@ export default function HomeClient() {
     };
   }, [languageId]);
 
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    const mediaQuery = window.matchMedia("(min-width: 1024px)");
+
+    const handleChange = () => setIsDesktop(mediaQuery.matches);
+    handleChange();
+
+    if (mediaQuery.addEventListener) {
+      mediaQuery.addEventListener("change", handleChange);
+      return () => mediaQuery.removeEventListener("change", handleChange);
+    }
+
+    mediaQuery.addListener(handleChange);
+    return () => mediaQuery.removeListener(handleChange);
+  }, []);
+
   return (
     <div className={styles.page}>
       <SiteHeader />
@@ -122,12 +139,21 @@ export default function HomeClient() {
 
         <FullMediaSection
           mediaType="video"
-          mediaSrc="/homepage/diamond_guid.mp4"
+          mediaSrc={
+            isDesktop
+              ? "/homepage/diamond_guid_desktop.mp4"
+              : "/homepage/diamond_guid_mobile.mp4"
+          }
           posterSrc="/homepage/banner_2.jpg"
-          eyebrow={t("home.diamondDifference.eyebrow")}
-          title={t("home.diamondDifference.title")}
-          subtitle={t("home.diamondDifference.subtitle")}
-          description={t("home.diamondDifference.description")}
+          mediaPosition={isDesktop ? "right center" : "right bottom"}
+          sectionClassName={styles.diamondGuideSection}
+          mediaClassName={styles.diamondGuideMedia}
+          contentClassName={styles.diamondGuideContent}
+          videoClassName={styles.diamondGuideVideo}
+          eyebrow={t("home.diamondGuide.eyebrow")}
+          title={t("home.diamondGuide.title")}
+          subtitle={t("home.diamondGuide.subtitle")}
+          description={t("home.diamondGuide.description")}
           ctaLabel={t("home.cta.discover")}
           href="/diamond-guide"
         />
@@ -136,10 +162,10 @@ export default function HomeClient() {
           mediaType="image"
           mediaSrc="/homepage/banner_1.jpg"
           posterSrc="/homepage/banner_1.jpg"
-          eyebrow={t("home.diamondGuide.eyebrow")}
-          title={t("home.diamondGuide.title")}
-          subtitle={t("home.diamondGuide.subtitle")}
-          description={t("home.diamondGuide.description")}
+          eyebrow={t("home.diamondDifference.eyebrow")}
+          title={t("home.diamondDifference.title")}
+          subtitle={t("home.diamondDifference.subtitle")}
+          description={t("home.diamondDifference.description")}
           ctaLabel={t("home.cta.discover")}
           href="/diamond-difference"
         />
