@@ -3,7 +3,18 @@
 import { useEffect } from "react";
 import styles from "./Modal.module.css";
 
-export default function Modal({ open, title, children, onClose, footer }) {
+export default function Modal({
+  open,
+  title,
+  children,
+  onClose,
+  footer,
+  className,
+  bodyClassName,
+  headerClassName,
+  footerClassName,
+  backdropClassName,
+}) {
   useEffect(() => {
     if (!open) return;
     const onKeyDown = (event) => {
@@ -15,20 +26,25 @@ export default function Modal({ open, title, children, onClose, footer }) {
 
   if (!open) return null;
 
+  const backdropClasses = `${styles.backdrop}${backdropClassName ? ` ${backdropClassName}` : ""}`;
+  const modalClasses = `${styles.modal}${className ? ` ${className}` : ""}`;
+  const headerClasses = `${styles.header}${headerClassName ? ` ${headerClassName}` : ""}`;
+  const bodyClasses = `${styles.body}${bodyClassName ? ` ${bodyClassName}` : ""}`;
+  const footerClasses = `${styles.footer}${footerClassName ? ` ${footerClassName}` : ""}`;
+
   return (
-    <div className={styles.backdrop} role="dialog" aria-modal="true" aria-label={title ?? "Modal"}>
+    <div className={backdropClasses} role="dialog" aria-modal="true" aria-label={title ?? "Modal"}>
       <button className={styles.backdropBtn} type="button" aria-label="Close modal" onClick={onClose} />
-      <div className={styles.modal}>
-        <div className={styles.header}>
+      <div className={modalClasses}>
+        <div className={headerClasses}>
           <div className={styles.title}>{title}</div>
           <button className={styles.close} type="button" onClick={onClose} aria-label="Close">
             ×
           </button>
         </div>
-        <div className={styles.body}>{children}</div>
-        {footer ? <div className={styles.footer}>{footer}</div> : null}
+        <div className={bodyClasses}>{children}</div>
+        {footer ? <div className={footerClasses}>{footer}</div> : null}
       </div>
     </div>
   );
 }
-

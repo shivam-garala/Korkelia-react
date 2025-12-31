@@ -2,9 +2,8 @@
 
 import Image from "next/image";
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
-import { Swiper, SwiperSlide } from "swiper/react";
-import { Navigation, Thumbs } from "swiper/modules";
 import { TransformComponent, TransformWrapper } from "react-zoom-pan-pinch";
+import Modal from "../ui/Modal.jsx";
 import styles from "./ProductGallery.module.css";
 
 const isVideoSrc = (value) => {
@@ -218,41 +217,57 @@ export default function ProductGallery({ items, productId = "" }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [loadedMap, setLoadedMap] = useState({});
-  const [thumbsSwiper, setThumbsSwiper] = useState(null);
-  const [mainSwiper, setMainSwiper] = useState(null);
-  const [isZoomed, setIsZoomed] = useState(false);
+  const [touchStartX, setTouchStartX] = useState(null);
   const galleryRef = useRef(null);
   const galleryScrollRaf = useRef(null);
+  const zoomRef = useRef(null);
 
   const openAt = useCallback((index) => {
     setActiveIndex(index);
     setGalleryIndex(index);
     setOpen(true);
-    setIsZoomed(false);
   }, []);
 
   const close = useCallback(() => {
     setOpen(false);
-    setIsZoomed(false);
+    setTouchStartX(null);
   }, []);
 
   const showPrev = useCallback(() => {
-    if (mainSwiper) {
-      mainSwiper.slidePrev();
-      return;
-    }
     if (slides.length < 2) return;
     setActiveIndex((prev) => (prev - 1 + slides.length) % slides.length);
-  }, [mainSwiper, slides.length]);
+  }, [slides.length]);
 
   const showNext = useCallback(() => {
-    if (mainSwiper) {
-      mainSwiper.slideNext();
-      return;
-    }
     if (slides.length < 2) return;
     setActiveIndex((prev) => (prev + 1) % slides.length);
-  }, [mainSwiper, slides.length]);
+  }, [slides.length]);
+
+  const handleTouchStart = useCallback((event) => {
+    setTouchStartX(event.touches[0]?.clientX ?? null);
+  }, []);
+
+  const handleTouchMove = useCallback(
+    (event) => {
+      if (touchStartX === null) return;
+      const touchEndX = event.touches[0]?.clientX ?? null;
+      if (touchEndX === null) return;
+      const touchDeltaX = touchEndX - touchStartX;
+      const sensitivity = 50;
+      if (touchDeltaX > sensitivity) {
+        showPrev();
+        setTouchStartX(null);
+      } else if (touchDeltaX < -sensitivity) {
+        showNext();
+        setTouchStartX(null);
+      }
+    },
+    [showNext, showPrev, touchStartX]
+  );
+
+  const handleTouchEnd = useCallback(() => {
+    setTouchStartX(null);
+  }, []);
 
   const scrollToGalleryIndex = useCallback((index) => {
     const root = galleryRef.current;
@@ -346,6 +361,46 @@ export default function ProductGallery({ items, productId = "" }) {
   }, [slides, scrollToGalleryIndex]);
 
   useEffect(() => {
+    if (!slides.length) return;
+    if (activeIndex >= slides.length) {
+      setActiveIndex(0);
+    }
+  }, [activeIndex, slides.length]);
+
+  const active = slides[activeIndex];
+  const isActiveVideo = active ? isVideoItem(active) : false;
+
+  useEffect(() => {
+    if (!open) return;
+    if (isActiveVideo) {
+      zoomRef.current = null;
+      return;
+    }
+    zoomRef.current?.resetTransform?.();
+  }, [activeIndex, isActiveVideo, open]);
+
+  const handleZoomIn = useCallback(() => {
+    if (isActiveVideo) return;
+    zoomRef.current?.zoomIn?.();
+  }, [isActiveVideo]);
+
+  const handleZoomOut = useCallback(() => {
+    if (isActiveVideo) return;
+    zoomRef.current?.zoomOut?.();
+  }, [isActiveVideo]);
+
+  const handleZoomReset = useCallback(() => {
+    if (isActiveVideo) return;
+    zoomRef.current?.resetTransform?.();
+  }, [isActiveVideo]);
+
+  const handleZoomImageLoad = useCallback(() => {
+    if (isActiveVideo) return;
+    zoomRef.current?.resetTransform?.(0);
+    zoomRef.current?.centerView?.(1, 0);
+  }, [isActiveVideo]);
+
+  useEffect(() => {
     return () => {
       if (galleryScrollRaf.current) {
         cancelAnimationFrame(galleryScrollRaf.current);
@@ -353,16 +408,93 @@ export default function ProductGallery({ items, productId = "" }) {
     };
   }, []);
 
-  useEffect(() => {
-    setIsZoomed(false);
-  }, [activeIndex]);
-
-  useEffect(() => {
-    if (!open || !mainSwiper) return;
-    mainSwiper.slideTo(activeIndex, 0);
-  }, [activeIndex, mainSwiper, open]);
-
-  const active = slides[activeIndex];
+  const modalFooter = (
+    <div className={styles.modalFooter}>
+      <div className={styles.zoomControls} role="group" aria-label="Zoom controls">
+        <button
+          type="button"
+          className={styles.zoomControlBtn}
+          onClick={handleZoomIn}
+          disabled={isActiveVideo}
+          aria-label="Zoom in"
+        >
+          +
+        </button>
+        <button
+          type="button"
+          className={styles.zoomControlBtn}
+          onClick={handleZoomReset}
+          disabled={isActiveVideo}
+          aria-label="Reset zoom"
+        >
+          <svg viewBox="0 0 24 24" className={styles.zoomIcon} aria-hidden="true">
+            <path d="M21 12a9 9 0 1 1-3.3-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
+            <path d="M21 4v5h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+          </svg>
+        </button>
+        <button
+          type="button"
+          className={styles.zoomControlBtn}
+          onClick={handleZoomOut}
+          disabled={isActiveVideo}
+          aria-label="Zoom out"
+        >
+          -
+        </button>
+      </div>
+      {slides.length > 1 ? (
+        <div className={styles.modalCount}>
+          {activeIndex + 1} / {slides.length}
+        </div>
+      ) : null}
+      {slides.length > 1 ? (
+        <div className={styles.modalDots} role="tablist" aria-label="Media previews">
+          {slides.map((item, index) => {
+            const dotImageSrc = item.src || fallbackImageSrc;
+            const isVideo = isVideoItem(item);
+            const videoSrc = item.videoSrc ?? (isVideoSrc(item.src) ? item.src : "");
+            return (
+              <button
+                key={item.key ?? item.src ?? index}
+                type="button"
+                className={`${styles.modalDot} ${index === activeIndex ? styles.modalDotActive : ""}`}
+                onClick={() => setActiveIndex(index)}
+                aria-label={`Show media ${index + 1}`}
+                aria-current={index === activeIndex ? "true" : undefined}
+              >
+                <span className={styles.modalDotInner}>
+                  {isVideo && videoSrc ? (
+                    <video
+                      className={styles.modalDotVideo}
+                      muted
+                      playsInline
+                      preload="metadata"
+                      poster={dotImageSrc}
+                      onLoadedMetadata={(event) => {
+                        event.currentTarget.currentTime = 0.1;
+                      }}
+                    >
+                      <source src={videoSrc} />
+                    </video>
+                  ) : (
+                    <img
+                      className={styles.modalDotImage}
+                      src={dotImageSrc}
+                      alt=""
+                      loading="lazy"
+                    />
+                  )}
+                  {isVideo ? (
+                    <span className={styles.modalDotVideoBadge} aria-hidden="true" />
+                  ) : null}
+                </span>
+              </button>
+            );
+          })}
+        </div>
+      ) : null}
+    </div>
+  );
 
   return (
     <>
@@ -460,152 +592,102 @@ export default function ProductGallery({ items, productId = "" }) {
         ) : null}
       </div>
 
-      {open && active ? (
-        <div className={styles.modalBackdrop} role="dialog" aria-modal="true" aria-label="Product media">
-          <button className={styles.modalBackdropBtn} type="button" aria-label="Close" onClick={close} />
-          <div className={styles.modal}>
-            <div className={styles.modalHeader}>
-              <div className={styles.modalTitle}>Media {activeIndex + 1} / {slides.length}</div>
-              <div className={styles.modalActions}>
-                <button type="button" className={`${styles.actionButton} ${styles.closeButton}`} onClick={close} aria-label="Close">
-                  <span aria-hidden="true">&times;</span>
-                </button>
-              </div>
-            </div>
-            <div className={styles.modalBody}>
-              <Swiper
-                modules={[Thumbs, Navigation]}
-                navigation
-                allowTouchMove={!isZoomed}
-                thumbs={{
-                  swiper: thumbsSwiper && !thumbsSwiper.destroyed ? thumbsSwiper : null,
-                }}
-                onSwiper={setMainSwiper}
-                onSlideChange={(swiper) => {
-                  setActiveIndex(swiper.activeIndex);
-                  setIsZoomed(false);
-                }}
-                initialSlide={activeIndex}
-                className={styles.modalSwiper}
+      <Modal
+        open={open && Boolean(active)}
+        title={`Media ${activeIndex + 1} / ${slides.length}`}
+        onClose={close}
+        footer={modalFooter}
+        className={styles.sliderModal}
+        bodyClassName={styles.sliderModalBody}
+        backdropClassName={styles.sliderBackdrop}
+      >
+        {active ? (
+          <div
+            className={styles.modalBody}
+            onTouchStart={handleTouchStart}
+            onTouchMove={handleTouchMove}
+            onTouchEnd={handleTouchEnd}
+          >
+            {slides.length > 1 ? (
+              <button
+                type="button"
+                className={`${styles.sliderNav} ${styles.sliderPrev}`}
+                onClick={showPrev}
+                aria-label="Previous image"
               >
-                {slides.map((item, index) => {
-                  const isVideo = isVideoItem(item);
-                  return (
-                    <SwiperSlide key={item.key ?? item.src ?? index} className={styles.modalSlide}>
-                      {isVideo ? (
-                        <div className={styles.modalMedia}>
-                          <video
-                            className={styles.modalVideo}
-                            autoPlay
-                            muted
-                            loop
-                            controls
-                            playsInline
-                            poster={item.src}
-                          >
-                            <source src={item.videoSrc ?? item.src} />
-                          </video>
-                        </div>
-                      ) : (
-                        <TransformWrapper
-                          minScale={1}
-                          maxScale={4}
-                          centerOnInit
-                          centerZoomedOut
-                          smooth
-                          smoothStep={0.08}
-                          doubleClick={{ mode: "zoomIn" }}
-                          wheel={{ step: 0.15 }}
-                          pinch={{ step: 5 }}
-                          panning={{ disabled: !(isZoomed && activeIndex === index) }}
-                          onZoomStop={({ state }) => {
-                            if (index === activeIndex) {
-                              setIsZoomed(state.scale > 1);
-                            }
-                          }}
-                          onPanningStop={({ state }) => {
-                            if (index === activeIndex && state.scale <= 1) {
-                              setIsZoomed(false);
-                            }
-                          }}
-                        >
-                          {({ zoomIn, zoomOut, resetTransform }) => (
-                            <div className={styles.zoomStage}>
-                              {isZoomed && index === activeIndex ? (
-                                <div className={styles.zoomOverlay} aria-hidden />
-                              ) : null}
-                              <div className={styles.zoomControls} role="group" aria-label="Zoom controls">
-                                <button
-                                  type="button"
-                                  className={styles.zoomControlBtn}
-                                  onClick={() => zoomIn()}
-                                  aria-label="Zoom in"
-                                >
-                                  +
-                                </button>
-                                <button
-                                  type="button"
-                                  className={styles.zoomControlBtn}
-                                  onClick={() => {
-                                    resetTransform();
-                                    setIsZoomed(false);
-                                  }}
-                                  aria-label="Reset zoom"
-                                >
-                                  <svg viewBox="0 0 24 24" className={styles.zoomIcon} aria-hidden="true">
-                                    <path d="M21 12a9 9 0 1 1-3.3-7" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" />
-                                    <path d="M21 4v5h-5" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
-                                  </svg>
-                                </button>
-                                <button
-                                  type="button"
-                                  className={styles.zoomControlBtn}
-                                  onClick={() => zoomOut()}
-                                  aria-label="Zoom out"
-                                >
-                                  -
-                                </button>
-                              </div>
-                              <TransformComponent wrapperStyle={{ width: "100%", height: "100%" }}>
-                                <img className={styles.modalImage} src={item.src} alt="" draggable="false" />
-                              </TransformComponent>
-                            </div>
-                          )}
-                        </TransformWrapper>
-                      )}
-                    </SwiperSlide>
-                  );
-                })}
-              </Swiper>
-            </div>
-            <div className={styles.modalFooter}>
-              {slides.length > 1 ? (
-                <div className={styles.modalCount}>{activeIndex + 1} / {slides.length}</div>
-              ) : null}
-              {slides.length > 1 ? (
-                <Swiper
-                  onSwiper={setThumbsSwiper}
-                  slidesPerView="auto"
-                  spaceBetween={0}
-                  watchSlidesProgress
-                  className={styles.thumbSwiper}
+                <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.navIcon}>
+                  <path d="M15 18l-6-6 6-6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            ) : null}
+            <div className={styles.sliderFrame}>
+              {isVideoItem(active) ? (
+                <video
+                  className={styles.modalVideo}
+                  autoPlay
+                  muted
+                  loop
+                  controls
+                  playsInline
+                  poster={active.src}
                 >
-                  {slides.map((item, index) => (
-                    <SwiperSlide key={item.key ?? item.src ?? index} className={styles.thumbSlide}>
-                      <div className={styles.thumbBox}>
-                        <img className={styles.thumbImage} src={item.src} alt="" loading="lazy" />
-                        {isVideoItem(item) ? (
-                          <span className={styles.thumbVideoBadge} aria-hidden="true" />
-                        ) : null}
-                      </div>
-                    </SwiperSlide>
-                  ))}
-                </Swiper>
-              ) : null}
+                  <source src={active.videoSrc ?? active.src} />
+                </video>
+              ) : (
+                <TransformWrapper
+                  key={active.key ?? active.src ?? activeIndex}
+                  ref={(ref) => {
+                    zoomRef.current = ref;
+                  }}
+                  centerOnInit
+                  centerZoomedOut
+                  minScale={1}
+                >
+                  <TransformComponent
+                    wrapperClass={styles.zoomWrapper}
+                    contentClass={styles.zoomContent}
+                    wrapperStyle={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                    contentStyle={{
+                      width: "100%",
+                      height: "100%",
+                      display: "flex",
+                      alignItems: "center",
+                      justifyContent: "center",
+                    }}
+                  >
+                    <img
+                      className={styles.modalImage}
+                      src={active.src}
+                      alt=""
+                      draggable="false"
+                      onLoad={handleZoomImageLoad}
+                    />
+                  </TransformComponent>
+                </TransformWrapper>
+              )}
             </div>
+            {slides.length > 1 ? (
+              <button
+                type="button"
+                className={`${styles.sliderNav} ${styles.sliderNext}`}
+                onClick={showNext}
+                aria-label="Next image"
+              >
+                <svg viewBox="0 0 24 24" aria-hidden="true" className={styles.navIcon}>
+                  <path d="M9 6l6 6-6 6" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
+                </svg>
+              </button>
+            ) : null}
           </div>
-        </div>
-      ) : null}
+        ) : null}
+      </Modal>
+
     </>
   );
 }
