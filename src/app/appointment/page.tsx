@@ -148,18 +148,27 @@ export default function AppointmentPage() {
               <TextField
                 label={labels.firstName}
                 name="firstName"
+                placeholder={labels.firstName}
+                required
+                autoComplete="given-name"
                 value={form.firstName}
                 onChange={handleChange}
               />
               <TextField
                 label={labels.lastName}
                 name="lastName"
+                placeholder={labels.lastName}
+                required
+                autoComplete="family-name"
                 value={form.lastName}
                 onChange={handleChange}
               />
               <TextField
                 label={labels.country}
                 name="country"
+                placeholder={labels.country}
+                required
+                autoComplete="country-name"
                 value={form.country}
                 onChange={handleChange}
               />
@@ -167,6 +176,8 @@ export default function AppointmentPage() {
                 label={labels.email}
                 name="email"
                 type="email"
+                placeholder={labels.email}
+                required
                 autoComplete="email"
                 value={form.email}
                 onChange={handleChange}
@@ -174,6 +185,10 @@ export default function AppointmentPage() {
               <TextField
                 label={labels.phone}
                 name="phone"
+                placeholder={labels.phone}
+                required
+                autoComplete="tel"
+                inputMode="tel"
                 value={form.phone}
                 onChange={handleChange}
               />
@@ -181,6 +196,8 @@ export default function AppointmentPage() {
                 label={labels.appointmentDate}
                 name="appointmentDate"
                 type="date"
+                placeholder={labels.appointmentDatePlaceholder}
+                required
                 value={form.appointmentDate}
                 onChange={handleChange}
               />
@@ -188,6 +205,8 @@ export default function AppointmentPage() {
                 label={labels.appointmentSlot}
                 name="appointmentSlot"
                 placeholder={labels.appointmentSlotPlaceholder}
+                required
+                disabled={false}
                 value={form.appointmentSlot}
                 onChange={handleChange}
                 options={slotOptions}

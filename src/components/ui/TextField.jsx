@@ -8,13 +8,13 @@ export default function TextField({
   type = "text",
   value,
   onChange,
-  required,
-  placeholder,
-  autoComplete,
-  inputMode,
-  step,
-  disabled,
-  name,
+  required = false,
+  placeholder = "",
+  autoComplete = "",
+  inputMode = "",
+  step = undefined,
+  disabled = false,
+  name = "",
   preventWheel = type === "number",
 }) {
   const inputRef = useRef(null);
@@ -53,4 +53,3 @@ export default function TextField({
     </label>
   );
 }
-
