@@ -25,10 +25,25 @@
 }
 
 .optionCheckbox {
-  width: 12px;
-  height: 12px;
+  width: 14px;
+  height: 14px;
   margin: 0;
-  accent-color: var(--color-primary);
+  border: 1px solid var(--color-border);
+  border-radius: 3px;
+  background-color: #ffffff;
+  appearance: none;
+  -webkit-appearance: none;
+  display: grid;
+  place-content: center;
+}
+
+.optionCheckbox:checked {
+  border-color: var(--color-primary);
+  background-color: var(--color-primary);
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 16 16'%3E%3Cpath d='M3.5 8.5l3 3 6-6' fill='none' stroke='%23ffffff' stroke-width='2' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: center;
+  background-size: 10px 10px;
 }
 
 .optionLabel {
@@ -41,15 +56,16 @@
 :global(.filters__control) {
   min-height: 40px;
   border-radius: 0;
-  border: 1px solid var(--color-primary);
-  background-color: #ffffff;
+  border: 1px solid var(--color-border) !important;
+  background-color: var(--color-surface) !important;
   box-shadow: none;
   cursor: pointer;
 }
 
 :global(.filters__control--is-focused) {
-  border-color: var(--color-primary);
-  box-shadow: none;
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 1px var(--color-primary) !important;
+  outline: none;
 }
 
 :global(.filters__value-container) {
@@ -112,12 +128,13 @@
 }
 
 :global(.filters__option--is-focused) {
-  background: color-mix(in srgb, var(--color-line), transparent 90%);
+  background: color-mix(in srgb, var(--color-primary), transparent 85%) !important;
+  color: var(--color-heading) !important;
 }
 
 :global(.filters__option--is-selected) {
-  background: color-mix(in srgb, var(--color-line), transparent 80%);
-  color: var(--color-heading);
+  background: var(--color-primary-soft) !important;
+  color: var(--color-heading) !important;
 }
 
 :global(.filters__multi-value) {
