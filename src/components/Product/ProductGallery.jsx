@@ -217,6 +217,7 @@ export default function ProductGallery({ items, productId = "" }) {
   const [activeIndex, setActiveIndex] = useState(0);
   const [galleryIndex, setGalleryIndex] = useState(0);
   const [loadedMap, setLoadedMap] = useState({});
+  const [failedMap, setFailedMap] = useState({});
   const [touchStartX, setTouchStartX] = useState(null);
   const galleryRef = useRef(null);
   const galleryScrollRaf = useRef(null);
@@ -349,9 +350,78 @@ export default function ProductGallery({ items, productId = "" }) {
     };
   }, [open]);
 
+  const handleMediaError = useCallback((index) => {
+    setFailedMap((prev) => (prev[index] ? prev : { ...prev, [index]: true }));
+    setLoadedMap((prev) => ({ ...prev, [index]: true }));
+  }, []);
+
   useEffect(() => {
     setLoadedMap({});
+    setFailedMap({});
   }, [slides]);
+
+  useEffect(() => {
+    if (!slides.length) return;
+    let active = true;
+    const cleanups = [];
+
+    slides.forEach((item, index) => {
+      if (!item || item.isSkeleton) return;
+      if (isVideoItem(item)) {
+        const videoSrc = item.videoSrc ?? (isVideoSrc(item.src) ? item.src : "");
+        if (!videoSrc) {
+          if (active) handleMediaError(index);
+          return;
+        }
+        const video = document.createElement("video");
+        const handleLoaded = () => {
+          if (!active) return;
+          setLoadedMap((prev) => (prev[index] ? prev : { ...prev, [index]: true }));
+        };
+        const handleError = () => {
+          if (!active) return;
+          handleMediaError(index);
+        };
+        video.addEventListener("loadeddata", handleLoaded);
+        video.addEventListener("error", handleError);
+        video.preload = "metadata";
+        video.src = videoSrc;
+        cleanups.push(() => {
+          video.removeEventListener("loadeddata", handleLoaded);
+          video.removeEventListener("error", handleError);
+        });
+        return;
+      }
+
+      const imgSrc = item.src || fallbackImageSrc;
+      const ImgCtor = typeof window !== "undefined" ? window.Image : null;
+      if (!ImgCtor) {
+        if (active) handleMediaError(index);
+        return;
+      }
+      const img = new ImgCtor();
+      const handleLoaded = () => {
+        if (!active) return;
+        setLoadedMap((prev) => (prev[index] ? prev : { ...prev, [index]: true }));
+      };
+      const handleError = () => {
+        if (!active) return;
+        handleMediaError(index);
+      };
+      img.addEventListener("load", handleLoaded);
+      img.addEventListener("error", handleError);
+      img.src = imgSrc;
+      cleanups.push(() => {
+        img.removeEventListener("load", handleLoaded);
+        img.removeEventListener("error", handleError);
+      });
+    });
+
+    return () => {
+      active = false;
+      cleanups.forEach((cleanup) => cleanup());
+    };
+  }, [handleMediaError, slides]);
 
   useEffect(() => {
     setGalleryIndex(0);
@@ -399,6 +469,7 @@ export default function ProductGallery({ items, productId = "" }) {
     zoomRef.current?.resetTransform?.(0);
     zoomRef.current?.centerView?.(1, 0);
   }, [isActiveVideo]);
+
 
   useEffect(() => {
     return () => {
@@ -500,58 +571,80 @@ export default function ProductGallery({ items, productId = "" }) {
     <>
         <div className={styles.galleryWrap}>
         <div className={styles.grid} ref={galleryRef} onScroll={handleGalleryScroll}>
-          {displaySlides.map((item, index) => (
-            <div
-              key={item.key ?? item.src ?? index}
-              className={`${styles.cell} ${styles[item.variant] ?? ""}`}
-              data-gallery-slide="true"
-            >
-              {item.isSkeleton ? (
-                <div className={styles.cellButton} aria-hidden="true">
-                  <div className={styles.media} aria-hidden>
-                    <div className={styles.mediaLoader} />
-                  </div>
-                </div>
-              ) : (
-                <button type="button" className={styles.cellButton} onClick={() => openAt(index)}>
-                  <div className={styles.media} aria-hidden>
-                    {!loadedMap[index] ? (
+          {displaySlides.map((item, index) => {
+            const isVideo = isVideoItem(item);
+            const hasFailed = Boolean(failedMap[index]);
+            const isLoaded = Boolean(loadedMap[index]);
+            const imageSrc = hasFailed ? fallbackImageSrc : item.src || fallbackImageSrc;
+            const isRemoteImage = /^https?:\/\//i.test(imageSrc);
+
+            return (
+              <div
+                key={item.key ?? item.src ?? index}
+                className={`${styles.cell} ${styles[item.variant] ?? ""}`}
+                data-gallery-slide="true"
+              >
+                {item.isSkeleton ? (
+                  <div className={styles.cellButton} aria-hidden="true">
+                    <div className={styles.media} aria-hidden>
                       <div className={styles.mediaLoader} />
-                    ) : null}
-                    {isVideoItem(item) ? (
-                      <video
-                        className={`${styles.inlineVideo} ${loadedMap[index] ? styles.imageLoaded : styles.imageHidden}`}
-                        autoPlay
-                        muted
-                        loop
-                        playsInline
-                        poster={item.src}
-                        onLoadedData={() =>
-                          setLoadedMap((prev) => ({ ...prev, [index]: true }))
-                        }
-                      >
-                        <source src={item.videoSrc ?? item.src} />
-                      </video>
-                    ) : (
-                      <Image
-                        className={`${styles.image} ${loadedMap[index] ? styles.imageLoaded : styles.imageHidden}`}
-                        src={item.src}
-                        alt=""
-                        fill
-                        sizes="(max-width: 980px) 100vw, 50vw"
-                        onLoadingComplete={() =>
-                          setLoadedMap((prev) => ({ ...prev, [index]: true }))
-                        }
-                      />
-                    )}
-                    {/* {!isVideoItem(item) && item.badge === "play" ? (
-                      <div className={styles.play} aria-hidden />
-                    ) : null} */}
+                    </div>
                   </div>
-                </button>
-              )}
-            </div>
-          ))}
+                ) : (
+                  <button type="button" className={styles.cellButton} onClick={() => openAt(index)}>
+                    <div className={styles.media} aria-hidden>
+                      {!isLoaded ? <div className={styles.mediaLoader} /> : null}
+                      {isVideo && !hasFailed ? (
+                        <video
+                          className={`${styles.inlineVideo} ${isLoaded ? styles.imageLoaded : styles.imageHidden}`}
+                          autoPlay
+                          muted
+                          loop
+                          playsInline
+                          poster={imageSrc}
+                          onLoadedData={() =>
+                            setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                          }
+                          onError={() => handleMediaError(index)}
+                        >
+                          <source src={item.videoSrc ?? item.src} />
+                        </video>
+                      ) : isRemoteImage ? (
+                        <img
+                          className={`${styles.image} ${isLoaded ? styles.imageLoaded : styles.imageHidden}`}
+                          src={imageSrc}
+                          alt=""
+                          loading="lazy"
+                          onLoad={() =>
+                            setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                          }
+                          onError={() => handleMediaError(index)}
+                        />
+                      ) : (
+                        <Image
+                          className={`${styles.image} ${isLoaded ? styles.imageLoaded : styles.imageHidden}`}
+                          src={imageSrc}
+                          alt=""
+                          fill
+                          sizes="(max-width: 980px) 100vw, 50vw"
+                          onLoad={() =>
+                            setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                          }
+                          onLoadingComplete={() =>
+                            setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                          }
+                          onError={() => handleMediaError(index)}
+                        />
+                      )}
+                      {/* {!isVideoItem(item) && item.badge === "play" ? (
+                        <div className={styles.play} aria-hidden />
+                      ) : null} */}
+                    </div>
+                  </button>
+                )}
+              </div>
+            );
+          })}
         </div>
 
         {slides.length > 1 ? (

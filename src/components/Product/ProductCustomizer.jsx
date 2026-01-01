@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useEffect, useId, useMemo, useState } from "react";
+import { useRouter } from "next/navigation";
 import Select from "react-select";
 import { toast } from "react-toastify";
 import axiosClient from "../../lib/axiosClient.js";
@@ -205,6 +206,7 @@ export default function ProductCustomizer({
   defaultCarat = "",
   defaultCutId = "",
 }) {
+  const router = useRouter();
   const { language } = useI18n();
   const qualityId = useId();
   const clarityId = useId();
@@ -1037,7 +1039,7 @@ console.log(selectedMetalId, selectedKaratId, selectedCarat);
         </div>
         <div className={styles.divider} aria-hidden />
 
-        <button className={styles.enquire} type="button">
+        <button className={styles.enquire} type="button" onClick={() => router.push("/appointment")}>
           {labels.enquireNow}
         </button>
       </div>

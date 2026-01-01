@@ -90,6 +90,7 @@ export default function AppointmentPage() {
     }
     setForm((prev) => ({ ...prev, [name]: value }));
   };
+
   const handleSubmit = async (event) => {
     event.preventDefault();
     if (submitting) return;

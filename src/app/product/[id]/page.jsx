@@ -5,6 +5,7 @@ import Container from "../../../components/ui/Container.jsx";
 import ProductCustomizer from "../../../components/Product/ProductCustomizer.jsx";
 import ProductGallery from "../../../components/Product/ProductGallery.jsx";
 import ProductGrid from "../../../components/Product/ProductGrid.jsx";
+import ShareProductModal from "../../../components/Product/ShareProductModal.jsx";
 import styles from "./page.module.css";
 
 export default async function ProductDetailsPage({ params, searchParams }) {
@@ -40,9 +41,7 @@ export default async function ProductDetailsPage({ params, searchParams }) {
       <main className={styles.main}>
         <Container>
           <div className={styles.topRow}>
-            <button className={styles.shareBtn} type="button" aria-label="Share">
-              <Image src="/icons/share.png" alt="" width={14} height={14} />
-            </button>
+            <ShareProductModal buttonClassName={styles.shareBtn} />
           </div>
           <div className={styles.topLine} aria-hidden />
 

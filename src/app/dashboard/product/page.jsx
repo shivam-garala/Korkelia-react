@@ -13,6 +13,7 @@ import TextField from "../../../components/ui/TextField.jsx";
 import fieldStyles from "../../../components/ui/Fields.module.css";
 import Button from "../../../components/ui/Button.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
+import Icon from "../../../components/ui/Icon.jsx";
 import { toast } from "react-toastify";
 import {
   createProduct,
@@ -53,6 +54,20 @@ function normalizeDisplayValue(value) {
   if (value === false || value === "false" || value === 0 || value === "0") return "0";
   if (value === null || value === undefined) return "";
   return String(value);
+}
+
+function resolveImageSrc(image) {
+  if (!image) return "";
+  if (typeof image === "string") {
+    if (/^https?:\/\//i.test(image) || image.startsWith("/")) return image;
+  }
+  const apiBase =
+    process.env.NEXT_PUBLIC_BASE_API_URL ??
+    process.env.NEXT_PUBLIC_API_URL ??
+    "";
+  const cleaned = typeof image === "string" ? image : "";
+  if (!apiBase || !cleaned) return cleaned;
+  return `${apiBase.replace(/\/$/, "")}/${cleaned.replace(/^\//, "")}`;
 }
 
 function extractProductNames(item) {
@@ -145,6 +160,8 @@ export default function ProductPage() {
   const [productNameFi, setProductNameFi] = useState("");
   const [isDisplay, setIsDisplay] = useState("1");
   const [imageFile, setImageFile] = useState(null);
+  const [imagePreviewUrl, setImagePreviewUrl] = useState("");
+  const [existingImageUrl, setExistingImageUrl] = useState("");
   const [fileInputKey, setFileInputKey] = useState(0);
   const [filters, setFilters] = useState({
     no: "",
@@ -153,6 +170,19 @@ export default function ProductPage() {
     style: "",
     is_display: "",
   });
+  const fallbackImage = "/productlisting/no_image.jpg";
+
+  useEffect(() => {
+    if (!imageFile) {
+      setImagePreviewUrl("");
+      return;
+    }
+    const nextUrl = URL.createObjectURL(imageFile);
+    setImagePreviewUrl(nextUrl);
+    return () => {
+      URL.revokeObjectURL(nextUrl);
+    };
+  }, [imageFile]);
 
   useEffect(() => {
     dispatch(fetchCategoryDropdown());
@@ -219,6 +249,7 @@ export default function ProductPage() {
     const rows = Array.isArray(items) ? items : [];
     return rows.map((item, index) => {
       const id = pickValue(item, ["id", "product_id", "productId"]) ?? index + 1;
+      const productName = pickValue(item, ["product_name"]);
       const rawCategoryId = pickValue(item, ["category_id", "categoryId", "category"]);
       const rawSubCategoryId = pickValue(item, ["sub_category_id", "subCategoryId", "subCategory"]);
       const rawStyleId = pickValue(item, ["style_id", "styleId", "style"]);
@@ -251,6 +282,7 @@ export default function ProductPage() {
       return {
         no: index + 1,
         id,
+        product_name: productName ?? "-",
         category: categoryLabel ?? "-",
         sub_category: subCategoryLabel ?? "-",
         style: styleLabel ?? "-",
@@ -268,7 +300,8 @@ export default function ProductPage() {
     const subCategoryQuery = normalize(filters.sub_category);
     const styleQuery = normalize(filters.style);
     const displayQuery = normalize(filters.is_display);
-    if (!noQuery && !categoryQuery && !subCategoryQuery && !styleQuery && !displayQuery) return tableRows;
+    const productNameQuery = normalize(filters.product_name);
+    if (!noQuery && !categoryQuery && !subCategoryQuery && !styleQuery && !displayQuery && !productNameQuery) return tableRows;
 
     return tableRows.filter((row) => {
       const noMatches = noQuery
@@ -280,9 +313,10 @@ export default function ProductPage() {
         : true;
       const styleMatches = styleQuery ? normalize(row.style).includes(styleQuery) : true;
       const displayMatches = displayQuery ? normalize(row.is_display).includes(displayQuery) : true;
-      return noMatches && categoryMatches && subCategoryMatches && styleMatches && displayMatches;
+      const productNameMatches = productNameQuery ? normalize(row.product_name).includes(productNameQuery) : true;
+      return noMatches && categoryMatches && subCategoryMatches && styleMatches && displayMatches && productNameMatches;
     });
-  }, [filters.category, filters.is_display, filters.no, filters.style, filters.sub_category, tableRows]);
+  }, [filters.category, filters.is_display, filters.no, filters.style, filters.sub_category, filters.product_name, tableRows]);
 
 
   const openCreate = () => {
@@ -297,6 +331,8 @@ export default function ProductPage() {
     setProductNameFi("");
     setIsDisplay("1");
     setImageFile(null);
+    setImagePreviewUrl("");
+    setExistingImageUrl("");
     setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
   };
@@ -307,6 +343,7 @@ export default function ProductPage() {
     const rawSubCategoryId = pickValue(row, ["sub_category_id", "subCategoryId", "subCategory"]);
     const rawStyleId = pickValue(row, ["style_id", "styleId", "style"]);
     const { nameEn, nameFi } = extractProductNames(row);
+    const rawImage = pickValue(row, ["image", "image_url", "imageUrl", "image_path", "imagePath"]);
     const resolvedCategoryName =
       row?.category?.category_name ??
       row?.category?.categoryName ??
@@ -341,6 +378,8 @@ export default function ProductPage() {
     setProductNameFi(nameFi);
     setIsDisplay(normalizeDisplayValue(rawDisplay) || "1");
     setImageFile(null);
+    setImagePreviewUrl("");
+    setExistingImageUrl(resolveImageSrc(rawImage));
     setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
   };
@@ -379,6 +418,11 @@ export default function ProductPage() {
       return;
     }
 
+    if (!editingId && !imageFile) {
+      toast.error("Upload product image.");
+      return;
+    }
+
     const payload = buildPayload();
 
     const action = editingId ? updateProduct({ id: editingId, payload }) : createProduct(payload);
@@ -388,6 +432,8 @@ export default function ProductPage() {
       setModalOpen(false);
       setEditingId(null);
       setImageFile(null);
+      setImagePreviewUrl("");
+      setExistingImageUrl("");
       setFileInputKey((prev) => prev + 1);
       dispatch(fetchProducts());
     }
@@ -407,6 +453,7 @@ export default function ProductPage() {
 
   const columns = [
     { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
+    { key: "product_name", header: "Product Name", filterable: true, filterPlaceholder: "Search Product Name" },
     { key: "category", header: "Category", filterable: true, filterPlaceholder: "Search Category" },
     { key: "sub_category", header: "Sub Category", filterable: true, filterPlaceholder: "Search Sub Category" },
     { key: "style", header: "Style", filterable: true, filterPlaceholder: "Search Style" },
@@ -494,6 +541,8 @@ export default function ProductPage() {
           setModalOpen(false);
           setEditingId(null);
           setImageFile(null);
+          setImagePreviewUrl("");
+          setExistingImageUrl("");
           setFileInputKey((prev) => prev + 1);
         }}
         footer={
@@ -507,6 +556,8 @@ export default function ProductPage() {
                 setModalOpen(false);
                 setEditingId(null);
                 setImageFile(null);
+                setImagePreviewUrl("");
+                setExistingImageUrl("");
                 setFileInputKey((prev) => prev + 1);
               }}
             >
@@ -515,6 +566,11 @@ export default function ProductPage() {
           </div>
         }
       >
+        {(() => {
+          const previewSrc = imagePreviewUrl || existingImageUrl || fallbackImage;
+          const hasLocalImage = Boolean(imagePreviewUrl);
+          const hasAnyImage = hasLocalImage || Boolean(existingImageUrl);
+          return (
         <form id="product-form" className={styles.form} onSubmit={submit}>
           {editingId ? (
             <>
@@ -601,16 +657,47 @@ export default function ProductPage() {
                 />
               </div>
               <div className={styles.formRow3}>
-                <label className={fieldStyles.field}>
+                <div className={fieldStyles.field}>
                   <span className={fieldStyles.label}>Image</span>
-                  <input
-                    key={fileInputKey}
-                    className={fieldStyles.control}
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-                  />
-                </label>
+                  <div className={styles.mediaCard}>
+                    <label
+                      className={styles.mediaUploadTarget}
+                      htmlFor={`product-image-${fileInputKey}`}
+                    >
+                      <img
+                        className={`${styles.mediaThumb}${hasAnyImage ? "" : ` ${styles.mediaThumbPlaceholder}`}`}
+                        src={previewSrc}
+                        alt="Product preview"
+                        loading="lazy"
+                      />
+                    </label>
+                    {hasLocalImage ? (
+                      <button
+                        type="button"
+                        className={styles.mediaDeleteButton}
+                        onClick={() => {
+                          setImageFile(null);
+                          setImagePreviewUrl("");
+                          setFileInputKey((prev) => prev + 1);
+                        }}
+                        aria-label="Remove image"
+                      >
+                        <Icon name="delete" size={16} />
+                      </button>
+                    ) : null}
+                    <input
+                      key={fileInputKey}
+                      id={`product-image-${fileInputKey}`}
+                      className={styles.mediaFileInput}
+                      type="file"
+                      accept="image/*"
+                      onClick={(e) => {
+                        e.currentTarget.value = null;
+                      }}
+                      onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                    />
+                  </div>
+                </div>
                 <label className={fieldStyles.field}>
                   <span className={fieldStyles.label}>Display</span>
                   <Select
@@ -711,17 +798,47 @@ export default function ProductPage() {
                 />
               </div>
               <div className={styles.formRow3}>
-                <label className={fieldStyles.field}>
+                <div className={fieldStyles.field}>
                   <span className={fieldStyles.label}>Image</span>
-                  <input
-                    key={fileInputKey}
-                    className={fieldStyles.control}
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-                    required
-                  />
-                </label>
+                  <div className={styles.mediaCard}>
+                    <label
+                      className={styles.mediaUploadTarget}
+                      htmlFor={`product-image-${fileInputKey}`}
+                    >
+                      <img
+                        className={`${styles.mediaThumb}${hasAnyImage ? "" : ` ${styles.mediaThumbPlaceholder}`}`}
+                        src={previewSrc}
+                        alt="Product preview"
+                        loading="lazy"
+                      />
+                    </label>
+                    {hasLocalImage ? (
+                      <button
+                        type="button"
+                        className={styles.mediaDeleteButton}
+                        onClick={() => {
+                          setImageFile(null);
+                          setImagePreviewUrl("");
+                          setFileInputKey((prev) => prev + 1);
+                        }}
+                        aria-label="Remove image"
+                      >
+                        <Icon name="delete" size={16} />
+                      </button>
+                    ) : null}
+                    <input
+                      key={fileInputKey}
+                      id={`product-image-${fileInputKey}`}
+                      className={styles.mediaFileInput}
+                      type="file"
+                      accept="image/*"
+                      onClick={(e) => {
+                        e.currentTarget.value = null;
+                      }}
+                      onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                    />
+                  </div>
+                </div>
                 <label className={fieldStyles.field}>
                   <span className={fieldStyles.label}>Display</span>
                   <Select
@@ -739,6 +856,8 @@ export default function ProductPage() {
             </>
           )}
         </form>
+          );
+        })()}
       </Modal>
       <ConfirmDialog
         open={Boolean(deleteTarget)}

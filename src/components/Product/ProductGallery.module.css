@@ -73,6 +73,11 @@
 }
 
 .image {
+  position: absolute;
+  inset: 0;
+  width: 100%;
+  height: 100%;
+  display: block;
   object-fit: contain;
   object-position: center;
 }
@@ -564,7 +569,7 @@
   width: 70px;
   height: 70px;
   border: 1px solid #d1d5db;
-  background: #f3f4f6;
+  background: #ffffff;
   padding: 0;
   display: grid;
   place-items: center;
@@ -574,9 +579,11 @@
 
 .modalDotInner {
   position: relative;
-  width: 100%;
-  height: 100%;
-  display: block;
+  width: 70px;
+  height: 70px;
+  display: flex;
+  align-items: center;
+  justify-content: center;
 }
 
 .modalDotActive {
@@ -586,14 +593,16 @@
 .modalDotImage {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   display: block;
 }
 
 .modalDotVideo {
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
+  object-position: center;
   display: block;
   background: #ffffff;
 }
