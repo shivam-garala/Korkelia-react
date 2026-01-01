@@ -272,7 +272,7 @@ export default function DiamondRatePage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "diamond_master", header: "Carat", filterable: true, filterPlaceholder: "Search Carat" },
     { key: "diamond_type", header: "Diamond Type", filterable: true, filterPlaceholder: "Search Type" },
     { key: "clarity", header: "Clarity", filterable: true, filterPlaceholder: "Search Clarity" },

@@ -148,7 +148,7 @@ export default function DiamondMasterPage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "carat", header: "Carat", filterable: true, filterPlaceholder: "Search Carat" },
     {
       key: "actions",

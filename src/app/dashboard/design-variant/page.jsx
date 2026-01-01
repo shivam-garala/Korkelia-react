@@ -824,7 +824,7 @@ export default function DesignVariantPage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "product", header: "Product", filterable: true, filterPlaceholder: "Search Product" },
     { key: "metal_rate", header: "Metal Rate", filterable: true, filterPlaceholder: "Search Metal Rate" },
     { key: "weight", header: "Weight", filterable: true, filterPlaceholder: "Search Weight" },

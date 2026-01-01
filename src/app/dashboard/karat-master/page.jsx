@@ -143,7 +143,7 @@ export default function KaratMasterPage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "karat", header: "Karat", filterable: true, filterPlaceholder: "Search Karat" },
     {
       key: "actions",

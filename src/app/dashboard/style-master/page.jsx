@@ -270,7 +270,7 @@ export default function StyleMasterPage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "category", header: "Category", filterable: true, filterPlaceholder: "Search Category" },
     { key: "sub_category", header: "Sub Category", filterable: true, filterPlaceholder: "Search Sub Category" },
     { key: "style_name", header: "Style Name", filterable: true, filterPlaceholder: "Search Name" },

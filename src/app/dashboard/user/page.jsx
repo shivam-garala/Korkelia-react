@@ -159,7 +159,7 @@ export default function UserPage() {
 
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "email", header: "Email", filterable: true, filterPlaceholder: "Search Email" },
     { key: "username", header: "Username", filterable: true, filterPlaceholder: "Search Username" },
     {
