@@ -76,6 +76,7 @@
   gap: 16px;
   margin-bottom: 16px;
   grid-template-columns: repeat(3, minmax(0, 1fr));
+  align-items: flex-start;
 }
 
 .actions {
@@ -103,6 +104,60 @@
 .select {
   min-width: 0;
   width: 100%;
+}
+
+.mediaCard {
+  position: relative;
+  border: 1px solid var(--color-border);
+  border-radius: 10px;
+  background: #ffffff;
+  overflow: hidden;
+}
+
+.mediaUploadTarget {
+  display: block;
+  width: 100%;
+  aspect-ratio: 1 / 1;
+  cursor: pointer;
+  background: #f8fafc;
+}
+
+.mediaThumb {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  display: block;
+}
+
+.mediaThumbPlaceholder {
+  object-fit: contain;
+  opacity: 0.6;
+}
+
+.mediaDeleteButton {
+  position: absolute;
+  top: 8px;
+  right: 8px;
+  width: 30px;
+  height: 30px;
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  background: #ffffff;
+  display: grid;
+  place-items: center;
+  cursor: pointer;
+  box-shadow: 0 6px 14px rgba(15, 23, 42, 0.12);
+}
+
+.mediaDeleteButton:hover {
+  border-color: var(--color-primary);
+}
+
+.mediaFileInput {
+  position: absolute;
+  inset: 0;
+  opacity: 0;
+  pointer-events: none;
 }
 
 :global(.adminSelect__control) {

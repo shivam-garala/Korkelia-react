@@ -7,6 +7,7 @@ import Dropdown from "./Dropdown";
 import NavMenuOverlay from "./NavMenuOverlay";
 import styles from "./SiteHeader.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
+import ShareProductModal from "../Product/ShareProductModal.jsx";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
@@ -35,10 +36,15 @@ export default function SiteHeader() {
             </div>
 
             <div className={styles.topRight}>
-              <Link className={styles.topLink} href="#">
-                <Image className={styles.topIcon} src="/icons/share.png" alt="" width={14} height={14} />
-                <span>{t("header.share")}</span>
-              </Link>
+              <ShareProductModal
+                buttonClassName={styles.topLink}
+                buttonContent={
+                  <>
+                    <Image className={styles.topIcon} src="/icons/share.png" alt="" width={14} height={14} />
+                    <span>{t("header.share")}</span>
+                  </>
+                }
+              />
               <Link className={styles.topLink} href="/appointment">
                 <Image className={styles.topIcon} src="/icons/appointment.png" alt="" width={14} height={14} />
                 <span>{t("header.appointment")}</span>

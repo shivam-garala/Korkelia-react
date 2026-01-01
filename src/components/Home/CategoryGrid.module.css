@@ -47,6 +47,8 @@
   border-radius: 4px;
   overflow: hidden;
   background: #ffffff;
+  background-size: cover;
+  background-position: center;
 }
 
 .image {
