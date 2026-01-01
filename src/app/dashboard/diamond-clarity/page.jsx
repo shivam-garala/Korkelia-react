@@ -145,7 +145,7 @@ export default function DiamondClarityPage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "clarity", header: "Clarity", filterable: true, filterPlaceholder: "Search Clarity" },
     {
       key: "actions",

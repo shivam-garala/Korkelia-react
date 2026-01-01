@@ -149,7 +149,7 @@ export default function MetalMasterPage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "metal_name", header: "Metal Name", filterable: true, filterPlaceholder: "Search Name" },
     { key: "metal_code", header: "Metal Code", filterable: true, filterPlaceholder: "Search Code" },
     {

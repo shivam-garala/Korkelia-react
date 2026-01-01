@@ -8,7 +8,7 @@
 .tableWrap {
   width: 100%;
   max-width: 100%;
-  max-height: calc(100vh - var(--admin-header-height, 76px) - 220px);
+  max-height: calc(100vh - var(--admin-header-height, 76px) - 120px);
   overflow: auto;
   -webkit-overflow-scrolling: touch;
   position: relative;
@@ -16,7 +16,7 @@
 
 .table {
   width: max-content;
-  min-width: 1200px;
+  min-width: 100%;
   max-width: none;
   border-collapse: collapse;
   table-layout: auto;

@@ -151,7 +151,7 @@ export default function DiamondTypePage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "type_name", header: "Type Name", filterable: true, filterPlaceholder: "Search Name" },
     { key: "type_code", header: "Type Code", filterable: true, filterPlaceholder: "Search Code" },
     {

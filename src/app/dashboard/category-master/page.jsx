@@ -162,7 +162,7 @@ export default function CategoryMasterPage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "category_name", header: "Category Name", filterable: true, filterPlaceholder: "Search Name" },
     { key: "category_code", header: "Category Code", filterable: true, filterPlaceholder: "Search Code" },
     {

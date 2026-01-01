@@ -229,7 +229,7 @@ export default function GoldRatePage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "metal", header: "Metal", filterable: true, filterPlaceholder: "Search Metal" },
     { key: "karat", header: "Karat", filterable: true, filterPlaceholder: "Search Karat" },
     { key: "rate", header: "Rate", filterable: true, filterPlaceholder: "Search Rate" },

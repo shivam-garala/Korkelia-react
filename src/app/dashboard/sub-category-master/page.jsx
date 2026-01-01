@@ -195,7 +195,7 @@ export default function SubCategoryMasterPage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "category", header: "Category", filterable: true, filterPlaceholder: "Search Category" },
     {
       key: "sub_category_name",

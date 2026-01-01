@@ -200,7 +200,7 @@ export default function LoginPage() {
           </form>
 
           <div className={styles.meta} aria-live="polite">
-            {message ? <p className={styles.message}>{message}</p> : null}
+            {/* {message ? <p className={styles.message}>{message}</p> : null} */}
             {statusLabel ? (
               <div className={styles.authedRow}>
                 <span className={styles.status}>{statusLabel}</span>

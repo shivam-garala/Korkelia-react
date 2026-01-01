@@ -192,7 +192,7 @@ export default function GoldColorPage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: true, filterPlaceholder: "Search No." },
+    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "color", header: "Color", filterable: true, filterPlaceholder: "Search Color" },
     { key: "colour_code", header: "Colour Code", filterable: true, filterPlaceholder: "Search Code" },
     { key: "metal_type", header: "Metal Type", filterable: true, filterPlaceholder: "Search Metal" },
