@@ -656,10 +656,10 @@ export default function ProductCustomizer({
 
   useEffect(() => {
     if (!filteredMetalTypeOptions.length) return;
-    const nextValue = filteredMetalTypeOptions[0].value;
-    if (metalType !== nextValue) {
-      setMetalType(nextValue);
+    if (metalType && filteredMetalTypeOptions.some((opt) => opt.value === metalType)) {
+      return;
     }
+    setMetalType(filteredMetalTypeOptions[0].value);
   }, [filteredMetalTypeOptions, metalType]);
 
   useEffect(() => {
@@ -959,12 +959,6 @@ console.log(selectedMetalId, selectedKaratId, selectedCarat);
               onClick={() => {
                 setVariantEnabled(true);
                 setMetal(item.value);
-                const nextMetalTypes = metalTypeOptions.filter(
-                  (opt) => Boolean(opt.isPlatinum) === Boolean(item.isPlatinum)
-                );
-                if (nextMetalTypes.length) {
-                  setMetalType(nextMetalTypes[0].value);
-                }
               }}
             >
               <span className={styles.dot} style={{ background: item.color }} aria-hidden />
