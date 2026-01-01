@@ -4,6 +4,7 @@ import Image from "next/image";
 import { useEffect, useState } from "react";
 import LanguageDropdown from "../LanguageDropdown/LanguageDropdown.jsx";
 import Icon from "../ui/Icon.jsx";
+import GlobalLoader from "../ui/GlobalLoader.jsx";
 import styles from "../../styles/workspace.module.css";
 
 export default function AdminHeader({
@@ -27,42 +28,45 @@ export default function AdminHeader({
   const displayAvatarText = mounted ? avatarText || "U" : "U";
 
   return (
-    <header className={styles.headerBar}>
-      <div className={styles.team}>
-        <button
-          className={styles.menuBtn}
-          type="button"
-          onClick={handleMenuClick}
-          aria-label="Toggle sidebar"
-        >
-          <Icon name="menu" size={18} />
-        </button>
-        <Image
-          className={styles.headerLogo}
-          src="/logo/logo.png"
-          alt="Korkeila"
-          width={140}
-          height={70}
-          priority
-        />
-      </div>
-      <div className={styles.actionsRow}>
-        {onSearch ? (
-          <button className={styles.chip} onClick={onSearch}>
-            <Icon name="search" size={16} />
-            Search
+    <>
+      <header className={styles.headerBar}>
+        <div className={styles.team}>
+          <button
+            className={styles.menuBtn}
+            type="button"
+            onClick={handleMenuClick}
+            aria-label="Toggle sidebar"
+          >
+            <Icon name="menu" size={18} />
           </button>
-        ) : null}
-        {/* <LanguageDropdown triggerClassName={styles.adminLanguageDropdown} /> */}
-        {actions}
-        <button
-          className={styles.avatarRing}
-          onClick={onProfile}
-          aria-label="Open profile"
-        >
-          <span className={styles.avatarRingInner}>{displayAvatarText}</span>
-        </button>
-      </div>
-    </header>
+          <Image
+            className={styles.headerLogo}
+            src="/logo/logo.png"
+            alt="Korkeila"
+            width={140}
+            height={70}
+            priority
+          />
+        </div>
+        <div className={styles.actionsRow}>
+          {onSearch ? (
+            <button className={styles.chip} onClick={onSearch}>
+              <Icon name="search" size={16} />
+              Search
+            </button>
+          ) : null}
+          {/* <LanguageDropdown triggerClassName={styles.adminLanguageDropdown} /> */}
+          {actions}
+          <button
+            className={styles.avatarRing}
+            onClick={onProfile}
+            aria-label="Open profile"
+          >
+            <span className={styles.avatarRingInner}>{displayAvatarText}</span>
+          </button>
+        </div>
+      </header>
+      <GlobalLoader />
+    </>
   );
 }

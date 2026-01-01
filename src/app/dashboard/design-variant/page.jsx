@@ -11,6 +11,7 @@ import Modal from "../../../components/ui/Modal.jsx";
 import AdminSelectField from "../../../components/ui/AdminSelectField.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import Button from "../../../components/ui/Button.jsx";
+import Icon from "../../../components/ui/Icon.jsx";
 import RadioGroup from "../../../components/ui/RadioGroup.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import axiosClient from "../../../lib/axiosClient.js";
@@ -205,6 +206,7 @@ export default function DesignVariantPage() {
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
   const [modalOpen, setModalOpen] = useState(false);
+  const [imageModalOpen, setImageModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
@@ -222,7 +224,9 @@ export default function DesignVariantPage() {
   const [descriptionFi, setDescriptionFi] = useState("");
   const [detailRows, setDetailRows] = useState([]);
   const [imageFiles, setImageFiles] = useState(() => Array(4).fill(null));
+  const [localImageUrls, setLocalImageUrls] = useState(() => Array(4).fill(""));
   const [videoFile, setVideoFile] = useState(null);
+  const [localVideoUrl, setLocalVideoUrl] = useState("");
   const [existingImages, setExistingImages] = useState([]);
   const [listingSelection, setListingSelection] = useState("");
   const [fileInputKey, setFileInputKey] = useState(0);
@@ -236,6 +240,7 @@ export default function DesignVariantPage() {
     mark_up: "",
     price: "",
   });
+  const fallbackImage = "/productlisting/no_image.jpg";
 
   useEffect(() => {
     dispatch(fetchDesignVariants());
@@ -396,6 +401,7 @@ export default function DesignVariantPage() {
 
   const openCreate = () => {
     setEditingId(null);
+    setImageModalOpen(false);
     setCategoryId("");
     setProductId("");
     setProductName("");
@@ -420,6 +426,8 @@ export default function DesignVariantPage() {
   const openEdit = async (row) => {
     const rawId = pickValue(row, ["id", "design_id", "designId"]);
     if (!rawId) return;
+
+    setImageModalOpen(false);
 
     const result = await dispatch(fetchDesignVariant(rawId));
     const response = result?.payload?.data ?? result?.payload ?? null;
@@ -554,6 +562,26 @@ export default function DesignVariantPage() {
     setVideoFile(file);
   }, []);
 
+  useEffect(() => {
+    const nextUrls = imageFiles.map((file) => (file ? URL.createObjectURL(file) : ""));
+    setLocalImageUrls(nextUrls);
+    return () => {
+      nextUrls.forEach((url) => {
+        if (url) URL.revokeObjectURL(url);
+      });
+    };
+  }, [imageFiles]);
+
+  useEffect(() => {
+    if (!videoFile) {
+      setLocalVideoUrl("");
+      return;
+    }
+    const url = URL.createObjectURL(videoFile);
+    setLocalVideoUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [videoFile]);
+
   const handleDeleteImage = useCallback(
     async (image) => {
       const imageId = image?.id ?? null;
@@ -613,6 +641,35 @@ export default function DesignVariantPage() {
     const list = Array.isArray(existingImages) ? existingImages : [];
     return list.find((img) => img?.isVideo) ?? null;
   }, [existingImages]);
+
+  const handleRemoveLocalImage = useCallback(
+    (index) => {
+      setImageFiles((prev) => {
+        if (!prev[index]) return prev;
+        const next = [...prev];
+        next[index] = null;
+        return next;
+      });
+      setListingSelection((prev) => {
+        if (prev !== `image-${index}`) return prev;
+        if (previewSlots[index]?.image_url) return prev;
+        return "";
+      });
+      setFileInputKey((prev) => prev + 1);
+    },
+    [previewSlots]
+  );
+
+  const handleRemoveLocalVideo = useCallback(() => {
+    if (!videoFile) return;
+    setVideoFile(null);
+    setListingSelection((prev) => {
+      if (prev !== "video") return prev;
+      if (previewVideo?.image_url) return prev;
+      return "";
+    });
+    setFileInputKey((prev) => prev + 1);
+  }, [previewVideo, videoFile]);
 
   const updateDetailRow = (key, updates) => {
     setDetailRows((prev) =>
@@ -699,12 +756,38 @@ export default function DesignVariantPage() {
         is_product_listing: listingSelection === `image-${index}` ? 1 : 0,
       });
     });
+    if (editingId) {
+      previewSlots.forEach((slot, index) => {
+        if (!slot || imageFiles[index]) return;
+        const imageName = slot?.image ?? "";
+        if (!imageName) return;
+        const existingPayload = {
+          image: imageName,
+          order: index + 1,
+          is_product_listing: listingSelection === `image-${index}` ? 1 : 0,
+        };
+        if (slot?.id) existingPayload.id = slot.id;
+        designImages.push(existingPayload);
+      });
+    }
     if (videoFile) {
       designImages.push({
         image: videoFile.name,
         order: 5,
         is_product_listing: listingSelection === "video" ? 1 : 0,
       });
+    }
+    if (editingId && previewVideo && !videoFile) {
+      const videoName = previewVideo?.image ?? "";
+      if (videoName) {
+        const existingVideoPayload = {
+          image: videoName,
+          order: 5,
+          is_product_listing: listingSelection === "video" ? 1 : 0,
+        };
+        if (previewVideo?.id) existingVideoPayload.id = previewVideo.id;
+        designImages.push(existingVideoPayload);
+      }
     }
     if (designImages.length) {
       payload.append("design_images", JSON.stringify(designImages));
@@ -831,6 +914,7 @@ export default function DesignVariantPage() {
         onClose={() => {
           setModalOpen(false);
           setEditingId(null);
+          setImageModalOpen(false);
         }}
         footer={
           <div className={crudStyles.formActions}>
@@ -842,6 +926,7 @@ export default function DesignVariantPage() {
               onClick={() => {
                 setModalOpen(false);
                 setEditingId(null);
+                setImageModalOpen(false);
               }}
             >
               Cancel
@@ -955,133 +1040,16 @@ export default function DesignVariantPage() {
             />
           </div>
           <div className={styles.fieldRow}>
-            {[0, 1, 2, 3].map((index) => (
-              <div key={`image-${index}`} className={fieldStyles.field}>
-                <div className={styles.mediaLabelRow}>
-                  <label
-                    className={fieldStyles.label}
-                    htmlFor={`image-${index}-${fileInputKey}`}
-                  >
-                    Image {index + 1}
-                  </label>
-                  <label
-                    className={[
-                      radioStyles.option,
-                      styles.listingOption,
-                      listingSelection === `image-${index}` ? radioStyles.optionChecked : "",
-                    ].join(" ")}
-                  >
-                    <input
-                      className={radioStyles.input}
-                      type="radio"
-                      name="listing-media"
-                      checked={listingSelection === `image-${index}`}
-                      onChange={() => setListingSelection(`image-${index}`)}
-                    />
-                    <span
-                      className={[radioStyles.indicator, styles.listingIndicator].join(" ")}
-                      aria-hidden
-                    />
-                    <span className={[radioStyles.text, styles.listingText].join(" ")}>
-                      Set as listing
-                    </span>
-                  </label>
+            <div className={styles.mediaManagerRow}>
+              <div className={styles.mediaManagerCopy}>
+                <div className={styles.mediaManagerTitle}>Design Images</div>
+                <div className={styles.mediaManagerHint}>
+                  Upload images and choose one as the listing image.
                 </div>
-                <input
-                  key={`image-${index}-${fileInputKey}`}
-                  id={`image-${index}-${fileInputKey}`}
-                  className={fieldStyles.control}
-                  type="file"
-                  accept="image/*"
-                  onChange={(e) => updateImageFile(index, e.target.files?.[0] ?? null)}
-                />
-                {previewSlots[index]?.image_url ? (
-                  <div className={styles.mediaPreview}>
-                    <img
-                      className={styles.previewImage}
-                      src={previewSlots[index].image_url}
-                      alt=""
-                      loading="lazy"
-                    />
-                    {previewSlots[index]?.id ? (
-                      <div className={styles.mediaActions}>
-                        <Button
-                          variant="danger"
-                          size="sm"
-                          type="button"
-                          disabled={imageDeletingId === String(previewSlots[index].id)}
-                          onClick={() => requestImageDelete(previewSlots[index])}
-                          icon="delete"
-                          iconOnly
-                          className={styles.mediaDelete}
-                        >
-                          Delete
-                        </Button>
-                      </div>
-                    ) : null}
-                  </div>
-                ) : null}
               </div>
-            ))}
-            <div className={fieldStyles.field}>
-              <div className={styles.mediaLabelRow}>
-                <label className={fieldStyles.label} htmlFor={`video-${fileInputKey}`}>
-                  Video
-                </label>
-                <label
-                  className={[
-                    radioStyles.option,
-                    styles.listingOption,
-                    listingSelection === "video" ? radioStyles.optionChecked : "",
-                  ].join(" ")}
-                >
-                  <input
-                    className={radioStyles.input}
-                    type="radio"
-                    name="listing-media"
-                    checked={listingSelection === "video"}
-                    onChange={() => setListingSelection("video")}
-                  />
-                  <span
-                    className={[radioStyles.indicator, styles.listingIndicator].join(" ")}
-                    aria-hidden
-                  />
-                  <span className={[radioStyles.text, styles.listingText].join(" ")}>
-                    Set as listing
-                  </span>
-                </label>
-              </div>
-              <input
-                key={`video-${fileInputKey}`}
-                id={`video-${fileInputKey}`}
-                className={fieldStyles.control}
-                type="file"
-                accept="video/*"
-                onChange={(e) => updateVideoFile(e.target.files?.[0] ?? null)}
-              />
-              {previewVideo?.image_url ? (
-                <div className={styles.mediaPreview}>
-                  <video className={styles.previewVideo} controls>
-                    <source src={previewVideo.image_url} />
-                  </video>
-                  {previewVideo?.id ? (
-                    <div className={styles.mediaActions}>
-                      <Button
-                        variant="danger"
-                        size="sm"
-                        type="button"
-                        disabled={imageDeletingId === String(previewVideo.id)}
-                        onClick={() => requestImageDelete(previewVideo)}
-                        icon="delete"
-                        iconOnly
-                        className={styles.mediaDelete}
-                      >
-                        Delete
-                      </Button>
-                    </div>
-                  ) : null}
-                </div>
-              ) : null}
+              <Button variant="secondary" type="button" onClick={() => setImageModalOpen(true)}>
+                Upload Images
+              </Button>
             </div>
           </div>
 
@@ -1176,6 +1144,198 @@ export default function DesignVariantPage() {
             ))}
           </div>
         </form>
+      </Modal>
+      <Modal
+        open={imageModalOpen}
+        title="Design Images"
+        onClose={() => setImageModalOpen(false)}
+        bodyClassName={styles.imageModalBody}
+        footer={
+          <div className={crudStyles.formActions}>
+            <Button variant="secondary" type="button" onClick={() => setImageModalOpen(false)}>
+              Close
+            </Button>
+          </div>
+        }
+      >
+        <div className={styles.imageGrid}>
+          {[0, 1, 2, 3].map((index) => {
+            const localUrl = localImageUrls[index];
+            const existing = previewSlots[index];
+            const previewSrc = localUrl || existing?.image_url || fallbackImage;
+            const hasExisting = Boolean(existing?.image_url);
+            const hasLocal = Boolean(localUrl);
+            const hasAny = hasExisting || hasLocal;
+            const isSelected = listingSelection === `image-${index}`;
+            const isDeleting = existing?.id && imageDeletingId === String(existing.id);
+            const allowListing = hasAny;
+            return (
+              <div
+                key={`preview-slot-${index}`}
+                className={`${styles.imageCard}${isSelected ? ` ${styles.imageCardSelected}` : ""}`}
+              >
+                {hasLocal || existing?.id ? (
+                  <button
+                    type="button"
+                    className={styles.imageDeleteButton}
+                    onClick={() => {
+                      if (hasLocal) {
+                        handleRemoveLocalImage(index);
+                        return;
+                      }
+                      requestImageDelete(existing);
+                    }}
+                    disabled={isDeleting}
+                    aria-label={`Delete image ${index + 1}`}
+                  >
+                    <Icon name="delete" size={16} />
+                  </button>
+                ) : null}
+                <label
+                  className={[
+                    styles.imageUploadTarget,
+                    index < 2 ? styles.ratioTwoThree : styles.ratioTwoTwo,
+                  ].join(" ")}
+                  htmlFor={`image-slot-${index}-${fileInputKey}`}
+                >
+                  <img
+                    className={`${styles.imageThumb}${hasAny ? "" : ` ${styles.imageThumbPlaceholder}`}`}
+                    src={previewSrc}
+                    alt={`Preview ${index + 1}`}
+                    loading="lazy"
+                  />
+                </label>
+                <div className={styles.imageActions}>
+                  <input
+                    key={`image-slot-${index}-${fileInputKey}`}
+                    id={`image-slot-${index}-${fileInputKey}`}
+                    className={styles.imageFileInput}
+                    type="file"
+                    accept="image/*"
+                    onClick={(e) => {
+                      e.currentTarget.value = null;
+                    }}
+                    onChange={(e) => updateImageFile(index, e.target.files?.[0] ?? null)}
+                  />
+                </div>
+                <label
+                  className={[
+                    radioStyles.option,
+                    styles.listingOption,
+                    styles.listingOverlay,
+                    styles.listingInline,
+                    isSelected ? radioStyles.optionChecked : "",
+                    !allowListing ? styles.listingDisabled : "",
+                  ].join(" ")}
+                >
+                  <input
+                    className={radioStyles.input}
+                    type="radio"
+                    name="listing-media"
+                    checked={isSelected}
+                    disabled={!allowListing}
+                    onChange={() => setListingSelection(`image-${index}`)}
+                  />
+                  <span
+                    className={[radioStyles.indicator, styles.listingIndicator].join(" ")}
+                    aria-hidden
+                  />
+                  <span className={[radioStyles.text, styles.listingText].join(" ")}>
+                    Set as listing
+                  </span>
+                </label>
+              </div>
+            );
+          })}
+          {(() => {
+            const videoSrc = localVideoUrl || previewVideo?.image_url || "";
+            const hasVideo = Boolean(videoSrc);
+            const isSelected = listingSelection === "video";
+            const isDeleting =
+              previewVideo?.id && imageDeletingId === String(previewVideo.id);
+            return (
+              <div
+                className={`${styles.imageCard} ${styles.imageCardWide}${
+                  isSelected ? ` ${styles.imageCardSelected}` : ""
+                }`}
+              >
+                {videoFile || previewVideo?.id ? (
+                  <button
+                    type="button"
+                    className={styles.imageDeleteButton}
+                    onClick={() => {
+                      if (videoFile) {
+                        handleRemoveLocalVideo();
+                        return;
+                      }
+                      requestImageDelete(previewVideo);
+                    }}
+                    disabled={isDeleting}
+                    aria-label="Delete video"
+                  >
+                    <Icon name="delete" size={16} />
+                  </button>
+                ) : null}
+                <label
+                  className={[styles.imageUploadTarget, styles.ratioOneTwo].join(" ")}
+                  htmlFor={`video-slot-${fileInputKey}`}
+                >
+                  {hasVideo ? (
+                    <video className={styles.videoThumb}>
+                      <source src={videoSrc} />
+                    </video>
+                  ) : (
+                    <img
+                      className={`${styles.imageThumb} ${styles.imageThumbPlaceholder}`}
+                      src={fallbackImage}
+                      alt="Video placeholder"
+                      loading="lazy"
+                    />
+                  )}
+                </label>
+                <div className={styles.imageActions}>
+                  <input
+                    key={`video-slot-${fileInputKey}`}
+                    id={`video-slot-${fileInputKey}`}
+                    className={styles.imageFileInput}
+                    type="file"
+                    accept="video/*"
+                    onClick={(e) => {
+                      e.currentTarget.value = null;
+                    }}
+                    onChange={(e) => updateVideoFile(e.target.files?.[0] ?? null)}
+                  />
+                </div>
+                <label
+                  className={[
+                    radioStyles.option,
+                    styles.listingOption,
+                    styles.listingOverlay,
+                    styles.listingInline,
+                    isSelected ? radioStyles.optionChecked : "",
+                    !hasVideo ? styles.listingDisabled : "",
+                  ].join(" ")}
+                >
+                  <input
+                    className={radioStyles.input}
+                    type="radio"
+                    name="listing-media"
+                    checked={isSelected}
+                    disabled={!hasVideo}
+                    onChange={() => setListingSelection("video")}
+                  />
+                  <span
+                    className={[radioStyles.indicator, styles.listingIndicator].join(" ")}
+                    aria-hidden
+                  />
+                  <span className={[radioStyles.text, styles.listingText].join(" ")}>
+                    Set as listing
+                  </span>
+                </label>
+              </div>
+            );
+          })()}
+        </div>
       </Modal>
       <ConfirmDialog
         open={Boolean(deleteTarget)}
