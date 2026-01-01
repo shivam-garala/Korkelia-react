@@ -17,6 +17,7 @@ import designReducer from "./slices/designSlice";
 import designVariantReducer from "./slices/designVariantSlice";
 import productReducer from "./slices/productSlice";
 import goldColorReducer from "./slices/goldColorSlice";
+import uiReducer from "./slices/uiSlice";
 
 export const store = configureStore({
   reducer: {
@@ -38,5 +39,6 @@ export const store = configureStore({
     designVariant: designVariantReducer,
     product: productReducer,
     goldColor: goldColorReducer,
+    ui: uiReducer,
   },
 });
