@@ -7,7 +7,11 @@ import SiteHeader from "../../components/Home/SiteHeader.jsx";
 import Container from "../../components/ui/Container.jsx";
 import FiltersBar from "../../components/Product/FiltersBar.jsx";
 import ProductGrid from "../../components/Product/ProductGrid.jsx";
-import axiosClient from "../../lib/axiosClient.js";
+import { fetchCategoryHomePage } from "../../lib/categoryHomeCache.js";
+import {
+  fetchProductListEcom,
+  fetchSubCategoryHomePage,
+} from "../../lib/productListingCache.js";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
@@ -85,10 +89,7 @@ export default function ProductListingClient() {
         return;
       }
       try {
-        const { data } = await axiosClient.get(
-          `/api/categoryMaster/home-page?language_id=${encodeURIComponent(languageId)}`
-        );
-        const list = Array.isArray(data) ? data : data?.data ?? [];
+        const list = await fetchCategoryHomePage(languageId);
         const normalizedName = String(categoryNameFromParams).trim().toLowerCase();
         const match = list.find((item) => {
           const label = item?.category_name ?? item?.name ?? "";
@@ -116,12 +117,7 @@ export default function ProductListingClient() {
 
     const loadSubCategories = async () => {
       try {
-        const { data } = await axiosClient.get(
-          `/api/subCategory/home-page?language_id=${encodeURIComponent(
-            languageId
-          )}&category_id=${encodeURIComponent(categoryId)}`
-        );
-        const list = Array.isArray(data) ? data : data?.data ?? [];
+        const list = await fetchSubCategoryHomePage(languageId, categoryId);
         const mapped = list
           .map((item) => {
             const id = item?.id ?? item?.sub_category_id ?? null;
@@ -166,12 +162,7 @@ export default function ProductListingClient() {
 
     const loadProducts = async () => {
       try {
-        const { data } = await axiosClient.get(
-          `/api/product/listEcom?language_id=${encodeURIComponent(
-            languageId
-          )}&category_id=${encodeURIComponent(categoryId)}`
-        );
-        const list = Array.isArray(data) ? data : data?.data ?? [];
+        const list = await fetchProductListEcom(languageId, categoryId);
         cacheProductList(list);
         
         // Extract category name directly from first product's design.product.category.category_name

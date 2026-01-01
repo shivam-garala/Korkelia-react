@@ -7,15 +7,19 @@
 
 .tableWrap {
   width: 100%;
-  overflow-x: auto;
-  overflow-y: hidden;
+  max-width: 100%;
+  max-height: calc(100vh - var(--admin-header-height, 76px) - 220px);
+  overflow: auto;
   -webkit-overflow-scrolling: touch;
+  position: relative;
 }
 
 .table {
-  width: 100%;
+  width: max-content;
+  min-width: 1200px;
+  max-width: none;
   border-collapse: collapse;
-  min-width: 100%;
+  table-layout: auto;
 }
 
 .th {
@@ -57,7 +61,7 @@
 
 @media (max-width: 900px) {
   .table {
-    min-width: 640px;
+    min-width: 900px;
   }
 
   .th,
@@ -72,7 +76,7 @@
 
 @media (max-width: 640px) {
   .table {
-    min-width: 100%;
+    min-width: 760px;
   }
 
   .th,

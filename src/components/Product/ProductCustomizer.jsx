@@ -42,11 +42,6 @@ const normalizeString = (value) => {
   return String(value).trim();
 };
 
-const normalizeWithFallback = (value, fallback) => {
-  const normalized = normalizeString(value);
-  return normalized || fallback;
-};
-
 const resolveDesignTranslation = (translation, languageId) => {
   if (!translation) return "";
   if (typeof translation === "string") return normalizeString(translation);
@@ -220,18 +215,12 @@ export default function ProductCustomizer({
   const [variantLoading, setVariantLoading] = useState(false);
   const [variantEnabled, setVariantEnabled] = useState(false);
   const [defaultsApplied, setDefaultsApplied] = useState(false);
-  const [cut, setCut] = useState(() => normalizeWithFallback(defaultCutId, "round"));
-  const [quality, setQuality] = useState(() =>
-    normalizeWithFallback(defaultDiamondTypeId, "natural")
-  );
-  const [clarity, setClarity] = useState(() =>
-    normalizeWithFallback(defaultClarityId, "fvs")
-  );
-  const [carat, setCarat] = useState(() => normalizeWithFallback(defaultCarat, "0.05"));
-  const [metal, setMetal] = useState(() => normalizeWithFallback(defaultMetalId, "white"));
-  const [metalType, setMetalType] = useState(() =>
-    normalizeWithFallback(defaultKaratId, "14k")
-  );
+  const [cut, setCut] = useState(() => normalizeString(defaultCutId));
+  const [quality, setQuality] = useState(() => normalizeString(defaultDiamondTypeId));
+  const [clarity, setClarity] = useState(() => normalizeString(defaultClarityId));
+  const [carat, setCarat] = useState(() => normalizeString(defaultCarat));
+  const [metal, setMetal] = useState(() => normalizeString(defaultMetalId));
+  const [metalType, setMetalType] = useState(() => normalizeString(defaultKaratId));
   const [size, setSize] = useState("");
   const [engraving, setEngraving] = useState("");
 
@@ -289,6 +278,19 @@ export default function ProductCustomizer({
   const hasDefaultCarat = Boolean(normalizeString(defaultCarat));
   const hasDefaultMetal = Boolean(normalizeString(defaultMetalId));
   const hasDefaultKarat = Boolean(normalizeString(defaultKaratId));
+  const hasPrefilledVariant =
+    hasDefaultCut ||
+    hasDefaultQuality ||
+    hasDefaultClarity ||
+    hasDefaultCarat ||
+    hasDefaultMetal ||
+    hasDefaultKarat;
+
+  useEffect(() => {
+    if (hasPrefilledVariant && !variantEnabled) {
+      setVariantEnabled(true);
+    }
+  }, [hasPrefilledVariant, variantEnabled]);
 
   useEffect(() => {
     if (!productDetails || defaultsApplied || variantEnabled) return;
@@ -491,6 +493,10 @@ export default function ProductCustomizer({
           value: value || label,
           label: label.toUpperCase() || "METAL",
           color,
+          isPlatinum:
+            item?.is_platinum === 1 ||
+            item?.is_platinum === "1" ||
+            String(item?.is_platinum ?? "").toLowerCase() === "yes",
         };
       })
       .filter(Boolean);
@@ -521,10 +527,21 @@ export default function ProductCustomizer({
         return {
           value,
           label: label ? label.toUpperCase() : value.toUpperCase(),
+          isPlatinum:
+            item?.is_platinum === 1 ||
+            item?.is_platinum === "1" ||
+            String(item?.is_platinum ?? "").toLowerCase() === "yes",
         };
       })
       .filter(Boolean);
   }, [filterData]);
+
+  const filteredMetalTypeOptions = useMemo(() => {
+    const selectedMetalOption = metalOptions.find((opt) => opt.value === metal) ?? null;
+    if (!selectedMetalOption) return metalTypeOptions;
+    const isPlatinumMetal = Boolean(selectedMetalOption.isPlatinum);
+    return metalTypeOptions.filter((opt) => Boolean(opt.isPlatinum) === isPlatinumMetal);
+  }, [metal, metalOptions, metalTypeOptions]);
 
   const sizeOptions = useMemo(() => {
     const list = Array.isArray(filterData?.ring_sizes) ? filterData.ring_sizes : [];
@@ -638,13 +655,12 @@ export default function ProductCustomizer({
   }, [metalOptions, metal]);
 
   useEffect(() => {
-    if (
-      metalTypeOptions.length &&
-      !metalTypeOptions.some((opt) => opt.value === metalType)
-    ) {
-      setMetalType(metalTypeOptions[0].value);
+    if (!filteredMetalTypeOptions.length) return;
+    const nextValue = filteredMetalTypeOptions[0].value;
+    if (metalType !== nextValue) {
+      setMetalType(nextValue);
     }
-  }, [metalTypeOptions, metalType]);
+  }, [filteredMetalTypeOptions, metalType]);
 
   useEffect(() => {
     if (size && sizeOptions.length && !sizeOptions.some((opt) => opt.value === size)) {
@@ -657,7 +673,7 @@ export default function ProductCustomizer({
   const selectedClarityId = clarityOptions.find((opt) => opt.value === clarity)?.value ?? "";
   const selectedMetalId = metalOptions.find((opt) => opt.value === metal)?.value ?? "";
   const selectedKaratId =
-    metalTypeOptions.find((opt) => opt.value === metalType)?.value ?? "";
+    filteredMetalTypeOptions.find((opt) => opt.value === metalType)?.value ?? "";
   const selectedCarat = carat ? String(carat) : "";
 
   const variantTitle =
@@ -709,6 +725,8 @@ export default function ProductCustomizer({
 
   useEffect(() => {
     let active = true;
+    console.log("AAAAA");
+    
     if (!variantEnabled) {
       setVariantDetails(null);
       setVariantLoading(false);
@@ -716,20 +734,18 @@ export default function ProductCustomizer({
         active = false;
       };
     }
+    console.log("BBBBB");
+    
     // Check if selected metal is Platinum by finding it in metalOptions
     const selectedMetalOption = metalOptions.find((opt) => opt.value === selectedMetalId);
     const isSelectedMetalPlatinum = selectedMetalOption?.label?.toLowerCase() === "platinum" || 
-                                     selectedMetalOption?.label?.toLowerCase().includes("platinum");
-
-    if (
-      !productId ||
-      !selectedMetalId ||
-      (!isSelectedMetalPlatinum && !selectedKaratId) ||
-      !selectedQualityId ||
-      !selectedClarityId ||
-      !selectedCarat ||
-      !selectedCutId
-    ) {
+    selectedMetalOption?.label?.toLowerCase().includes("platinum");
+    console.log("CCCCC");
+    console.log(!isSelectedMetalPlatinum && !selectedKaratId);
+    console.log(productId, selectedMetalId, selectedKaratId, selectedQualityId, selectedClarityId, selectedCarat, selectedCutId);
+    console.log(!productId);
+    
+    if (!productId) {
       setVariantDetails(null);
       setVariantLoading(false);
       return () => {
@@ -737,16 +753,19 @@ export default function ProductCustomizer({
       };
     }
 
+    
+    console.log("DDDDD");
+    
+
     const params = new URLSearchParams({
       product_id: String(productId),
-      metal_id: String(selectedMetalId),
-      diamond_type_id: String(selectedQualityId),
-      clarity_id: String(selectedClarityId),
-      carat: String(selectedCarat),
-      cut_id: String(selectedCutId),
     });
-    // Only add karat_id if metal is not Platinum
-    if (!isSelectedMetalPlatinum && selectedKaratId) {
+    if (selectedMetalId) params.set("metal_id", String(selectedMetalId));
+    if (selectedQualityId) params.set("diamond_type_id", String(selectedQualityId));
+    if (selectedClarityId) params.set("clarity_id", String(selectedClarityId));
+    if (selectedCarat) params.set("carat", String(selectedCarat));
+    if (selectedCutId) params.set("cut_id", String(selectedCutId));
+    if (selectedKaratId) {
       params.set("karat_id", String(selectedKaratId));
     }
 
@@ -788,6 +807,7 @@ export default function ProductCustomizer({
     variantEnabled,
     metalOptions,
   ]);
+console.log(selectedMetalId, selectedKaratId, selectedCarat);
 
   // Update sessionStorage cache when variantDetails changes
   useEffect(() => {
@@ -837,81 +857,97 @@ export default function ProductCustomizer({
 
       <div className={styles.section}>
         <div className={styles.sectionTitle}>{labels.customizedForYou}</div>
-        <div className={styles.fieldTitle}>{labels.selectDiamondCut}</div>
-        <div className={styles.cuts}>
-          {cutOptions.map((item) => (
-            <button
-              key={item.id}
-              type="button"
-              className={`${styles.cut} ${cut === item.id ? styles.cutActive : ""}`}
-              onClick={() => {
-                setVariantEnabled(true);
-                setCut(item.id);
-              }}
-            >
-              <div className={styles.cutIcon} aria-hidden>
-                <Image src={item.src} alt="" width={28} height={28} />
+        {cutOptions.length ? (
+          <>
+            <div className={styles.fieldTitle}>{labels.selectDiamondCut}</div>
+            <div className={styles.cuts}>
+              {cutOptions.map((item) => (
+                <button
+                  key={item.id}
+                  type="button"
+                  className={`${styles.cut} ${cut === item.id ? styles.cutActive : ""}`}
+                  onClick={() => {
+                    setVariantEnabled(true);
+                    setCut(item.id);
+                  }}
+                >
+                  <div className={styles.cutIcon} aria-hidden>
+                    <Image src={item.src} alt="" width={28} height={28} />
+                  </div>
+                  <div className={styles.cutLabel}>{item.label}</div>
+                </button>
+              ))}
+            </div>
+            <div className={styles.divider} aria-hidden />
+          </>
+        ) : null}
+
+        {qualityOptions.length || clarityOptions.length ? (
+          <>
+            <div className={styles.gridFields}>
+              <div className={styles.fieldTitle}>{labels.diamondQuality}</div>
+              <div style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
+                {qualityOptions.length ? (
+                  <div>
+                    <Select
+                      className={styles.select}
+                      classNamePrefix="customizer"
+                      instanceId={qualityId}
+                      styles={dropdownStyles}
+                      value={qualityOptions.find((opt) => opt.value === quality) ?? null}
+                      options={qualityOptions}
+                      onChange={(option) => {
+                        setVariantEnabled(true);
+                        setQuality(option?.value ?? "");
+                      }}
+                      isSearchable={false}
+                    />
+                  </div>
+                ) : null}
+                {clarityOptions.length ? (
+                  <div>
+                    <Select
+                      className={styles.select}
+                      classNamePrefix="customizer"
+                      instanceId={clarityId}
+                      styles={dropdownStyles}
+                      value={clarityOptions.find((opt) => opt.value === clarity) ?? null}
+                      options={clarityOptions}
+                      onChange={(option) => {
+                        setVariantEnabled(true);
+                        setClarity(option?.value ?? "");
+                      }}
+                      isSearchable={false}
+                    />
+                  </div>
+                ) : null}
               </div>
-              <div className={styles.cutLabel}>{item.label}</div>
-            </button>
-          ))}
-        </div>
-        <div className={styles.divider} aria-hidden />
-
-        <div className={styles.gridFields}>
-        <div className={styles.fieldTitle}>{labels.diamondQuality}</div>
-          <div style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
-            <div>
-              <Select
-              className={styles.select}
-              classNamePrefix="customizer"
-              instanceId={qualityId}
-              styles={dropdownStyles}
-              value={qualityOptions.find((opt) => opt.value === quality) ?? null}
-              options={qualityOptions}
-              onChange={(option) => {
-                setVariantEnabled(true);
-                setQuality(option?.value ?? "");
-              }}
-              isSearchable={false}
-            />
             </div>
-            <div>
-              <Select
-              className={styles.select}
-              classNamePrefix="customizer"
-              instanceId={clarityId}
-              styles={dropdownStyles}
-              value={clarityOptions.find((opt) => opt.value === clarity) ?? null}
-              options={clarityOptions}
-              onChange={(option) => {
-                setVariantEnabled(true);
-                setClarity(option?.value ?? "");
-              }}
-              isSearchable={false}
-            />
-            </div>
-          </div>
-        </div>
-        <div className={styles.divider} aria-hidden />
+            <div className={styles.divider} aria-hidden />
+          </>
+        ) : null}
 
-        <div className={styles.fieldTitle}>{labels.diamondCaratWeight}</div>
-        <div className={styles.pills}>
-          {caratOptions.map((value) => (
-            <button
-              key={value}
-              type="button"
-              className={`${styles.pill} ${carat === value ? styles.pillActive : ""}`}
-              onClick={() => {
-                setVariantEnabled(true);
-                setCarat(value);
-              }}
-            >
-              {value}
-            </button>
-          ))}
-        </div>
-        <div className={styles.divider} aria-hidden />
+        {caratOptions.length ? (
+          <>
+            <div className={styles.fieldTitle}>{labels.diamondCaratWeight}</div>
+            <div className={styles.pills}>
+              {caratOptions.map((value) => (
+                <button
+                  key={value}
+                  type="button"
+                  className={`${styles.pill} ${carat === value ? styles.pillActive : ""}`}
+                  onClick={() => {
+                    setVariantEnabled(true);
+                    setCarat(value);
+                  }}
+                >
+                  {value}
+                </button>
+              ))}
+            </div>
+            <div className={styles.divider} aria-hidden />
+          </>
+        ) : null}
 
         <div className={styles.fieldTitle}>{labels.selectMetalColor}</div>
         <div className={styles.metalRow}>
@@ -923,6 +959,12 @@ export default function ProductCustomizer({
               onClick={() => {
                 setVariantEnabled(true);
                 setMetal(item.value);
+                const nextMetalTypes = metalTypeOptions.filter(
+                  (opt) => Boolean(opt.isPlatinum) === Boolean(item.isPlatinum)
+                );
+                if (nextMetalTypes.length) {
+                  setMetalType(nextMetalTypes[0].value);
+                }
               }}
             >
               <span className={styles.dot} style={{ background: item.color }} aria-hidden />
@@ -933,12 +975,12 @@ export default function ProductCustomizer({
         <div className={styles.divider} aria-hidden />
 
         <div className={styles.gridFields}>
-          {!isPlatinum ? (
+          {filteredMetalTypeOptions.length ? (
             <>
               <div>
                 <div className={styles.fieldTitle}>{labels.metalType}</div>
                 <div className={styles.pills}>
-                  {metalTypeOptions.map((option) => (
+                  {filteredMetalTypeOptions.map((option) => (
                     <button
                       key={option.value}
                       type="button"
