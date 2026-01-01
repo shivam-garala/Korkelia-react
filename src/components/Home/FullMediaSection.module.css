@@ -158,7 +158,11 @@
   }
 
   .content {
-    padding-block: 56px;
+    padding-block: 40px;
     padding-inline: 20px;
+  }
+
+  .cta {
+    margin-top: 20px;
   }
 }

@@ -184,6 +184,22 @@ const updateCacheWithVariant = (productId, variantDetails) => {
   }
 };
 
+const resolvePriceFlag = (details) => {
+  if (!details) return null;
+  const raw =
+    // details?.price_flag ??
+    // details?.priceFlag ??
+    details?.design?.price_flag ??
+    // details?.design_variant?.price_flag ??
+    // details?.designVariant?.price_flag ??
+    // details?.design?.product?.price_flag ??
+    // details?.product?.price_flag ??
+    null;
+  if (raw === null || raw === undefined || raw === "") return null;
+  const normalized = String(raw).trim().toLowerCase();
+  return raw === 1 || raw === "1" || normalized === "yes" || normalized === "true";
+};
+
 export default function ProductCustomizer({
   title = "PRODUCT NAME",
   productId = "",
@@ -803,6 +819,9 @@ export default function ProductCustomizer({
     variantDetails?.metal_rate ??
     null;
   const displayPrice = variantPrice ?? (productBasePrice || null);
+  const priceFlagValue =
+    resolvePriceFlag(variantDetails) ?? resolvePriceFlag(productDetails);
+  const shouldShowPrice = priceFlagValue === null ? true : priceFlagValue;
 
   return (
     <aside className={styles.panel}>
@@ -952,17 +971,21 @@ export default function ProductCustomizer({
             />
           </div>
         </div>
-        <div className={styles.divider} aria-hidden />
-        <div className={styles.priceBlock}>
-          {/* <div className={styles.priceLabel}>{labels.price}</div> */}
-          {variantLoading ? (
-            <div className={styles.variantStatus}>...</div>
-          ) : displayPrice ? (
-            <div className={styles.priceValue}>{displayPrice}</div>
-          ) : null}
-          {/* <div className={styles.priceValue}>{variantPrice ?? "--"}</div> */}
-        </div>
-        <div className={styles.divider} aria-hidden />
+        {shouldShowPrice ? (
+          <>
+            <div className={styles.divider} aria-hidden />
+            <div className={styles.priceBlock}>
+              {/* <div className={styles.priceLabel}>{labels.price}</div> */}
+              {variantLoading ? (
+                <div className={styles.variantStatus}>...</div>
+              ) : displayPrice ? (
+                <div className={styles.priceValue}>{displayPrice}</div>
+              ) : null}
+              {/* <div className={styles.priceValue}>{variantPrice ?? "--"}</div> */}
+            </div>
+            <div className={styles.divider} aria-hidden />
+          </>
+        ) : null}
 
         <div className={styles.fieldTitle}>{labels.engraving}</div>
         <div className={styles.engraveRow}>
