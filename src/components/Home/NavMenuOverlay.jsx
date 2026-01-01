@@ -6,7 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import styles from "./NavMenuOverlay.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
-import axiosClient from "../../lib/axiosClient.js";
+import { fetchCategoryHomePage } from "../../lib/categoryHomeCache.js";
 
 function Icon({ path, className, style }) {
   return (
@@ -89,10 +89,7 @@ export default function NavMenuOverlay({ open, onClose }) {
     const loadCategories = async () => {
       try {
         if (active) setCategoriesLoading(true);
-        const { data } = await axiosClient.get(
-          `/api/categoryMaster/home-page?language_id=${encodeURIComponent(languageId)}`
-        );
-        const list = Array.isArray(data) ? data : data?.data ?? [];
+        const list = await fetchCategoryHomePage(languageId);
         const mapped = list
           .map((item) => {
             const id = item?.id ?? item?.category_id ?? null;

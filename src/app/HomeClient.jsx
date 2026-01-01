@@ -6,7 +6,7 @@ import FullMediaSection from "../components/Home/FullMediaSection.jsx";
 import Hero from "../components/Home/Hero.jsx";
 import SiteFooter from "../components/Home/SiteFooter.jsx";
 import SiteHeader from "../components/Home/SiteHeader.jsx";
-import axiosClient from "../lib/axiosClient.js";
+import { fetchCategoryHomePage } from "../lib/categoryHomeCache.js";
 import { useI18n } from "../providers/I18nProvider.jsx";
 import styles from "./home.module.css";
 
@@ -68,10 +68,7 @@ export default function HomeClient() {
     const loadCategories = async () => {
       try {
         if (active) setCategoriesLoading(true);
-        const { data } = await axiosClient.get(
-          `/api/categoryMaster/home-page?language_id=${encodeURIComponent(languageId)}`
-        );
-        const list = Array.isArray(data) ? data : data?.data ?? [];
+        const list = await fetchCategoryHomePage(languageId);
         const mapped = list
           .map((item) => {
             const id = item?.id ?? item?.category_id ?? null;
