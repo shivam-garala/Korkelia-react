@@ -227,7 +227,8 @@ export default function AppointmentPage() {
       return;
     }
     const normalizedCaptcha = form.captcha.trim().toUpperCase();
-    if (!captchaText || normalizedCaptcha !== captchaText) {
+    const expectedCaptcha = captchaText.trim().toUpperCase();
+    if (!expectedCaptcha || normalizedCaptcha !== expectedCaptcha) {
       toast.error(captchaErrorMessage);
       regenerateCaptcha();
       return;
@@ -250,6 +251,7 @@ export default function AppointmentPage() {
         (languageKey === "fi"
           ? "Ajanvaraus lahetetty onnistuneesti."
           : "Appointment submitted successfully.");
+      toast.success(message);
       setForm(initialForm);
       regenerateCaptcha();
     } catch (error) {
@@ -393,6 +395,7 @@ export default function AppointmentPage() {
                       required
                       value={form.captcha}
                       onChange={handleChange}
+                      inputClassName={styles.captchaInput}
                       style={{
                         borderTopLeftRadius: 0,
                         borderBottomLeftRadius: 0,
