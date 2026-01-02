@@ -1,7 +1,7 @@
 "use client";
 
 import Image from "next/image";
-import { useEffect, useId, useMemo, useState } from "react";
+import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
 import { toast } from "react-toastify";
@@ -216,6 +216,8 @@ export default function ProductCustomizer({
   const [variantDetails, setVariantDetails] = useState(null);
   const [variantLoading, setVariantLoading] = useState(false);
   const [variantEnabled, setVariantEnabled] = useState(false);
+  const [variantAdjustedFilters, setVariantAdjustedFilters] = useState(null);
+  const [variantDesignAvailable, setVariantDesignAvailable] = useState(null);
   const [defaultsApplied, setDefaultsApplied] = useState(false);
   const [cut, setCut] = useState(() => normalizeString(defaultCutId));
   const [quality, setQuality] = useState(() => normalizeString(defaultDiamondTypeId));
@@ -225,6 +227,9 @@ export default function ProductCustomizer({
   const [metalType, setMetalType] = useState(() => normalizeString(defaultKaratId));
   const [size, setSize] = useState("");
   const [engraving, setEngraving] = useState("");
+  const lastFilterQueryRef = useRef("");
+  const lastVariantQueryRef = useRef("");
+  const skipNextVariantFetchRef = useRef(false);
 
   const labels =
     language === "fi"
@@ -333,14 +338,22 @@ export default function ProductCustomizer({
   useEffect(() => {
     let active = true;
 
+    const query = new URLSearchParams({
+      language_id: String(languageId),
+    });
+    if (productId) query.set("product_id", String(productId));
+    const queryString = query.toString();
+    if (queryString === lastFilterQueryRef.current) {
+      return () => {
+        active = false;
+      };
+    }
+    lastFilterQueryRef.current = queryString;
+
     const loadFilters = async () => {
       try {
-        const query = new URLSearchParams({
-          language_id: String(languageId),
-        });
-        if (productId) query.set("product_id", String(productId));
         const { data } = await axiosClient.get(
-          `/api/design/filter-dropdowns-ecom?${query.toString()}`
+          `/api/design/filter-dropdowns-ecom?${queryString}`
         );
         const payload = data?.data ?? data;
         if (active) {
@@ -348,6 +361,7 @@ export default function ProductCustomizer({
         }
       } catch (error) {
         if (active) setFilterData(null);
+        lastFilterQueryRef.current = "";
         console.error("Product filter load failed", error);
       }
     };
@@ -678,17 +692,17 @@ export default function ProductCustomizer({
     filteredMetalTypeOptions.find((opt) => opt.value === metalType)?.value ?? "";
   const selectedCarat = carat ? String(carat) : "";
 
-  const variantTitle =
-    variantEnabled
-      ? resolveTranslationName(
-          variantDetails?.design_translation ??
-            variantDetails?.design_translations ??
-            variantDetails?.translations,
-          languageId
-        ) ||
-        normalizeString(variantDetails?.design_variant_name) ||
-        normalizeString(variantDetails?.product_name)
-      : "";
+  // const variantTitle =
+  //   variantEnabled
+  //     ? resolveTranslationName(
+  //         variantDetails?.design_translation ??
+  //           variantDetails?.design_translations ??
+  //           variantDetails?.translations,
+  //         languageId
+  //       ) ||
+  //       normalizeString(variantDetails?.design_variant_name) ||
+  //       normalizeString(variantDetails?.product_name)
+  //     : "";
   const variantDescription =
     variantEnabled
       ? resolveTranslationDescription(
@@ -701,8 +715,8 @@ export default function ProductCustomizer({
       : "";
 
   const productTitle =
-    variantTitle ||
-    normalizeString(productDetails?.product_name) ||
+    // variantTitle ||
+    // normalizeString(productDetails?.product_name) ||
     normalizeString(productDetails?.design?.design_variant_name) ||
     normalizeString(title) ||
     "PRODUCT NAME";
@@ -727,37 +741,33 @@ export default function ProductCustomizer({
 
   useEffect(() => {
     let active = true;
-    console.log("AAAAA");
     
     if (!variantEnabled) {
       setVariantDetails(null);
+      setVariantAdjustedFilters(null);
+      setVariantDesignAvailable(null);
       setVariantLoading(false);
       return () => {
         active = false;
       };
     }
-    console.log("BBBBB");
-    
-    // Check if selected metal is Platinum by finding it in metalOptions
-    const selectedMetalOption = metalOptions.find((opt) => opt.value === selectedMetalId);
-    const isSelectedMetalPlatinum = selectedMetalOption?.label?.toLowerCase() === "platinum" || 
-    selectedMetalOption?.label?.toLowerCase().includes("platinum");
-    console.log("CCCCC");
-    console.log(!isSelectedMetalPlatinum && !selectedKaratId);
-    console.log(productId, selectedMetalId, selectedKaratId, selectedQualityId, selectedClarityId, selectedCarat, selectedCutId);
-    console.log(!productId);
     
     if (!productId || !selectedMetalId || !selectedKaratId) {
       setVariantDetails(null);
+      setVariantAdjustedFilters(null);
+      setVariantDesignAvailable(null);
       setVariantLoading(false);
       return () => {
         active = false;
       };
     }
 
-    
-    console.log("DDDDD");
-    
+    if (skipNextVariantFetchRef.current) {
+      skipNextVariantFetchRef.current = false;
+      return () => {
+        active = false;
+      };
+    }
 
     const params = new URLSearchParams({
       product_id: String(productId),
@@ -770,17 +780,44 @@ export default function ProductCustomizer({
     if (selectedKaratId) {
       params.set("karat_id", String(selectedKaratId));
     }
+    const queryString = params.toString();
+    if (queryString === lastVariantQueryRef.current) {
+      return () => {
+        active = false;
+      };
+    }
+    lastVariantQueryRef.current = queryString;
 
     setVariantLoading(true);
     const loadVariant = async () => {
       try {
         const { data } = await axiosClient.get(
-          `/api/design/variant-details-ecom?${params.toString()}`
+          `/api/design/variant-details-ecom?${queryString}`
         );
-        if (active) setVariantDetails(data?.data ?? data ?? null);
+        if (active) {
+          const response = data ?? null;
+          const payload = response?.data ?? response ?? null;
+          setVariantDetails(payload);
+          setVariantAdjustedFilters(
+            response?.adjusted_filters ??
+              payload?.adjusted_filters ??
+              response?.adjustedFilters ??
+              payload?.adjustedFilters ??
+              null
+          );
+          setVariantDesignAvailable(
+            response?.is_design_avl ??
+              payload?.is_design_avl ??
+              response?.isDesignAvailable ??
+              payload?.isDesignAvailable ??
+              null
+          );
+        }
       } catch (error) {
         if (active) {
           setVariantDetails(null);
+          setVariantAdjustedFilters(null);
+          setVariantDesignAvailable(null);
           const errorMessage =
             error?.response?.data?.message ??
             error?.response?.data?.error ??
@@ -788,6 +825,7 @@ export default function ProductCustomizer({
             "Failed to load variant details. Please try again.";
           toast.error(errorMessage);
         }
+        lastVariantQueryRef.current = "";
         console.error("Variant details load failed", error);
       } finally {
         if (active) setVariantLoading(false);
@@ -807,9 +845,103 @@ export default function ProductCustomizer({
     selectedCarat,
     selectedCutId,
     variantEnabled,
-    metalOptions,
   ]);
-console.log(selectedMetalId, selectedKaratId, selectedCarat);
+
+  useEffect(() => {
+    if (!variantEnabled || !variantAdjustedFilters) return;
+    const designAvailability =
+      variantDesignAvailable ??
+      variantAdjustedFilters?.is_design_avl ??
+      variantAdjustedFilters?.is_design_available ??
+      variantDetails?.is_design_avl ??
+      variantDetails?.is_design_available ??
+      null;
+    if (designAvailability === null || designAvailability === undefined) return;
+    const availabilityValue = normalizeString(designAvailability).toLowerCase();
+    if (availabilityValue !== "0" && availabilityValue !== "false") {
+      return;
+    }
+
+    const adjusted = variantAdjustedFilters ?? {};
+    const nextCut = normalizeString(adjusted.cut_id ?? adjusted.cutId ?? "");
+    const nextQuality = normalizeString(
+      adjusted.diamond_type_id ??
+        adjusted.diamondTypeId ??
+        adjusted.type_id ??
+        adjusted.typeId ??
+        ""
+    );
+    const nextClarity = normalizeString(adjusted.clarity_id ?? adjusted.clarityId ?? "");
+    const nextCarat = normalizeString(adjusted.carat ?? adjusted.carat_weight ?? adjusted.caratWeight ?? "");
+    const nextMetal = normalizeString(adjusted.metal_id ?? adjusted.metalId ?? "");
+    const nextKarat = normalizeString(adjusted.karat_id ?? adjusted.karatId ?? "");
+
+    const canUseOption = (value, options, matcher) => {
+      if (!value) return false;
+      if (!options || !options.length) return true;
+      return options.some((opt) => matcher(opt, value));
+    };
+
+    const canUseCut = canUseOption(nextCut, cutOptions, (opt, value) => opt.id === value);
+    if (nextCut && nextCut !== cut && canUseCut) {
+      setCut(nextCut);
+    }
+
+    const canUseQuality = canUseOption(nextQuality, qualityOptions, (opt, value) => opt.value === value);
+    if (nextQuality && nextQuality !== quality && canUseQuality) {
+      setQuality(nextQuality);
+    }
+
+    const canUseClarity = canUseOption(nextClarity, clarityOptions, (opt, value) => opt.value === value);
+    if (nextClarity && nextClarity !== clarity && canUseClarity) {
+      setClarity(nextClarity);
+    }
+
+    const canUseCarat = nextCarat && (!caratOptions.length || caratOptions.includes(nextCarat));
+    if (nextCarat && nextCarat !== carat && canUseCarat) {
+      setCarat(nextCarat);
+    }
+
+    const canUseMetal = canUseOption(nextMetal, metalOptions, (opt, value) => opt.value === value);
+    if (nextMetal && nextMetal !== metal && canUseMetal) {
+      setMetal(nextMetal);
+    }
+
+    const metalTypeList = filteredMetalTypeOptions.length ? filteredMetalTypeOptions : metalTypeOptions;
+    const canUseKarat = canUseOption(nextKarat, metalTypeList, (opt, value) => opt.value === value);
+    if (nextKarat && nextKarat !== metalType && canUseKarat) {
+      setMetalType(nextKarat);
+    }
+
+    if (
+      (nextCut && nextCut !== cut) ||
+      (nextQuality && nextQuality !== quality) ||
+      (nextClarity && nextClarity !== clarity) ||
+      (nextCarat && nextCarat !== carat) ||
+      (nextMetal && nextMetal !== metal) ||
+      (nextKarat && nextKarat !== metalType)
+    ) {
+      skipNextVariantFetchRef.current = true;
+    }
+  }, [
+    variantAdjustedFilters,
+    variantDesignAvailable,
+    variantDetails,
+    variantEnabled,
+    cut,
+    cutOptions,
+    quality,
+    qualityOptions,
+    clarity,
+    clarityOptions,
+    carat,
+    caratOptions,
+    metal,
+    metalOptions,
+    metalType,
+    metalTypeOptions,
+    filteredMetalTypeOptions,
+  ]);
 
   // Update sessionStorage cache when variantDetails changes
   useEffect(() => {

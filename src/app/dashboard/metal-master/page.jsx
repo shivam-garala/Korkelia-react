@@ -14,6 +14,7 @@ import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import {
   createMetalMaster,
   deleteMetalMaster,
+  fetchMetalMaster,
   fetchMetalMasters,
   selectMetalMasterError,
   selectMetalMasterLoading,
@@ -31,6 +32,55 @@ function pickValue(obj, keys) {
     if (value !== undefined && value !== null) return value;
   }
   return null;
+}
+
+function normalizeList(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+  return [];
+}
+
+function extractMetalNames(item) {
+  const list = normalizeList(
+    pickValue(item, [
+      "metal_translation",
+      "metal_translations",
+      "translations",
+      "metal_name_array",
+      "metalNameArray",
+      "metal_names",
+      "metalNames",
+    ])
+  );
+  let nameEn = "";
+  let nameFi = "";
+
+  list.forEach((entry) => {
+    const languageId = String(
+      pickValue(entry, ["language_id", "languageId", "lang_id", "langId"]) ??
+        pickValue(entry?.language, ["id", "language_id", "languageId", "lang_id", "langId"]) ??
+        ""
+    );
+    const languageName = String(
+      pickValue(entry?.language, ["language_name", "languageName", "name", "label"]) ?? ""
+    ).toLowerCase();
+    const name = pickValue(entry, ["metal_name", "metalName", "name", "label"]);
+    if (!name) return;
+    if (languageId === "1" || languageName === "english") nameEn = String(name);
+    if (languageId === "2" || languageName === "finnish") nameFi = String(name);
+  });
+
+  const fallbackName = pickValue(item, ["metal_name", "metalName", "name"]);
+  if (!nameEn && fallbackName) nameEn = String(fallbackName);
+
+  return { nameEn, nameFi };
 }
 
 export default function MetalMasterPage() {
@@ -67,7 +117,8 @@ export default function MetalMasterPage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [metalName, setMetalName] = useState("");
+  const [metalNameEn, setMetalNameEn] = useState("");
+  const [metalNameFi, setMetalNameFi] = useState("");
   const [metalCode, setMetalCode] = useState("");
   const [filters, setFilters] = useState({ no: "", metal_name: "", metal_code: "" });
 
@@ -79,10 +130,12 @@ export default function MetalMasterPage() {
     const rows = Array.isArray(items) ? items : [];
     return rows.map((item, index) => {
       const id = pickValue(item, ["id", "metal_id", "metalId"]) ?? index + 1;
+      const { nameEn, nameFi } = extractMetalNames(item);
+      const metalLabel = [nameEn, nameFi].filter(Boolean).join(" / ") || "-";
       return {
         no: index + 1,
         id,
-        metal_name: pickValue(item, ["metal_name", "metalName", "name"]) ?? "-",
+        metal_name: metalLabel,
         metal_code: pickValue(item, ["metal_code", "metalCode", "code"]) ?? "-",
         _raw: item,
       };
@@ -109,22 +162,40 @@ export default function MetalMasterPage() {
 
   const openCreate = () => {
     setEditingId(null);
-    setMetalName("");
+    setMetalNameEn("");
+    setMetalNameFi("");
     setMetalCode("");
     setModalOpen(true);
   };
 
-  const openEdit = (row) => {
+  const openEdit = async (row) => {
     const rawId = pickValue(row, ["id", "metal_id", "metalId"]);
+    if (!rawId) return;
+
+    let source = row;
+    const result = await dispatch(fetchMetalMaster(rawId));
+    const payload = result?.payload?.data ?? result?.payload ?? null;
+    if (payload && typeof payload === "object") {
+      source = payload?.data ?? payload;
+    }
+
+    const { nameEn, nameFi } = extractMetalNames(source);
     setEditingId(rawId ?? null);
-    setMetalName(String(pickValue(row, ["metal_name", "metalName", "name"]) ?? ""));
-    setMetalCode(String(pickValue(row, ["metal_code", "metalCode", "code"]) ?? ""));
+    setMetalNameEn(nameEn);
+    setMetalNameFi(nameFi);
+    setMetalCode(String(pickValue(source, ["metal_code", "metalCode", "code"]) ?? ""));
     setModalOpen(true);
   };
 
   const submit = async (event) => {
     event.preventDefault();
-    const payload = { metal_name: metalName, metal_code: metalCode };
+    const payload = {
+      metal_code: metalCode,
+      metal_name_array: [
+        ...(metalNameEn ? [{ metal_name: metalNameEn, language_id: "1" }] : []),
+        ...(metalNameFi ? [{ metal_name: metalNameFi, language_id: "2" }] : []),
+      ],
+    };
 
     const action = editingId ? updateMetalMaster({ id: editingId, payload }) : createMetalMaster(payload);
 
@@ -253,11 +324,17 @@ export default function MetalMasterPage() {
         }
       >
         <form id="metal-form" className={styles.form} onSubmit={submit}>
-          <div className={styles.formRow2}>
+          <div className={styles.formRow3}>
             <TextField
-              label="Metal Name"
-              value={metalName}
-              onChange={(e) => setMetalName(e.target.value)}
+              label="Metal Name (English)"
+              value={metalNameEn}
+              onChange={(e) => setMetalNameEn(e.target.value)}
+              required
+            />
+            <TextField
+              label="Metal Name (Finnish)"
+              value={metalNameFi}
+              onChange={(e) => setMetalNameFi(e.target.value)}
               required
             />
             <TextField

@@ -46,6 +46,90 @@ function pickValue(obj, keys) {
   return null;
 }
 
+function normalizeList(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+  return [];
+}
+
+function extractTypeNames(item) {
+  if (!item) return { nameEn: "", nameFi: "" };
+  const list = normalizeList(
+    pickValue(item, [
+      "type_name_array",
+      "typeNameArray",
+      "type_names",
+      "typeNames",
+      "translations",
+      "diamond_type_translations",
+      "diamondTypeTranslations",
+      "diamond_type_translation",
+      "diamondTypeTranslation",
+    ])
+  );
+  let nameEn = "";
+  let nameFi = "";
+
+  list.forEach((entry) => {
+    const languageId = String(
+      pickValue(entry, ["language_id", "languageId", "lang_id", "langId"]) ??
+        pickValue(entry?.language, ["id", "language_id", "languageId", "lang_id", "langId"]) ??
+        ""
+    );
+    const languageName = String(
+      pickValue(entry?.language, ["language_name", "languageName", "name", "label"]) ?? ""
+    ).toLowerCase();
+    const name = pickValue(entry, [
+      "type_name",
+      "typeName",
+      "diamond_type_name",
+      "diamondTypeName",
+      "name",
+      "label",
+    ]);
+    if (!name) return;
+    if (languageId === "1" || languageName === "english") nameEn = String(name);
+    if (languageId === "2" || languageName === "finnish") nameFi = String(name);
+  });
+
+  const fallbackName = pickValue(item, [
+    "type_name",
+    "typeName",
+    "diamond_type_name",
+    "diamondTypeName",
+    "name",
+  ]);
+  if (!nameEn && fallbackName) nameEn = String(fallbackName);
+
+  return { nameEn, nameFi };
+}
+
+function resolveTypeLabel(item) {
+  if (!item) return "";
+  const { nameEn, nameFi } = extractTypeNames(item);
+  const combined = [nameEn, nameFi].filter(Boolean).join(" / ");
+  return (
+    combined ||
+    String(
+      pickValue(item, [
+        "type_name",
+        "typeName",
+        "diamond_type_name",
+        "diamondTypeName",
+        "name",
+        "label",
+      ]) ?? ""
+    )
+  );
+}
+
 function formatDiamondMasterLabel(item, fallbackId) {
   if (!item) return fallbackId !== undefined && fallbackId !== null ? String(fallbackId) : "-";
   const carat = pickValue(item, ["carat"]);
@@ -125,7 +209,7 @@ export default function DiamondRatePage() {
     return list
       .map((item) => {
         const id = pickValue(item, ["id", "type_id", "diamond_type_id", "typeId"]);
-        const label = pickValue(item, ["type_name", "typeName", "name", "label"]);
+        const label = resolveTypeLabel(item);
         if (id === null || id === undefined || label === null || label === undefined) return null;
         return { id: String(id), label: String(label) };
       })
@@ -159,11 +243,7 @@ export default function DiamondRatePage() {
             ?.label ??
           (rawDiamondMasterId !== null && rawDiamondMasterId !== undefined ? String(rawDiamondMasterId) : "-");
 
-      const diamondTypeFromRelation =
-        item?.diamond_type?.type_name ??
-        item?.diamond_type?.typeName ??
-        item?.diamond_type?.name ??
-        null;
+      const diamondTypeFromRelation = resolveTypeLabel(item?.diamond_type ?? item?.diamondType ?? null) || null;
       const diamondTypeLabel =
         diamondTypeFromRelation ??
         diamondTypeOptions.find((opt) => String(opt.id) === String(rawDiamondTypeId))?.label ??

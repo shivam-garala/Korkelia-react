@@ -15,6 +15,7 @@ import Button from "../../../components/ui/Button.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import Icon from "../../../components/ui/Icon.jsx";
 import { toast } from "react-toastify";
+import axiosClient from "../../../lib/axiosClient.js";
 import {
   createProduct,
   deleteProduct,
@@ -30,6 +31,7 @@ import {
 } from "../../../store/slices/categoryMasterSlice.js";
 import {
   fetchSubCategories,
+  selectSubCategoryLoading,
   selectSubCategories,
 } from "../../../store/slices/subCategorySlice.js";
 import {
@@ -105,6 +107,18 @@ function extractProductNames(item) {
   return { nameEn, nameFi };
 }
 
+function buildStyleOptions(list) {
+  const items = Array.isArray(list) ? list : [];
+  return items
+    .map((item) => {
+      const id = pickValue(item, ["id", "style_id", "styleId"]);
+      const label = pickValue(item, ["style_name", "styleName", "name", "label"]);
+      if (id === null || id === undefined || label === null || label === undefined) return null;
+      return { value: String(id), label: String(label) };
+    })
+    .filter(Boolean);
+}
+
 export default function ProductPage() {
   const pathname = usePathname();
   const router = useRouter();
@@ -112,6 +126,7 @@ export default function ProductPage() {
   const items = useAppSelector(selectProducts);
   const categories = useAppSelector(selectCategoryMasters);
   const subCategories = useAppSelector(selectSubCategories);
+  const subCategoryLoading = useAppSelector(selectSubCategoryLoading);
   const stylesList = useAppSelector(selectStyleMasters);
   const loading = useAppSelector(selectProductLoading);
   const error = useAppSelector(selectProductError);
@@ -158,6 +173,8 @@ export default function ProductPage() {
   const [styleName, setStyleName] = useState("");
   const [productNameEn, setProductNameEn] = useState("");
   const [productNameFi, setProductNameFi] = useState("");
+  const [styleDropdownItems, setStyleDropdownItems] = useState([]);
+  const [styleDropdownLoading, setStyleDropdownLoading] = useState(false);
   const [isDisplay, setIsDisplay] = useState("1");
   const [imageFile, setImageFile] = useState(null);
   const [imagePreviewUrl, setImagePreviewUrl] = useState("");
@@ -191,6 +208,42 @@ export default function ProductPage() {
     dispatch(fetchProducts());
   }, [dispatch]);
 
+  useEffect(() => {
+    let active = true;
+
+    if (!subCategoryId) {
+      setStyleDropdownItems([]);
+      setStyleDropdownLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+
+    const loadStyles = async () => {
+      try {
+        setStyleDropdownLoading(true);
+        const { data } = await axiosClient.get(
+          `/api/styleMaster/dropdown-by-subcategory?sub_category_id=${encodeURIComponent(
+            subCategoryId
+          )}`
+        );
+        const payload = data?.data ?? data;
+        const list = Array.isArray(payload) ? payload : payload?.data ?? [];
+        if (active) setStyleDropdownItems(list);
+      } catch (error) {
+        if (active) setStyleDropdownItems([]);
+        console.error("Style dropdown load failed", error);
+      } finally {
+        if (active) setStyleDropdownLoading(false);
+      }
+    };
+
+    loadStyles();
+    return () => {
+      active = false;
+    };
+  }, [subCategoryId]);
+
   const categoryOptions = useMemo(() => {
     const list = Array.isArray(categories) ? categories : [];
     return list
@@ -220,22 +273,19 @@ export default function ProductPage() {
       .filter(Boolean);
   }, [subCategories]);
 
-  const filteredSubCategoryOptions = useMemo(() => {
-    if (!categoryId) return subCategoryOptions;
-    return subCategoryOptions.filter((option) => option.categoryId === String(categoryId));
-  }, [categoryId, subCategoryOptions]);
+  const filteredSubCategoryOptions = useMemo(
+    () => subCategoryOptions,
+    [subCategoryOptions]
+  );
 
   const styleOptions = useMemo(() => {
-    const list = Array.isArray(stylesList) ? stylesList : [];
-    return list
-      .map((item) => {
-        const id = pickValue(item, ["id", "style_id", "styleId"]);
-        const label = pickValue(item, ["style_name", "styleName", "name", "label"]);
-        if (id === null || id === undefined || label === null || label === undefined) return null;
-        return { value: String(id), label: String(label) };
-      })
-      .filter(Boolean);
+    return buildStyleOptions(stylesList);
   }, [stylesList]);
+
+  const styleDropdownOptions = useMemo(() => {
+    if (!subCategoryId) return styleOptions;
+    return buildStyleOptions(styleDropdownItems);
+  }, [styleDropdownItems, styleOptions, subCategoryId]);
 
   const displayOptions = useMemo(
     () => [
@@ -586,8 +636,6 @@ export default function ProductPage() {
                       const selected = categoryOptions.find((opt) => opt.value === nextId);
                       setCategoryId(nextId);
                       setCategoryName(selected?.label ?? "");
-                      setSubCategoryId("");
-                      setSubCategoryName("");
                     }}
                     isDisabled={!categoryOptions.length}
                     placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
@@ -608,12 +656,16 @@ export default function ProductPage() {
                       const selected = filteredSubCategoryOptions.find((opt) => opt.value === nextId);
                       setSubCategoryId(nextId);
                       setSubCategoryName(selected?.label ?? "");
+                      setStyleId("");
+                      setStyleName("");
                     }}
                     isDisabled={!filteredSubCategoryOptions.length}
                     placeholder={
-                      filteredSubCategoryOptions.length
+                      subCategoryLoading
+                        ? "Loading sub categories..."
+                        : filteredSubCategoryOptions.length
                         ? "Select sub category"
-                        : "Loading sub categories..."
+                        : "No sub categories"
                     }
                     options={filteredSubCategoryOptions}
                     menuPortalTarget={portalTarget}
@@ -629,13 +681,27 @@ export default function ProductPage() {
                     value={styleOptions.find((option) => option.value === styleId) ?? null}
                     onChange={(option) => {
                       const nextId = option?.value ?? "";
-                      const selected = styleOptions.find((opt) => opt.value === nextId);
+                      const selected = styleDropdownOptions.find((opt) => opt.value === nextId);
                       setStyleId(nextId);
                       setStyleName(selected?.label ?? "");
                     }}
-                    isDisabled={!styleOptions.length}
-                    placeholder={styleOptions.length ? "Select style" : "Loading styles..."}
-                    options={styleOptions}
+                    isDisabled={
+                      subCategoryId
+                        ? styleDropdownLoading || !styleDropdownOptions.length
+                        : !styleOptions.length
+                    }
+                    placeholder={
+                      subCategoryId
+                        ? styleDropdownLoading
+                          ? "Loading styles..."
+                          : styleDropdownOptions.length
+                          ? "Select style"
+                          : "No styles found"
+                        : styleOptions.length
+                        ? "Select style"
+                        : "Loading styles..."
+                    }
+                    options={styleDropdownOptions}
                     menuPortalTarget={portalTarget}
                     menuPosition="fixed"
                     styles={selectMenuStyles}
@@ -727,8 +793,6 @@ export default function ProductPage() {
                       const selected = categoryOptions.find((opt) => opt.value === nextId);
                       setCategoryId(nextId);
                       setCategoryName(selected?.label ?? "");
-                      setSubCategoryId("");
-                      setSubCategoryName("");
                     }}
                     isDisabled={!categoryOptions.length}
                     placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
@@ -749,12 +813,16 @@ export default function ProductPage() {
                       const selected = filteredSubCategoryOptions.find((opt) => opt.value === nextId);
                       setSubCategoryId(nextId);
                       setSubCategoryName(selected?.label ?? "");
+                      setStyleId("");
+                      setStyleName("");
                     }}
                     isDisabled={!filteredSubCategoryOptions.length}
                     placeholder={
-                      filteredSubCategoryOptions.length
+                      subCategoryLoading
+                        ? "Loading sub categories..."
+                        : filteredSubCategoryOptions.length
                         ? "Select sub category"
-                        : "Loading sub categories..."
+                        : "No sub categories"
                     }
                     options={filteredSubCategoryOptions}
                     menuPortalTarget={portalTarget}
@@ -770,13 +838,27 @@ export default function ProductPage() {
                     value={styleOptions.find((option) => option.value === styleId) ?? null}
                     onChange={(option) => {
                       const nextId = option?.value ?? "";
-                      const selected = styleOptions.find((opt) => opt.value === nextId);
+                      const selected = styleDropdownOptions.find((opt) => opt.value === nextId);
                       setStyleId(nextId);
                       setStyleName(selected?.label ?? "");
                     }}
-                    isDisabled={!styleOptions.length}
-                    placeholder={styleOptions.length ? "Select style" : "Loading styles..."}
-                    options={styleOptions}
+                    isDisabled={
+                      subCategoryId
+                        ? styleDropdownLoading || !styleDropdownOptions.length
+                        : !styleOptions.length
+                    }
+                    placeholder={
+                      subCategoryId
+                        ? styleDropdownLoading
+                          ? "Loading styles..."
+                          : styleDropdownOptions.length
+                          ? "Select style"
+                          : "No styles found"
+                        : styleOptions.length
+                        ? "Select style"
+                        : "Loading styles..."
+                    }
+                    options={styleDropdownOptions}
                     menuPortalTarget={portalTarget}
                     menuPosition="fixed"
                     styles={selectMenuStyles}

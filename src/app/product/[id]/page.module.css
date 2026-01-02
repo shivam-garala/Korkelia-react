@@ -83,4 +83,8 @@
   .layout {
     grid-template-columns: 1fr;
   }
+
+  .topLine {
+    margin: 0 0 40px;
+  }
 }
