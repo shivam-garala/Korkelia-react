@@ -95,12 +95,15 @@ export default function ProductGallery({ items, productId = "" }) {
             image
         );
         const videoSrc = resolveImageSrc(image?.videoSrc ?? "");
-        const isVideo =
-          Boolean(videoSrc) ||
+        const videoFromSrc = isVideoSrc(src);
+        const wantsVideo =
           image?.type === "video" ||
           image?.badge === "play" ||
-          isVideoSrc(src);
-        const resolvedVideoSrc = videoSrc || (isVideoSrc(src) ? src : "");
+          videoFromSrc ||
+          Boolean(videoSrc);
+        const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
+        if (wantsVideo && !resolvedVideoSrc) return null;
+        const isVideo = Boolean(resolvedVideoSrc);
         const resolvedSrc = src || (isVideo ? fallbackImageSrc : "");
         if (!resolvedSrc && !resolvedVideoSrc) return null;
         const variant =
@@ -172,8 +175,11 @@ export default function ProductGallery({ items, productId = "" }) {
             ""
         );
         const videoSrc = resolveImageSrc(item?.videoSrc ?? "");
-        const isVideo = Boolean(videoSrc) || isVideoItem(item) || isVideoSrc(src);
-        const resolvedVideoSrc = videoSrc || (isVideoSrc(src) ? src : "");
+        const videoFromSrc = isVideoSrc(src);
+        const wantsVideo = isVideoItem(item) || videoFromSrc || Boolean(videoSrc);
+        const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
+        if (wantsVideo && !resolvedVideoSrc) return null;
+        const isVideo = Boolean(resolvedVideoSrc);
         const resolvedSrc = src || (isVideo ? fallbackImageSrc : "");
         if (!resolvedSrc && !resolvedVideoSrc) return null;
         const variant =

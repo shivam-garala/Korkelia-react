@@ -274,6 +274,45 @@ export default function ProductCustomizer({
     setProductDetails(cached);
   }, [productId]);
 
+  useEffect(() => {
+    const nextCut = normalizeString(defaultCutId);
+    const nextQuality = normalizeString(defaultDiamondTypeId);
+    const nextClarity = normalizeString(defaultClarityId);
+    const nextCarat = normalizeString(defaultCarat);
+    const nextMetal = normalizeString(defaultMetalId);
+    const nextKarat = normalizeString(defaultKaratId);
+
+    setCut(nextCut);
+    setQuality(nextQuality);
+    setClarity(nextClarity);
+    setCarat(nextCarat);
+    setMetal(nextMetal);
+    setMetalType(nextKarat);
+    setSize("");
+    setEngraving("");
+    setVariantEnabled(
+      Boolean(
+        nextCut ||
+          nextQuality ||
+          nextClarity ||
+          nextCarat ||
+          nextMetal ||
+          nextKarat
+      )
+    );
+    setDefaultsApplied(false);
+    skipNextVariantFetchRef.current = false;
+    lastVariantQueryRef.current = "";
+  }, [
+    productId,
+    defaultCutId,
+    defaultDiamondTypeId,
+    defaultClarityId,
+    defaultCarat,
+    defaultMetalId,
+    defaultKaratId,
+  ]);
+
   const listingDefaults = useMemo(
     () => resolveListingDefaults(productDetails),
     [productDetails]

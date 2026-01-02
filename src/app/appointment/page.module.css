@@ -217,6 +217,11 @@
   -ms-user-select: none;
 }
 
+.captchaInput {
+  text-align: center;
+  text-transform: uppercase;
+}
+
 .captchaRefresh {
   border: none;
   background: transparent;

@@ -17,6 +17,8 @@ export default function TextField({
   name = "",
   preventWheel = type === "number",
   style = {},
+  inputClassName = "",
+  inputStyle = {},
 }) {
   const inputRef = useRef(null);
 
@@ -39,7 +41,8 @@ export default function TextField({
       {label ? <span className={styles.label}>{label}</span> : null}
       <input
         ref={inputRef}
-        className={styles.control}
+        className={`${styles.control}${inputClassName ? ` ${inputClassName}` : ""}`}
+        style={inputStyle}
         type={type}
         value={value}
         onChange={onChange}

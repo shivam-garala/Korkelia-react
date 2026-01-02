@@ -9,13 +9,26 @@ import ShareProductModal from "../../../components/Product/ShareProductModal.jsx
 import styles from "./page.module.css";
 
 export default async function ProductDetailsPage({ params, searchParams }) {
-  const { id } = await params;
-  const defaultMetalId = searchParams?.metal_id ?? "";
-  const defaultKaratId = searchParams?.karat_id ?? "";
-  const defaultDiamondTypeId = searchParams?.diamond_type_id ?? "";
-  const defaultClarityId = searchParams?.clarity_id ?? "";
-  const defaultCarat = searchParams?.carat ?? "";
-  const defaultCutId = searchParams?.cut_id ?? "";
+  const resolvedParams = await Promise.resolve(params);
+  const resolvedSearchParams = await Promise.resolve(searchParams);
+  const { id } = resolvedParams ?? {};
+
+  const readSearchParam = (source, key) => {
+    if (!source) return "";
+    if (typeof source.get === "function") {
+      return source.get(key) ?? "";
+    }
+    const value = source[key];
+    if (Array.isArray(value)) return value[0] ?? "";
+    return value ?? "";
+  };
+
+  const defaultMetalId = readSearchParam(resolvedSearchParams, "metal_id");
+  const defaultKaratId = readSearchParam(resolvedSearchParams, "karat_id");
+  const defaultDiamondTypeId = readSearchParam(resolvedSearchParams, "diamond_type_id");
+  const defaultClarityId = readSearchParam(resolvedSearchParams, "clarity_id");
+  const defaultCarat = readSearchParam(resolvedSearchParams, "carat");
+  const defaultCutId = readSearchParam(resolvedSearchParams, "cut_id");
   const galleryItems = [
     { key: "a", variant: "square", src: "/productdetails/1.jpg" },
     { key: "b", variant: "tall", src: "/productdetails/2.jpg" },
