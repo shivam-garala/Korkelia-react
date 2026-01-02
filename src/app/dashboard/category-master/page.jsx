@@ -15,6 +15,7 @@ import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import {
   createCategoryMaster,
   deleteCategoryMaster,
+  fetchCategoryMaster,
   fetchCategoryMasters,
   selectCategoryMasterError,
   selectCategoryMasterLoading,
@@ -32,6 +33,55 @@ function pickValue(obj, keys) {
     if (value !== undefined && value !== null) return value;
   }
   return null;
+}
+
+function normalizeList(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+  return [];
+}
+
+function extractCategoryNames(item) {
+  const list = normalizeList(
+    pickValue(item, [
+      "category_name_array",
+      "categoryNameArray",
+      "category_names",
+      "categoryNames",
+      "translations",
+      "category_translations",
+      "categoryTranslations",
+    ])
+  );
+  let nameEn = "";
+  let nameFi = "";
+
+  list.forEach((entry) => {
+    const languageId = String(
+      pickValue(entry, ["language_id", "languageId", "lang_id", "langId"]) ??
+        pickValue(entry?.language, ["id", "language_id", "languageId", "lang_id", "langId"]) ??
+        ""
+    );
+    const languageName = String(
+      pickValue(entry?.language, ["language_name", "languageName", "name", "label"]) ?? ""
+    ).toLowerCase();
+    const name = pickValue(entry, ["category_name", "categoryName", "name", "label"]);
+    if (!name) return;
+    if (languageId === "1" || languageName === "english") nameEn = String(name);
+    if (languageId === "2" || languageName === "finnish") nameFi = String(name);
+  });
+
+  const fallbackName = pickValue(item, ["category_name", "categoryName", "name"]);
+  if (!nameEn && fallbackName) nameEn = String(fallbackName);
+
+  return { nameEn, nameFi };
 }
 
 export default function CategoryMasterPage() {
@@ -69,7 +119,8 @@ export default function CategoryMasterPage() {
   const [editingId, setEditingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
-  const [categoryName, setCategoryName] = useState("");
+  const [categoryNameEn, setCategoryNameEn] = useState("");
+  const [categoryNameFi, setCategoryNameFi] = useState("");
   const [categoryCode, setCategoryCode] = useState("");
   const [categoryImage, setCategoryImage] = useState(null);
   const [fileInputKey, setFileInputKey] = useState(0);
@@ -83,10 +134,12 @@ export default function CategoryMasterPage() {
     const rows = Array.isArray(items) ? items : [];
     return rows.map((item, index) => {
       const id = pickValue(item, ["id", "category_id", "categoryId"]) ?? index + 1;
+      const { nameEn, nameFi } = extractCategoryNames(item);
+      const categoryLabel = [nameEn, nameFi].filter(Boolean).join(" / ") || "-";
       return {
         no: index + 1,
         id,
-        category_name: pickValue(item, ["category_name", "categoryName", "name"]) ?? "-",
+        category_name: categoryLabel,
         category_code: pickValue(item, ["category_code", "categoryCode", "code"]) ?? "-",
         _raw: item,
       };
@@ -113,18 +166,30 @@ export default function CategoryMasterPage() {
 
   const openCreate = () => {
     setEditingId(null);
-    setCategoryName("");
+    setCategoryNameEn("");
+    setCategoryNameFi("");
     setCategoryCode("");
     setCategoryImage(null);
     setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
   };
 
-  const openEdit = (row) => {
+  const openEdit = async (row) => {
     const rawId = pickValue(row, ["id", "category_id", "categoryId"]);
+    if (!rawId) return;
+
+    let source = row;
+    const result = await dispatch(fetchCategoryMaster(rawId));
+    const payload = result?.payload?.data ?? result?.payload ?? null;
+    if (payload && typeof payload === "object") {
+      source = payload?.data ?? payload;
+    }
+
+    const { nameEn, nameFi } = extractCategoryNames(source);
     setEditingId(rawId ?? null);
-    setCategoryName(String(pickValue(row, ["category_name", "categoryName", "name"]) ?? ""));
-    setCategoryCode(String(pickValue(row, ["category_code", "categoryCode", "code"]) ?? ""));
+    setCategoryNameEn(nameEn);
+    setCategoryNameFi(nameFi);
+    setCategoryCode(String(pickValue(source, ["category_code", "categoryCode", "code"]) ?? ""));
     setCategoryImage(null);
     setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
@@ -133,7 +198,11 @@ export default function CategoryMasterPage() {
   const submit = async (event) => {
     event.preventDefault();
     const payload = new FormData();
-    payload.append("category_name", categoryName);
+    const nameArray = [];
+    if (categoryNameEn) nameArray.push({ language_id: "1", category_name: categoryNameEn });
+    if (categoryNameFi) nameArray.push({ language_id: "2", category_name: categoryNameFi });
+    if (categoryNameEn) payload.append("category_name", categoryNameEn);
+    payload.append("category_name_array", JSON.stringify(nameArray));
     payload.append("category_code", categoryCode);
     if (categoryImage) payload.append("image", categoryImage);
 
@@ -270,13 +339,21 @@ export default function CategoryMasterPage() {
         }
       >
         <form id="category-form" className={styles.form} onSubmit={submit}>
-          <div className={styles.formRow3}>
+          <div className={styles.formRow2}>
             <TextField
-              label="Category Name"
-              value={categoryName}
-              onChange={(e) => setCategoryName(e.target.value)}
+              label="Category Name (English)"
+              value={categoryNameEn}
+              onChange={(e) => setCategoryNameEn(e.target.value)}
               required
             />
+            <TextField
+              label="Category Name (Finnish)"
+              value={categoryNameFi}
+              onChange={(e) => setCategoryNameFi(e.target.value)}
+              required
+            />
+          </div>
+          <div className={styles.formRow2}>
             <TextField
               label="Category Code"
               value={categoryCode}

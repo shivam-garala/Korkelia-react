@@ -733,14 +733,14 @@
   }
 
   .cellButton {
-    border: 1px solid color-mix(in srgb, var(--color-line), transparent 75%);
+    border: none;
   }
 
   .square .media,
   .tall .media {
-    aspect-ratio: 2 / 3;
+    aspect-ratio: 4 / 5;
     height: auto;
-    padding: 24px 18px;
+    padding: 16px 12px;
   }
 
   .circle .media,

@@ -14,6 +14,7 @@ import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import {
   createDiamondType,
   deleteDiamondType,
+  fetchDiamondType,
   fetchDiamondTypes,
   selectDiamondTypeError,
   selectDiamondTypeLoading,
@@ -31,6 +32,70 @@ function pickValue(obj, keys) {
     if (value !== undefined && value !== null) return value;
   }
   return null;
+}
+
+function normalizeList(value) {
+  if (Array.isArray(value)) return value;
+  if (typeof value === "string") {
+    try {
+      const parsed = JSON.parse(value);
+      return Array.isArray(parsed) ? parsed : [];
+    } catch (error) {
+      return [];
+    }
+  }
+  return [];
+}
+
+function extractTypeNames(item) {
+  const list = normalizeList(
+    pickValue(item, [
+      "type_name_array",
+      "typeNameArray",
+      "type_names",
+      "typeNames",
+      "translations",
+      "diamond_type_translations",
+      "diamondTypeTranslations",
+      "diamond_type_translation",
+      "diamondTypeTranslation",
+    ])
+  );
+  let nameEn = "";
+  let nameFi = "";
+
+  list.forEach((entry) => {
+    const languageId = String(
+      pickValue(entry, ["language_id", "languageId", "lang_id", "langId"]) ??
+        pickValue(entry?.language, ["id", "language_id", "languageId", "lang_id", "langId"]) ??
+        ""
+    );
+    const languageName = String(
+      pickValue(entry?.language, ["language_name", "languageName", "name", "label"]) ?? ""
+    ).toLowerCase();
+    const name = pickValue(entry, [
+      "type_name",
+      "typeName",
+      "diamond_type_name",
+      "diamondTypeName",
+      "name",
+      "label",
+    ]);
+    if (!name) return;
+    if (languageId === "1" || languageName === "english") nameEn = String(name);
+    if (languageId === "2" || languageName === "finnish") nameFi = String(name);
+  });
+
+  const fallbackName = pickValue(item, [
+    "type_name",
+    "typeName",
+    "diamond_type_name",
+    "diamondTypeName",
+    "name",
+  ]);
+  if (!nameEn && fallbackName) nameEn = String(fallbackName);
+
+  return { nameEn, nameFi };
 }
 
 export default function DiamondTypePage() {
@@ -67,7 +132,8 @@ export default function DiamondTypePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
-  const [typeName, setTypeName] = useState("");
+  const [typeNameEn, setTypeNameEn] = useState("");
+  const [typeNameFi, setTypeNameFi] = useState("");
   const [typeCode, setTypeCode] = useState("");
   const [filters, setFilters] = useState({ no: "", type_name: "", type_code: "" });
 
@@ -79,10 +145,12 @@ export default function DiamondTypePage() {
     const rows = Array.isArray(items) ? items : [];
     return rows.map((item, index) => {
       const id = pickValue(item, ["id", "type_id", "diamond_type_id", "typeId"]) ?? index + 1;
+      const { nameEn, nameFi } = extractTypeNames(item);
+      const typeLabel = [nameEn, nameFi].filter(Boolean).join(" / ") || "-";
       return {
         no: index + 1,
         id,
-        type_name: pickValue(item, ["type_name", "typeName", "name"]) ?? "-",
+        type_name: typeLabel,
         type_code: pickValue(item, ["type_code", "typeCode", "code"]) ?? "-",
         _raw: item,
       };
@@ -109,22 +177,44 @@ export default function DiamondTypePage() {
 
   const openCreate = () => {
     setEditingId(null);
-    setTypeName("");
+    setTypeNameEn("");
+    setTypeNameFi("");
     setTypeCode("");
     setModalOpen(true);
   };
 
   const openEdit = (row) => {
     const rawId = pickValue(row, ["id", "type_id", "diamond_type_id", "typeId"]);
-    setEditingId(rawId ?? null);
-    setTypeName(String(pickValue(row, ["type_name", "typeName", "name"]) ?? ""));
-    setTypeCode(String(pickValue(row, ["type_code", "typeCode", "code"]) ?? ""));
-    setModalOpen(true);
+    if (!rawId) return;
+    const loadDetails = async () => {
+      let source = row;
+      const result = await dispatch(fetchDiamondType(rawId));
+      const payload = result?.payload?.data ?? result?.payload ?? null;
+      if (payload && typeof payload === "object") {
+        source = payload?.data ?? payload;
+      }
+
+      const { nameEn, nameFi } = extractTypeNames(source);
+      setEditingId(rawId ?? null);
+      setTypeNameEn(nameEn);
+      setTypeNameFi(nameFi);
+      setTypeCode(String(pickValue(source, ["type_code", "typeCode", "code"]) ?? ""));
+      setModalOpen(true);
+    };
+
+    loadDetails();
   };
 
   const submit = async (event) => {
     event.preventDefault();
-    const payload = { type_name: typeName, type_code: typeCode };
+    const payload = {
+      type_name: typeNameEn,
+      type_code: typeCode,
+      type_name_array: [
+        ...(typeNameEn ? [{ language_id: "1", type_name: typeNameEn }] : []),
+        ...(typeNameFi ? [{ language_id: "2", type_name: typeNameFi }] : []),
+      ],
+    };
 
     const action = editingId
       ? updateDiamondType({ id: editingId, payload })
@@ -255,11 +345,17 @@ export default function DiamondTypePage() {
         }
       >
         <form id="diamond-type-form" className={styles.form} onSubmit={submit}>
-          <div className={styles.formRow2}>
+          <div className={styles.formRow3}>
             <TextField
-              label="Type Name"
-              value={typeName}
-              onChange={(e) => setTypeName(e.target.value)}
+              label="Type Name (English)"
+              value={typeNameEn}
+              onChange={(e) => setTypeNameEn(e.target.value)}
+              required
+            />
+            <TextField
+              label="Type Name (Finnish)"
+              value={typeNameFi}
+              onChange={(e) => setTypeNameFi(e.target.value)}
               required
             />
             <TextField
