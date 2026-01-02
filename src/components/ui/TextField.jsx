@@ -16,6 +16,7 @@ export default function TextField({
   disabled = false,
   name = "",
   preventWheel = type === "number",
+  style = {},
 }) {
   const inputRef = useRef(null);
 
@@ -34,7 +35,7 @@ export default function TextField({
   }, [preventWheel, type]);
 
   return (
-    <label className={styles.field}>
+    <label className={styles.field} style={style}>
       {label ? <span className={styles.label}>{label}</span> : null}
       <input
         ref={inputRef}

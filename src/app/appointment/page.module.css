@@ -54,6 +54,31 @@
   gap: 22px 26px;
 }
 
+.datePickerWrapper {
+  width: 100%;
+}
+
+
+.datePickerPopper {
+  z-index: 9999;
+}
+
+:global(.react-datepicker) {
+  border-radius: 8px;
+  border: 1px solid var(--color-border);
+  box-shadow: var(--shadow-soft);
+  font-family: var(--font-body);
+}
+
+:global(.react-datepicker__header) {
+  background: #f2f2f2;
+  border-bottom: 1px solid var(--color-border);
+}
+
+:global(.react-datepicker__day--disabled) {
+  color: var(--color-muted);
+}
+
 .form input,
 .form select,
 .form textarea {
@@ -68,6 +93,149 @@
   outline: none;
   border-color: var(--color-primary);
   box-shadow: 0 0 0 1px var(--color-primary);
+}
+
+:global(.formSelect__control) {
+  min-height: 40px !important;
+  border-radius: 8px !important;
+  border: 1px solid var(--color-primary) !important;
+  background: var(--color-surface) !important;
+  box-shadow: none !important;
+  font-family: var(--font-body);
+  color: var(--foreground);
+}
+
+:global(.formSelect__control--is-focused) {
+  border-color: var(--color-primary) !important;
+  box-shadow: 0 0 0 1px var(--color-primary) !important;
+}
+
+:global(.formSelect__control:hover) {
+  border-color: var(--color-primary);
+}
+
+:global(.formSelect__value-container) {
+  padding: 0 10px;
+}
+
+:global(.formSelect__input-container) {
+  margin: 0;
+  padding: 0;
+}
+
+:global(.formSelect__single-value),
+:global(.formSelect__placeholder) {
+  color: var(--foreground);
+  font-size: 15px;
+  font-family: var(--font-body);
+}
+
+:global(.formSelect__indicator-separator) {
+  display: none;
+}
+
+:global(.formSelect__dropdown-indicator) {
+  color: var(--color-primary);
+}
+
+:global(.formSelect__menu) {
+  border-radius: 8px !important;
+  border: 1px solid var(--color-primary);
+  box-shadow: 0 12px 24px rgba(0, 0, 0, 0.12);
+  background: #ffffff;
+  font-family: var(--font-body);
+}
+
+:global(.formSelect__menu-list) {
+  padding: 4px;
+  border-radius: 8px;
+}
+
+:global(.formSelect__option) {
+  font-size: 14px;
+  padding: 8px 12px;
+  border-radius: 8px !important;
+  font-family: var(--font-body);
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  line-height: 1.2;
+  margin: 2px 0;
+}
+
+:global(.formSelect__option--is-focused) {
+  background: color-mix(in srgb, var(--color-primary), transparent 85%) !important;
+  color: var(--color-heading) !important;
+}
+
+:global(.formSelect__option--is-selected) {
+  background: var(--color-primary-soft) !important;
+  color: var(--color-heading) !important;
+}
+
+:global(.formSelect__option:active) {
+  background: var(--color-primary-soft) !important;
+  color: var(--color-heading) !important;
+}
+
+:global(.formSelect__control--is-disabled) {
+  opacity: 0.7;
+  cursor: not-allowed;
+}
+
+.captchaRow {
+  width: 300px;
+  margin: 0 auto;
+}
+
+.captchaCodeRow {
+  display: grid;
+  grid-template-columns: repeat(2, minmax(0, 1fr));
+  gap: 12px;
+  align-items: center;
+}
+
+.captchaHeader {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.captchaCode {
+  height: 39px;
+  border-radius: 8px;
+  border-color: var(--color-primary);
+  background: #f2f2f2;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  letter-spacing: 4px;
+  font-weight: 600;
+  color: var(--color-heading);
+  user-select: none;
+  -webkit-user-select: none;
+  -ms-user-select: none;
+}
+
+.captchaRefresh {
+  border: none;
+  background: transparent;
+  color: var(--color-primary);
+  font-size: 14px;
+  cursor: pointer;
+  padding: 0;
+  display: inline-flex;
+  align-items: center;
+  gap: 6px;
+  line-height: 1;
+}
+
+.captchaRefresh:hover {
+  text-decoration: underline;
+}
+
+.captchaRefreshIcon {
+  display: inline-flex;
 }
 
 .fullRow {
@@ -114,6 +282,10 @@
 
 @media (max-width: 900px) {
   .formGrid {
+    grid-template-columns: 1fr;
+  }
+
+  .captchaRow {
     grid-template-columns: 1fr;
   }
 }
