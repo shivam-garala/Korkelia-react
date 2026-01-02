@@ -11,6 +11,14 @@
   line-height: 1.5;
 }
 
+.hiddenInput {
+  position: absolute;
+  width: 0;
+  height: 0;
+  opacity: 0;
+  pointer-events: none;
+}
+
 .control {
   padding: 10px;
   border-radius: 8px;
@@ -74,4 +82,8 @@
 /* Hide IE/Edge legacy arrow */
 .select::-ms-expand {
   display: none;
+}
+
+.reactSelect {
+  width: 100%;
 }

@@ -747,7 +747,7 @@ export default function ProductCustomizer({
     console.log(productId, selectedMetalId, selectedKaratId, selectedQualityId, selectedClarityId, selectedCarat, selectedCutId);
     console.log(!productId);
     
-    if (!productId) {
+    if (!productId || !selectedMetalId || !selectedKaratId) {
       setVariantDetails(null);
       setVariantLoading(false);
       return () => {
