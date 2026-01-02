@@ -114,6 +114,23 @@ export const fetchCategoryDropdown = createAsyncThunk(
   }
 );
 
+export const fetchRelatedVariantImages = createAsyncThunk(
+  "designVariant/fetchRelatedVariantImages",
+  async ({ productId, metalRateId }, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosClient.get("/api/design/related-variant-images", {
+        params: {
+          product_id: productId,
+          metal_rate_id: metalRateId,
+        },
+      });
+      return data;
+    } catch (error) {
+      return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
+    }
+  }
+);
+
 const initialState = {
   items: [],
   selected: null,
