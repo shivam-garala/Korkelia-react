@@ -15,7 +15,6 @@ import Icon from "../../../components/ui/Icon.jsx";
 import RadioGroup from "../../../components/ui/RadioGroup.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import axiosClient from "../../../lib/axiosClient.js";
-import fieldStyles from "../../../components/ui/Fields.module.css";
 import radioStyles from "../../../components/ui/RadioGroup.module.css";
 import { toast } from "react-toastify";
 import {
@@ -30,7 +29,9 @@ import {
   selectDesignVariantCategories,
   selectDesignVariantError,
   selectDesignVariantLoading,
+  selectDesignVariantLoadingMore,
   selectDesignVariantMetalRates,
+  selectDesignVariantPagination,
   selectDesignVariantProducts,
   selectDesignVariants,
   updateDesignVariant,
@@ -170,6 +171,8 @@ function extractVariantTranslations(item) {
   return { nameEn, nameFi, descriptionEn, descriptionFi };
 }
 
+const PAGE_LIMIT = 50;
+
 export default function DesignVariantPage() {
   const pathname = usePathname();
   const router = useRouter();
@@ -181,6 +184,8 @@ export default function DesignVariantPage() {
   const cutMasters = useAppSelector(selectCutMasters);
   const diamondRates = useAppSelector(selectDiamondRates);
   const loading = useAppSelector(selectDesignVariantLoading);
+  const loadingMore = useAppSelector(selectDesignVariantLoadingMore);
+  const pagination = useAppSelector(selectDesignVariantPagination);
   const error = useAppSelector(selectDesignVariantError);
   const userName = useAppSelector(selectUserName) ?? "Admin";
   const userEmail = useAppSelector(selectEmail) ?? "";
@@ -246,8 +251,22 @@ export default function DesignVariantPage() {
   });
   const fallbackImage = "/productlisting/no_image.jpg";
 
+  const currentPage = pagination?.currentPage ?? 1;
+  const totalPages = pagination?.totalPages ?? 1;
+  const hasMore = currentPage < totalPages;
+
+  const fetchFirstPage = useCallback(() => {
+    dispatch(fetchDesignVariants({ page: 1, limit: PAGE_LIMIT }));
+  }, [dispatch]);
+
+  const handleLoadMore = useCallback(() => {
+    if (loadingMore || loading) return;
+    if (currentPage >= totalPages) return;
+    dispatch(fetchDesignVariants({ page: currentPage + 1, limit: PAGE_LIMIT }));
+  }, [dispatch, loadingMore, loading, currentPage, totalPages]);
+
   useEffect(() => {
-    dispatch(fetchDesignVariants());
+    dispatch(fetchDesignVariants({ page: 1, limit: PAGE_LIMIT }));
     dispatch(fetchProductDropdown());
     dispatch(fetchMetalRateDropdown());
     dispatch(fetchCategoryDropdown());
@@ -877,7 +896,7 @@ export default function DesignVariantPage() {
       setEditingId(null);
       setImageFiles([]);
       setFileInputKey((prev) => prev + 1);
-      dispatch(fetchDesignVariants());
+      fetchFirstPage();
     }
   };
 
@@ -889,7 +908,7 @@ export default function DesignVariantPage() {
   const confirmDelete = async () => {
     if (!deleteTarget) return;
     await dispatch(deleteDesignVariant(deleteTarget));
-    dispatch(fetchDesignVariants());
+    fetchFirstPage();
     setDeleteTarget(null);
   };
 
@@ -903,9 +922,27 @@ export default function DesignVariantPage() {
     },
     { key: "product", header: "Product", filterable: true, filterPlaceholder: "Search Product" },
     { key: "metal_rate", header: "Metal Rate", filterable: true, filterPlaceholder: "Search Metal Rate" },
-    { key: "weight", header: "Weight", filterable: true, filterPlaceholder: "Search Weight" },
-    { key: "mark_up", header: "Mark Up", filterable: true, filterPlaceholder: "Search Mark Up" },
-    { key: "price", header: "Price", filterable: true, filterPlaceholder: "Search Price" },
+    {
+      key: "weight",
+      header: "Weight",
+      filterable: true,
+      filterPlaceholder: "Search Weight",
+      filterInputStyle: { width: 120 },
+    },
+    {
+      key: "mark_up",
+      header: "Mark Up",
+      filterable: true,
+      filterPlaceholder: "Search Mark Up",
+      filterInputStyle: { width: 120 },
+    },
+    {
+      key: "price",
+      header: "Price",
+      filterable: true,
+      filterPlaceholder: "Search Price",
+      filterInputStyle: { width: 120 },
+    },
     { key: "details", header: "Diamond Detail", filterable: false },
     { key: "image_count", header: "Uploaded Media Count", filterable: false, },
     {
@@ -944,7 +981,7 @@ export default function DesignVariantPage() {
                   variant="secondary"
                   icon="refresh"
                   iconOnly
-                  onClick={() => dispatch(fetchDesignVariants())}
+                  onClick={fetchFirstPage}
                   disabled={loading}
                 >
                   {loading ? "Refreshing..." : "Refresh"}
@@ -959,6 +996,10 @@ export default function DesignVariantPage() {
             <DataTable
               columns={columns}
               rows={filteredRows}
+              useInfiniteScroll={true}
+              onLoadMore={handleLoadMore}
+              hasMore={hasMore}
+              loadingMore={loadingMore}
               getRowKey={(row) => row.id}
               filters={filters}
               onFiltersChange={setFilters}
