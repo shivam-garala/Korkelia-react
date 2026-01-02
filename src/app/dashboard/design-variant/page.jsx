@@ -26,6 +26,7 @@ import {
   fetchDesignVariants,
   fetchMetalRateDropdown,
   fetchProductDropdown,
+  fetchRelatedVariantImages,
   selectDesignVariantCategories,
   selectDesignVariantError,
   selectDesignVariantLoading,
@@ -228,6 +229,8 @@ export default function DesignVariantPage() {
   const [videoFile, setVideoFile] = useState(null);
   const [localVideoUrl, setLocalVideoUrl] = useState("");
   const [existingImages, setExistingImages] = useState([]);
+  const [relatedVariantImages, setRelatedVariantImages] = useState([]);
+  const [loadingRelatedImages, setLoadingRelatedImages] = useState(false);
   const [listingSelection, setListingSelection] = useState("");
   const [fileInputKey, setFileInputKey] = useState(0);
   const [imageDeletingId, setImageDeletingId] = useState(null);
@@ -358,6 +361,7 @@ export default function DesignVariantPage() {
         mark_up: pickValue(item, ["mark_up", "markUp"]) ?? "-",
         price: priceValue ?? "-",
         details: formatDetailSummary(detailList),
+        image_count: pickValue(item, ["image_count"]) ?? 0,
         _raw: item,
       };
     });
@@ -436,6 +440,7 @@ export default function DesignVariantPage() {
     setImageFiles(Array(4).fill(null));
     setVideoFile(null);
     setExistingImages([]);
+    setRelatedVariantImages([]);
     setListingSelection("");
     setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
@@ -600,6 +605,35 @@ export default function DesignVariantPage() {
     return () => URL.revokeObjectURL(url);
   }, [videoFile]);
 
+  // Fetch related variant images when product and metal rate are selected (only in create mode)
+  useEffect(() => {
+    if (!editingId && productId && metalRateId && modalOpen) {
+      setLoadingRelatedImages(true);
+      dispatch(fetchRelatedVariantImages({ productId, metalRateId }))
+        .then((result) => {
+          if (result?.payload?.data?.images) {
+            // Process images to detect videos, same as in openEdit
+            const processedImages = result.payload.data.images.map((img) => ({
+              ...img,
+              isVideo: isVideoAsset(img?.image_url ?? img?.image),
+            }));
+            setRelatedVariantImages(processedImages);
+          } else {
+            setRelatedVariantImages([]);
+          }
+        })
+        .catch((error) => {
+          console.error("Failed to fetch related variant images", error);
+          setRelatedVariantImages([]);
+        })
+        .finally(() => {
+          setLoadingRelatedImages(false);
+        });
+    } else {
+      setRelatedVariantImages([]);
+    }
+  }, [productId, metalRateId, editingId, modalOpen, dispatch]);
+
   const handleDeleteImage = useCallback(
     async (image) => {
       const imageId = image?.id ?? null;
@@ -640,7 +674,12 @@ export default function DesignVariantPage() {
 
   const previewSlots = useMemo(() => {
     const slots = Array(4).fill(null);
-    const list = Array.isArray(existingImages) ? existingImages : [];
+    // In create mode, use related variant images if available, otherwise use existing images
+    // In edit mode, use existing images
+    const list = !editingId && relatedVariantImages.length > 0
+      ? relatedVariantImages
+      : (Array.isArray(existingImages) ? existingImages : []);
+
     list.forEach((img, index) => {
       if (img?.isVideo) return;
       const orderValue = Number(img?.order);
@@ -653,12 +692,16 @@ export default function DesignVariantPage() {
       }
     });
     return slots;
-  }, [existingImages]);
+  }, [existingImages, relatedVariantImages, editingId]);
 
   const previewVideo = useMemo(() => {
-    const list = Array.isArray(existingImages) ? existingImages : [];
+    // In create mode, check related variant images first, then existing images
+    // In edit mode, check existing images
+    const list = !editingId && relatedVariantImages.length > 0
+      ? relatedVariantImages
+      : (Array.isArray(existingImages) ? existingImages : []);
     return list.find((img) => img?.isVideo) ?? null;
-  }, [existingImages]);
+  }, [existingImages, relatedVariantImages, editingId]);
 
   const handleRemoveLocalImage = useCallback(
     (index) => {
@@ -774,20 +817,25 @@ export default function DesignVariantPage() {
         is_product_listing: listingSelection === `image-${index}` ? 1 : 0,
       });
     });
-    if (editingId) {
-      previewSlots.forEach((slot, index) => {
-        if (!slot || imageFiles[index]) return;
-        const imageName = slot?.image ?? "";
-        if (!imageName) return;
-        const existingPayload = {
-          image: imageName,
-          order: index + 1,
-          is_product_listing: listingSelection === `image-${index}` ? 1 : 0,
-        };
-        if (slot?.id) existingPayload.id = slot.id;
-        designImages.push(existingPayload);
-      });
-    }
+
+    // In create mode: include related variant images if no new file uploaded for that slot
+    // In edit mode: include existing images if no new file uploaded for that slot
+    previewSlots.forEach((slot, index) => {
+      if (!slot || imageFiles[index]) return; // Skip if slot is empty or new file uploaded
+      const imageName = slot?.image ?? slot?.image_name ?? "";
+      if (!imageName) return;
+
+      const existingPayload = {
+        image: imageName,
+        image_name: imageName, // Include both for backend compatibility
+        order: index + 1,
+        is_product_listing: listingSelection === `image-${index}` ? 1 : 0,
+        is_existing: !editingId, // Mark as existing for create mode (from related variant)
+      };
+
+      if (slot?.id) existingPayload.id = slot.id;
+      designImages.push(existingPayload);
+    });
     if (videoFile) {
       designImages.push({
         image: videoFile.name,
@@ -795,13 +843,17 @@ export default function DesignVariantPage() {
         is_product_listing: listingSelection === "video" ? 1 : 0,
       });
     }
-    if (editingId && previewVideo && !videoFile) {
-      const videoName = previewVideo?.image ?? "";
+    // Include existing video if no new video file is uploaded
+    // This applies to both edit mode (existing video) and create mode (video from related variant)
+    if (previewVideo && !videoFile) {
+      const videoName = previewVideo?.image ?? previewVideo?.image_name ?? "";
       if (videoName) {
         const existingVideoPayload = {
           image: videoName,
+          image_name: videoName,
           order: 5,
           is_product_listing: listingSelection === "video" ? 1 : 0,
+          is_existing: !editingId, // Mark as existing for create mode (from related variant)
         };
         if (previewVideo?.id) existingVideoPayload.id = previewVideo.id;
         designImages.push(existingVideoPayload);
@@ -855,6 +907,7 @@ export default function DesignVariantPage() {
     { key: "mark_up", header: "Mark Up", filterable: true, filterPlaceholder: "Search Mark Up" },
     { key: "price", header: "Price", filterable: true, filterPlaceholder: "Search Price" },
     { key: "details", header: "Diamond Detail", filterable: false },
+    { key: "image_count", header: "Uploaded Media Count", filterable: false, },
     {
       key: "actions",
       header: "Action",
@@ -1071,7 +1124,18 @@ export default function DesignVariantPage() {
                   Upload images and choose one as the listing image.
                 </div>
               </div>
-              <Button variant="secondary" type="button" onClick={() => setImageModalOpen(true)}>
+              <Button
+                variant="secondary"
+                type="button"
+                onClick={() => {
+                  if (!editingId && (!productId || !metalRateId)) {
+                    toast.error("Please select Product and Metal Rate before uploading images");
+                    return;
+                  }
+                  setImageModalOpen(true);
+                }}
+                disabled={!editingId && (!productId || !metalRateId)}
+              >
                 Upload Images
               </Button>
             </div>
