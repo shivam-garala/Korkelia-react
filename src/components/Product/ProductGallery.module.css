@@ -846,6 +846,11 @@
     height: 40px;
   }
 
+  .modalDotInner {
+    width: 40px;
+    height: 40px;
+  }
+
   .thumbSlide {
     height: 100px;
     width: 100px;

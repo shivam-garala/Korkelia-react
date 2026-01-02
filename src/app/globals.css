@@ -5,6 +5,7 @@
 @import "swiper/css";
 @import "swiper/css/navigation";
 @import "swiper/css/thumbs";
+@import "react-datepicker/dist/react-datepicker.css";
 
 :root {
   --background: #ffffff;

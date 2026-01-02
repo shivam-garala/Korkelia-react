@@ -15,12 +15,42 @@ function axiosErrorMessage(error, fallback) {
   return message || fallback;
 }
 
+function mergeUniqueById(existing = [], incoming = []) {
+  const seen = new Set(existing.map((item) => item?.id));
+  const merged = [...existing];
+  incoming.forEach((item) => {
+    const id = item?.id;
+    if (id === undefined || id === null || !seen.has(id)) {
+      if (id !== undefined && id !== null) {
+        seen.add(id);
+      }
+      merged.push(item);
+    }
+  });
+  return merged;
+}
+
 export const fetchDesignVariants = createAsyncThunk(
   "designVariant/fetchAll",
-  async (_, { rejectWithValue }) => {
+  async ({ page = 1, limit = 20 } = {}, { rejectWithValue }) => {
     try {
-      const { data } = await axiosClient.get("/api/design/read");
-      return data;
+      const { data } = await axiosClient.get("/api/design/read", {
+        params: { page, limit },
+      });
+      if (Array.isArray(data)) {
+        return {
+          data,
+          total_count: data.length,
+          total_pages: 1,
+          current_page: page,
+          limit,
+        };
+      }
+      return {
+        ...data,
+        current_page: data?.current_page ?? page,
+        limit: data?.limit ?? limit,
+      };
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
     }
@@ -138,7 +168,12 @@ const initialState = {
   metalRates: [],
   categories: [],
   loading: false,
+  loadingMore: false,
   error: null,
+  totalCount: 0,
+  totalPages: 1,
+  currentPage: 1,
+  limit: 10,
 };
 
 const designVariantSlice = createSlice({
@@ -154,18 +189,40 @@ const designVariantSlice = createSlice({
   },
   extraReducers: (builder) => {
     builder
-      .addCase(fetchDesignVariants.pending, (state) => {
-        state.loading = true;
-        state.error = null;
+      .addCase(fetchDesignVariants.pending, (state, action) => {
+        const page = action.meta?.arg?.page ?? 1;
+        if (page > 1) {
+          state.loadingMore = true;
+        } else {
+          state.loading = true;
+          state.error = null;
+        }
       })
       .addCase(fetchDesignVariants.fulfilled, (state, action) => {
+        const payload = action.payload ?? {};
+        const isArrayPayload = Array.isArray(payload);
+        const items = isArrayPayload ? payload : payload?.data ?? [];
+        const page =
+          (isArrayPayload ? null : payload?.current_page ?? payload?.page) ??
+          action.meta?.arg?.page ??
+          1;
+        const limit = (isArrayPayload ? null : payload?.limit) ?? action.meta?.arg?.limit ?? 10;
+        const totalCount =
+          (isArrayPayload ? items.length : payload?.total_count ?? payload?.totalCount) ?? 0;
+        const totalPages =
+          (isArrayPayload ? 1 : payload?.total_pages ?? payload?.totalPages) ||
+          (totalCount && limit ? Math.ceil(totalCount / limit) : page);
         state.loading = false;
-        state.items = Array.isArray(action.payload)
-          ? action.payload
-          : action.payload?.data ?? [];
+        state.loadingMore = false;
+        state.items = page > 1 ? mergeUniqueById(state.items, items) : items;
+        state.totalCount = totalCount;
+        state.totalPages = totalPages || 1;
+        state.currentPage = page;
+        state.limit = limit;
       })
       .addCase(fetchDesignVariants.rejected, (state, action) => {
         state.loading = false;
+        state.loadingMore = false;
         state.error = action.payload ?? "Failed to load design variants.";
       })
       .addCase(fetchDesignVariant.fulfilled, (state, action) => {
@@ -204,6 +261,7 @@ const designVariantSlice = createSlice({
           action.type.startsWith("designVariant/") && action.type.endsWith("/rejected"),
         (state, action) => {
           state.loading = false;
+          state.loadingMore = false;
           state.error = action.payload ?? "Request failed.";
         }
       );
@@ -213,9 +271,16 @@ const designVariantSlice = createSlice({
 export const { clearDesignVariantError, setSelectedDesignVariant } = designVariantSlice.actions;
 export const selectDesignVariants = (state) => state.designVariant.items;
 export const selectDesignVariantLoading = (state) => state.designVariant.loading;
+export const selectDesignVariantLoadingMore = (state) => state.designVariant.loadingMore;
 export const selectDesignVariantError = (state) => state.designVariant.error;
 export const selectDesignVariantProducts = (state) => state.designVariant.products;
 export const selectDesignVariantMetalRates = (state) => state.designVariant.metalRates;
 export const selectDesignVariantCategories = (state) => state.designVariant.categories;
+export const selectDesignVariantPagination = (state) => ({
+  totalCount: state.designVariant.totalCount,
+  totalPages: state.designVariant.totalPages,
+  currentPage: state.designVariant.currentPage,
+  limit: state.designVariant.limit,
+});
 
 export default designVariantSlice.reducer;
