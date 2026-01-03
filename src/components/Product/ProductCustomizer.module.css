@@ -231,7 +231,7 @@
 .metalRow {
   display: flex;
   flex-wrap: wrap;
-  gap: 14px;
+  gap: 6px;
   align-items: center;
 }
 
