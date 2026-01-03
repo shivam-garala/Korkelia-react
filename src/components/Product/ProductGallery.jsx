@@ -245,7 +245,19 @@ export default function ProductGallery({ items, productId = "" }) {
       })),
     [imageVariants]
   );
-  const displaySlides = showSkeleton ? skeletonSlides : slides;
+  const gridSlides = useMemo(() => {
+    if (showSkeleton) return skeletonSlides;
+    if (!slides.length) return slides;
+    const present = new Set(slides.map((item) => item?.variant).filter(Boolean));
+    const placeholders = imageVariants
+      .filter((variant) => !present.has(variant))
+      .map((variant) => ({
+        key: `placeholder-${variant}`,
+        variant,
+        isPlaceholder: true,
+      }));
+    return placeholders.length ? [...slides, ...placeholders] : slides;
+  }, [showSkeleton, skeletonSlides, slides, imageVariants]);
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
   const [galleryIndex, setGalleryIndex] = useState(0);
@@ -606,13 +618,12 @@ export default function ProductGallery({ items, productId = "" }) {
     <>
         <div className={styles.galleryWrap}>
         <div className={styles.grid} ref={galleryRef} onScroll={handleGalleryScroll}>
-          {displaySlides.map((item, index) => {
+          {gridSlides.map((item, index) => {
             const isVideo = isVideoItem(item);
             const hasFailed = Boolean(failedMap[index]);
             const isLoaded = Boolean(loadedMap[index]);
             const imageSrc = hasFailed ? fallbackImageSrc : item.src || fallbackImageSrc;
             const isRemoteImage = /^https?:\/\//i.test(imageSrc);
-
             return (
               <div
                 key={item.key ?? item.src ?? index}
@@ -624,6 +635,10 @@ export default function ProductGallery({ items, productId = "" }) {
                     <div className={styles.media} aria-hidden>
                       <div className={styles.mediaLoader} />
                     </div>
+                  </div>
+                ) : item.isPlaceholder ? (
+                  <div className={styles.cellButton} aria-hidden="true">
+                    <div className={styles.media} aria-hidden />
                   </div>
                 ) : (
                   <button type="button" className={styles.cellButton} onClick={() => openAt(index)}>
