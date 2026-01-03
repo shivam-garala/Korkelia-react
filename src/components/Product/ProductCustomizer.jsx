@@ -265,13 +265,34 @@ export default function ProductCustomizer({
   const languageId = language === "fi" ? "2" : "1";
 
   useEffect(() => {
+    let active = true;
     setDefaultsApplied(false);
     if (!productId) {
       setProductDetails(null);
-      return;
+      return () => {
+        active = false;
+      };
     }
-    const cached = readCachedProduct(productId);
-    setProductDetails(cached);
+
+    const updateCachedProduct = () => {
+      if (!active) return;
+      setProductDetails(readCachedProduct(productId));
+    };
+
+    updateCachedProduct();
+
+    const handleCacheUpdate = (event) => {
+      const updatedId = event?.detail?.productId ?? "";
+      if (!updatedId || String(updatedId) === String(productId)) {
+        updateCachedProduct();
+      }
+    };
+
+    window.addEventListener("productCacheUpdated", handleCacheUpdate);
+    return () => {
+      active = false;
+      window.removeEventListener("productCacheUpdated", handleCacheUpdate);
+    };
   }, [productId]);
 
   useEffect(() => {

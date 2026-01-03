@@ -40,6 +40,15 @@ const isWeekendDay = (date) => {
   return weekday === 0 || weekday === 6;
 };
 
+const isPastDay = (date) => {
+  if (!date) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const candidate = new Date(date);
+  candidate.setHours(0, 0, 0, 0);
+  return candidate < today;
+};
+
 const parseDateValue = (value) => {
   if (!value) return null;
   const [year, month, day] = value.split("-").map(Number);
@@ -58,6 +67,7 @@ const formatDateValue = (date) => {
 export default function AppointmentPage() {
   const { language } = useI18n();
   const languageKey = language === "fi" ? "fi" : "en";
+  const languageId = language === "fi" ? "2" : "1";
   const labels =
     languageKey === "fi"
       ? {
@@ -66,8 +76,8 @@ export default function AppointmentPage() {
           firstName: "Etunimi",
           lastName: "Sukunimi",
           country: "Maa",
-          email: "Sahkopostiosoite",
-          phone: "Puhelinnumero",
+          email: "Sähköposti",
+          phone: "Puhelinnumero (sis. maakoodin)",
           appointmentDate: "Valitse paiva",
           appointmentDatePlaceholder: "Valitse paiva",
           appointmentSlot: "Valitse aikavali",
@@ -86,7 +96,7 @@ export default function AppointmentPage() {
           lastName: "Last Name",
           country: "Country",
           email: "Email",
-          phone: "Phone Number",
+          phone: "Phone Number (Including Country Code)",
           appointmentDate: "Select Date",
           appointmentDatePlaceholder: "Select a date",
           appointmentSlot: "Select Time Slot",
@@ -102,6 +112,10 @@ export default function AppointmentPage() {
     languageKey === "fi"
       ? "Lauantai ja sunnuntai eivat ole varattavissa."
       : "Saturday and Sunday are not available.";
+  const pastDateMessage =
+    languageKey === "fi"
+      ? "Vain tulevat paivat ovat saatavilla."
+      : "Only future dates are available.";
   const captchaErrorMessage =
     languageKey === "fi"
       ? "Varmennekoodi ei vastaa. Yrita uudelleen."
@@ -126,7 +140,9 @@ export default function AppointmentPage() {
     const loadSlots = async () => {
       setSlotLoading(true);
       try {
-        const { data } = await axiosClient.get("/api/appointment/timeslots");
+        const { data } = await axiosClient.get(
+          `/api/appointment/timeslots?language_id=${encodeURIComponent(languageId)}`
+        );
         const slots = data?.data ?? data ?? [];
         if (!Array.isArray(slots) || !slots.length) {
           if (active) {
@@ -194,7 +210,7 @@ export default function AppointmentPage() {
     return () => {
       active = false;
     };
-  }, [languageKey]);
+  }, [languageKey, languageId]);
   const selectedDate = parseDateValue(form.appointmentDate);
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -210,6 +226,11 @@ export default function AppointmentPage() {
       setForm((prev) => ({ ...prev, appointmentDate: "" }));
       return;
     }
+    if (isPastDay(date)) {
+      toast.error(pastDateMessage);
+      setForm((prev) => ({ ...prev, appointmentDate: "" }));
+      return;
+    }
     if (isWeekendDay(date)) {
       toast.error(weekendMessage);
       setForm((prev) => ({ ...prev, appointmentDate: "" }));
@@ -222,7 +243,15 @@ export default function AppointmentPage() {
     event.preventDefault();
     if (submitting) return;
     const appointmentDateValue = parseDateValue(form.appointmentDate);
-    if (!appointmentDateValue || isWeekendDay(appointmentDateValue)) {
+    if (!appointmentDateValue) {
+      toast.error(weekendMessage);
+      return;
+    }
+    if (isPastDay(appointmentDateValue)) {
+      toast.error(pastDateMessage);
+      return;
+    }
+    if (isWeekendDay(appointmentDateValue)) {
       toast.error(weekendMessage);
       return;
     }
@@ -245,7 +274,10 @@ export default function AppointmentPage() {
         time_slot: form.appointmentSlot,
         description: form.details.trim(),
       };
-      const { data } = await axiosClient.post("/api/appointment/create", payload);
+      const { data } = await axiosClient.post(
+        `/api/appointment/create?language_id=${encodeURIComponent(languageId)}`,
+        payload
+      );
       const message =
         data?.message ??
         (languageKey === "fi"
@@ -336,7 +368,8 @@ export default function AppointmentPage() {
                   onChange={handleDateChange}
                   placeholderText={labels.appointmentDatePlaceholder}
                   dateFormat="yyyy-MM-dd"
-                  filterDate={(date) => !isWeekendDay(date)}
+                  filterDate={(date) => !isWeekendDay(date) && !isPastDay(date)}
+                  minDate={new Date()}
                   className={fieldStyles.control}
                   wrapperClassName={styles.datePickerWrapper}
                   popperClassName={styles.datePickerPopper}

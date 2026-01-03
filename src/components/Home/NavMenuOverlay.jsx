@@ -4,9 +4,11 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
+import Dropdown from "./Dropdown";
 import styles from "./NavMenuOverlay.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import { fetchCategoryHomePage } from "../../lib/categoryHomeCache.js";
+import ShareProductModal from "../Product/ShareProductModal.jsx";
 
 function Icon({ path, className, style }) {
   return (
@@ -30,7 +32,7 @@ export default function NavMenuOverlay({ open, onClose }) {
   const [productsOpen, setProductsOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-  const { t, language } = useI18n();
+  const { t, language, setLanguage } = useI18n();
   const pathname = usePathname();
   const languageId = language === "fi" ? "2" : "1";
   const categoriesLoadedRef = useRef({});
@@ -153,7 +155,6 @@ export default function NavMenuOverlay({ open, onClose }) {
 
       <div className={styles.content}>
         <div className={styles.contentInner}>
-          <div className={styles.divider} aria-hidden="true" />
           <ul className={styles.menu}>
             <li className={styles.item}>
               <Link
@@ -255,6 +256,71 @@ export default function NavMenuOverlay({ open, onClose }) {
               </Link>
             </li>
           </ul>
+
+          <div className={styles.divider} aria-hidden="true" />
+
+          <div className={styles.topActions}>
+            <div className={styles.topActionsLeft}>
+              <Dropdown
+                ariaLabel={t("common.language")}
+                leadingIcon="globe"
+                value={language}
+                onChange={setLanguage}
+                options={[
+                  { value: "en", label: "English" },
+                  { value: "fi", label: "Finnish" },
+                ]}
+              />
+              <div className={styles.currency} aria-label="Currency">
+                <Image
+                  className={styles.currencyIcon}
+                  src="/icons/euro.png"
+                  alt=""
+                  width={14}
+                  height={14}
+                />
+                <span>{t("header.currency")}</span>
+              </div>
+            </div>
+
+            <div className={styles.topActionsRight}>
+              <ShareProductModal
+                buttonClassName={styles.topLink}
+                buttonContent={
+                  <>
+                    <Image
+                      className={styles.topIcon}
+                      src="/icons/share.png"
+                      alt=""
+                      width={14}
+                      height={14}
+                    />
+                    <span>{t("header.share")}</span>
+                  </>
+                }
+              />
+              <Link className={styles.topLink} href="/appointment" onClick={onClose}>
+                <Image
+                  className={styles.topIcon}
+                  src="/icons/appointment.png"
+                  alt=""
+                  width={14}
+                  height={14}
+                />
+                <span>{t("header.appointment")}</span>
+              </Link>
+              <Link className={styles.topLink} href="/contact" onClick={onClose}>
+                <Image
+                  className={styles.topIcon}
+                  src="/icons/contact_header_icon.png"
+                  alt=""
+                  width={14}
+                  height={14}
+                />
+                <span>{t("header.ambassador")}</span>
+              </Link>
+            </div>
+          </div>
         </div>
       </div>
     </div>
