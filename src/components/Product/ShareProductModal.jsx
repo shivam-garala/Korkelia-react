@@ -4,11 +4,41 @@ import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import Modal from "../ui/Modal.jsx";
 import styles from "./ShareProductModal.module.css";
+import { useI18n } from "../../providers/I18nProvider.jsx";
 
 export default function ShareProductModal({ buttonClassName = "", buttonContent = null }) {
   const [open, setOpen] = useState(false);
   const [currentUrl, setCurrentUrl] = useState("");
   const [copied, setCopied] = useState(false);
+  const { language } = useI18n();
+  const labels =
+    language === "fi"
+      ? {
+          title: "Jaa tämä tuote",
+          subtitle: "Jaa tämä tuote ystäviesi kanssa:",
+          copyPlaceholder: "Kopioi linkki",
+          copy: "Kopioi",
+          copied: "Kopioitu",
+          close: "Sulje",
+          shareButton: "Jaa",
+          facebook: "Facebook",
+          whatsapp: "WhatsApp",
+          facebookAria: "Jaa Facebookissa",
+          whatsappAria: "Jaa WhatsAppissa",
+        }
+      : {
+          title: "Share This Product",
+          subtitle: "Share this product with your friends:",
+          copyPlaceholder: "Copy link",
+          copy: "Copy",
+          copied: "Copied",
+          close: "Close",
+          shareButton: "Share",
+          facebook: "Facebook",
+          whatsapp: "WhatsApp",
+          facebookAria: "Share on Facebook",
+          whatsappAria: "Share on WhatsApp",
+        };
 
   useEffect(() => {
     if (!open) return;
@@ -48,33 +78,33 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
         type="button"
         className={`${styles.trigger}${buttonClassName ? ` ${buttonClassName}` : ""}`}
         onClick={() => setOpen(true)}
-        aria-label="Share"
+        aria-label={labels.shareButton}
       >
         {buttonContent ?? <Image src="/icons/share.png" alt="" width={14} height={14} />}
       </button>
 
       <Modal
         open={open}
-        title="Share This Product"
+        title={labels.title}
         onClose={() => setOpen(false)}
         className={styles.modal}
         bodyClassName={styles.modalBody}
         footer={
           <div className={styles.footer}>
             <button type="button" className={styles.closeButton} onClick={() => setOpen(false)}>
-              Close
+              {labels.close}
             </button>
           </div>
         }
       >
-        <p className={styles.subtitle}>Share this product with your friends:</p>
+        <p className={styles.subtitle}>{labels.subtitle}</p>
         <div className={styles.shareGrid}>
           <a
             className={styles.shareItem}
             href={shareLinks.facebook}
             target="_blank"
             rel="noreferrer"
-            aria-label="Share on Facebook"
+            aria-label={labels.facebookAria}
           >
             <span className={`${styles.shareIcon} ${styles.facebook}`}>
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -84,14 +114,14 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
                 />
               </svg>
             </span>
-            <span>Facebook</span>
+            <span>{labels.facebook}</span>
           </a>
           <a
             className={styles.shareItem}
             href={shareLinks.whatsapp}
             target="_blank"
             rel="noreferrer"
-            aria-label="Share on WhatsApp"
+            aria-label={labels.whatsappAria}
           >
             <span className={`${styles.shareIcon} ${styles.whatsapp}`}>
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -101,16 +131,16 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
                 />
               </svg>
             </span>
-            <span>WhatsApp</span>
+            <span>{labels.whatsapp}</span>
           </a>
         </div>
 
         <div className={styles.copyRow}>
           <div className={styles.copyField} title={currentUrl || ""}>
-            {currentUrl || "Copy link"}
+            {currentUrl || labels.copyPlaceholder}
           </div>
           <button type="button" className={styles.copyButton} onClick={handleCopy}>
-            {copied ? "Copied" : "Copy"}
+            {copied ? labels.copied : labels.copy}
           </button>
         </div>
       </Modal>

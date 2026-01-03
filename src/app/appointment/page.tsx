@@ -40,6 +40,15 @@ const isWeekendDay = (date) => {
   return weekday === 0 || weekday === 6;
 };
 
+const isPastDay = (date) => {
+  if (!date) return false;
+  const today = new Date();
+  today.setHours(0, 0, 0, 0);
+  const candidate = new Date(date);
+  candidate.setHours(0, 0, 0, 0);
+  return candidate < today;
+};
+
 const parseDateValue = (value) => {
   if (!value) return null;
   const [year, month, day] = value.split("-").map(Number);
@@ -67,8 +76,8 @@ export default function AppointmentPage() {
           firstName: "Etunimi",
           lastName: "Sukunimi",
           country: "Maa",
-          email: "Sahkopostiosoite",
-          phone: "Puhelinnumero",
+          email: "Sähköposti",
+          phone: "Puhelinnumero (sis. maakoodin)",
           appointmentDate: "Valitse paiva",
           appointmentDatePlaceholder: "Valitse paiva",
           appointmentSlot: "Valitse aikavali",
@@ -87,7 +96,7 @@ export default function AppointmentPage() {
           lastName: "Last Name",
           country: "Country",
           email: "Email",
-          phone: "Phone Number",
+          phone: "Phone Number (Including Country Code)",
           appointmentDate: "Select Date",
           appointmentDatePlaceholder: "Select a date",
           appointmentSlot: "Select Time Slot",
@@ -103,6 +112,10 @@ export default function AppointmentPage() {
     languageKey === "fi"
       ? "Lauantai ja sunnuntai eivat ole varattavissa."
       : "Saturday and Sunday are not available.";
+  const pastDateMessage =
+    languageKey === "fi"
+      ? "Vain tulevat paivat ovat saatavilla."
+      : "Only future dates are available.";
   const captchaErrorMessage =
     languageKey === "fi"
       ? "Varmennekoodi ei vastaa. Yrita uudelleen."
@@ -213,6 +226,11 @@ export default function AppointmentPage() {
       setForm((prev) => ({ ...prev, appointmentDate: "" }));
       return;
     }
+    if (isPastDay(date)) {
+      toast.error(pastDateMessage);
+      setForm((prev) => ({ ...prev, appointmentDate: "" }));
+      return;
+    }
     if (isWeekendDay(date)) {
       toast.error(weekendMessage);
       setForm((prev) => ({ ...prev, appointmentDate: "" }));
@@ -225,7 +243,15 @@ export default function AppointmentPage() {
     event.preventDefault();
     if (submitting) return;
     const appointmentDateValue = parseDateValue(form.appointmentDate);
-    if (!appointmentDateValue || isWeekendDay(appointmentDateValue)) {
+    if (!appointmentDateValue) {
+      toast.error(weekendMessage);
+      return;
+    }
+    if (isPastDay(appointmentDateValue)) {
+      toast.error(pastDateMessage);
+      return;
+    }
+    if (isWeekendDay(appointmentDateValue)) {
       toast.error(weekendMessage);
       return;
     }
@@ -342,7 +368,8 @@ export default function AppointmentPage() {
                   onChange={handleDateChange}
                   placeholderText={labels.appointmentDatePlaceholder}
                   dateFormat="yyyy-MM-dd"
-                  filterDate={(date) => !isWeekendDay(date)}
+                  filterDate={(date) => !isWeekendDay(date) && !isPastDay(date)}
+                  minDate={new Date()}
                   className={fieldStyles.control}
                   wrapperClassName={styles.datePickerWrapper}
                   popperClassName={styles.datePickerPopper}
