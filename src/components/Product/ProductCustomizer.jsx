@@ -469,9 +469,14 @@ export default function ProductCustomizer({
         const value = normalizeString(rawValue);
         const label = normalizeString(rawLabel ?? value);
         if (!value && !label) return null;
+        const isLab =
+          item?.is_lab === 1 ||
+          item?.is_lab === "1" ||
+          String(item?.is_lab ?? "").toLowerCase() === "yes";
         return {
           value: value || label,
           label: label.toUpperCase() || "QUALITY",
+          isLab,
         };
       })
       .filter(Boolean);
@@ -497,13 +502,26 @@ export default function ProductCustomizer({
         const value = normalizeString(rawValue);
         const label = normalizeString(rawLabel ?? value);
         if (!value && !label) return null;
+        const isLab =
+          item?.is_lab === 1 ||
+          item?.is_lab === "1" ||
+          String(item?.is_lab ?? "").toLowerCase() === "yes";
         return {
           value: value || label,
           label: label.toUpperCase() || "CLARITY",
+          isLab,
         };
       })
       .filter(Boolean);
   }, [filterData]);
+
+  const filteredClarityOptions = useMemo(() => {
+    if (!clarityOptions.length) return [];
+    const selectedQualityOption =
+      qualityOptions.find((opt) => opt.value === quality) ?? null;
+    if (!selectedQualityOption?.isLab) return clarityOptions;
+    return clarityOptions.filter((opt) => opt.isLab);
+  }, [clarityOptions, qualityOptions, quality]);
 
   const caratOptions = useMemo(() => {
     const list = Array.isArray(filterData?.carats) ? filterData.carats : [];
@@ -669,6 +687,16 @@ export default function ProductCustomizer({
     }),
     []
   );
+  const qualityDropdownStyles = useMemo(
+    () => ({
+      ...dropdownStyles,
+      control: (base, state) => ({
+        ...dropdownStyles.control(base, state),
+        minWidth: 100,
+      }),
+    }),
+    [dropdownStyles]
+  );
 
   useEffect(() => {
     if (cutOptions.length && !cutOptions.some((opt) => opt.id === cut)) {
@@ -687,12 +715,12 @@ export default function ProductCustomizer({
 
   useEffect(() => {
     if (
-      clarityOptions.length &&
-      !clarityOptions.some((opt) => opt.value === clarity)
+      filteredClarityOptions.length &&
+      !filteredClarityOptions.some((opt) => opt.value === clarity)
     ) {
-      setClarity(clarityOptions[0].value);
+      setClarity(filteredClarityOptions[0].value);
     }
-  }, [clarityOptions, clarity]);
+  }, [filteredClarityOptions, clarity]);
 
   useEffect(() => {
     if (caratOptions.length && !caratOptions.includes(carat)) {
@@ -725,7 +753,8 @@ export default function ProductCustomizer({
 
   const selectedCutId = cutOptions.find((opt) => opt.id === cut)?.id ?? "";
   const selectedQualityId = qualityOptions.find((opt) => opt.value === quality)?.value ?? "";
-  const selectedClarityId = clarityOptions.find((opt) => opt.value === clarity)?.value ?? "";
+  const selectedClarityId =
+    filteredClarityOptions.find((opt) => opt.value === clarity)?.value ?? "";
   const selectedMetalId = metalOptions.find((opt) => opt.value === metal)?.value ?? "";
   const selectedKaratId =
     filteredMetalTypeOptions.find((opt) => opt.value === metalType)?.value ?? "";
@@ -1055,7 +1084,7 @@ export default function ProductCustomizer({
           </>
         ) : null}
 
-        {qualityOptions.length || clarityOptions.length ? (
+        {qualityOptions.length || filteredClarityOptions.length ? (
           <>
             <div className={styles.gridFields}>
               <div className={styles.fieldTitle}>{labels.diamondQuality}</div>
@@ -1066,7 +1095,7 @@ export default function ProductCustomizer({
                       className={styles.select}
                       classNamePrefix="customizer"
                       instanceId={qualityId}
-                      styles={dropdownStyles}
+                      styles={qualityDropdownStyles}
                       value={qualityOptions.find((opt) => opt.value === quality) ?? null}
                       options={qualityOptions}
                       onChange={(option) => {
@@ -1077,15 +1106,15 @@ export default function ProductCustomizer({
                     />
                   </div>
                 ) : null}
-                {clarityOptions.length ? (
+                {filteredClarityOptions.length ? (
                   <div>
                     <Select
                       className={styles.select}
                       classNamePrefix="customizer"
                       instanceId={clarityId}
                       styles={dropdownStyles}
-                      value={clarityOptions.find((opt) => opt.value === clarity) ?? null}
-                      options={clarityOptions}
+                      value={filteredClarityOptions.find((opt) => opt.value === clarity) ?? null}
+                      options={filteredClarityOptions}
                       onChange={(option) => {
                         setVariantEnabled(true);
                         setClarity(option?.value ?? "");
