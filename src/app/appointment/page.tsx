@@ -58,6 +58,7 @@ const formatDateValue = (date) => {
 export default function AppointmentPage() {
   const { language } = useI18n();
   const languageKey = language === "fi" ? "fi" : "en";
+  const languageId = language === "fi" ? "2" : "1";
   const labels =
     languageKey === "fi"
       ? {
@@ -126,7 +127,9 @@ export default function AppointmentPage() {
     const loadSlots = async () => {
       setSlotLoading(true);
       try {
-        const { data } = await axiosClient.get("/api/appointment/timeslots");
+        const { data } = await axiosClient.get(
+          `/api/appointment/timeslots?language_id=${encodeURIComponent(languageId)}`
+        );
         const slots = data?.data ?? data ?? [];
         if (!Array.isArray(slots) || !slots.length) {
           if (active) {
@@ -194,7 +197,7 @@ export default function AppointmentPage() {
     return () => {
       active = false;
     };
-  }, [languageKey]);
+  }, [languageKey, languageId]);
   const selectedDate = parseDateValue(form.appointmentDate);
   const handleChange = (event) => {
     const { name, value } = event.target;
@@ -245,7 +248,10 @@ export default function AppointmentPage() {
         time_slot: form.appointmentSlot,
         description: form.details.trim(),
       };
-      const { data } = await axiosClient.post("/api/appointment/create", payload);
+      const { data } = await axiosClient.post(
+        `/api/appointment/create?language_id=${encodeURIComponent(languageId)}`,
+        payload
+      );
       const message =
         data?.message ??
         (languageKey === "fi"

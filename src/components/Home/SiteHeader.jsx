@@ -13,53 +13,59 @@ export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { language, setLanguage, t } = useI18n();
 
+  const topBarContent = (
+    <>
+      <div className={styles.topLeft}>
+        <Dropdown
+          ariaLabel={t("common.language")}
+          leadingIcon="globe"
+          value={language}
+          onChange={setLanguage}
+          options={[
+            { value: "en", label: "English" },
+            { value: "fi", label: "Finnish" },
+          ]}
+        />
+        <div className={styles.currency} aria-label="Currency">
+          <Image className={styles.currencyIcon} src="/icons/euro.png" alt="" width={14} height={14} />
+          <span>{t("header.currency")}</span>
+        </div>
+      </div>
+
+      <div className={styles.topRight}>
+        <ShareProductModal
+          buttonClassName={styles.topLink}
+          buttonContent={
+            <>
+              <Image className={styles.topIcon} src="/icons/share.png" alt="" width={14} height={14} />
+              <span>{t("header.share")}</span>
+            </>
+          }
+        />
+        <Link className={styles.topLink} href="/appointment">
+          <Image className={styles.topIcon} src="/icons/appointment.png" alt="" width={14} height={14} />
+          <span>{t("header.appointment")}</span>
+        </Link>
+        <Link className={styles.topLink} href="/contact">
+          <Image
+            className={styles.topIcon}
+            src="/icons/contact_header_icon.png"
+            alt=""
+            width={14}
+            height={14}
+          />
+          <span>{t("header.ambassador")}</span>
+        </Link>
+      </div>
+    </>
+  );
+
   return (
     <>
       <header className={styles.header}>
         <div>
           <div className={styles.topInner}>
-            <div className={styles.topLeft}>
-              <Dropdown
-                ariaLabel={t("common.language")}
-                leadingIcon="globe"
-                value={language}
-                onChange={setLanguage}
-                options={[
-                  { value: "en", label: "English" },
-                  { value: "fi", label: "Finnish" },
-                ]}
-              />
-              <div className={styles.currency} aria-label="Currency">
-                <Image className={styles.currencyIcon} src="/icons/euro.png" alt="" width={14} height={14} />
-                <span>{t("header.currency")}</span>
-              </div>
-            </div>
-
-            <div className={styles.topRight}>
-              <ShareProductModal
-                buttonClassName={styles.topLink}
-                buttonContent={
-                  <>
-                    <Image className={styles.topIcon} src="/icons/share.png" alt="" width={14} height={14} />
-                    <span>{t("header.share")}</span>
-                  </>
-                }
-              />
-              <Link className={styles.topLink} href="/appointment">
-                <Image className={styles.topIcon} src="/icons/appointment.png" alt="" width={14} height={14} />
-                <span>{t("header.appointment")}</span>
-              </Link>
-              <Link className={styles.topLink} href="/contact">
-                <Image
-                  className={styles.topIcon}
-                  src="/icons/contact_header_icon.png"
-                  alt=""
-                  width={14}
-                  height={14}
-                />
-                <span>{t("header.ambassador")}</span>
-              </Link>
-            </div>
+            {topBarContent}
           </div>
         </div>
 
@@ -87,6 +93,7 @@ export default function SiteHeader() {
           </Link>
 
           <div className={styles.right} />
+
         </div>
       </header>
 

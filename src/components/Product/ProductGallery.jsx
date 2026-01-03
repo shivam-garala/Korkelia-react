@@ -8,7 +8,7 @@ import styles from "./ProductGallery.module.css";
 
 const isVideoSrc = (value) => {
   if (!value || typeof value !== "string") return false;
-  return /\.(mp4|webm|ogg)(\?.*)?$/i.test(value);
+  return /\.(mp4|webm|mov|m4v|ogg)(\?.*)?$/i.test(value);
 };
 
 const isVideoItem = (item) =>
@@ -32,18 +32,27 @@ const readCachedProduct = (productId) => {
   }
 };
 
+const normalizeMediaUrl = (value) => {
+  if (!value) return "";
+  return encodeURI(String(value));
+};
+
 const resolveImageSrc = (image) => {
   if (!image) return "";
   if (typeof image === "string") {
-    if (/^https?:\/\//i.test(image) || image.startsWith("/")) return image;
+    if (/^https?:\/\//i.test(image) || image.startsWith("/")) {
+      return normalizeMediaUrl(image);
+    }
   }
   const apiBase =
     process.env.NEXT_PUBLIC_BASE_API_URL ??
     process.env.NEXT_PUBLIC_API_URL ??
     "";
   const cleaned = typeof image === "string" ? image : "";
-  if (!apiBase || !cleaned) return cleaned;
-  return `${apiBase.replace(/\/$/, "")}/${cleaned.replace(/^\//, "")}`;
+  if (!apiBase || !cleaned) return normalizeMediaUrl(cleaned);
+  return normalizeMediaUrl(
+    `${apiBase.replace(/\/$/, "")}/${cleaned.replace(/^\//, "")}`
+  );
 };
 
 const fallbackImageSrc = "/productdetails/no_image.jpg";
@@ -94,9 +103,18 @@ export default function ProductGallery({ items, productId = "" }) {
             image?.image_name ??
             image
         );
-        const videoSrc = resolveImageSrc(image?.videoSrc ?? "");
+        const videoSrc = resolveImageSrc(
+          image?.videoSrc ?? image?.video_url ?? image?.videoUrl ?? image?.video ?? ""
+        );
+        const isExplicitVideo =
+          image?.isVideo === true ||
+          image?.is_video === true ||
+          image?.isVideo === 1 ||
+          image?.is_video === 1 ||
+          String(image?.is_video ?? "").toLowerCase() === "yes";
         const videoFromSrc = isVideoSrc(src);
         const wantsVideo =
+          isExplicitVideo ||
           image?.type === "video" ||
           image?.badge === "play" ||
           videoFromSrc ||
@@ -174,9 +192,18 @@ export default function ProductGallery({ items, productId = "" }) {
             item?.image_name ??
             ""
         );
-        const videoSrc = resolveImageSrc(item?.videoSrc ?? "");
+        const videoSrc = resolveImageSrc(
+          item?.videoSrc ?? item?.video_url ?? item?.videoUrl ?? item?.video ?? ""
+        );
+        const isExplicitVideo =
+          item?.isVideo === true ||
+          item?.is_video === true ||
+          item?.isVideo === 1 ||
+          item?.is_video === 1 ||
+          String(item?.is_video ?? "").toLowerCase() === "yes";
         const videoFromSrc = isVideoSrc(src);
-        const wantsVideo = isVideoItem(item) || videoFromSrc || Boolean(videoSrc);
+        const wantsVideo =
+          isExplicitVideo || isVideoItem(item) || videoFromSrc || Boolean(videoSrc);
         const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
         if (wantsVideo && !resolvedVideoSrc) return null;
         const isVideo = Boolean(resolvedVideoSrc);
@@ -389,11 +416,13 @@ export default function ProductGallery({ items, productId = "" }) {
           handleMediaError(index);
         };
         video.addEventListener("loadeddata", handleLoaded);
+        video.addEventListener("loadedmetadata", handleLoaded);
         video.addEventListener("error", handleError);
         video.preload = "metadata";
         video.src = videoSrc;
         cleanups.push(() => {
           video.removeEventListener("loadeddata", handleLoaded);
+          video.removeEventListener("loadedmetadata", handleLoaded);
           video.removeEventListener("error", handleError);
         });
         return;
@@ -607,8 +636,12 @@ export default function ProductGallery({ items, productId = "" }) {
                           muted
                           loop
                           playsInline
+                          preload="metadata"
                           poster={imageSrc}
                           onLoadedData={() =>
+                            setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                          }
+                          onLoadedMetadata={() =>
                             setLoadedMap((prev) => ({ ...prev, [index]: true }))
                           }
                           onError={() => handleMediaError(index)}

@@ -142,7 +142,7 @@
 
 @media (max-width: 560px) {
   .topInner {
-    justify-content: center;
+    display: none;
   }
 
   .topLeft {
@@ -151,7 +151,9 @@
   }
 
   .topRight {
-    display: none;
+    display: flex;
+    justify-content: center;
+    width: 100%;
   }
 
   .brandLogo {

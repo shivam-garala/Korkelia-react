@@ -1,11 +1,10 @@
-import Image from "next/image";
 import SiteFooter from "../../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../../components/Home/SiteHeader.jsx";
 import Container from "../../../components/ui/Container.jsx";
 import ProductCustomizer from "../../../components/Product/ProductCustomizer.jsx";
 import ProductGallery from "../../../components/Product/ProductGallery.jsx";
-import ProductGrid from "../../../components/Product/ProductGrid.jsx";
 import ShareProductModal from "../../../components/Product/ShareProductModal.jsx";
+import RelatedProducts from "./RelatedProducts.jsx";
 import styles from "./page.module.css";
 
 export default async function ProductDetailsPage({ params, searchParams }) {
@@ -29,6 +28,7 @@ export default async function ProductDetailsPage({ params, searchParams }) {
   const defaultClarityId = readSearchParam(resolvedSearchParams, "clarity_id");
   const defaultCarat = readSearchParam(resolvedSearchParams, "carat");
   const defaultCutId = readSearchParam(resolvedSearchParams, "cut_id");
+  const designId = readSearchParam(resolvedSearchParams, "design_id");
   const galleryItems = [
     { key: "a", variant: "square", src: "/productdetails/1.jpg" },
     { key: "b", variant: "tall", src: "/productdetails/2.jpg" },
@@ -41,11 +41,6 @@ export default async function ProductDetailsPage({ params, searchParams }) {
       badge: "play",
       videoSrc: "/productdetails/Rose%20Anim%20Kastehelmi%20Mq%20Rd%201725.mp4",
     },
-  ];
-  const related = [
-    { id: "r1", name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/2" },
-    { id: "r2", name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/3" },
-    { id: "r3", name: "PRODUCT NAME", price: "\u20AC 3,000", imageSrc: "/productlisting/White_Pers_Palladim_4mm_0001.png", href: "/product/4" },
   ];
 
   return (
@@ -79,12 +74,7 @@ export default async function ProductDetailsPage({ params, searchParams }) {
             </div>
           {/* </div> */}
 
-          <div className={styles.related}>
-            <h2 className={styles.relatedTitle}>RELATED PRODUCTS</h2>
-            <div className={styles.relatedGrid}>
-              <ProductGrid products={related} columns={3} />
-            </div>
-          </div>
+          <RelatedProducts productId={id ?? ""} designId={designId} />
         </Container>
       </main>
       <SiteFooter />

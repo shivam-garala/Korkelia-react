@@ -99,7 +99,7 @@
   min-height: 40px !important;
   border-radius: 8px !important;
   border: 1px solid var(--color-primary) !important;
-  background: var(--color-surface) !important;
+  background: #f2f2f2 !important;
   box-shadow: none !important;
   font-family: var(--font-body);
   color: var(--foreground);
