@@ -180,6 +180,47 @@ const updateCacheWithVariant = (productId, variantDetails) => {
   }
 };
 
+const updateCacheWithProductDetails = (productId, details) => {
+  if (typeof window === "undefined" || !productId || !details) return;
+  try {
+    const raw = window.sessionStorage.getItem("product_list_cache");
+    const cache = raw ? JSON.parse(raw) : {};
+    if (!cache || typeof cache !== "object") return;
+    const productKey = String(productId);
+    const existingProduct = cache[productKey] ?? {};
+    const incomingDesign =
+      details?.design ??
+      details?.design_variant ??
+      details?.designVariant ??
+      null;
+    const existingDesign =
+      existingProduct.design ??
+      existingProduct.design_variant ??
+      existingProduct.designVariant ??
+      null;
+
+    const nextDesign = incomingDesign ?? existingDesign ?? null;
+    cache[productKey] = {
+      ...existingProduct,
+      ...details,
+      ...(nextDesign
+        ? {
+            design: nextDesign,
+            design_variant: nextDesign,
+            designVariant: nextDesign,
+          }
+        : {}),
+    };
+
+    window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
+    window.dispatchEvent(
+      new CustomEvent("productCacheUpdated", { detail: { productId: productKey } })
+    );
+  } catch (error) {
+    console.error("Product cache update failed", error);
+  }
+};
+
 const resolvePriceFlag = (details) => {
   if (!details) return null;
   const raw =
@@ -294,6 +335,37 @@ export default function ProductCustomizer({
       window.removeEventListener("productCacheUpdated", handleCacheUpdate);
     };
   }, [productId]);
+
+  useEffect(() => {
+    let active = true;
+    if (!productId) {
+      return () => {
+        active = false;
+      };
+    }
+
+    const loadProductDetails = async () => {
+      try {
+        const params = new URLSearchParams();
+        if (languageId) params.set("language_id", String(languageId));
+        const query = params.toString();
+        const { data } = await axiosClient.get(
+          `/api/product/readOne/${encodeURIComponent(productId)}${query ? `?${query}` : ""}`
+        );
+        const payload = data?.data ?? data ?? null;
+        if (!payload || typeof payload !== "object") return;
+        if (active) setProductDetails(payload);
+        updateCacheWithProductDetails(productId, payload);
+      } catch (error) {
+        console.error("Product details load failed", error);
+      }
+    };
+
+    loadProductDetails();
+    return () => {
+      active = false;
+    };
+  }, [productId, languageId]);
 
   useEffect(() => {
     const nextCut = normalizeString(defaultCutId);
@@ -803,14 +875,31 @@ export default function ProductCustomizer({
         normalizeString(variantDetails?.description ?? "")
       : "";
 
+  const productTranslationSource =
+    productDetails?.design?.design_translation ??
+    productDetails?.design_translation ??
+    productDetails?.design?.design_translations ??
+    productDetails?.design_translations ??
+    productDetails?.design?.translations ??
+    productDetails?.translations ??
+    null;
+  const translatedTitle = resolveTranslationName(productTranslationSource, languageId);
+  const translatedDescription = resolveTranslationDescription(
+    productTranslationSource,
+    languageId
+  );
+
   const productTitle =
     // variantTitle ||
     // normalizeString(productDetails?.product_name) ||
+    translatedTitle ||
     normalizeString(productDetails?.design?.design_variant_name) ||
+    normalizeString(productDetails?.product_name) ||
     normalizeString(title) ||
     "PRODUCT NAME";
   const productDescription =
     variantDescription ||
+    translatedDescription ||
     resolveDesignTranslation(
       productDetails?.design?.design_translation ??
         productDetails?.design_translation ??
@@ -861,6 +950,7 @@ export default function ProductCustomizer({
     const params = new URLSearchParams({
       product_id: String(productId),
     });
+    if (languageId) params.set("language_id", String(languageId));
     if (selectedMetalId) params.set("metal_id", String(selectedMetalId));
     if (selectedQualityId) params.set("diamond_type_id", String(selectedQualityId));
     if (selectedClarityId) params.set("clarity_id", String(selectedClarityId));
@@ -934,6 +1024,7 @@ export default function ProductCustomizer({
     selectedCarat,
     selectedCutId,
     variantEnabled,
+    languageId,
   ]);
 
   useEffect(() => {
