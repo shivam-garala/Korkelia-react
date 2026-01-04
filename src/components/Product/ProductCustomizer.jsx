@@ -221,22 +221,6 @@ const updateCacheWithProductDetails = (productId, details) => {
   }
 };
 
-const resolvePriceFlag = (details) => {
-  if (!details) return null;
-  const raw =
-    // details?.price_flag ??
-    // details?.priceFlag ??
-    details?.design?.price_flag ??
-    // details?.design_variant?.price_flag ??
-    // details?.designVariant?.price_flag ??
-    // details?.design?.product?.price_flag ??
-    // details?.product?.price_flag ??
-    null;
-  if (raw === null || raw === undefined || raw === "") return null;
-  const normalized = String(raw).trim().toLowerCase();
-  return raw === 1 || raw === "1" || normalized === "yes" || normalized === "true";
-};
-
 export default function ProductCustomizer({
   title = "PRODUCT NAME",
   productId = "",
@@ -1153,9 +1137,7 @@ export default function ProductCustomizer({
     variantDetails?.metal_rate ??
     null;
   const displayPrice = variantPrice ?? (productBasePrice || null);
-  const priceFlagValue =
-    resolvePriceFlag(variantDetails) ?? resolvePriceFlag(productDetails);
-  const shouldShowPrice = priceFlagValue === null ? true : priceFlagValue;
+  const shouldShowPrice = true;
 
   return (
     <aside className={styles.panel}>
