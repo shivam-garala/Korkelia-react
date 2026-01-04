@@ -451,6 +451,9 @@ export default function ProductCustomizer({
     hasDefaultKarat,
   ]);
 
+  const filterCutId = normalizeString(cut);
+  const filterQualityId = normalizeString(quality);
+
   useEffect(() => {
     let active = true;
 
@@ -458,6 +461,8 @@ export default function ProductCustomizer({
       language_id: String(languageId),
     });
     if (productId) query.set("product_id", String(productId));
+    if (filterCutId) query.set("cut_id", filterCutId);
+    if (filterQualityId) query.set("diamond_type_id", filterQualityId);
     const queryString = query.toString();
     if (queryString === lastFilterQueryRef.current) {
       return () => {
@@ -486,7 +491,7 @@ export default function ProductCustomizer({
     return () => {
       active = false;
     };
-  }, [languageId, productId]);
+  }, [languageId, productId, filterCutId, filterQualityId]);
 
   const cutOptions = useMemo(() => {
     const list = Array.isArray(filterData?.cuts) ? filterData.cuts : [];
