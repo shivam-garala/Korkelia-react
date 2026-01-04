@@ -35,6 +35,51 @@
   line-height: 1.5;
 }
 
+.link {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.link:hover {
+  color: #38766b;
+}
+
+.settings {
+  display: grid;
+  gap: 12px;
+  border-top: 1px solid color-mix(in srgb, var(--color-line), transparent 55%);
+  padding-top: 12px;
+}
+
+.settingRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.settingText {
+  display: grid;
+  gap: 2px;
+}
+
+.settingTitle {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.settingNote {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.toggle {
+  width: 18px;
+  height: 18px;
+}
+
 .actions {
   display: flex;
   gap: 10px;
