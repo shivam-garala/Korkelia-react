@@ -13,6 +13,7 @@ export default function Dropdown({
   triggerClassName,
 }) {
   const [open, setOpen] = useState(false);
+  const [mounted, setMounted] = useState(false);
   const buttonId = useId();
   const menuId = useId();
   const ref = useRef(null);
@@ -21,6 +22,10 @@ export default function Dropdown({
     () => options.find((option) => option.value === value) ?? options[0],
     [options, value]
   );
+
+  useEffect(() => {
+    setMounted(true);
+  }, []);
 
   useEffect(() => {
     const onKeyDown = (event) => {
@@ -53,13 +58,13 @@ export default function Dropdown({
   return (
     <div className={styles.wrap} ref={ref}>
       <button
-        id={buttonId}
+        id={mounted ? buttonId : undefined}
         type="button"
         className={`${styles.trigger}${triggerClassName ? ` ${triggerClassName}` : ""}`}
         aria-label={ariaLabel}
         aria-haspopup="listbox"
         aria-expanded={open}
-        aria-controls={open ? menuId : undefined}
+        aria-controls={open && mounted ? menuId : undefined}
         onClick={() => setOpen((prev) => !prev)}
       >
         {iconSrc ? (
@@ -84,7 +89,12 @@ export default function Dropdown({
       </button>
 
       {open ? (
-        <div id={menuId} className={styles.menu} role="listbox" aria-labelledby={buttonId}>
+        <div
+          id={mounted ? menuId : undefined}
+          className={styles.menu}
+          role="listbox"
+          aria-labelledby={mounted ? buttonId : undefined}
+        >
           {options.map((option) => (
             <button
               key={option.value}
