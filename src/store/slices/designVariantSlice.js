@@ -32,10 +32,14 @@ function mergeUniqueById(existing = [], incoming = []) {
 
 export const fetchDesignVariants = createAsyncThunk(
   "designVariant/fetchAll",
-  async ({ page = 1, limit = 20 } = {}, { rejectWithValue }) => {
+  async ({ page = 1, limit = 20, search } = {}, { rejectWithValue }) => {
     try {
+      const params = { page, limit };
+      const normalizedSearch =
+        typeof search === "string" ? search.trim() : search != null ? String(search) : "";
+      if (normalizedSearch) params.search = normalizedSearch;
       const { data } = await axiosClient.get("/api/design/read", {
-        params: { page, limit },
+        params,
       });
       if (Array.isArray(data)) {
         return {

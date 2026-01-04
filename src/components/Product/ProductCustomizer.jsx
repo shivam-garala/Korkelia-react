@@ -1,6 +1,5 @@
 "use client";
 
-import Image from "next/image";
 import { useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
@@ -13,7 +12,6 @@ const cutImageByCode = {
   RD: "/diamondcuts/round_cut.png",
   PR: "/diamondcuts/princess.png",
   EM: "/diamondcuts/emreld.png",
-  HR: "/diamondcuts/round_cut.png",
   OL: "/diamondcuts/oval.png",
   MQ: "/diamondcuts/marqus.png",
   PE: "/diamondcuts/pear_cut.png",
@@ -24,7 +22,6 @@ const cutImageByName = {
   ROUND: "/diamondcuts/round_cut.png",
   PRINCESS: "/diamondcuts/princess.png",
   EMERALD: "/diamondcuts/emreld.png",
-  HEART: "/diamondcuts/round_cut.png",
   OVAL: "/diamondcuts/oval.png",
   MARQUISE: "/diamondcuts/marqus.png",
   PEAR: "/diamondcuts/pear_cut.png",
@@ -180,47 +177,6 @@ const updateCacheWithVariant = (productId, variantDetails) => {
   }
 };
 
-const updateCacheWithProductDetails = (productId, details) => {
-  if (typeof window === "undefined" || !productId || !details) return;
-  try {
-    const raw = window.sessionStorage.getItem("product_list_cache");
-    const cache = raw ? JSON.parse(raw) : {};
-    if (!cache || typeof cache !== "object") return;
-    const productKey = String(productId);
-    const existingProduct = cache[productKey] ?? {};
-    const incomingDesign =
-      details?.design ??
-      details?.design_variant ??
-      details?.designVariant ??
-      null;
-    const existingDesign =
-      existingProduct.design ??
-      existingProduct.design_variant ??
-      existingProduct.designVariant ??
-      null;
-
-    const nextDesign = incomingDesign ?? existingDesign ?? null;
-    cache[productKey] = {
-      ...existingProduct,
-      ...details,
-      ...(nextDesign
-        ? {
-            design: nextDesign,
-            design_variant: nextDesign,
-            designVariant: nextDesign,
-          }
-        : {}),
-    };
-
-    window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
-    window.dispatchEvent(
-      new CustomEvent("productCacheUpdated", { detail: { productId: productKey } })
-    );
-  } catch (error) {
-    console.error("Product cache update failed", error);
-  }
-};
-
 export default function ProductCustomizer({
   title = "PRODUCT NAME",
   productId = "",
@@ -319,37 +275,6 @@ export default function ProductCustomizer({
       window.removeEventListener("productCacheUpdated", handleCacheUpdate);
     };
   }, [productId]);
-
-  useEffect(() => {
-    let active = true;
-    if (!productId) {
-      return () => {
-        active = false;
-      };
-    }
-
-    const loadProductDetails = async () => {
-      try {
-        const params = new URLSearchParams();
-        if (languageId) params.set("language_id", String(languageId));
-        const query = params.toString();
-        const { data } = await axiosClient.get(
-          `/api/product/readOne/${encodeURIComponent(productId)}${query ? `?${query}` : ""}`
-        );
-        const payload = data?.data ?? data ?? null;
-        if (!payload || typeof payload !== "object") return;
-        if (active) setProductDetails(payload);
-        updateCacheWithProductDetails(productId, payload);
-      } catch (error) {
-        console.error("Product details load failed", error);
-      }
-    };
-
-    loadProductDetails();
-    return () => {
-      active = false;
-    };
-  }, [productId, languageId]);
 
   useEffect(() => {
     const nextCut = normalizeString(defaultCutId);
@@ -1173,7 +1098,7 @@ export default function ProductCustomizer({
                   }}
                 >
                   <div className={styles.cutIcon} aria-hidden>
-                    <Image src={item.src} alt="" width={28} height={28} />
+                    <img className={styles.cutIconImage} src={item.src} alt="" />
                   </div>
                   <div className={styles.cutLabel}>{item.label}</div>
                 </button>

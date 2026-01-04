@@ -1,6 +1,6 @@
 'use client';
 
-import { useMemo, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import { useRouter, usePathname } from "next/navigation";
 import SidebarNav from "../../components/Sidebar/SidebarNav.jsx";
 import AdminHeader from "../../components/AdminHeader/AdminHeader.jsx";
@@ -18,8 +18,11 @@ export default function DashboardPage() {
   const dispatch = useAppDispatch();
   const userName = useAppSelector(selectUserName) ?? "Admin";
   const userEmail = useAppSelector(selectEmail) ?? "";
+  const [hydrated, setHydrated] = useState(false);
+  const safeUserName = hydrated ? userName : "Admin";
+  const safeUserEmail = hydrated ? userEmail : "";
   const avatarInitials = useMemo(() => {
-    const normalizedName = (userName ?? "").trim();
+    const normalizedName = (safeUserName ?? "").trim();
     if (normalizedName.length) {
       return normalizedName
         .split(" ")
@@ -29,18 +32,25 @@ export default function DashboardPage() {
         .slice(0, 2)
         .toUpperCase();
     }
-    const normalizedEmail = (userEmail ?? "").trim();
+    const normalizedEmail = (safeUserEmail ?? "").trim();
     if (normalizedEmail.length) {
       const firstChar = normalizedEmail[0];
       const domainChar = normalizedEmail.split("@")[1]?.[0];
       return [firstChar, domainChar].filter(Boolean).join("").slice(0, 2).toUpperCase() || "U";
     }
     return "U";
-  }, [userEmail, userName]);
+  }, [safeUserEmail, safeUserName]);
   const [notifOpen, setNotifOpen] = useState(false);
   const [profileOpen, setProfileOpen] = useState(false);
   const [searchOpen, setSearchOpen] = useState(false);
-  const displayName = useMemo(() => userName?.split(" ")[0] || "Admin", [userName]);
+  const displayName = useMemo(
+    () => safeUserName?.split(" ")[0] || "Admin",
+    [safeUserName]
+  );
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
 
   return (
     <div className={styles.page}>
@@ -70,8 +80,8 @@ export default function DashboardPage() {
       <ProfileDrawer
         open={profileOpen}
         onClose={() => setProfileOpen(false)}
-        name={userName}
-        email={userEmail}
+        name={safeUserName}
+        email={safeUserEmail}
         onLogout={async () => {
           try {
             await fetch("/api/admin/logout", { method: "POST" });
