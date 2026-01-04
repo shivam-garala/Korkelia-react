@@ -81,6 +81,11 @@
   background: #fff;
 }
 
+.cutIconImage {
+  height: 28px;
+  width: auto;
+}
+
 .cutLabel {
   font-size: 12px;
   letter-spacing: 0.8px;

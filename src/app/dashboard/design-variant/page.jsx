@@ -78,9 +78,17 @@ function formatDetailSummary(details) {
   return details
     .map((detail) => {
       const cutCode = pickValue(detail, ["cut_code", "cutCode", "code", "cut"]);
-      const diamondRateName = pickValue(detail, ["diamond_rate_name", "diamondRateName", "rate_name", "name"]);
+      const cutName = pickValue(detail, ["cut_name", "cutName", "name"]);
+      const diamondRateName = pickValue(detail, [
+        "diamond_rate_name",
+        "diamondRateName",
+        "rate_name",
+        "name",
+      ]);
       const pcs = pickValue(detail, ["pcs", "pieces", "diamond_pcs"]);
-      return [cutCode, diamondRateName, pcs ? `x${pcs}` : null].filter(Boolean).join(" ");
+      return [cutCode ?? cutName, diamondRateName, pcs ? `x${pcs}` : null]
+        .filter(Boolean)
+        .join(" ");
     })
     .filter(Boolean)
     .join(", ");
@@ -240,39 +248,70 @@ export default function DesignVariantPage() {
   const [fileInputKey, setFileInputKey] = useState(0);
   const [imageDeletingId, setImageDeletingId] = useState(null);
   const [imageDeleteTarget, setImageDeleteTarget] = useState(null);
-  const [filters, setFilters] = useState({
-    no: "",
-    variant_name: "",
-    product: "",
-    metal_rate: "",
-    weight: "",
-    mark_up: "",
-    price: "",
-  });
+  const [searchQuery, setSearchQuery] = useState("");
+  const [activeSearch, setActiveSearch] = useState("");
+  const [hydrated, setHydrated] = useState(false);
   const fallbackImage = "/productlisting/no_image.jpg";
 
   const currentPage = pagination?.currentPage ?? 1;
   const totalPages = pagination?.totalPages ?? 1;
   const hasMore = currentPage < totalPages;
+  const searchTerm = useMemo(
+    () => String(searchQuery ?? "").trim(),
+    [searchQuery]
+  );
 
-  const fetchFirstPage = useCallback(() => {
-    dispatch(fetchDesignVariants({ page: 1, limit: PAGE_LIMIT }));
-  }, [dispatch]);
+  const fetchFirstPage = useCallback(
+    (searchValue = searchTerm) => {
+      const normalized = String(searchValue ?? "").trim();
+      setActiveSearch(normalized);
+      dispatch(
+        fetchDesignVariants({
+          page: 1,
+          limit: PAGE_LIMIT,
+          ...(normalized ? { search: normalized } : {}),
+        })
+      );
+    },
+    [dispatch, searchTerm]
+  );
 
   const handleLoadMore = useCallback(() => {
     if (loadingMore || loading) return;
     if (currentPage >= totalPages) return;
-    dispatch(fetchDesignVariants({ page: currentPage + 1, limit: PAGE_LIMIT }));
-  }, [dispatch, loadingMore, loading, currentPage, totalPages]);
+    dispatch(
+      fetchDesignVariants({
+        page: currentPage + 1,
+        limit: PAGE_LIMIT,
+        ...(activeSearch ? { search: activeSearch } : {}),
+      })
+    );
+  }, [dispatch, loadingMore, loading, currentPage, totalPages, activeSearch]);
 
   useEffect(() => {
-    dispatch(fetchDesignVariants({ page: 1, limit: PAGE_LIMIT }));
     dispatch(fetchProductDropdown());
     dispatch(fetchMetalRateDropdown());
     dispatch(fetchCategoryDropdown());
     dispatch(fetchCutMasters());
     dispatch(fetchDiamondRateDropdown());
   }, [dispatch]);
+
+  useEffect(() => {
+    setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    if (!searchTerm) {
+      fetchFirstPage("");
+      return;
+    }
+
+    const timer = setTimeout(() => {
+      fetchFirstPage(searchTerm);
+    }, 350);
+
+    return () => clearTimeout(timer);
+  }, [fetchFirstPage, searchTerm]);
 
   const categoryOptions = useMemo(() => {
     const list = Array.isArray(categories) ? categories : [];
@@ -385,60 +424,6 @@ export default function DesignVariantPage() {
       };
     });
   }, [items, metalRateOptions, productOptions]);
-
-  const filteredRows = useMemo(() => {
-    const normalize = (value) => String(value ?? "").trim().toLowerCase();
-    const noQuery = normalize(filters.no);
-    const variantQuery = normalize(filters.variant_name);
-    const productQuery = normalize(filters.product);
-    const metalRateQuery = normalize(filters.metal_rate);
-    const weightQuery = normalize(filters.weight);
-    const markUpQuery = normalize(filters.mark_up);
-    const priceQuery = normalize(filters.price);
-    if (
-      !noQuery &&
-      !variantQuery &&
-      !productQuery &&
-      !metalRateQuery &&
-      !weightQuery &&
-      !markUpQuery &&
-      !priceQuery
-    ) {
-      return tableRows;
-    }
-
-    return tableRows.filter((row) => {
-      const noMatches = noQuery
-        ? normalize(row.no).includes(noQuery) || normalize(row.id).includes(noQuery)
-        : true;
-      const variantMatches = variantQuery
-        ? normalize(row.variant_name).includes(variantQuery)
-        : true;
-      const productMatches = productQuery ? normalize(row.product).includes(productQuery) : true;
-      const metalRateMatches = metalRateQuery ? normalize(row.metal_rate).includes(metalRateQuery) : true;
-      const weightMatches = weightQuery ? normalize(row.weight).includes(weightQuery) : true;
-      const markUpMatches = markUpQuery ? normalize(row.mark_up).includes(markUpQuery) : true;
-      const priceMatches = priceQuery ? normalize(row.price).includes(priceQuery) : true;
-      return (
-        noMatches &&
-        variantMatches &&
-        productMatches &&
-        metalRateMatches &&
-        weightMatches &&
-        markUpMatches &&
-        priceMatches
-      );
-    });
-  }, [
-    filters.mark_up,
-    filters.metal_rate,
-    filters.no,
-    filters.price,
-    filters.product,
-    filters.variant_name,
-    filters.weight,
-    tableRows,
-  ]);
 
   const openCreate = () => {
     setEditingId(null);
@@ -917,29 +902,29 @@ export default function DesignVariantPage() {
     {
       key: "variant_name",
       header: "Design Variant Name",
-      filterable: true,
+      filterable: false,
       filterPlaceholder: "Search Design Variant",
     },
-    { key: "product", header: "Product", filterable: true, filterPlaceholder: "Search Product" },
-    { key: "metal_rate", header: "Metal Rate", filterable: true, filterPlaceholder: "Search Metal Rate" },
+    { key: "product", header: "Product", filterable: false, filterPlaceholder: "Search Product" },
+    { key: "metal_rate", header: "Metal Rate", filterable: false, filterPlaceholder: "Search Metal Rate" },
     {
       key: "weight",
       header: "Weight",
-      filterable: true,
+      filterable: false,
       filterPlaceholder: "Search Weight",
       filterInputStyle: { width: 120 },
     },
     {
       key: "mark_up",
       header: "Mark Up",
-      filterable: true,
+      filterable: false,
       filterPlaceholder: "Search Mark Up",
       filterInputStyle: { width: 120 },
     },
     {
       key: "price",
       header: "Price",
-      filterable: true,
+      filterable: false,
       filterPlaceholder: "Search Price",
       filterInputStyle: { width: 120 },
     },
@@ -977,11 +962,23 @@ export default function DesignVariantPage() {
             <div className={crudStyles.headerRow}>
               <h2 className={crudStyles.title}>Design Variant</h2>
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+                {hydrated ? (
+                  <TextField
+                    type="search"
+                    value={searchQuery}
+                    onChange={(e) => setSearchQuery(e.target.value)}
+                    placeholder="Search design variant"
+                    inputMode="search"
+                    style={{ minWidth: 220 }}
+                  />
+                ) : (
+                  <div style={{ minWidth: 220, minHeight: 44 }} />
+                )}
                 <Button
                   variant="secondary"
                   icon="refresh"
                   iconOnly
-                  onClick={fetchFirstPage}
+                  onClick={() => fetchFirstPage(searchTerm)}
                   disabled={loading}
                 >
                   {loading ? "Refreshing..." : "Refresh"}
@@ -995,14 +992,12 @@ export default function DesignVariantPage() {
 
             <DataTable
               columns={columns}
-              rows={filteredRows}
+              rows={tableRows}
               useInfiniteScroll={true}
               onLoadMore={handleLoadMore}
               hasMore={hasMore}
               loadingMore={loadingMore}
               getRowKey={(row) => row.id}
-              filters={filters}
-              onFiltersChange={setFilters}
               emptyMessage={loading ? "Loading..." : "No records found"}
             />
           </div>
