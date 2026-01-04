@@ -19,6 +19,7 @@ import axiosClient from "../../../lib/axiosClient.js";
 import {
   createProduct,
   deleteProduct,
+  fetchProduct,
   fetchProducts,
   selectProductError,
   selectProductLoading,
@@ -387,35 +388,44 @@ export default function ProductPage() {
     setModalOpen(true);
   };
 
-  const openEdit = (row) => {
+  const openEdit = async (row) => {
     const rawId = pickValue(row, ["id", "product_id", "productId"]);
-    const rawCategoryId = pickValue(row, ["category_id", "categoryId", "category"]);
-    const rawSubCategoryId = pickValue(row, ["sub_category_id", "subCategoryId", "subCategory"]);
-    const rawStyleId = pickValue(row, ["style_id", "styleId", "style"]);
-    const { nameEn, nameFi } = extractProductNames(row);
-    const rawImage = pickValue(row, ["image", "image_url", "imageUrl", "image_path", "imagePath"]);
+    if (!rawId) return;
+
+    let source = row;
+    const result = await dispatch(fetchProduct(rawId));
+    const payload = result?.payload?.data ?? result?.payload ?? null;
+    if (payload && typeof payload === "object") {
+      source = payload?.data ?? payload;
+    }
+
+    const rawCategoryId = pickValue(source, ["category_id", "categoryId", "category"]);
+    const rawSubCategoryId = pickValue(source, ["sub_category_id", "subCategoryId", "subCategory"]);
+    const rawStyleId = pickValue(source, ["style_id", "styleId", "style"]);
+    const { nameEn, nameFi } = extractProductNames(source);
+    const rawImage = pickValue(source, ["image", "image_url", "imageUrl", "image_path", "imagePath"]);
     const resolvedCategoryName =
-      row?.category?.category_name ??
-      row?.category?.categoryName ??
-      row?.category?.name ??
-      pickValue(row, ["category_name", "categoryName", "name"]) ??
+      source?.category?.category_name ??
+      source?.category?.categoryName ??
+      source?.category?.name ??
+      pickValue(source, ["category_name", "categoryName", "name"]) ??
       categoryOptions.find((option) => String(option.value) === String(rawCategoryId))?.label ??
       "";
     const resolvedSubCategoryName =
-      row?.subCategory?.sub_category_name ??
-      row?.subCategory?.subCategoryName ??
-      row?.subCategory?.name ??
-      pickValue(row, ["sub_category_name", "subCategoryName", "name"]) ??
+      source?.subCategory?.sub_category_name ??
+      source?.subCategory?.subCategoryName ??
+      source?.subCategory?.name ??
+      pickValue(source, ["sub_category_name", "subCategoryName", "name"]) ??
       subCategoryOptions.find((option) => String(option.value) === String(rawSubCategoryId))?.label ??
       "";
     const resolvedStyleName =
-      row?.style?.style_name ??
-      row?.style?.styleName ??
-      row?.style?.name ??
-      pickValue(row, ["style_name", "styleName", "name"]) ??
+      source?.style?.style_name ??
+      source?.style?.styleName ??
+      source?.style?.name ??
+      pickValue(source, ["style_name", "styleName", "name"]) ??
       styleOptions.find((option) => String(option.value) === String(rawStyleId))?.label ??
       "";
-    const rawDisplay = pickValue(row, ["is_display", "isDisplay", "display", "display_status"]);
+    const rawDisplay = pickValue(source, ["is_display", "isDisplay", "display", "display_status"]);
 
     setEditingId(rawId ?? null);
     setCategoryId(rawCategoryId !== undefined && rawCategoryId !== null ? String(rawCategoryId) : "");
