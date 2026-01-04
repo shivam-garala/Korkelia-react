@@ -4,7 +4,6 @@ import Link from "next/link";
 import Image from "next/image";
 import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
-import Dropdown from "./Dropdown";
 import styles from "./NavMenuOverlay.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import { fetchCategoryHomePage } from "../../lib/categoryHomeCache.js";
@@ -260,29 +259,6 @@ export default function NavMenuOverlay({ open, onClose }) {
           <div className={styles.divider} aria-hidden="true" />
 
           <div className={styles.topActions}>
-            <div className={styles.topActionsLeft}>
-              <Dropdown
-                ariaLabel={t("common.language")}
-                leadingIcon="globe"
-                value={language}
-                onChange={setLanguage}
-                options={[
-                  { value: "en", label: "English" },
-                  { value: "fi", label: "Finnish" },
-                ]}
-              />
-              <div className={styles.currency} aria-label="Currency">
-                <Image
-                  className={styles.currencyIcon}
-                  src="/icons/euro.png"
-                  alt=""
-                  width={14}
-                  height={14}
-                />
-                <span>{t("header.currency")}</span>
-              </div>
-            </div>
-
             <div className={styles.topActionsRight}>
               <ShareProductModal
                 buttonClassName={styles.topLink}

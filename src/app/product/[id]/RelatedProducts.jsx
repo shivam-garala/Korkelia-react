@@ -93,6 +93,15 @@ const updateCacheWithRelated = (product) => {
         product.name ??
         incomingDesign.design_variant_name ??
         existingDesign.design_variant_name,
+      design_translation:
+        incomingDesign.design_translation ??
+        existingDesign.design_translation,
+      design_translations:
+        incomingDesign.design_translations ??
+        existingDesign.design_translations,
+      translations:
+        incomingDesign.translations ??
+        existingDesign.translations,
       images: nextImages ?? existingDesign.images,
       image: product.imageSrc || incomingDesign.image || existingDesign.image,
       total_price:
