@@ -522,6 +522,13 @@ export default function DesignVariantPage() {
       detailList.map((detail, idx) => {
         const rawIsCenter = pickValue(detail, ["is_center", "isCenter"]);
         const isCenterValue = rawIsCenter === 1 || rawIsCenter === "1" ? "1" : "0";
+        const rawPositionVisible = pickValue(detail, ["position_visible", "positionVisible"]);
+        const positionVisibleValue =
+          rawPositionVisible === 0 ||
+          rawPositionVisible === "0" ||
+          String(rawPositionVisible).toLowerCase() === "no"
+            ? "0"
+            : "1";
         return {
           key: `${Date.now()}-${idx}`,
           id: pickValue(detail, ["id", "detail_id", "diamond_design_detail_id"]) ?? null,
@@ -534,6 +541,7 @@ export default function DesignVariantPage() {
           ),
           pcs: String(pickValue(detail, ["pcs", "pieces", "diamond_pcs"]) ?? ""),
           isCenter: isCenterValue,
+          positionVisible: positionVisibleValue,
         };
       })
     );
@@ -573,6 +581,7 @@ export default function DesignVariantPage() {
         diamondRateName: "",
         pcs: "",
         isCenter: "0",
+        positionVisible: "1",
       },
     ]);
   };
@@ -785,6 +794,7 @@ export default function DesignVariantPage() {
         diamond_rate_name: row.diamondRateName || diamondOption?.label || "",
         pcs: row.pcs,
         is_center: row.isCenter === "1" ? 1 : 0,
+        position_visible: row.positionVisible === "1" ? 1 : 0,
       };
       if (row.id) detail.id = row.id;
       return detail;
@@ -1024,6 +1034,7 @@ export default function DesignVariantPage() {
       <Modal
         open={modalOpen}
         title={editingId ? "Update Design Variant" : "Add Design Variant"}
+        className={styles.variantModal}
         onClose={() => {
           setModalOpen(false);
           setEditingId(null);
@@ -1195,6 +1206,7 @@ export default function DesignVariantPage() {
               <span>Diamond Rate</span>
               <span>Pcs</span>
               <span>Type</span>
+              <span>Is Visible</span>
               <span />
             </div>
             {detailRows.map((row) => (
@@ -1250,6 +1262,17 @@ export default function DesignVariantPage() {
                   options={[
                     { value: "0", label: "Other" },
                     { value: "1", label: "Center" },
+                  ]}
+                />
+                <AdminSelectField
+                  label=""
+                  value={row.positionVisible}
+                  onChange={(e) => updateDetailRow(row.key, { positionVisible: e.target.value })}
+                  required
+                  placeholder="Select visibility"
+                  options={[
+                    { value: "1", label: "Yes" },
+                    { value: "0", label: "No" },
                   ]}
                 />
                 <div className={styles.rowActions}>
