@@ -969,33 +969,40 @@ export default function DesignVariantPage() {
 
         <main className={layout.content}>
           <div className={crudStyles.panel}>
-            <div className={crudStyles.headerRow}>
+            <div className={`${crudStyles.headerRow} ${styles.headerRow}`}>
               <h2 className={crudStyles.title}>Design Variant</h2>
-              <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
+              <div className={styles.headerActions}>
                 {hydrated ? (
-                  <TextField
-                    type="search"
-                    value={searchQuery}
-                    onChange={(e) => setSearchQuery(e.target.value)}
-                    placeholder="Search design variant"
-                    inputMode="search"
-                    style={{ minWidth: 220 }}
-                  />
+                  <div className={styles.headerSearch}>
+                    <TextField
+                      type="search"
+                      value={searchQuery}
+                      onChange={(e) => setSearchQuery(e.target.value)}
+                      placeholder="Search design variant"
+                      inputMode="search"
+                      id="design-variant-search"
+                      name="design-variant-search"
+                      autoComplete="off"
+                      style={{ width: "100%" }}
+                    />
+                  </div>
                 ) : (
-                  <div style={{ minWidth: 220, minHeight: 44 }} />
+                  <div className={styles.headerSearchPlaceholder} />
                 )}
-                <Button
-                  variant="secondary"
-                  icon="refresh"
-                  iconOnly
-                  onClick={() => fetchFirstPage(searchTerm)}
-                  disabled={loading}
-                >
-                  {loading ? "Refreshing..." : "Refresh"}
-                </Button>
-                <Button variant="primarySoft" onClick={openCreate}>
-                  Add Design Variant
-                </Button>
+                <div className={styles.headerButtons}>
+                  <Button
+                    variant="secondary"
+                    icon="refresh"
+                    iconOnly
+                    onClick={() => fetchFirstPage(searchTerm)}
+                    disabled={loading}
+                  >
+                    {loading ? "Refreshing..." : "Refresh"}
+                  </Button>
+                  <Button variant="primarySoft" onClick={openCreate}>
+                    Add Design Variant
+                  </Button>
+                </div>
               </div>
             </div>
 

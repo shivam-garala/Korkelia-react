@@ -5,6 +5,8 @@
   padding: 16px;
   box-shadow: var(--shadow-soft);
   height: 100%;
+  display: flex;
+  flex-direction: column;
 }
 
 .headerRow {
