@@ -102,11 +102,14 @@ export default function DataTable({
             {rowCount ? (
               rows.map((row, index) => (
                 <tr key={String(getRowKey(row, index))} className={styles.tr}>
-                  {columns.map((col) => (
-                    <td key={`${String(getRowKey(row, index))}-${col.key}`} className={styles.td}>
-                      {col.render ? col.render(row, index) : row?.[col.key] ?? ""}
-                    </td>
-                  ))}
+                  {columns.map((col) => {
+                    const cellRenderer = col.customRender ?? col.render;
+                    return (
+                      <td key={`${String(getRowKey(row, index))}-${col.key}`} className={styles.td}>
+                        {cellRenderer ? cellRenderer(row, index) : row?.[col.key] ?? ""}
+                      </td>
+                    );
+                  })}
                 </tr>
               ))
             ) : (

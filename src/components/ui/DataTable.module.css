@@ -68,9 +68,9 @@
 }
 
 @media (max-width: 900px) {
-  .table {
+  /* .table {
     min-width: 900px;
-  }
+  } */
 
   .th,
   .td {
@@ -83,9 +83,9 @@
 }
 
 @media (max-width: 640px) {
-  .table {
+  /* .table {
     min-width: 760px;
-  }
+  } */
 
   .th,
   .td,

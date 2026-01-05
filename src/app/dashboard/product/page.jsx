@@ -8,6 +8,7 @@ import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import DataTable from "../../../components/ui/DataTableSuspense.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
+import DesignZoomModal from "../../../components/ui/DesignZoomModal.jsx";
 import Select from "react-select";
 import TextField from "../../../components/ui/TextField.jsx";
 import fieldStyles from "../../../components/ui/Fields.module.css";
@@ -329,6 +330,7 @@ export default function ProductPage() {
       const displayValue = normalizeDisplayValue(rawDisplay);
       const displayLabel = displayValue === "1" ? "Yes" : displayValue === "0" ? "No" : displayValue || "-";
       const imageValue = pickValue(item, ["image", "image_url", "imageUrl", "image_path", "imagePath"]);
+      const resolvedImage = resolveImageSrc(imageValue);
 
       return {
         no: index + 1,
@@ -337,7 +339,8 @@ export default function ProductPage() {
         category: categoryLabel ?? "-",
         sub_category: subCategoryLabel ?? "-",
         style: styleLabel ?? "-",
-        image: imageValue ?? "-",
+        image: resolvedImage || "-",
+        s3Url: resolvedImage || "",
         is_display: displayLabel,
         _raw: item,
       };
@@ -518,6 +521,14 @@ export default function ProductPage() {
     { key: "sub_category", header: "Sub Category", filterable: true, filterPlaceholder: "Search Sub Category" },
     { key: "style", header: "Style", filterable: true, filterPlaceholder: "Search Style" },
     { key: "is_display", header: "Display", filterable: true, filterPlaceholder: "Search Display" },
+    {
+      key: "image",
+      header: "Image",
+      filterable: false,
+      customRender: (row) => {
+        return <DesignZoomModal imgPath={row?.s3Url ? `${row?.s3Url}?v=${Date.now()}` : ""} />;
+      },
+    },
     {
       key: "actions",
       header: "Action",
