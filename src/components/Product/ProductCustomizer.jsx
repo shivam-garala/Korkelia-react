@@ -378,6 +378,19 @@ export default function ProductCustomizer({
 
   const filterCutId = normalizeString(cut);
   const filterQualityId = normalizeString(quality);
+  const filterAvailabilityValue = normalizeString(
+    variantDetails?.is_filter_available ??
+      // productDetails?.design?.is_filter_available ??
+      // productDetails?.design_variant?.is_filter_available ??
+      // productDetails?.designVariant?.is_filter_available ??
+      // productDetails?.is_filter_available ??
+      // filterData?.is_filter_available ??
+      ""
+  );
+  const hideCutSection = filterAvailabilityValue === "2";
+  const allowCutInQuery = filterAvailabilityValue !== "0" && !hideCutSection;
+  const hideCaratSection = filterAvailabilityValue === "2";
+  const allowCaratInQuery = filterAvailabilityValue !== "0" && !hideCaratSection;
 
   useEffect(() => {
     let active = true;
@@ -386,7 +399,7 @@ export default function ProductCustomizer({
       language_id: String(languageId),
     });
     if (productId) query.set("product_id", String(productId));
-    if (filterCutId) query.set("cut_id", filterCutId);
+    if (filterCutId && allowCutInQuery) query.set("cut_id", filterCutId);
     if (filterQualityId) query.set("diamond_type_id", filterQualityId);
     const queryString = query.toString();
     if (queryString === lastFilterQueryRef.current) {
@@ -416,7 +429,7 @@ export default function ProductCustomizer({
     return () => {
       active = false;
     };
-  }, [languageId, productId, filterCutId, filterQualityId]);
+  }, [languageId, productId, filterCutId, filterQualityId, allowCutInQuery]);
 
   const cutOptions = useMemo(() => {
     const list = Array.isArray(filterData?.cuts) ? filterData.cuts : [];
@@ -706,10 +719,11 @@ export default function ProductCustomizer({
   );
 
   useEffect(() => {
+    if (hideCutSection) return;
     if (cutOptions.length && !cutOptions.some((opt) => opt.id === cut)) {
       setCut(cutOptions[0].id);
     }
-  }, [cutOptions, cut]);
+  }, [cutOptions, cut, hideCutSection]);
 
   useEffect(() => {
     if (
@@ -730,10 +744,11 @@ export default function ProductCustomizer({
   }, [filteredClarityOptions, clarity]);
 
   useEffect(() => {
+    if (hideCaratSection) return;
     if (caratOptions.length && !caratOptions.includes(carat)) {
       setCarat(caratOptions[0]);
     }
-  }, [caratOptions, carat]);
+  }, [caratOptions, carat, hideCaratSection]);
 
   useEffect(() => {
     if (
@@ -868,8 +883,8 @@ export default function ProductCustomizer({
     if (selectedMetalId) params.set("metal_id", String(selectedMetalId));
     if (selectedQualityId) params.set("diamond_type_id", String(selectedQualityId));
     if (selectedClarityId) params.set("clarity_id", String(selectedClarityId));
-    if (selectedCarat) params.set("carat", String(selectedCarat));
-    if (selectedCutId) params.set("cut_id", String(selectedCutId));
+    if (selectedCarat && allowCaratInQuery) params.set("carat", String(selectedCarat));
+    if (selectedCutId && allowCutInQuery) params.set("cut_id", String(selectedCutId));
     if (selectedKaratId) {
       params.set("karat_id", String(selectedKaratId));
     }
@@ -939,6 +954,8 @@ export default function ProductCustomizer({
     selectedCutId,
     variantEnabled,
     languageId,
+    allowCutInQuery,
+    allowCaratInQuery,
   ]);
 
   useEffect(() => {
@@ -976,9 +993,11 @@ export default function ProductCustomizer({
       return options.some((opt) => matcher(opt, value));
     };
 
-    const canUseCut = canUseOption(nextCut, cutOptions, (opt, value) => opt.id === value);
-    if (nextCut && nextCut !== cut && canUseCut) {
-      setCut(nextCut);
+    if (!hideCutSection) {
+      const canUseCut = canUseOption(nextCut, cutOptions, (opt, value) => opt.id === value);
+      if (nextCut && nextCut !== cut && canUseCut) {
+        setCut(nextCut);
+      }
     }
 
     const canUseQuality = canUseOption(nextQuality, qualityOptions, (opt, value) => opt.value === value);
@@ -991,9 +1010,11 @@ export default function ProductCustomizer({
       setClarity(nextClarity);
     }
 
-    const canUseCarat = nextCarat && (!caratOptions.length || caratOptions.includes(nextCarat));
-    if (nextCarat && nextCarat !== carat && canUseCarat) {
-      setCarat(nextCarat);
+    if (!hideCaratSection) {
+      const canUseCarat = nextCarat && (!caratOptions.length || caratOptions.includes(nextCarat));
+      if (nextCarat && nextCarat !== carat && canUseCarat) {
+        setCarat(nextCarat);
+      }
     }
 
     const canUseMetal = canUseOption(nextMetal, metalOptions, (opt, value) => opt.value === value);
@@ -1008,10 +1029,10 @@ export default function ProductCustomizer({
     }
 
     if (
-      (nextCut && nextCut !== cut) ||
+      (!hideCutSection && nextCut && nextCut !== cut) ||
       (nextQuality && nextQuality !== quality) ||
       (nextClarity && nextClarity !== clarity) ||
-      (nextCarat && nextCarat !== carat) ||
+      (!hideCaratSection && nextCarat && nextCarat !== carat) ||
       (nextMetal && nextMetal !== metal) ||
       (nextKarat && nextKarat !== metalType)
     ) {
@@ -1035,6 +1056,8 @@ export default function ProductCustomizer({
     metalType,
     metalTypeOptions,
     filteredMetalTypeOptions,
+    hideCutSection,
+    hideCaratSection,
   ]);
 
   // Update sessionStorage cache when variantDetails changes
@@ -1083,7 +1106,7 @@ export default function ProductCustomizer({
 
       <div className={styles.section}>
         <div className={styles.sectionTitle}>{labels.customizedForYou}</div>
-        {cutOptions.length ? (
+        {!hideCutSection && cutOptions.length ? (
           <>
             <div className={styles.fieldTitle}>{labels.selectDiamondCut}</div>
             <div className={styles.cuts}>
@@ -1153,7 +1176,7 @@ export default function ProductCustomizer({
           </>
         ) : null}
 
-        {caratOptions.length ? (
+        {!hideCaratSection && caratOptions.length ? (
           <>
             <div className={styles.fieldTitle}>{labels.diamondCaratWeight}</div>
             <div className={styles.pills}>
