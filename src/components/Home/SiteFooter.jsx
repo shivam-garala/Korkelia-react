@@ -52,7 +52,7 @@ export default function SiteFooter() {
 
           <div className={styles.bottomRow}>
             <div className={styles.meta}>
-              <span><span style={{ fontSize: '18px', verticalAlign: 'middle', marginRight: '2px' }}>Ac</span>{t("footer.copyrightLine1")}</span>
+              <span><span style={{ fontSize: '18px', verticalAlign: 'middle', marginRight: '2px' }}>©</span>{t("footer.copyrightLine1")}</span>
             </div>
 
             <div className={styles.logoWrap} aria-hidden>
