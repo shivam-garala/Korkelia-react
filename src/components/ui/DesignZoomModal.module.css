@@ -52,6 +52,8 @@
   outline-offset: -4px;
   box-shadow: 0 14px 32px rgba(15, 23, 42, 0.2);
   padding: 12px;
+  min-width: 350px;
+  min-height: 350px;
   max-width: 90vw;
   max-height: 90vh;
   overflow: auto;
@@ -71,4 +73,28 @@
   max-height: calc(90vh - 24px);
   object-fit: contain;
   display: block;
+}
+
+@media (max-width: 900px) {
+  .modalInner {
+    max-width: 96vw;
+    max-height: 96vh;
+    padding: 10px;
+  }
+
+  .modalImage {
+    max-height: calc(96vh - 20px);
+  }
+}
+
+@media (max-width: 640px) {
+  .modalInner {
+    max-width: 98vw;
+    max-height: 98vh;
+    padding: 8px;
+  }
+
+  .modalImage {
+    max-height: calc(98vh - 16px);
+  }
 }
