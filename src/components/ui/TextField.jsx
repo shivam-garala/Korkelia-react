@@ -10,10 +10,11 @@ export default function TextField({
   onChange,
   required = false,
   placeholder = "",
-  autoComplete = "",
+  autoComplete = undefined,
   inputMode = "",
   step = undefined,
   disabled = false,
+  id = undefined,
   name = "",
   preventWheel = type === "number",
   style = {},
@@ -48,10 +49,11 @@ export default function TextField({
         onChange={onChange}
         required={required}
         placeholder={placeholder}
-        autoComplete={autoComplete}
+        autoComplete={autoComplete || undefined}
         inputMode={inputMode}
         step={step}
         disabled={disabled}
+        id={id}
         name={name}
       />
     </label>
