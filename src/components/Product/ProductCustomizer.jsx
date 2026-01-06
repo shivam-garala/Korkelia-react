@@ -397,7 +397,7 @@ export default function ProductCustomizer({
   const allowCaratInQuery = filterAvailabilityValue !== "0" && !hideCaratSection;
 
   useEffect(() => {
-    let active = true;
+    const controller = new AbortController();
 
     const query = new URLSearchParams({
       language_id: String(languageId),
@@ -408,22 +408,25 @@ export default function ProductCustomizer({
     const queryString = query.toString();
     if (queryString === lastFilterQueryRef.current) {
       return () => {
-        active = false;
+        controller.abort();
       };
     }
-    lastFilterQueryRef.current = queryString;
 
     const loadFilters = async () => {
       try {
         const { data } = await axiosClient.get(
-          `/api/design/filter-dropdowns-ecom?${queryString}`
+          `/api/design/filter-dropdowns-ecom?${queryString}`,
+          { signal: controller.signal }
         );
         const payload = data?.data ?? data;
-        if (active) {
-          setFilterData(payload && typeof payload === "object" ? payload : null);
-        }
+        console.log(payload);
+        console.log(controller.signal.aborted);
+
+        lastFilterQueryRef.current = queryString;
+        setFilterData(payload && typeof payload === "object" ? payload : null);
       } catch (error) {
-        if (active) setFilterData(null);
+        if (controller.signal.aborted) return;
+        setFilterData(null);
         lastFilterQueryRef.current = "";
         console.error("Product filter load failed", error);
       }
@@ -431,7 +434,7 @@ export default function ProductCustomizer({
 
     loadFilters();
     return () => {
-      active = false;
+      controller.abort();
     };
   }, [languageId, productId, filterCutId, filterQualityId, allowCutInQuery]);
 
@@ -598,6 +601,8 @@ export default function ProductCustomizer({
     return Array.from(groups.values());
   }, [variantDetails, filterAvailabilityValue]);
 
+  console.log(filterData);
+  
   const metalOptions = useMemo(() => {
     const list = Array.isArray(filterData?.metals) ? filterData.metals : [];
     return list
@@ -1311,6 +1316,7 @@ export default function ProductCustomizer({
 
         <div className={styles.fieldTitle}>{labels.selectMetalColor}</div>
         <div className={styles.metalRow}>
+          {console.log(metalOptions)}
           {metalOptions.map((item) => (
             <button
               key={item.value}
