@@ -216,6 +216,16 @@
   gap: 6px;
 }
 
+.diamondDetailGroups {
+  display: grid;
+  gap: 12px;
+}
+
+.diamondDetailGroup {
+  display: grid;
+  gap: 6px;
+}
+
 .pill {
   min-width: 32px;
   padding-inline: 5px;
@@ -226,6 +236,13 @@
   color: var(--color-primary);
   font-size: 12px;
   cursor: pointer;
+}
+
+.pillDisabled {
+  cursor: not-allowed;
+  color: var(--color-muted);
+  background: color-mix(in srgb, var(--color-line), #ffffff 75%);
+  border-color: color-mix(in srgb, var(--color-line), transparent 40%);
 }
 
 .pillActive {
