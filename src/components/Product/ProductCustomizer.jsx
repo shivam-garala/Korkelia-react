@@ -211,6 +211,7 @@ export default function ProductCustomizer({
   const lastFilterQueryRef = useRef("");
   const lastVariantQueryRef = useRef("");
   const skipNextVariantFetchRef = useRef(false);
+  const variantFromCacheRef = useRef(false);
 
   const labels =
     language === "fi"
@@ -319,6 +320,11 @@ export default function ProductCustomizer({
     () => resolveListingDefaults(productDetails),
     [productDetails]
   );
+  const listingDesign =
+    productDetails?.design ??
+    productDetails?.design_variant ??
+    productDetails?.designVariant ??
+    null;
 
   const hasDefaultCut = Boolean(normalizeString(defaultCutId));
   const hasDefaultQuality = Boolean(normalizeString(defaultDiamondTypeId));
@@ -380,11 +386,9 @@ export default function ProductCustomizer({
   const filterQualityId = normalizeString(quality);
   const filterAvailabilityValue = normalizeString(
     variantDetails?.is_filter_available ??
-      // productDetails?.design?.is_filter_available ??
-      // productDetails?.design_variant?.is_filter_available ??
-      // productDetails?.designVariant?.is_filter_available ??
-      // productDetails?.is_filter_available ??
-      // filterData?.is_filter_available ??
+      listingDesign?.is_filter_available ??
+      productDetails?.is_filter_available ??
+      filterData?.is_filter_available ??
       ""
   );
   const hideCutSection = filterAvailabilityValue === "2";
@@ -558,6 +562,41 @@ export default function ProductCustomizer({
       })
       .filter(Boolean);
   }, [filterData]);
+
+  const diamondDetailGroups = useMemo(() => {
+    if (filterAvailabilityValue !== "2") return [];
+    const list = Array.isArray(variantDetails?.diamond_details)
+      ? variantDetails.diamond_details
+      : [];
+    if (!list.length) return [];
+    const groups = new Map();
+    list.forEach((detail) => {
+      const cutName = normalizeString(
+        detail?.cut_master?.cut_name ??
+          detail?.cut_master?.name ??
+          detail?.cut_name ??
+          detail?.cut ??
+          ""
+      );
+      const caratValue = normalizeString(
+        detail?.diamond_rate?.diamond_master?.carat ??
+          detail?.diamond_rate?.diamond_master_id?.carat ??
+          detail?.diamond_rate?.carat ??
+          detail?.carat ??
+          ""
+      );
+      if (!cutName || !caratValue) return;
+      const key = cutName.toUpperCase();
+      if (!groups.has(key)) {
+        groups.set(key, { cutName: key, carats: [] });
+      }
+      const entry = groups.get(key);
+      if (!entry.carats.includes(caratValue)) {
+        entry.carats.push(caratValue);
+      }
+    });
+    return Array.from(groups.values());
+  }, [variantDetails, filterAvailabilityValue]);
 
   const metalOptions = useMemo(() => {
     const list = Array.isArray(filterData?.metals) ? filterData.metals : [];
@@ -782,6 +821,33 @@ export default function ProductCustomizer({
     filteredMetalTypeOptions.find((opt) => opt.value === metalType)?.value ?? "";
   const selectedCarat = carat ? String(carat) : "";
 
+  const shouldSkipVariantFetch = useMemo(() => {
+    if (!hasPrefilledVariant || !listingDesign) return false;
+    const matchesField = (expected, actual) => {
+      const normalizedExpected = normalizeString(expected);
+      if (!normalizedExpected) return true;
+      return normalizedExpected === normalizeString(actual);
+    };
+    return (
+      matchesField(listingDefaults.metal, selectedMetalId) &&
+      matchesField(listingDefaults.karat, selectedKaratId) &&
+      matchesField(listingDefaults.cut, selectedCutId) &&
+      matchesField(listingDefaults.quality, selectedQualityId) &&
+      matchesField(listingDefaults.clarity, selectedClarityId) &&
+      matchesField(listingDefaults.carat, selectedCarat)
+    );
+  }, [
+    hasPrefilledVariant,
+    listingDesign,
+    listingDefaults,
+    selectedMetalId,
+    selectedKaratId,
+    selectedCutId,
+    selectedQualityId,
+    selectedClarityId,
+    selectedCarat,
+  ]);
+
   // const variantTitle =
   //   variantEnabled
   //     ? resolveTranslationName(
@@ -854,6 +920,7 @@ export default function ProductCustomizer({
       setVariantAdjustedFilters(null);
       setVariantDesignAvailable(null);
       setVariantLoading(false);
+      variantFromCacheRef.current = false;
       return () => {
         active = false;
       };
@@ -864,6 +931,7 @@ export default function ProductCustomizer({
       setVariantAdjustedFilters(null);
       setVariantDesignAvailable(null);
       setVariantLoading(false);
+      variantFromCacheRef.current = false;
       return () => {
         active = false;
       };
@@ -889,6 +957,19 @@ export default function ProductCustomizer({
       params.set("karat_id", String(selectedKaratId));
     }
     const queryString = params.toString();
+    if (shouldSkipVariantFetch && listingDesign) {
+      variantFromCacheRef.current = true;
+      lastVariantQueryRef.current = queryString;
+      if (active) {
+        setVariantDetails((prev) => (prev === listingDesign ? prev : listingDesign));
+        setVariantAdjustedFilters(null);
+        setVariantDesignAvailable(null);
+        setVariantLoading(false);
+      }
+      return () => {
+        active = false;
+      };
+    }
     if (queryString === lastVariantQueryRef.current) {
       return () => {
         active = false;
@@ -896,6 +977,7 @@ export default function ProductCustomizer({
     }
     lastVariantQueryRef.current = queryString;
 
+    variantFromCacheRef.current = false;
     setVariantLoading(true);
     const loadVariant = async () => {
       try {
@@ -956,6 +1038,8 @@ export default function ProductCustomizer({
     languageId,
     allowCutInQuery,
     allowCaratInQuery,
+    shouldSkipVariantFetch,
+    listingDesign,
   ]);
 
   useEffect(() => {
@@ -1062,7 +1146,7 @@ export default function ProductCustomizer({
 
   // Update sessionStorage cache when variantDetails changes
   useEffect(() => {
-    if (variantDetails && productId) {
+    if (variantDetails && productId && !variantFromCacheRef.current) {
       updateCacheWithVariant(productId, variantDetails);
     }
   }, [variantDetails, productId]);
@@ -1192,6 +1276,33 @@ export default function ProductCustomizer({
                 >
                   {value}
                 </button>
+              ))}
+            </div>
+            <div className={styles.divider} aria-hidden />
+          </>
+        ) : null}
+
+        {diamondDetailGroups.length ? (
+          <>
+            <div className={styles.diamondDetailGroups}>
+              {diamondDetailGroups.map((group) => (
+                <div className={styles.diamondDetailGroup} key={group.cutName}>
+                  <div className={styles.fieldTitle}>
+                    {group.cutName} {labels.diamondCaratWeight}
+                  </div>
+                  <div className={styles.pills}>
+                    {group.carats.map((value) => (
+                      <button
+                        key={`${group.cutName}-${value}`}
+                        type="button"
+                        className={`${styles.pill} ${styles.pillDisabled}`}
+                        disabled
+                      >
+                        {value}
+                      </button>
+                    ))}
+                  </div>
+                </div>
               ))}
             </div>
             <div className={styles.divider} aria-hidden />
