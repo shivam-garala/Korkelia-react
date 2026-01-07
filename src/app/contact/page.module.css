@@ -99,8 +99,26 @@
 }
 
 .contactText {
-  display: grid;
-  gap: 4px;
+  display: flex;
+  flex-wrap: wrap;
+  align-items: center;
+  gap: 6px;
+}
+
+.contactLabel {
+  color: var(--color-muted);
+}
+
+.contactLink {
+  color: inherit;
+  text-decoration: none;
+  transition: color 0.2s ease, text-decoration-color 0.2s ease;
+}
+
+.contactLink:hover,
+.contactLink:focus-visible {
+  color: var(--color-primary);
+  text-decoration: underline;
 }
 
 .map {
