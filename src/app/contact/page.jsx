@@ -76,6 +76,7 @@ export default function ContactPage() {
   const languageKey = language === "fi" ? "fi" : "en";
   const content = contentByLanguage[languageKey] ?? contentByLanguage.en;
 
+  const phoneHref = "tel:+358503270600";
   const whatsappHref = "https://wa.me/358503270600";
   const emailHref = "mailto:korkeila@korkeilahelsinki.fi";
 
@@ -124,9 +125,12 @@ export default function ContactPage() {
                   <li className={styles.contactItem}>
                     <Image src="/icons/icon_phone_contact.png" alt="" width={16} height={16} />
                     <div className={styles.contactText}>
-                      <span>
-                        {content.sections.contact.phoneLabel}: {content.sections.contact.phone}
+                      <span className={styles.contactLabel}>
+                        {content.sections.contact.phoneLabel}:
                       </span>
+                      <a className={styles.contactLink} href={phoneHref}>
+                        {content.sections.contact.phone}
+                      </a>
                     </div>
                   </li>
                   <li className={styles.contactItem}>
