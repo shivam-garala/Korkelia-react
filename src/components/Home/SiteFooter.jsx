@@ -8,7 +8,7 @@ import CookieBanner from "../ui/CookieBanner.jsx";
 
 const socials = [
   { href: "https://www.facebook.com/korkeilahelsinki", src: "/icons/facebook.png", alt: "Facebook" },
-  { href: "https://www.threads.com/@korkeilahelsinki", src: "/icons/othersocial.png", alt: "Threads" },
+  { href: "https://www.threads.com/@korkeilahelsinki", src: "/icons/threads _ icon.png", alt: "Threads" },
   { href: "https://www.instagram.com/korkeilahelsinki/", src: "/icons/insta.png", alt: "Instagram" },
   // { href: "#", src: "/icons/pintrest.png", alt: "Pinterest" },
   // { href: "#", src: "/icons/youtube.png", alt: "YouTube" },
