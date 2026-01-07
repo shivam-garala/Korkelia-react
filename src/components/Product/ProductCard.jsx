@@ -1,9 +1,11 @@
 import Link from "next/link";
 import styles from "./ProductCard.module.css";
 
-export default function ProductCard({ href, imageSrc, name, price }) {
+export default function ProductCard({ href, imageSrc, name, price, pricePrefix }) {
   const resolvedSrc = imageSrc || "/productlisting/no_image.jpg";
   const isRemoteSrc = /^https?:\/\//i.test(resolvedSrc);
+  const hasPrice = price !== null && price !== undefined && String(price).trim() !== "";
+  const displayPrice = hasPrice && pricePrefix ? `${pricePrefix} ${price}` : price ?? "";
   const content = (
     <>
       <div className={styles.media} aria-hidden>
@@ -16,7 +18,7 @@ export default function ProductCard({ href, imageSrc, name, price }) {
       <div className={styles.rule} aria-hidden />
       <div className={styles.meta}>
         <div className={styles.name}>{name}</div>
-        <div className={styles.price}>{price ?? ""}</div>
+        <div className={styles.price}>{displayPrice}</div>
       </div>
     </>
   );

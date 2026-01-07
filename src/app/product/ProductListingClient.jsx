@@ -54,6 +54,7 @@ export default function ProductListingClient() {
             sortByPrice: "Lajittele hinnan mukaan",
             lowToHigh: "Halvin ensin",
             highToLow: "Kallein ensin",
+            pricePrefix: "Hinta alkaen",
             noProducts: "Tässä kategoriassa ei löytynyt tuotteita.",
           }
         : {
@@ -61,6 +62,7 @@ export default function ProductListingClient() {
             sortByPrice: "Sort By Price",
             lowToHigh: "Low to High",
             highToLow: "High to Low",
+            pricePrefix: "Starting From",
             noProducts: "No products found in this category.",
           },
     [language]
@@ -299,7 +301,12 @@ export default function ProductListingClient() {
           />
 
           <div className={styles.gridWrap}>
-            <ProductGrid products={displayedProducts} columns={3} loading={productsLoading} />
+            <ProductGrid
+              products={displayedProducts}
+              columns={3}
+              loading={productsLoading}
+              pricePrefix={labels.pricePrefix}
+            />
             {!productsLoading && displayedProducts.length === 0 ? (
               <div className={styles.emptyState}>{labels.noProducts}</div>
             ) : null}

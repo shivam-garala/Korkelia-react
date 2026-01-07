@@ -29,9 +29,12 @@ const contentByLanguage = {
       },
       contact: {
         title: "Contact Details",
-        phone: "Phone: +358 50 327 0600",
-        whatsapp: "WhatsApp: +358 50 327 0600",
-        email: "Email: korkeila@korkeilahelsinki.fi",
+        phoneLabel: "Phone",
+        phone: "+358 50 327 0600",
+        whatsappLabel: "WhatsApp",
+        whatsapp: "+358 50 327 0600",
+        emailLabel: "Email",
+        email: "korkeila@korkeilahelsinki.fi",
       },
       mapLink: "Open in Google Maps",
     },
@@ -56,9 +59,12 @@ const contentByLanguage = {
       },
       contact: {
         title: "YHTEYSTIEDOT",
-        phone: "Puhelin: +358 50 327 0600",
-        whatsapp: "WhatsApp: +358 50 327 0600",
-        email: "Sposti: korkeila@korkeilahelsinki.fi",
+        phoneLabel: "Puhelin",
+        phone: "+358 50 327 0600",
+        whatsappLabel: "WhatsApp",
+        whatsapp: "+358 50 327 0600",
+        emailLabel: "Sposti",
+        email: "korkeila@korkeilahelsinki.fi",
       },
       mapLink: "Avaa Google Mapsissa",
     },
@@ -69,6 +75,9 @@ export default function ContactPage() {
   const { language } = useI18n();
   const languageKey = language === "fi" ? "fi" : "en";
   const content = contentByLanguage[languageKey] ?? contentByLanguage.en;
+
+  const whatsappHref = "https://wa.me/358503270600";
+  const emailHref = "mailto:korkeila@korkeilahelsinki.fi";
 
   return (
     <div className={styles.page}>
@@ -115,19 +124,36 @@ export default function ContactPage() {
                   <li className={styles.contactItem}>
                     <Image src="/icons/icon_phone_contact.png" alt="" width={16} height={16} />
                     <div className={styles.contactText}>
-                      <span>{content.sections.contact.phone}</span>
+                      <span>
+                        {content.sections.contact.phoneLabel}: {content.sections.contact.phone}
+                      </span>
                     </div>
                   </li>
                   <li className={styles.contactItem}>
                     <Image src="/icons/icon_whatsapp_contact.png" alt="" width={16} height={16} />
                     <div className={styles.contactText}>
-                      <span>{content.sections.contact.whatsapp}</span>
+                      <span className={styles.contactLabel}>
+                        {content.sections.contact.whatsappLabel}:
+                      </span>
+                      <a
+                        className={styles.contactLink}
+                        href={whatsappHref}
+                        target="_blank"
+                        rel="noreferrer"
+                      >
+                        {content.sections.contact.whatsapp}
+                      </a>
                     </div>
                   </li>
                   <li className={styles.contactItem}>
                     <Image src="/icons/icon_email_contact.png" alt="" width={16} height={16} />
                     <div className={styles.contactText}>
-                      <span>{content.sections.contact.email}</span>
+                      <span className={styles.contactLabel}>
+                        {content.sections.contact.emailLabel}:
+                      </span>
+                      <a className={styles.contactLink} href={emailHref}>
+                        {content.sections.contact.email}
+                      </a>
                     </div>
                   </li>
                 </ul>

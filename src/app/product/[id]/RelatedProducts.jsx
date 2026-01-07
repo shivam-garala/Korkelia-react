@@ -4,7 +4,7 @@ import { useEffect, useMemo, useState } from "react";
 import Link from "next/link";
 import axiosClient from "../../../lib/axiosClient.js";
 import cardStyles from "../../../components/Product/ProductCard.module.css";
-import gridStyles from "../../../components/Product/ProductGrid.module.css";
+import Carousel from "../../../components/ui/Carousel.jsx";
 import { useI18n } from "../../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
@@ -329,47 +329,55 @@ export default function RelatedProducts({ productId, designId, columns = 3 }) {
     };
   }, [productId, currentCategoryId, currentDesignId, languageId]);
 
+  const getProductKey = (product) =>
+    product.id ?? product.href ?? product.productId ?? product.name;
+
+  const renderCard = (product) => {
+    const resolvedSrc = product.imageSrc || "/productlisting/no_image.jpg";
+    const content = (
+      <>
+        <div className={cardStyles.media} aria-hidden>
+          <img className={cardStyles.image} src={resolvedSrc} alt={product.name ?? ""} />
+        </div>
+        <div className={cardStyles.rule} aria-hidden />
+        <div className={cardStyles.meta}>
+          <div className={cardStyles.name}>{product.name}</div>
+          <div className={cardStyles.price}>{product.price ?? ""}</div>
+        </div>
+      </>
+    );
+
+    return product.href ? (
+      <Link
+        className={cardStyles.card}
+        href={product.href}
+        onClick={() => updateCacheWithRelated(product)}
+      >
+        {content}
+      </Link>
+    ) : (
+      <div
+        className={cardStyles.card}
+        onClick={() => updateCacheWithRelated(product)}
+      >
+        {content}
+      </div>
+    );
+  };
+
   if (!products.length) return null;
 
   return (
     <div className={styles.related}>
       <h2 className={styles.relatedTitle}>RELATED PRODUCTS</h2>
       <div className={styles.relatedGrid}>
-        <div className={gridStyles.grid} style={{ "--columns": columns }}>
-          {products.map((product) => {
-            const resolvedSrc = product.imageSrc || "/productlisting/no_image.jpg";
-            const content = (
-              <>
-                <div className={cardStyles.media} aria-hidden>
-                  <img className={cardStyles.image} src={resolvedSrc} alt={product.name ?? ""} />
-                </div>
-                <div className={cardStyles.rule} aria-hidden />
-                <div className={cardStyles.meta}>
-                  <div className={cardStyles.name}>{product.name}</div>
-                  <div className={cardStyles.price}>{product.price ?? ""}</div>
-                </div>
-              </>
-            );
-            return product.href ? (
-              <Link
-                key={product.id ?? product.href}
-                className={cardStyles.card}
-                href={product.href}
-                onClick={() => updateCacheWithRelated(product)}
-              >
-                {content}
-              </Link>
-            ) : (
-              <div
-                key={product.id ?? product.name}
-                className={cardStyles.card}
-                onClick={() => updateCacheWithRelated(product)}
-              >
-                {content}
-              </div>
-            );
-          })}
-        </div>
+        <Carousel
+          items={products}
+          columns={columns}
+          renderItem={(product) => renderCard(product)}
+          getKey={(product) => getProductKey(product)}
+          ariaLabel="Related products"
+        />
       </div>
     </div>
   );

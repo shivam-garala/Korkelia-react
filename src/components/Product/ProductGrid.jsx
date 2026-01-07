@@ -3,7 +3,7 @@ import cardStyles from "./ProductCard.module.css";
 import styles from "./ProductGrid.module.css";
 import ProductCard from "./ProductCard.jsx";
 
-export default function ProductGrid({ products, columns = 3, loading = false }) {
+export default function ProductGrid({ products, columns = 3, loading = false, pricePrefix }) {
   if (loading) {
     const count = Math.max(columns * 2, 6);
     return (
@@ -33,6 +33,7 @@ export default function ProductGrid({ products, columns = 3, loading = false }) 
           imageSrc={product.imageSrc}
           name={product.name}
           price={product.price}
+          pricePrefix={pricePrefix}
         />
       ))}
     </div>

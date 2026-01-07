@@ -7,12 +7,12 @@ import { useI18n } from "../../providers/I18nProvider.jsx";
 import CookieBanner from "../ui/CookieBanner.jsx";
 
 const socials = [
-  { href: "#", src: "/icons/facebook.png", alt: "Facebook" },
-  { href: "#", src: "/icons/othersocial.png", alt: "other social" },
-  { href: "#", src: "/icons/pintrest.png", alt: "Pinterest" },
-  { href: "#", src: "/icons/insta.png", alt: "Instagram" },
-  { href: "#", src: "/icons/youtube.png", alt: "YouTube" },
-  { href: "#", src: "/icons/xtwitter.png", alt: "X" },
+  { href: "https://www.facebook.com/korkeilahelsinki", src: "/icons/facebook.png", alt: "Facebook" },
+  { href: "https://www.threads.com/@korkeilahelsinki", src: "/icons/othersocial.png", alt: "Threads" },
+  { href: "https://www.instagram.com/korkeilahelsinki/", src: "/icons/insta.png", alt: "Instagram" },
+  // { href: "#", src: "/icons/pintrest.png", alt: "Pinterest" },
+  // { href: "#", src: "/icons/youtube.png", alt: "YouTube" },
+  // { href: "#", src: "/icons/xtwitter.png", alt: "X" },
 ];
 
 export default function SiteFooter() {
