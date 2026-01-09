@@ -34,7 +34,7 @@ const tabs = [
       en: "GLOBAL SOURCING NETWORK",
       fi: "GLOBAALI HANKINTAVERKOSTO",
     },
-    image: "/diamonddifference/global%20sourcing.png",
+    image: "/diamonddifference/global_sourcing.jpg",
     alt: "Global sourcing network",
     body: {
       en: [
@@ -71,7 +71,7 @@ const tabs = [
       en: "OUR COMMITMENT",
       fi: "SERTIFIOITU, EETTINEN JA LÄPINÄKYVÄ",
     },
-    image: "/diamonddifference/global%20sourcing.png",
+    image: "/diamonddifference/commitment.jpeg",
     alt: "Certified and ethical sourcing",
     body: {
       en: [
@@ -102,7 +102,7 @@ const tabs = [
       en: "BEYOND THE CUT",
       fi: "TIMANTIN TIE JALOKIVEKSI",
     },
-    image: "/diamonddifference/global%20sourcing.png",
+    image: "/diamonddifference/beyond_the_cut.jpeg",
     alt: "Beyond the cut",
     body: {
       en: [

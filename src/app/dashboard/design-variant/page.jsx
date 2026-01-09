@@ -10,6 +10,7 @@ import DataTable from "../../../components/ui/DataTableSuspense.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
 import AdminSelectField from "../../../components/ui/AdminSelectField.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
+import TextArea from "../../../components/ui/TextArea.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import Icon from "../../../components/ui/Icon.jsx";
 import RadioGroup from "../../../components/ui/RadioGroup.jsx";
@@ -914,8 +915,15 @@ export default function DesignVariantPage() {
       header: "Design Variant Name",
       filterable: false,
       filterPlaceholder: "Search Design Variant",
+      width: 220,
     },
-    { key: "product", header: "Product", filterable: false, filterPlaceholder: "Search Product" },
+    {
+      key: "product",
+      header: "Product",
+      filterable: false,
+      filterPlaceholder: "Search Product",
+      width: 220,
+    },
     { key: "metal_rate", header: "Metal Rate", filterable: false, filterPlaceholder: "Search Metal Rate" },
     {
       key: "weight",
@@ -938,7 +946,7 @@ export default function DesignVariantPage() {
       filterPlaceholder: "Search Price",
       filterInputStyle: { width: 120 },
     },
-    { key: "details", header: "Diamond Detail", filterable: false },
+    { key: "details", header: "Diamond Detail", filterable: false, width: 220 },
     { key: "image_count", header: "Uploaded Media Count", filterable: false, },
     {
       key: "actions",
@@ -1157,13 +1165,13 @@ export default function DesignVariantPage() {
             />
           </div>
           <div className={crudStyles.formRow2}>
-            <TextField
+            <TextArea
               label="Description (English)"
               value={descriptionEn}
               onChange={(e) => setDescriptionEn(e.target.value)}
               required
             />
-            <TextField
+            <TextArea
               label="Description (Finnish)"
               value={descriptionFi}
               onChange={(e) => setDescriptionFi(e.target.value)}

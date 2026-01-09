@@ -40,6 +40,12 @@
   cursor: not-allowed;
 }
 
+.textarea {
+  min-height: 110px;
+  line-height: 1.5;
+  resize: vertical;
+}
+
 /* Hide number input spinners for a cleaner admin UI. */
 .control[type="number"] {
   -moz-appearance: textfield;

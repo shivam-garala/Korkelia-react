@@ -69,32 +69,55 @@ export default function DataTable({
         <table className={styles.table}>
           <thead>
             <tr>
-              {columns.map((col) => (
-                <th key={col.key} className={styles.th}>
-                  {col.header}
-                </th>
-              ))}
+              {columns.map((col) => {
+                const widthStyle = col.width
+                  ? { width: col.width, minWidth: col.width }
+                  : undefined;
+                const headerStyle = col.headerStyle
+                  ? { ...(widthStyle ?? {}), ...col.headerStyle }
+                  : widthStyle;
+                return (
+                  <th key={col.key} className={styles.th} style={headerStyle}>
+                    {col.header}
+                  </th>
+                );
+              })}
             </tr>
             {showFilters ? (
               <tr>
-                {columns.map((col) => (
-                  <th key={`${col.key}-filter`} className={styles.thFilter}>
-                    {col.filterable ? (
-                      <input
-                        className={styles.filterInput}
-                        style={col.filterInputStyle}
-                        value={filters?.[col.key] ?? ""}
-                        onChange={(e) =>
-                          onFiltersChange({
-                            ...filters,
-                            [col.key]: e.target.value,
-                          })
-                        }
-                        placeholder={col.filterPlaceholder ?? `Search ${String(col.header ?? col.key)}`}
-                      />
-                    ) : null}
-                  </th>
-                ))}
+                {columns.map((col) => {
+                  const widthStyle = col.width
+                    ? { width: col.width, minWidth: col.width }
+                    : undefined;
+                  const filterCellStyle = col.filterCellStyle
+                    ? { ...(widthStyle ?? {}), ...col.filterCellStyle }
+                    : widthStyle;
+                  return (
+                    <th
+                      key={`${col.key}-filter`}
+                      className={styles.thFilter}
+                      style={filterCellStyle}
+                    >
+                      {col.filterable ? (
+                        <input
+                          className={styles.filterInput}
+                          style={col.filterInputStyle}
+                          value={filters?.[col.key] ?? ""}
+                          onChange={(e) =>
+                            onFiltersChange({
+                              ...filters,
+                              [col.key]: e.target.value,
+                            })
+                          }
+                          placeholder={
+                            col.filterPlaceholder ??
+                            `Search ${String(col.header ?? col.key)}`
+                          }
+                        />
+                      ) : null}
+                    </th>
+                  );
+                })}
               </tr>
             ) : null}
           </thead>
@@ -104,8 +127,18 @@ export default function DataTable({
                 <tr key={String(getRowKey(row, index))} className={styles.tr}>
                   {columns.map((col) => {
                     const cellRenderer = col.customRender ?? col.render;
+                    const widthStyle = col.width
+                      ? { width: col.width, minWidth: col.width }
+                      : undefined;
+                    const cellStyle = col.cellStyle
+                      ? { ...(widthStyle ?? {}), ...col.cellStyle }
+                      : widthStyle;
                     return (
-                      <td key={`${String(getRowKey(row, index))}-${col.key}`} className={styles.td}>
+                      <td
+                        key={`${String(getRowKey(row, index))}-${col.key}`}
+                        className={styles.td}
+                        style={cellStyle}
+                      >
                         {cellRenderer ? cellRenderer(row, index) : row?.[col.key] ?? ""}
                       </td>
                     );

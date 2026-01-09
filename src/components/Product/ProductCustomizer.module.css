@@ -17,6 +17,7 @@
   color: var(--color-muted);
   font-size: 15px;
   line-height: 1.5;
+  white-space: pre-wrap;
 }
 
 .variantStatus {
