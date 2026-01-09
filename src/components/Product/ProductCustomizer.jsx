@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useId, useMemo, useRef, useState } from "react";
+import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
 import { toast } from "react-toastify";
@@ -276,12 +276,14 @@ const updateCacheWithVariant = (productId, variantDetails) => {
   }
 };
 
-const updateCacheWithListing = (productId, listingItem) => {
+const updateCacheWithListing = (productId, listingItem, options = {}) => {
   if (typeof window === "undefined" || !productId || !listingItem) return null;
   try {
     const raw = window.sessionStorage.getItem("product_list_cache");
     const cache = raw ? JSON.parse(raw) : {};
     if (typeof cache !== "object") return null;
+
+    const preserveExplicitImages = Boolean(options?.preserveExplicitImages);
 
     const productKey = String(productId);
     const existingProduct = cache[productKey] ?? {};
@@ -295,6 +297,12 @@ const updateCacheWithListing = (productId, listingItem) => {
       listingItem?.design_variant ??
       listingItem?.designVariant ??
       {};
+    const existingImages = existingDesign?.images;
+    const hasExplicitImages = Array.isArray(existingImages);
+    const nextImages =
+      preserveExplicitImages && hasExplicitImages
+        ? existingImages
+        : incomingDesign?.images ?? existingDesign?.images;
     const nextDesign = {
       ...existingDesign,
       ...incomingDesign,
@@ -307,7 +315,7 @@ const updateCacheWithListing = (productId, listingItem) => {
         incomingDesign?.design_variant_name ?? existingDesign?.design_variant_name,
       description: incomingDesign?.description ?? existingDesign?.description,
       product: incomingDesign?.product ?? existingDesign?.product,
-      images: incomingDesign?.images ?? existingDesign?.images,
+      images: nextImages,
       image: incomingDesign?.image ?? existingDesign?.image,
     };
     const nextProduct = {
@@ -368,6 +376,8 @@ export default function ProductCustomizer({
   const skipNextVariantFetchRef = useRef(false);
   const variantFromCacheRef = useRef(false);
   const lastListingRefreshRef = useRef("");
+  const lastVariantLanguageRef = useRef("");
+  const userVariantInteractionRef = useRef(false);
 
   const labels =
     language === "fi"
@@ -462,7 +472,9 @@ export default function ProductCustomizer({
           return String(id) === String(productId);
         });
         if (match) {
-          const updated = updateCacheWithListing(productId, match);
+          const updated = updateCacheWithListing(productId, match, {
+            preserveExplicitImages: variantEnabled,
+          });
           if (updated && active) {
             setProductDetails(updated);
           }
@@ -477,7 +489,7 @@ export default function ProductCustomizer({
     return () => {
       active = false;
     };
-  }, [productId, languageId, listingCategoryId]);
+  }, [productId, languageId, listingCategoryId, variantEnabled]);
 
   useEffect(() => {
     const nextCut = normalizeString(defaultCutId);
@@ -495,6 +507,7 @@ export default function ProductCustomizer({
     setMetalType(nextKarat);
     setSize("");
     setEngraving("");
+    userVariantInteractionRef.current = false;
     setVariantEnabled(
       Boolean(
         nextCut ||
@@ -517,6 +530,11 @@ export default function ProductCustomizer({
     defaultMetalId,
     defaultKaratId,
   ]);
+
+  const markVariantInteraction = useCallback(() => {
+    userVariantInteractionRef.current = true;
+    setVariantEnabled(true);
+  }, []);
 
   const listingDefaults = useMemo(
     () => resolveListingDefaults(productDetails),
@@ -1167,6 +1185,16 @@ export default function ProductCustomizer({
       };
     }
 
+    const languageToken = normalizeString(languageId);
+    const languageChanged =
+      Boolean(languageToken) &&
+      Boolean(lastVariantLanguageRef.current) &&
+      lastVariantLanguageRef.current !== languageToken;
+    if (languageChanged) {
+      lastVariantQueryRef.current = "";
+    }
+    lastVariantLanguageRef.current = languageToken;
+
     const params = new URLSearchParams({
       product_id: String(productId),
     });
@@ -1180,7 +1208,12 @@ export default function ProductCustomizer({
       params.set("karat_id", String(selectedKaratId));
     }
     const queryString = params.toString();
-    if (shouldSkipVariantFetch && listingDesign) {
+    if (
+      shouldSkipVariantFetch &&
+      listingDesign &&
+      !languageChanged &&
+      !userVariantInteractionRef.current
+    ) {
       variantFromCacheRef.current = true;
       lastVariantQueryRef.current = queryString;
       if (active) {
@@ -1423,7 +1456,7 @@ export default function ProductCustomizer({
                   type="button"
                   className={`${styles.cut} ${cut === item.id ? styles.cutActive : ""}`}
                   onClick={() => {
-                    setVariantEnabled(true);
+                    markVariantInteraction();
                     setCut(item.id);
                   }}
                 >
@@ -1453,7 +1486,7 @@ export default function ProductCustomizer({
                       value={qualityOptions.find((opt) => opt.value === quality) ?? null}
                       options={qualityOptions}
                       onChange={(option) => {
-                        setVariantEnabled(true);
+                        markVariantInteraction();
                         setQuality(option?.value ?? "");
                       }}
                       isSearchable={false}
@@ -1470,7 +1503,7 @@ export default function ProductCustomizer({
                       value={filteredClarityOptions.find((opt) => opt.value === clarity) ?? null}
                       options={filteredClarityOptions}
                       onChange={(option) => {
-                        setVariantEnabled(true);
+                        markVariantInteraction();
                         setClarity(option?.value ?? "");
                       }}
                       isSearchable={false}
@@ -1493,7 +1526,7 @@ export default function ProductCustomizer({
                   type="button"
                   className={`${styles.pill} ${carat === value ? styles.pillActive : ""}`}
                   onClick={() => {
-                    setVariantEnabled(true);
+                    markVariantInteraction();
                     setCarat(value);
                   }}
                 >
@@ -1541,7 +1574,7 @@ export default function ProductCustomizer({
               type="button"
               className={`${styles.metal} ${metal === item.value ? styles.metalActive : ""}`}
               onClick={() => {
-                setVariantEnabled(true);
+                markVariantInteraction();
                 setMetal(item.value);
               }}
             >
@@ -1564,7 +1597,7 @@ export default function ProductCustomizer({
                       type="button"
                       className={`${styles.pill} ${metalType === option.value ? styles.pillActive : ""}`}
                       onClick={() => {
-                        setVariantEnabled(true);
+                        markVariantInteraction();
                         setMetalType(option.value);
                       }}
                     >

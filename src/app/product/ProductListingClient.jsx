@@ -11,6 +11,7 @@ import { fetchCategoryHomePage } from "../../lib/categoryHomeCache.js";
 import {
   fetchProductListEcom,
   fetchSubCategoryHomePage,
+  clearProductListingCache,
 } from "../../lib/productListingCache.js";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
@@ -164,6 +165,7 @@ export default function ProductListingClient() {
 
     const loadProducts = async () => {
       try {
+        clearProductListingCache();
         const list = await fetchProductListEcom(languageId, categoryId);
         cacheProductList(list);
         

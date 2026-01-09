@@ -118,60 +118,68 @@ export default function ProductGallery({ items, productId = "" }) {
     };
   }, [productId]);
 
-  const cachedItems = useMemo(() => {
+  const { items: cachedItems, hasExplicitImages } = useMemo(() => {
     const design =
       cachedProduct?.design ??
       cachedProduct?.design_variant ??
       cachedProduct?.designVariant ??
       null;
-    const images = Array.isArray(design?.images) ? sortMediaByOrder(design.images) : [];
-    const mapped = images
-      .map((image, index) => {
-        const src = resolveImageSrc(
-          image?.image_url ??
-            image?.url ??
-            image?.image ??
-            image?.image_name ??
-            image
-        );
-        const videoSrc = resolveImageSrc(
-          image?.videoSrc ?? image?.video_url ?? image?.videoUrl ?? image?.video ?? ""
-        );
-        const isExplicitVideo =
-          image?.isVideo === true ||
-          image?.is_video === true ||
-          image?.isVideo === 1 ||
-          image?.is_video === 1 ||
-          String(image?.is_video ?? "").toLowerCase() === "yes";
-        const videoFromSrc = isVideoSrc(src);
-        const wantsVideo =
-          isExplicitVideo ||
-          image?.type === "video" ||
-          image?.badge === "play" ||
-          videoFromSrc ||
-          Boolean(videoSrc);
-        const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
-        if (wantsVideo && !resolvedVideoSrc) return null;
-        const isVideo = Boolean(resolvedVideoSrc);
-        const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : (src || fallbackImageSrc);
-        const variant =
-          isVideo
-            ? "video"
-            : image?.variant && image.variant !== "video"
-            ? image.variant
-            : imageVariants[index % imageVariants.length];
-        const next = {
-          key: image?.id ?? image?.image_id ?? resolvedSrc ?? resolvedVideoSrc ?? index,
-          variant,
-          src: resolvedSrc,
-          badge: isVideo ? image?.badge ?? "play" : image?.badge,
-        };
-        if (resolvedVideoSrc) next.videoSrc = resolvedVideoSrc;
-        return next;
-      })
-      .filter(Boolean);
-
-    if (mapped.length) return mapped;
+    const hasExplicitImages = Array.isArray(design?.images);
+    if (hasExplicitImages) {
+      const images = sortMediaByOrder(design.images);
+      const mapped = images
+        .map((image, index) => {
+          const src = resolveImageSrc(
+            image?.image_url ??
+              image?.url ??
+              image?.image ??
+              image?.image_name ??
+              image
+          );
+          const videoSrc = resolveImageSrc(
+            image?.videoSrc ?? image?.video_url ?? image?.videoUrl ?? image?.video ?? ""
+          );
+          const isExplicitVideo =
+            image?.isVideo === true ||
+            image?.is_video === true ||
+            image?.isVideo === 1 ||
+            image?.is_video === 1 ||
+            String(image?.is_video ?? "").toLowerCase() === "yes";
+          const videoFromSrc = isVideoSrc(src);
+          const wantsVideo =
+            isExplicitVideo ||
+            image?.type === "video" ||
+            image?.badge === "play" ||
+            videoFromSrc ||
+            Boolean(videoSrc);
+          const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
+          if (wantsVideo && !resolvedVideoSrc) return null;
+          const isVideo = Boolean(resolvedVideoSrc);
+          const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : (src || fallbackImageSrc);
+          const variant =
+            isVideo
+              ? "video"
+              : image?.variant && image.variant !== "video"
+              ? image.variant
+              : imageVariants[index % imageVariants.length];
+          const next = {
+            key: image?.id ?? image?.image_id ?? resolvedSrc ?? resolvedVideoSrc ?? index,
+            variant,
+            src: resolvedSrc,
+            badge: isVideo ? image?.badge ?? "play" : image?.badge,
+          };
+          if (resolvedVideoSrc) next.videoSrc = resolvedVideoSrc;
+          return next;
+        })
+        .filter(Boolean);
+      if (mapped.length) {
+        return { items: mapped, hasExplicitImages: true };
+      }
+      return {
+        items: [{ key: "no-image", variant: "square", src: fallbackImageSrc }],
+        hasExplicitImages: true,
+      };
+    }
 
     const fallbackSrc = resolveImageSrc(
       cachedProduct?.image ??
@@ -179,19 +187,25 @@ export default function ProductGallery({ items, productId = "" }) {
         design?.product?.image ??
         ""
     );
-    if (!fallbackSrc) return [];
+    if (!fallbackSrc) return { items: [], hasExplicitImages: false };
     if (isVideoSrc(fallbackSrc)) {
-      return [
-        {
-          key: "fallback",
-          variant: "video",
-          src: "",
-          videoSrc: fallbackSrc,
-          badge: "play",
-        },
-      ];
+      return {
+        items: [
+          {
+            key: "fallback",
+            variant: "video",
+            src: "",
+            videoSrc: fallbackSrc,
+            badge: "play",
+          },
+        ],
+        hasExplicitImages: false,
+      };
     }
-    return [{ key: "fallback", variant: "square", src: fallbackSrc }];
+    return {
+      items: [{ key: "fallback", variant: "square", src: fallbackSrc }],
+      hasExplicitImages: false,
+    };
   }, [cachedProduct, imageVariants]);
 
   const baseItems = useMemo(() => {
@@ -258,11 +272,12 @@ export default function ProductGallery({ items, productId = "" }) {
   }, [hasItems, items, imageVariants]);
 
   const slides = useMemo(() => {
+    if (hasExplicitImages) return cachedItems;
     const base = cachedItems.length ? cachedItems : baseItems;
     if (base.length) return base;
     if (!hasResponse) return [];
     return [{ key: "no-image", variant: "square", src: fallbackImageSrc }];
-  }, [baseItems, cachedItems, hasResponse]);
+  }, [baseItems, cachedItems, hasExplicitImages, hasResponse]);
 
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -285,9 +300,9 @@ export default function ProductGallery({ items, productId = "" }) {
 
   const displaySlides = useMemo(() => {
     if (filteredSlides.length) return filteredSlides;
-    if (!hasResponse) return [];
+    if (!hasResponse || hasExplicitImages) return [];
     return [{ key: "no-image", variant: "square", src: fallbackImageSrc }];
-  }, [filteredSlides, hasResponse]);
+  }, [filteredSlides, hasExplicitImages, hasResponse]);
 
   const showSkeleton = !hasResponse;
   const skeletonSlides = useMemo(
@@ -303,12 +318,15 @@ export default function ProductGallery({ items, productId = "" }) {
     if (showSkeleton) return skeletonSlides;
     if (!displaySlides.length) return displaySlides;
     const present = new Set(displaySlides.map((item) => item?.variant).filter(Boolean));
+    const isOnlyNoImage =
+      displaySlides.length === 1 && displaySlides[0]?.key === "no-image";
     const placeholders = imageVariants
       .filter((variant) => !present.has(variant))
       .map((variant) => ({
         key: `placeholder-${variant}`,
         variant,
         isPlaceholder: true,
+        src: isOnlyNoImage ? fallbackImageSrc : "",
       }));
     return placeholders.length ? [...displaySlides, ...placeholders] : displaySlides;
   }, [showSkeleton, skeletonSlides, displaySlides, imageVariants]);
@@ -691,7 +709,17 @@ export default function ProductGallery({ items, productId = "" }) {
                   </div>
                 ) : item.isPlaceholder ? (
                   <div className={styles.cellButton} aria-hidden="true">
-                    <div className={styles.media} aria-hidden />
+                    <div className={styles.media} aria-hidden>
+                      {item.src ? (
+                        <Image
+                          className={styles.image}
+                          src={item.src}
+                          alt=""
+                          fill
+                          sizes="(max-width: 980px) 100vw, 50vw"
+                        />
+                      ) : null}
+                    </div>
                   </div>
                 ) : (
                   <button type="button" className={styles.cellButton} onClick={() => openAt(index)}>
