@@ -37,6 +37,37 @@ const normalizeMediaUrl = (value) => {
   return encodeURI(String(value));
 };
 
+const normalizeOrderValue = (value, fallback) => {
+  if (value === null || value === undefined || value === "") return fallback;
+  const parsed = Number(value);
+  return Number.isFinite(parsed) ? parsed : fallback;
+};
+
+const getMediaKey = (item, index) => {
+  if (!item) return `media-${index}`;
+  return String(
+    item.key ??
+      item.id ??
+      item.image_id ??
+      item.src ??
+      item.videoSrc ??
+      `media-${index}`
+  );
+};
+
+const sortMediaByOrder = (list) =>
+  list
+    .map((item, index) => ({
+      item,
+      index,
+      order: normalizeOrderValue(
+        item?.order ?? item?.sort_order ?? item?.sortOrder ?? item?.position,
+        index
+      ),
+    }))
+    .sort((a, b) => (a.order - b.order) || (a.index - b.index))
+    .map(({ item }) => item);
+
 const resolveImageSrc = (image) => {
   if (!image) return "";
   if (typeof image === "string") {
@@ -93,7 +124,7 @@ export default function ProductGallery({ items, productId = "" }) {
       cachedProduct?.design_variant ??
       cachedProduct?.designVariant ??
       null;
-    const images = Array.isArray(design?.images) ? design.images : [];
+    const images = Array.isArray(design?.images) ? sortMediaByOrder(design.images) : [];
     const mapped = images
       .map((image, index) => {
         const src = resolveImageSrc(
@@ -122,8 +153,7 @@ export default function ProductGallery({ items, productId = "" }) {
         const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
         if (wantsVideo && !resolvedVideoSrc) return null;
         const isVideo = Boolean(resolvedVideoSrc);
-        const resolvedSrc = src || (isVideo ? fallbackImageSrc : "");
-        if (!resolvedSrc && !resolvedVideoSrc) return null;
+        const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : (src || fallbackImageSrc);
         const variant =
           isVideo
             ? "video"
@@ -155,7 +185,7 @@ export default function ProductGallery({ items, productId = "" }) {
         {
           key: "fallback",
           variant: "video",
-          src: fallbackImageSrc,
+          src: "",
           videoSrc: fallbackSrc,
           badge: "play",
         },
@@ -176,7 +206,7 @@ export default function ProductGallery({ items, productId = "" }) {
             return {
               key: src,
               variant: "video",
-              src: fallbackImageSrc,
+              src: "",
               videoSrc: src,
               badge: "play",
             };
@@ -207,8 +237,7 @@ export default function ProductGallery({ items, productId = "" }) {
         const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
         if (wantsVideo && !resolvedVideoSrc) return null;
         const isVideo = Boolean(resolvedVideoSrc);
-        const resolvedSrc = src || (isVideo ? fallbackImageSrc : "");
-        if (!resolvedSrc && !resolvedVideoSrc) return null;
+        const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : (src || fallbackImageSrc);
         const variant =
           isVideo
             ? "video"
@@ -235,6 +264,31 @@ export default function ProductGallery({ items, productId = "" }) {
     return [{ key: "no-image", variant: "square", src: fallbackImageSrc }];
   }, [baseItems, cachedItems, hasResponse]);
 
+  const [open, setOpen] = useState(false);
+  const [activeIndex, setActiveIndex] = useState(0);
+  const [galleryIndex, setGalleryIndex] = useState(0);
+  const [loadedMap, setLoadedMap] = useState({});
+  const [failedMap, setFailedMap] = useState({});
+  const [touchStartX, setTouchStartX] = useState(null);
+  const galleryRef = useRef(null);
+  const galleryScrollRaf = useRef(null);
+  const zoomRef = useRef(null);
+
+  const filteredSlides = useMemo(() => {
+    if (!slides.length) return slides;
+    return slides.filter((item, index) => {
+      if (!isVideoItem(item)) return true;
+      const itemKey = getMediaKey(item, index);
+      return !failedMap[itemKey];
+    });
+  }, [slides, failedMap]);
+
+  const displaySlides = useMemo(() => {
+    if (filteredSlides.length) return filteredSlides;
+    if (!hasResponse) return [];
+    return [{ key: "no-image", variant: "square", src: fallbackImageSrc }];
+  }, [filteredSlides, hasResponse]);
+
   const showSkeleton = !hasResponse;
   const skeletonSlides = useMemo(
     () =>
@@ -247,8 +301,8 @@ export default function ProductGallery({ items, productId = "" }) {
   );
   const gridSlides = useMemo(() => {
     if (showSkeleton) return skeletonSlides;
-    if (!slides.length) return slides;
-    const present = new Set(slides.map((item) => item?.variant).filter(Boolean));
+    if (!displaySlides.length) return displaySlides;
+    const present = new Set(displaySlides.map((item) => item?.variant).filter(Boolean));
     const placeholders = imageVariants
       .filter((variant) => !present.has(variant))
       .map((variant) => ({
@@ -256,17 +310,8 @@ export default function ProductGallery({ items, productId = "" }) {
         variant,
         isPlaceholder: true,
       }));
-    return placeholders.length ? [...slides, ...placeholders] : slides;
-  }, [showSkeleton, skeletonSlides, slides, imageVariants]);
-  const [open, setOpen] = useState(false);
-  const [activeIndex, setActiveIndex] = useState(0);
-  const [galleryIndex, setGalleryIndex] = useState(0);
-  const [loadedMap, setLoadedMap] = useState({});
-  const [failedMap, setFailedMap] = useState({});
-  const [touchStartX, setTouchStartX] = useState(null);
-  const galleryRef = useRef(null);
-  const galleryScrollRaf = useRef(null);
-  const zoomRef = useRef(null);
+    return placeholders.length ? [...displaySlides, ...placeholders] : displaySlides;
+  }, [showSkeleton, skeletonSlides, displaySlides, imageVariants]);
 
   const openAt = useCallback((index) => {
     setActiveIndex(index);
@@ -280,14 +325,14 @@ export default function ProductGallery({ items, productId = "" }) {
   }, []);
 
   const showPrev = useCallback(() => {
-    if (slides.length < 2) return;
-    setActiveIndex((prev) => (prev - 1 + slides.length) % slides.length);
-  }, [slides.length]);
+    if (displaySlides.length < 2) return;
+    setActiveIndex((prev) => (prev - 1 + displaySlides.length) % displaySlides.length);
+  }, [displaySlides.length]);
 
   const showNext = useCallback(() => {
-    if (slides.length < 2) return;
-    setActiveIndex((prev) => (prev + 1) % slides.length);
-  }, [slides.length]);
+    if (displaySlides.length < 2) return;
+    setActiveIndex((prev) => (prev + 1) % displaySlides.length);
+  }, [displaySlides.length]);
 
   const handleTouchStart = useCallback((event) => {
     setTouchStartX(event.touches[0]?.clientX ?? null);
@@ -326,24 +371,24 @@ export default function ProductGallery({ items, productId = "" }) {
 
   const goToGalleryIndex = useCallback(
     (index) => {
-      const total = slides.length;
+      const total = displaySlides.length;
       if (!total) return;
       const nextIndex = ((index % total) + total) % total;
       setGalleryIndex(nextIndex);
       scrollToGalleryIndex(nextIndex);
     },
-    [slides.length, scrollToGalleryIndex]
+    [displaySlides.length, scrollToGalleryIndex]
   );
 
   const showGalleryPrev = useCallback(() => {
-    if (slides.length < 2) return;
+    if (displaySlides.length < 2) return;
     goToGalleryIndex(galleryIndex - 1);
-  }, [galleryIndex, goToGalleryIndex, slides.length]);
+  }, [galleryIndex, goToGalleryIndex, displaySlides.length]);
 
   const showGalleryNext = useCallback(() => {
-    if (slides.length < 2) return;
+    if (displaySlides.length < 2) return;
     goToGalleryIndex(galleryIndex + 1);
-  }, [galleryIndex, goToGalleryIndex, slides.length]);
+  }, [galleryIndex, goToGalleryIndex, displaySlides.length]);
 
   const handleGalleryScroll = useCallback(() => {
     if (!galleryRef.current) return;
@@ -395,9 +440,11 @@ export default function ProductGallery({ items, productId = "" }) {
     };
   }, [open]);
 
-  const handleMediaError = useCallback((index) => {
-    setFailedMap((prev) => (prev[index] ? prev : { ...prev, [index]: true }));
-    setLoadedMap((prev) => ({ ...prev, [index]: true }));
+  const handleMediaError = useCallback((mediaKey) => {
+    if (!mediaKey) return;
+    const key = String(mediaKey);
+    setFailedMap((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
+    setLoadedMap((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
   }, []);
 
   useEffect(() => {
@@ -412,20 +459,21 @@ export default function ProductGallery({ items, productId = "" }) {
 
     slides.forEach((item, index) => {
       if (!item || item.isSkeleton) return;
+      const itemKey = getMediaKey(item, index);
       if (isVideoItem(item)) {
         const videoSrc = item.videoSrc ?? (isVideoSrc(item.src) ? item.src : "");
         if (!videoSrc) {
-          if (active) handleMediaError(index);
+          if (active) handleMediaError(itemKey);
           return;
         }
         const video = document.createElement("video");
         const handleLoaded = () => {
           if (!active) return;
-          setLoadedMap((prev) => (prev[index] ? prev : { ...prev, [index]: true }));
+          setLoadedMap((prev) => (prev[itemKey] ? prev : { ...prev, [itemKey]: true }));
         };
         const handleError = () => {
           if (!active) return;
-          handleMediaError(index);
+          handleMediaError(itemKey);
         };
         video.addEventListener("loadeddata", handleLoaded);
         video.addEventListener("loadedmetadata", handleLoaded);
@@ -443,17 +491,17 @@ export default function ProductGallery({ items, productId = "" }) {
       const imgSrc = item.src || fallbackImageSrc;
       const ImgCtor = typeof window !== "undefined" ? window.Image : null;
       if (!ImgCtor) {
-        if (active) handleMediaError(index);
+        if (active) handleMediaError(itemKey);
         return;
       }
       const img = new ImgCtor();
       const handleLoaded = () => {
         if (!active) return;
-        setLoadedMap((prev) => (prev[index] ? prev : { ...prev, [index]: true }));
+        setLoadedMap((prev) => (prev[itemKey] ? prev : { ...prev, [itemKey]: true }));
       };
       const handleError = () => {
         if (!active) return;
-        handleMediaError(index);
+        handleMediaError(itemKey);
       };
       img.addEventListener("load", handleLoaded);
       img.addEventListener("error", handleError);
@@ -472,19 +520,19 @@ export default function ProductGallery({ items, productId = "" }) {
 
   useEffect(() => {
     setGalleryIndex(0);
-    if (slides.length) {
+    if (displaySlides.length) {
       requestAnimationFrame(() => scrollToGalleryIndex(0));
     }
-  }, [slides, scrollToGalleryIndex]);
+  }, [displaySlides, scrollToGalleryIndex]);
 
   useEffect(() => {
-    if (!slides.length) return;
-    if (activeIndex >= slides.length) {
+    if (!displaySlides.length) return;
+    if (activeIndex >= displaySlides.length) {
       setActiveIndex(0);
     }
-  }, [activeIndex, slides.length]);
+  }, [activeIndex, displaySlides.length]);
 
-  const active = slides[activeIndex];
+  const active = displaySlides[activeIndex];
   const isActiveVideo = active ? isVideoItem(active) : false;
 
   useEffect(() => {
@@ -560,16 +608,16 @@ export default function ProductGallery({ items, productId = "" }) {
           -
         </button>
       </div>
-      {slides.length > 1 ? (
+      {displaySlides.length > 1 ? (
         <div className={styles.modalCount}>
-          {activeIndex + 1} / {slides.length}
+          {activeIndex + 1} / {displaySlides.length}
         </div>
       ) : null}
-      {slides.length > 1 ? (
+      {displaySlides.length > 1 ? (
         <div className={styles.modalDots} role="tablist" aria-label="Media previews">
-          {slides.map((item, index) => {
-            const dotImageSrc = item.src || fallbackImageSrc;
+          {displaySlides.map((item, index) => {
             const isVideo = isVideoItem(item);
+            const dotImageSrc = isVideo ? (item.src || "") : (item.src || fallbackImageSrc);
             const videoSrc = item.videoSrc ?? (isVideoSrc(item.src) ? item.src : "");
             return (
               <button
@@ -620,10 +668,15 @@ export default function ProductGallery({ items, productId = "" }) {
         <div className={styles.grid} ref={galleryRef} onScroll={handleGalleryScroll}>
           {gridSlides.map((item, index) => {
             const isVideo = isVideoItem(item);
-            const hasFailed = Boolean(failedMap[index]);
-            const isLoaded = Boolean(loadedMap[index]);
-            const imageSrc = hasFailed ? fallbackImageSrc : item.src || fallbackImageSrc;
-            const isRemoteImage = /^https?:\/\//i.test(imageSrc);
+            const itemKey = getMediaKey(item, index);
+            const hasFailed = Boolean(failedMap[itemKey]);
+            const isLoaded = Boolean(loadedMap[itemKey]);
+            const imageSrc = isVideo
+              ? (item.src || "")
+              : hasFailed
+              ? fallbackImageSrc
+              : item.src || fallbackImageSrc;
+            const isRemoteImage = !isVideo && /^https?:\/\//i.test(imageSrc);
             return (
               <div
                 key={item.key ?? item.src ?? index}
@@ -654,12 +707,12 @@ export default function ProductGallery({ items, productId = "" }) {
                           preload="metadata"
                           poster={imageSrc}
                           onLoadedData={() =>
-                            setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                            setLoadedMap((prev) => ({ ...prev, [itemKey]: true }))
                           }
                           onLoadedMetadata={() =>
-                            setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                            setLoadedMap((prev) => ({ ...prev, [itemKey]: true }))
                           }
-                          onError={() => handleMediaError(index)}
+                          onError={() => handleMediaError(itemKey)}
                         >
                           <source src={item.videoSrc ?? item.src} />
                         </video>
@@ -670,9 +723,9 @@ export default function ProductGallery({ items, productId = "" }) {
                           alt=""
                           loading="lazy"
                           onLoad={() =>
-                            setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                            setLoadedMap((prev) => ({ ...prev, [itemKey]: true }))
                           }
-                          onError={() => handleMediaError(index)}
+                          onError={() => handleMediaError(itemKey)}
                         />
                       ) : (
                         <Image
@@ -682,12 +735,12 @@ export default function ProductGallery({ items, productId = "" }) {
                           fill
                           sizes="(max-width: 980px) 100vw, 50vw"
                           onLoad={() =>
-                            setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                            setLoadedMap((prev) => ({ ...prev, [itemKey]: true }))
                           }
                           onLoadingComplete={() =>
-                            setLoadedMap((prev) => ({ ...prev, [index]: true }))
+                            setLoadedMap((prev) => ({ ...prev, [itemKey]: true }))
                           }
-                          onError={() => handleMediaError(index)}
+                          onError={() => handleMediaError(itemKey)}
                         />
                       )}
                       {/* {!isVideoItem(item) && item.badge === "play" ? (
@@ -701,7 +754,7 @@ export default function ProductGallery({ items, productId = "" }) {
           })}
         </div>
 
-        {slides.length > 1 ? (
+        {displaySlides.length > 1 ? (
           <>
             <button
               type="button"
@@ -724,7 +777,7 @@ export default function ProductGallery({ items, productId = "" }) {
               </svg>
             </button>
             <div className={styles.galleryDots} role="tablist" aria-label="Gallery images">
-              {slides.map((item, index) => (
+              {displaySlides.map((item, index) => (
                 <button
                   key={item.key ?? item.src ?? index}
                   type="button"
@@ -741,7 +794,7 @@ export default function ProductGallery({ items, productId = "" }) {
 
       <Modal
         open={open && Boolean(active)}
-        title={`Media ${activeIndex + 1} / ${slides.length}`}
+        title={`Media ${activeIndex + 1} / ${displaySlides.length}`}
         onClose={close}
         footer={modalFooter}
         className={styles.sliderModal}
@@ -755,7 +808,7 @@ export default function ProductGallery({ items, productId = "" }) {
             onTouchMove={handleTouchMove}
             onTouchEnd={handleTouchEnd}
           >
-            {slides.length > 1 ? (
+            {displaySlides.length > 1 ? (
               <button
                 type="button"
                 className={`${styles.sliderNav} ${styles.sliderPrev}`}
@@ -819,7 +872,7 @@ export default function ProductGallery({ items, productId = "" }) {
                 </TransformWrapper>
               )}
             </div>
-            {slides.length > 1 ? (
+            {displaySlides.length > 1 ? (
               <button
                 type="button"
                 className={`${styles.sliderNav} ${styles.sliderNext}`}

@@ -5,6 +5,7 @@ import { useRouter } from "next/navigation";
 import Select from "react-select";
 import { toast } from "react-toastify";
 import axiosClient from "../../lib/axiosClient.js";
+import { fetchProductListEcom } from "../../lib/productListingCache.js";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import styles from "./ProductCustomizer.module.css";
 
@@ -40,17 +41,72 @@ const normalizeString = (value) => {
   return String(value).trim();
 };
 
+const normalizeLanguageToken = (value) => normalizeString(value).toLowerCase();
+
+const resolveLanguageToken = (entry) => {
+  const candidates = [
+    entry?.language_id,
+    entry?.languageId,
+    entry?.lang_id,
+    entry?.langId,
+    entry?.language?.id,
+    entry?.language?.language_id,
+    entry?.language?.languageId,
+    entry?.language?.lang_id,
+    entry?.language?.langId,
+    entry?.language_code,
+    entry?.languageCode,
+    entry?.lang_code,
+    entry?.langCode,
+    entry?.language?.language_code,
+    entry?.language?.languageCode,
+    entry?.language?.lang_code,
+    entry?.language?.langCode,
+    entry?.language?.code,
+    entry?.language?.short_code,
+    entry?.language?.shortCode,
+    entry?.language?.short_name,
+    entry?.language?.shortName,
+    entry?.language?.name,
+    entry?.language?.label,
+    entry?.language_name,
+    entry?.languageName,
+  ];
+  for (const candidate of candidates) {
+    const normalized = normalizeLanguageToken(candidate);
+    if (normalized) return normalized;
+  }
+  return "";
+};
+
+const buildLanguageAliases = (languageId) => {
+  const normalized = normalizeLanguageToken(languageId);
+  if (!normalized) return [];
+  if (normalized === "1" || normalized === "en" || normalized === "english") {
+    return ["1", "en", "english"];
+  }
+  if (normalized === "2" || normalized === "fi" || normalized === "finnish") {
+    return ["2", "fi", "finnish"];
+  }
+  return [normalized];
+};
+
 const resolveDesignTranslation = (translation, languageId) => {
   if (!translation) return "";
   if (typeof translation === "string") return normalizeString(translation);
   if (Array.isArray(translation)) {
+    const languageAliases = buildLanguageAliases(languageId);
     const match = translation.find((entry) => {
-      const entryLangId = normalizeString(entry?.language_id ?? entry?.language?.id);
-      return entryLangId && entryLangId === normalizeString(languageId);
+      const entryLangId = resolveLanguageToken(entry);
+      return entryLangId && languageAliases.includes(entryLangId);
     });
     const candidate =
       match?.description ??
+      match?.design_description ??
+      match?.designDescription ??
       match?.design_variant_name ??
+      match?.product_name ??
+      match?.productName ??
       match?.name ??
       match?.label ??
       "";
@@ -59,7 +115,11 @@ const resolveDesignTranslation = (translation, languageId) => {
   if (typeof translation === "object") {
     const candidate =
       translation?.description ??
+      translation?.design_description ??
+      translation?.designDescription ??
       translation?.design_variant_name ??
+      translation?.product_name ??
+      translation?.productName ??
       translation?.name ??
       translation?.label ??
       "";
@@ -72,16 +132,28 @@ const resolveTranslationName = (translation, languageId) => {
   if (!translation) return "";
   if (typeof translation === "string") return normalizeString(translation);
   if (Array.isArray(translation)) {
+    const languageAliases = buildLanguageAliases(languageId);
     const match = translation.find((entry) => {
-      const entryLangId = normalizeString(entry?.language_id ?? entry?.language?.id);
-      return entryLangId && entryLangId === normalizeString(languageId);
+      const entryLangId = resolveLanguageToken(entry);
+      return entryLangId && languageAliases.includes(entryLangId);
     });
-    const candidate = match?.design_variant_name ?? match?.name ?? match?.label ?? "";
+    const candidate =
+      match?.design_variant_name ??
+      match?.product_name ??
+      match?.productName ??
+      match?.name ??
+      match?.label ??
+      "";
     return normalizeString(candidate);
   }
   if (typeof translation === "object") {
     const candidate =
-      translation?.design_variant_name ?? translation?.name ?? translation?.label ?? "";
+      translation?.design_variant_name ??
+      translation?.product_name ??
+      translation?.productName ??
+      translation?.name ??
+      translation?.label ??
+      "";
     return normalizeString(candidate);
   }
   return "";
@@ -91,15 +163,24 @@ const resolveTranslationDescription = (translation, languageId) => {
   if (!translation) return "";
   if (typeof translation === "string") return normalizeString(translation);
   if (Array.isArray(translation)) {
+    const languageAliases = buildLanguageAliases(languageId);
     const match = translation.find((entry) => {
-      const entryLangId = normalizeString(entry?.language_id ?? entry?.language?.id);
-      return entryLangId && entryLangId === normalizeString(languageId);
+      const entryLangId = resolveLanguageToken(entry);
+      return entryLangId && languageAliases.includes(entryLangId);
     });
-    const candidate = match?.description ?? "";
+    const candidate =
+      match?.description ??
+      match?.design_description ??
+      match?.designDescription ??
+      "";
     return normalizeString(candidate);
   }
   if (typeof translation === "object") {
-    const candidate = translation?.description ?? "";
+    const candidate =
+      translation?.description ??
+      translation?.design_description ??
+      translation?.designDescription ??
+      "";
     return normalizeString(candidate);
   }
   return "";
@@ -134,6 +215,24 @@ const resolveListingDefaults = (details) => {
       metalRate?.karat_id ?? metalRate?.karat?.id ?? ""
     ),
   };
+};
+
+const resolveCategoryId = (details) => {
+  if (!details) return "";
+  const design =
+    details?.design ??
+    details?.design_variant ??
+    details?.designVariant ??
+    null;
+  return normalizeString(
+    details?.category_id ??
+      details?.categoryId ??
+      design?.category_id ??
+      design?.categoryId ??
+      design?.product?.category_id ??
+      design?.product?.categoryId ??
+      ""
+  );
 };
 
 const readCachedProduct = (productId) => {
@@ -177,6 +276,62 @@ const updateCacheWithVariant = (productId, variantDetails) => {
   }
 };
 
+const updateCacheWithListing = (productId, listingItem) => {
+  if (typeof window === "undefined" || !productId || !listingItem) return null;
+  try {
+    const raw = window.sessionStorage.getItem("product_list_cache");
+    const cache = raw ? JSON.parse(raw) : {};
+    if (typeof cache !== "object") return null;
+
+    const productKey = String(productId);
+    const existingProduct = cache[productKey] ?? {};
+    const existingDesign =
+      existingProduct.design ??
+      existingProduct.design_variant ??
+      existingProduct.designVariant ??
+      {};
+    const incomingDesign =
+      listingItem?.design ??
+      listingItem?.design_variant ??
+      listingItem?.designVariant ??
+      {};
+    const nextDesign = {
+      ...existingDesign,
+      ...incomingDesign,
+      design_translation:
+        incomingDesign?.design_translation ?? existingDesign?.design_translation,
+      design_translations:
+        incomingDesign?.design_translations ?? existingDesign?.design_translations,
+      translations: incomingDesign?.translations ?? existingDesign?.translations,
+      design_variant_name:
+        incomingDesign?.design_variant_name ?? existingDesign?.design_variant_name,
+      description: incomingDesign?.description ?? existingDesign?.description,
+      product: incomingDesign?.product ?? existingDesign?.product,
+      images: incomingDesign?.images ?? existingDesign?.images,
+      image: incomingDesign?.image ?? existingDesign?.image,
+    };
+    const nextProduct = {
+      ...existingProduct,
+      ...listingItem,
+      product_name: listingItem?.product_name ?? existingProduct?.product_name,
+      description: listingItem?.description ?? existingProduct?.description,
+      design: nextDesign,
+      design_variant: nextDesign,
+      designVariant: nextDesign,
+    };
+
+    cache[productKey] = nextProduct;
+    window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
+    window.dispatchEvent(
+      new CustomEvent("productCacheUpdated", { detail: { productId: productKey } })
+    );
+    return nextProduct;
+  } catch (error) {
+    console.error("Product cache update failed", error);
+    return null;
+  }
+};
+
 export default function ProductCustomizer({
   title = "PRODUCT NAME",
   productId = "",
@@ -212,6 +367,7 @@ export default function ProductCustomizer({
   const lastVariantQueryRef = useRef("");
   const skipNextVariantFetchRef = useRef(false);
   const variantFromCacheRef = useRef(false);
+  const lastListingRefreshRef = useRef("");
 
   const labels =
     language === "fi"
@@ -276,6 +432,52 @@ export default function ProductCustomizer({
       window.removeEventListener("productCacheUpdated", handleCacheUpdate);
     };
   }, [productId]);
+
+  const listingCategoryId = useMemo(
+    () => resolveCategoryId(productDetails),
+    [productDetails]
+  );
+
+  useEffect(() => {
+    let active = true;
+    if (!productId || !languageId || !listingCategoryId) {
+      return () => {
+        active = false;
+      };
+    }
+    const refreshKey = `${languageId}:${productId}:${listingCategoryId}`;
+    if (lastListingRefreshRef.current === refreshKey) {
+      return () => {
+        active = false;
+      };
+    }
+    lastListingRefreshRef.current = refreshKey;
+
+    const refreshListingDetails = async () => {
+      try {
+        const list = await fetchProductListEcom(languageId, listingCategoryId);
+        if (!active || !Array.isArray(list)) return;
+        const match = list.find((item) => {
+          const id = item?.id ?? item?.product_id ?? item?.productId ?? null;
+          return String(id) === String(productId);
+        });
+        if (match) {
+          const updated = updateCacheWithListing(productId, match);
+          if (updated && active) {
+            setProductDetails(updated);
+          }
+        }
+      } catch (error) {
+        if (!active) return;
+        console.error("Product list refresh failed", error);
+      }
+    };
+
+    refreshListingDetails();
+    return () => {
+      active = false;
+    };
+  }, [productId, languageId, listingCategoryId]);
 
   useEffect(() => {
     const nextCut = normalizeString(defaultCutId);
@@ -869,7 +1071,13 @@ export default function ProductCustomizer({
       ? resolveTranslationDescription(
           variantDetails?.design_translation ??
             variantDetails?.design_translations ??
-            variantDetails?.translations,
+            variantDetails?.translations ??
+            variantDetails?.design_name_array ??
+            variantDetails?.designNameArray ??
+            variantDetails?.product_name_array ??
+            variantDetails?.productNameArray ??
+            variantDetails?.product_translations ??
+            variantDetails?.productTranslations,
           languageId
         ) ||
         normalizeString(variantDetails?.description ?? "")
@@ -882,6 +1090,16 @@ export default function ProductCustomizer({
     productDetails?.design_translations ??
     productDetails?.design?.translations ??
     productDetails?.translations ??
+    productDetails?.design?.design_name_array ??
+    productDetails?.design?.designNameArray ??
+    productDetails?.design?.product_name_array ??
+    productDetails?.design?.productNameArray ??
+    productDetails?.design?.product_translations ??
+    productDetails?.design?.productTranslations ??
+    productDetails?.product_name_array ??
+    productDetails?.productNameArray ??
+    productDetails?.product_translations ??
+    productDetails?.productTranslations ??
     null;
   const translatedTitle = resolveTranslationName(productTranslationSource, languageId);
   const translatedDescription = resolveTranslationDescription(
