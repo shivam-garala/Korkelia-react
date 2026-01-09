@@ -74,6 +74,7 @@
   padding: 46px;
   background: #f6f6f6;
   display: grid;
+  align-content: center;
   gap: 16px;
   background: linear-gradient(135deg, #fffaf6 0%, #fbe6dc 100%);
 }
@@ -107,14 +108,15 @@
 
 .panelMedia {
   display: grid;
-  place-items: center;
-  padding: 28px;
+  place-items: stretch;
+  padding: 0;
   background: #ededed;
 }
 
 .panelImage {
-  width: min(100%, 460px);
-  height: auto;
+  width: 100%;
+  height: 100%;
+  object-fit: contain;
   display: block;
 }
 
