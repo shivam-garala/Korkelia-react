@@ -728,7 +728,8 @@
 
   .cell {
     flex: 0 0 100%;
-    scroll-snap-align: center;
+    scroll-snap-align: start;
+    scroll-snap-stop: always;
     border: none;
     padding: 0;
   }
