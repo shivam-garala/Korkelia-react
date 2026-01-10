@@ -50,6 +50,7 @@
 .tab {
   border: none;
   padding: 12px 8px;
+  padding-inline: 30px;
   text-align: center;
   font-size: 15px;
   letter-spacing: 1.6px;
@@ -147,6 +148,7 @@
 
   .tab {
     flex: 0 0 auto;
+    min-width: 150px;
     white-space: nowrap;
     scroll-snap-align: start;
   }
