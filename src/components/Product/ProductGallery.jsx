@@ -169,7 +169,14 @@ const resolveImageSrc = (image) => {
   );
 };
 
-const fallbackImageSrc = "/productdetails/no_image.jpg";
+const fallbackSquareTwoThree = "/fallback_image/fallback_square_2.jpg";
+const fallbackSquareOneOne = "/fallback_image/fallback_square_4.jpg";
+
+const fallbackByVariant = (variant) => {
+  const normalized = String(variant ?? "").toLowerCase();
+  if (normalized === "square" || normalized === "tall") return fallbackSquareTwoThree;
+  return fallbackSquareOneOne;
+};
 
 const resolveProductMedia = (product, imageVariants) => {
   if (!product) return { items: [], hasExplicitImages: false };
@@ -209,13 +216,15 @@ const resolveProductMedia = (product, imageVariants) => {
         const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
         if (wantsVideo && !resolvedVideoSrc) return null;
         const isVideo = Boolean(resolvedVideoSrc);
-        const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : (src || fallbackImageSrc);
         const variant =
           isVideo
             ? "video"
             : image?.variant && image.variant !== "video"
             ? image.variant
             : imageVariants[index % imageVariants.length];
+        const resolvedSrc = isVideo
+          ? (videoFromSrc ? "" : src)
+          : (src || fallbackByVariant(variant));
         const next = {
           key: image?.id ?? image?.image_id ?? resolvedSrc ?? resolvedVideoSrc ?? index,
           variant,
@@ -230,7 +239,7 @@ const resolveProductMedia = (product, imageVariants) => {
       return { items: mapped, hasExplicitImages: true };
     }
     return {
-      items: [{ key: "no-image", variant: "square", src: fallbackImageSrc }],
+      items: [{ key: "no-image", variant: "square", src: fallbackByVariant("square") }],
       hasExplicitImages: true,
     };
   }
@@ -399,13 +408,15 @@ export default function ProductGallery({ items, productId = "", designId = "" })
         const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
         if (wantsVideo && !resolvedVideoSrc) return null;
         const isVideo = Boolean(resolvedVideoSrc);
-        const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : (src || fallbackImageSrc);
         const variant =
           isVideo
             ? "video"
             : item?.variant && item.variant !== "video"
             ? item.variant
             : imageVariants[index % imageVariants.length];
+        const resolvedSrc = isVideo
+          ? (videoFromSrc ? "" : src)
+          : (src || fallbackByVariant(variant));
         const next = {
           ...item,
           key: item?.key ?? item?.id ?? resolvedSrc ?? resolvedVideoSrc ?? index,
@@ -429,7 +440,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
       : baseItems;
     if (base.length) return base;
     if (!hasResponse) return [];
-    return [{ key: "no-image", variant: "square", src: fallbackImageSrc }];
+    return [{ key: "no-image", variant: "square", src: fallbackByVariant("square") }];
   }, [
     baseItems,
     cachedItems,
@@ -461,7 +472,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
   const displaySlides = useMemo(() => {
     if (filteredSlides.length) return filteredSlides;
     if (!hasResponse || hasExplicitImages) return [];
-    return [{ key: "no-image", variant: "square", src: fallbackImageSrc }];
+    return [{ key: "no-image", variant: "square", src: fallbackByVariant("square") }];
   }, [filteredSlides, hasExplicitImages, hasResponse]);
 
   const showSkeleton = !hasResponse;
@@ -486,7 +497,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
         key: `placeholder-${variant}`,
         variant,
         isPlaceholder: true,
-        src: isOnlyNoImage ? fallbackImageSrc : "",
+        src: fallbackByVariant(variant),
       }));
     return placeholders.length ? [...displaySlides, ...placeholders] : displaySlides;
   }, [showSkeleton, skeletonSlides, displaySlides, imageVariants]);
@@ -666,7 +677,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
         return;
       }
 
-      const imgSrc = item.src || fallbackImageSrc;
+      const imgSrc = item.src || fallbackByVariant(item.variant);
       const ImgCtor = typeof window !== "undefined" ? window.Image : null;
       if (!ImgCtor) {
         if (active) handleMediaError(itemKey);
@@ -712,6 +723,12 @@ export default function ProductGallery({ items, productId = "", designId = "" })
 
   const active = displaySlides[activeIndex];
   const isActiveVideo = active ? isVideoItem(active) : false;
+  const activeKey = active ? getMediaKey(active, activeIndex) : "";
+  const activeFallback = fallbackByVariant(active?.variant);
+  const activeImageSrc =
+    active && !isActiveVideo
+      ? (failedMap[activeKey] ? activeFallback : active?.src || activeFallback)
+      : "";
 
   useEffect(() => {
     if (!open) return;
@@ -796,7 +813,11 @@ export default function ProductGallery({ items, productId = "", designId = "" })
         <div className={styles.modalDots} role="tablist" aria-label="Media previews">
           {displaySlides.map((item, index) => {
             const isVideo = isVideoItem(item);
-            const dotImageSrc = isVideo ? (item.src || "") : (item.src || fallbackImageSrc);
+            const itemKey = getMediaKey(item, index);
+            const dotFallback = fallbackByVariant(item.variant);
+            const dotImageSrc = isVideo
+              ? (item.src || "")
+              : (failedMap[itemKey] ? dotFallback : item.src || dotFallback);
             const videoSrc = item.videoSrc ?? (isVideoSrc(item.src) ? item.src : "");
             return (
               <button
@@ -827,6 +848,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
                       src={dotImageSrc}
                       alt=""
                       loading="lazy"
+                      onError={() => handleMediaError(itemKey)}
                     />
                   )}
                   {isVideo ? (
@@ -850,11 +872,12 @@ export default function ProductGallery({ items, productId = "", designId = "" })
             const itemKey = getMediaKey(item, index);
             const hasFailed = Boolean(failedMap[itemKey]);
             const isLoaded = Boolean(loadedMap[itemKey]);
+            const fallbackSrc = fallbackByVariant(item.variant);
             const imageSrc = isVideo
               ? (item.src || "")
               : hasFailed
-              ? fallbackImageSrc
-              : item.src || fallbackImageSrc;
+              ? fallbackSrc
+              : item.src || fallbackSrc;
             const isRemoteImage = !isVideo && /^https?:\/\//i.test(imageSrc);
             return (
               <div
@@ -1018,7 +1041,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
                   loop
                   controls
                   playsInline
-                  poster={active.src}
+                  poster={active.src || activeFallback}
                 >
                   <source src={active.videoSrc ?? active.src} />
                 </video>
@@ -1052,10 +1075,11 @@ export default function ProductGallery({ items, productId = "", designId = "" })
                   >
                     <img
                       className={styles.modalImage}
-                      src={active.src}
+                      src={activeImageSrc}
                       alt=""
                       draggable="false"
                       onLoad={handleZoomImageLoad}
+                      onError={() => handleMediaError(activeKey)}
                     />
                   </TransformComponent>
                 </TransformWrapper>
