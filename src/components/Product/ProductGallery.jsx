@@ -17,15 +17,98 @@ const isVideoItem = (item) =>
   item?.badge === "play" ||
   (item?.variant === "video" && isVideoSrc(item?.src));
 
-const readCachedProduct = (productId) => {
+const buildDesignCacheKey = (designId) =>
+  designId ? `design:${designId}` : "";
+
+const hasIdValue = (value) => value !== null && value !== undefined && value !== "";
+
+const getDesignIdCandidates = (entry) => {
+  if (!entry) return [];
+  const candidates = [
+    entry?.design?.id,
+    entry?.design_variant?.id,
+    entry?.designVariant?.id,
+    entry?.design?.design_id,
+    entry?.design?.designId,
+    entry?.design_id,
+    entry?.designId,
+    entry?.design_variant_id,
+    entry?.designVariantId,
+  ];
+  if (candidates.some((value) => hasIdValue(value))) return candidates;
+  return [entry?.id];
+};
+
+const hasDesignId = (entry) => getDesignIdCandidates(entry).some(hasIdValue);
+
+const matchesProductId = (entry, expectedId) => {
+  if (!entry || expectedId === null || expectedId === undefined) return false;
+  const expected = String(expectedId);
+  const candidates = [
+    entry?.id,
+    entry?.product_id,
+    entry?.productId,
+    entry?.product?.id,
+    entry?.product?.product_id,
+    entry?.design?.product_id,
+    entry?.design?.product?.id,
+    entry?.design?.product?.product_id,
+    entry?.design_variant?.product_id,
+    entry?.designVariant?.product_id,
+  ];
+  return candidates.some((value) => value !== null && value !== undefined && String(value) === expected);
+};
+
+const matchesDesignId = (entry, expectedId) => {
+  if (!entry || expectedId === null || expectedId === undefined) return false;
+  const expected = String(expectedId);
+  const candidates = getDesignIdCandidates(entry);
+  return candidates.some((value) => value !== null && value !== undefined && String(value) === expected);
+};
+
+const readCachedProduct = (productId, designId) => {
   if (typeof window === "undefined") return null;
-  if (!productId) return null;
+  if (!productId && !designId) return null;
   try {
     const raw = window.sessionStorage.getItem("product_list_cache");
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return null;
-    return parsed[String(productId)] ?? null;
+    const designKey = buildDesignCacheKey(designId);
+    if (designKey && parsed[designKey]) {
+      const byDesign = parsed[designKey];
+      if (!productId || matchesProductId(byDesign, productId)) {
+        return byDesign;
+      }
+    }
+    if (productId) {
+      const byProduct = parsed[String(productId)] ?? null;
+      if (byProduct) {
+        if (!designId) return byProduct;
+        if (matchesDesignId(byProduct, designId)) return byProduct;
+        if (!hasDesignId(byProduct)) return byProduct;
+      }
+    }
+    if (productId || designId) {
+      const entries = Object.values(parsed).filter(
+        (entry) => entry && typeof entry === "object"
+      );
+      const strictMatch = entries.find(
+        (entry) =>
+          (!productId || matchesProductId(entry, productId)) &&
+          (!designId || matchesDesignId(entry, designId))
+      );
+      if (strictMatch) return strictMatch;
+      if (designId) {
+        const designMatch = entries.find((entry) => matchesDesignId(entry, designId));
+        if (designMatch) return designMatch;
+      }
+      if (productId) {
+        const productMatch = entries.find((entry) => matchesProductId(entry, productId));
+        if (productMatch) return productMatch;
+      }
+    }
+    return null;
   } catch (error) {
     console.error("Product cache read failed", error);
     return null;
@@ -88,26 +171,172 @@ const resolveImageSrc = (image) => {
 
 const fallbackImageSrc = "/productdetails/no_image.jpg";
 
-export default function ProductGallery({ items, productId = "" }) {
+const resolveProductMedia = (product, imageVariants) => {
+  if (!product) return { items: [], hasExplicitImages: false };
+  const design =
+    product?.design ??
+    product?.design_variant ??
+    product?.designVariant ??
+    null;
+  const hasExplicitImages = Array.isArray(design?.images);
+  if (hasExplicitImages) {
+    const images = sortMediaByOrder(design.images);
+    const mapped = images
+      .map((image, index) => {
+        const src = resolveImageSrc(
+          image?.image_url ??
+            image?.url ??
+            image?.image ??
+            image?.image_name ??
+            image
+        );
+        const videoSrc = resolveImageSrc(
+          image?.videoSrc ?? image?.video_url ?? image?.videoUrl ?? image?.video ?? ""
+        );
+        const isExplicitVideo =
+          image?.isVideo === true ||
+          image?.is_video === true ||
+          image?.isVideo === 1 ||
+          image?.is_video === 1 ||
+          String(image?.is_video ?? "").toLowerCase() === "yes";
+        const videoFromSrc = isVideoSrc(src);
+        const wantsVideo =
+          isExplicitVideo ||
+          image?.type === "video" ||
+          image?.badge === "play" ||
+          videoFromSrc ||
+          Boolean(videoSrc);
+        const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
+        if (wantsVideo && !resolvedVideoSrc) return null;
+        const isVideo = Boolean(resolvedVideoSrc);
+        const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : (src || fallbackImageSrc);
+        const variant =
+          isVideo
+            ? "video"
+            : image?.variant && image.variant !== "video"
+            ? image.variant
+            : imageVariants[index % imageVariants.length];
+        const next = {
+          key: image?.id ?? image?.image_id ?? resolvedSrc ?? resolvedVideoSrc ?? index,
+          variant,
+          src: resolvedSrc,
+          badge: isVideo ? image?.badge ?? "play" : image?.badge,
+        };
+        if (resolvedVideoSrc) next.videoSrc = resolvedVideoSrc;
+        return next;
+      })
+      .filter(Boolean);
+    if (mapped.length) {
+      return { items: mapped, hasExplicitImages: true };
+    }
+    return {
+      items: [{ key: "no-image", variant: "square", src: fallbackImageSrc }],
+      hasExplicitImages: true,
+    };
+  }
+
+  const fallbackSrc = resolveImageSrc(
+    product?.image ??
+      design?.image ??
+      design?.product?.image ??
+      ""
+  );
+  if (!fallbackSrc) return { items: [], hasExplicitImages: false };
+  if (isVideoSrc(fallbackSrc)) {
+    return {
+      items: [
+        {
+          key: "fallback",
+          variant: "video",
+          src: "",
+          videoSrc: fallbackSrc,
+          badge: "play",
+        },
+      ],
+      hasExplicitImages: false,
+    };
+  }
+  return {
+    items: [{ key: "fallback", variant: "square", src: fallbackSrc }],
+    hasExplicitImages: false,
+  };
+};
+
+export default function ProductGallery({ items, productId = "", designId = "" }) {
   const [cachedProduct, setCachedProduct] = useState(null);
+  const explicitDesignId = useMemo(
+    () => (designId ? String(designId) : ""),
+    [designId]
+  );
+  const [activeDesignId, setActiveDesignId] = useState(explicitDesignId);
+  const [useActiveDesign, setUseActiveDesign] = useState(false);
   const imageVariants = useMemo(
     () => ["square", "tall", "circle", "wide"],
     []
   );
-  const hasItems = Array.isArray(items);
-  const hasResponse = cachedProduct !== null || (items !== null && items !== undefined);
+  const hasArrayItems = Array.isArray(items);
+  const propProduct =
+    !hasArrayItems && items && typeof items === "object" ? items : null;
+  const hasResponse =
+    cachedProduct !== null ||
+    propProduct !== null ||
+    (items !== null && items !== undefined);
+
+  useEffect(() => {
+    setActiveDesignId(explicitDesignId);
+    setUseActiveDesign(false);
+  }, [explicitDesignId]);
 
   useEffect(() => {
     const updateCachedProduct = () => {
-      setCachedProduct(readCachedProduct(productId));
+      const resolvedDesignId =
+        useActiveDesign && activeDesignId
+          ? activeDesignId
+          : explicitDesignId || activeDesignId;
+      setCachedProduct(readCachedProduct(productId, resolvedDesignId));
     };
-    
+
     // Initial load
     updateCachedProduct();
     
     // Listen for cache updates
     const handleCacheUpdate = (event) => {
-      if (event.detail?.productId === productId || !event.detail?.productId) {
+      const updatedProductId = event.detail?.productId ?? "";
+      const updatedDesignId = event.detail?.designId ?? "";
+      const forceDesign = event.detail?.forceDesign === true;
+      const userInitiated = event.detail?.userInitiated === true;
+      if (!event.detail || (!updatedProductId && !updatedDesignId)) {
+        updateCachedProduct();
+        return;
+      }
+      const hasExplicitDesign = Boolean(explicitDesignId);
+      const canUpdateDesign =
+        !hasExplicitDesign ||
+        forceDesign ||
+        userInitiated ||
+        (updatedDesignId && String(updatedDesignId) === String(explicitDesignId));
+      if (
+        updatedProductId &&
+        String(updatedProductId) === String(productId) &&
+        updatedDesignId &&
+        canUpdateDesign
+      ) {
+        setActiveDesignId(String(updatedDesignId));
+        if (forceDesign || userInitiated) {
+          setUseActiveDesign(true);
+        }
+      }
+      const matchesProduct =
+        updatedProductId && String(updatedProductId) === String(productId);
+      const resolvedDesignId =
+        useActiveDesign && activeDesignId
+          ? activeDesignId
+          : explicitDesignId || activeDesignId;
+      const matchesDesign =
+        updatedDesignId &&
+        resolvedDesignId &&
+        String(updatedDesignId) === String(resolvedDesignId);
+      if (matchesProduct || (!productId && matchesDesign)) {
         updateCachedProduct();
       }
     };
@@ -116,100 +345,19 @@ export default function ProductGallery({ items, productId = "" }) {
     return () => {
       window.removeEventListener("productCacheUpdated", handleCacheUpdate);
     };
-  }, [productId]);
+  }, [activeDesignId, explicitDesignId, productId, useActiveDesign]);
 
-  const { items: cachedItems, hasExplicitImages } = useMemo(() => {
-    const design =
-      cachedProduct?.design ??
-      cachedProduct?.design_variant ??
-      cachedProduct?.designVariant ??
-      null;
-    const hasExplicitImages = Array.isArray(design?.images);
-    if (hasExplicitImages) {
-      const images = sortMediaByOrder(design.images);
-      const mapped = images
-        .map((image, index) => {
-          const src = resolveImageSrc(
-            image?.image_url ??
-              image?.url ??
-              image?.image ??
-              image?.image_name ??
-              image
-          );
-          const videoSrc = resolveImageSrc(
-            image?.videoSrc ?? image?.video_url ?? image?.videoUrl ?? image?.video ?? ""
-          );
-          const isExplicitVideo =
-            image?.isVideo === true ||
-            image?.is_video === true ||
-            image?.isVideo === 1 ||
-            image?.is_video === 1 ||
-            String(image?.is_video ?? "").toLowerCase() === "yes";
-          const videoFromSrc = isVideoSrc(src);
-          const wantsVideo =
-            isExplicitVideo ||
-            image?.type === "video" ||
-            image?.badge === "play" ||
-            videoFromSrc ||
-            Boolean(videoSrc);
-          const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
-          if (wantsVideo && !resolvedVideoSrc) return null;
-          const isVideo = Boolean(resolvedVideoSrc);
-          const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : (src || fallbackImageSrc);
-          const variant =
-            isVideo
-              ? "video"
-              : image?.variant && image.variant !== "video"
-              ? image.variant
-              : imageVariants[index % imageVariants.length];
-          const next = {
-            key: image?.id ?? image?.image_id ?? resolvedSrc ?? resolvedVideoSrc ?? index,
-            variant,
-            src: resolvedSrc,
-            badge: isVideo ? image?.badge ?? "play" : image?.badge,
-          };
-          if (resolvedVideoSrc) next.videoSrc = resolvedVideoSrc;
-          return next;
-        })
-        .filter(Boolean);
-      if (mapped.length) {
-        return { items: mapped, hasExplicitImages: true };
-      }
-      return {
-        items: [{ key: "no-image", variant: "square", src: fallbackImageSrc }],
-        hasExplicitImages: true,
-      };
-    }
-
-    const fallbackSrc = resolveImageSrc(
-      cachedProduct?.image ??
-        design?.image ??
-        design?.product?.image ??
-        ""
-    );
-    if (!fallbackSrc) return { items: [], hasExplicitImages: false };
-    if (isVideoSrc(fallbackSrc)) {
-      return {
-        items: [
-          {
-            key: "fallback",
-            variant: "video",
-            src: "",
-            videoSrc: fallbackSrc,
-            badge: "play",
-          },
-        ],
-        hasExplicitImages: false,
-      };
-    }
-    return {
-      items: [{ key: "fallback", variant: "square", src: fallbackSrc }],
-      hasExplicitImages: false,
-    };
-  }, [cachedProduct, imageVariants]);
+  const { items: cachedItems, hasExplicitImages } = useMemo(
+    () => resolveProductMedia(cachedProduct, imageVariants),
+    [cachedProduct, imageVariants]
+  );
+  const { items: propItems, hasExplicitImages: hasPropImages } = useMemo(
+    () => resolveProductMedia(propProduct, imageVariants),
+    [propProduct, imageVariants]
+  );
 
   const baseItems = useMemo(() => {
-    if (!hasItems) return [];
+    if (!hasArrayItems) return [];
     return items
       .map((item, index) => {
         if (!item) return null;
@@ -269,15 +417,27 @@ export default function ProductGallery({ items, productId = "" }) {
         return next;
       })
       .filter(Boolean);
-  }, [hasItems, items, imageVariants]);
+  }, [hasArrayItems, items, imageVariants]);
 
   const slides = useMemo(() => {
+    if (hasPropImages) return propItems;
     if (hasExplicitImages) return cachedItems;
-    const base = cachedItems.length ? cachedItems : baseItems;
+    const base = propItems.length
+      ? propItems
+      : cachedItems.length
+      ? cachedItems
+      : baseItems;
     if (base.length) return base;
     if (!hasResponse) return [];
     return [{ key: "no-image", variant: "square", src: fallbackImageSrc }];
-  }, [baseItems, cachedItems, hasExplicitImages, hasResponse]);
+  }, [
+    baseItems,
+    cachedItems,
+    hasExplicitImages,
+    hasPropImages,
+    hasResponse,
+    propItems,
+  ]);
 
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
@@ -591,6 +751,7 @@ export default function ProductGallery({ items, productId = "" }) {
       }
     };
   }, []);
+
 
   const modalFooter = (
     <div className={styles.modalFooter}>

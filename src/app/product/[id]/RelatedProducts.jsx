@@ -23,6 +23,9 @@ const readCachedProduct = (productId) => {
   }
 };
 
+const buildDesignCacheKey = (designId) =>
+  designId ? `design:${designId}` : "";
+
 const normalizeBaseUrl = (value) => {
   if (!value) return "";
   return String(value).replace(/\/+$/, "");
@@ -71,6 +74,8 @@ const updateCacheWithRelated = (product) => {
     const cache = raw ? JSON.parse(raw) : {};
     if (!cache || typeof cache !== "object") return;
     const productKey = String(product.productId);
+    const designId = product.designId ? String(product.designId) : "";
+    const designKey = buildDesignCacheKey(designId);
     const existingProduct = cache[productKey] ?? {};
     const existingDesign =
       existingProduct.design ??
@@ -114,7 +119,7 @@ const updateCacheWithRelated = (product) => {
       product: incomingDesign.product ?? existingDesign.product,
     };
 
-    cache[productKey] = {
+    const nextProduct = {
       ...existingProduct,
       total_price:
         product.price ??
@@ -127,10 +132,14 @@ const updateCacheWithRelated = (product) => {
       design_variant: nextDesign,
       designVariant: nextDesign,
     };
+    cache[productKey] = nextProduct;
+    if (designKey) {
+      cache[designKey] = nextProduct;
+    }
 
     window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
     window.dispatchEvent(
-      new CustomEvent("productCacheUpdated", { detail: { productId: productKey } })
+      new CustomEvent("productCacheUpdated", { detail: { productId: productKey, designId } })
     );
   } catch (error) {
     console.error("Related product cache update failed", error);

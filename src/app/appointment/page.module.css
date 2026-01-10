@@ -182,65 +182,27 @@
   cursor: not-allowed;
 }
 
-.captchaRow {
-  width: 300px;
-  margin: 0 auto;
-}
-
-.captchaCodeRow {
+.recaptchaRow {
+  width: 100%;
   display: grid;
-  grid-template-columns: repeat(2, minmax(0, 1fr));
-  gap: 12px;
-  align-items: center;
+  justify-items: center;
+  gap: 10px;
 }
 
-.captchaHeader {
+.recaptchaHeader {
   display: flex;
-  align-items: center;
-  justify-content: space-between;
-  gap: 12px;
-}
-
-.captchaCode {
-  height: 39px;
-  border-radius: 8px;
-  border-color: var(--color-primary);
-  background: #f2f2f2;
-  display: flex;
-  align-items: center;
   justify-content: center;
-  letter-spacing: 4px;
-  font-weight: 600;
-  color: var(--color-heading);
-  user-select: none;
-  -webkit-user-select: none;
-  -ms-user-select: none;
 }
 
-.captchaInput {
-  text-align: center;
-  text-transform: uppercase;
+.recaptchaWidget {
+  min-height: 78px;
 }
 
-.captchaRefresh {
-  border: none;
-  background: transparent;
-  color: var(--color-primary);
+.recaptchaError {
+  margin: 0;
+  color: var(--color-muted);
   font-size: 14px;
-  cursor: pointer;
-  padding: 0;
-  display: inline-flex;
-  align-items: center;
-  gap: 6px;
-  line-height: 1;
-}
-
-.captchaRefresh:hover {
-  text-decoration: underline;
-}
-
-.captchaRefreshIcon {
-  display: inline-flex;
+  text-align: center;
 }
 
 .fullRow {
@@ -290,7 +252,7 @@
     grid-template-columns: 1fr;
   }
 
-  .captchaRow {
+  .recaptchaRow {
     grid-template-columns: 1fr;
   }
 }
