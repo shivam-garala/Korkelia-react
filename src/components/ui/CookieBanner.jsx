@@ -88,7 +88,7 @@ export default function CookieBanner() {
               </div>
               <input className={styles.toggle} type="checkbox" checked readOnly disabled />
             </div>
-            <div className={styles.settingRow}>
+            {/*<div className={styles.settingRow}>
               <div className={styles.settingText}>
                 <div className={styles.settingTitle}>{labels.analyticsTitle}</div>
                 <div className={styles.settingNote}>{labels.analyticsNote}</div>
@@ -111,14 +111,14 @@ export default function CookieBanner() {
                 checked={marketingEnabled}
                 onChange={(event) => setMarketingEnabled(event.target.checked)}
               />
-            </div>
+            </div>*/}
           </div>
         ) : null}
       </div>
       <div className={styles.actions}>
         {showSettings ? (
           <>
-            <button
+            {/* <button
               type="button"
               className={styles.secondaryButton}
               onClick={() =>
@@ -131,7 +131,7 @@ export default function CookieBanner() {
               }
             >
               {labels.decline}
-            </button>
+            </button> */}
             <button
               type="button"
               className={styles.secondaryButton}
@@ -163,7 +163,7 @@ export default function CookieBanner() {
           </>
         ) : (
           <>
-            <button
+            {/* <button
               type="button"
               className={styles.secondaryButton}
               onClick={() =>
@@ -176,7 +176,7 @@ export default function CookieBanner() {
               }
             >
               {labels.decline}
-            </button>
+            </button> */}
             <button
               type="button"
               className={styles.primaryButton}
