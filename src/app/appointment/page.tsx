@@ -1,6 +1,7 @@
 ﻿"use client";
 
-import { useEffect, useState } from "react";
+import { useEffect, useRef, useState } from "react";
+import Script from "next/script";
 import SiteFooter from "../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../components/Home/SiteHeader.jsx";
 import Container from "../../components/ui/Container.jsx";
@@ -13,6 +14,15 @@ import { useI18n } from "../../providers/I18nProvider.jsx";
 import DatePicker from "react-datepicker";
 import styles from "./page.module.css";
 
+declare global {
+  interface Window {
+    grecaptcha?: {
+      render: (container: HTMLElement, parameters: Record<string, unknown>) => number;
+      reset: (optWidgetId?: number) => void;
+    };
+  }
+}
+
 const initialForm = {
   firstName: "",
   lastName: "",
@@ -22,16 +32,6 @@ const initialForm = {
   appointmentDate: "",
   appointmentSlot: "",
   details: "",
-  captcha: "",
-};
-
-const generateCaptcha = (length = 6) => {
-  const chars = "ABCDEFGHJKLMNPQRSTUVWXYZ23456789";
-  let text = "";
-  for (let i = 0; i < length; i += 1) {
-    text += chars[Math.floor(Math.random() * chars.length)];
-  }
-  return text;
 };
 
 const isWeekendDay = (date) => {
@@ -82,10 +82,10 @@ export default function AppointmentPage() {
           appointmentDatePlaceholder: "Valitse paiva",
           appointmentSlot: "Valitse aikavali",
           appointmentSlotPlaceholder: "Valitse aikavali",
-          captchaLabel: "Varmennekoodi",
-          captchaInput: "Syota koodi",
-          captchaPlaceholder: "Kirjoita koodi",
-          captchaRefresh: "Paivita",
+          captchaLabel: "Captcha",
+          captchaRequired: "Captcha on pakollinen.",
+          captchaFailed: "Captcha tarkistus epaonnistui.",
+          captchaMissingKey: "Captcha ei ole asetettu.",
           details: "Kuvaile koru, josta olet kiinnostunut",
           submit: "Laheta",
         }
@@ -102,9 +102,9 @@ export default function AppointmentPage() {
           appointmentSlot: "Select Time Slot",
           appointmentSlotPlaceholder: "Select a time slot",
           captchaLabel: "Captcha",
-          captchaInput: "Enter Captcha",
-          captchaPlaceholder: "Type the text",
-          captchaRefresh: "Refresh",
+          captchaRequired: "Captcha is required.",
+          captchaFailed: "Captcha verification failed.",
+          captchaMissingKey: "Captcha is not configured.",
           details: "Please describe the jewelry item you are interested in",
           submit: "Submit",
         };
@@ -116,24 +116,46 @@ export default function AppointmentPage() {
     languageKey === "fi"
       ? "Vain tulevat paivat ovat saatavilla."
       : "Only future dates are available.";
-  const captchaErrorMessage =
-    languageKey === "fi"
-      ? "Varmennekoodi ei vastaa. Yrita uudelleen."
-      : "Captcha does not match. Please try again.";
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
   const [slotOptions, setSlotOptions] = useState([]);
   const [slotLoading, setSlotLoading] = useState(false);
-  const [captchaText, setCaptchaText] = useState("");
+  const [recaptchaToken, setRecaptchaToken] = useState("");
+  const [recaptchaReady, setRecaptchaReady] = useState(false);
+  const recaptchaRef = useRef<HTMLDivElement | null>(null);
+  const recaptchaWidgetId = useRef<number | null>(null);
+  const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
 
-  const regenerateCaptcha = () => {
-    setCaptchaText(generateCaptcha());
-    setForm((prev) => ({ ...prev, captcha: "" }));
+  const resetRecaptcha = () => {
+    if (typeof window === "undefined") return;
+    if (window.grecaptcha && typeof window.grecaptcha.reset === "function") {
+      const widgetId = recaptchaWidgetId.current;
+      if (typeof widgetId === "number") {
+        window.grecaptcha.reset(widgetId);
+      } else {
+        window.grecaptcha.reset();
+      }
+    }
+    setRecaptchaToken("");
   };
 
   useEffect(() => {
-    regenerateCaptcha();
+    if (typeof window !== "undefined" && window.grecaptcha?.render) {
+      setRecaptchaReady(true);
+    }
   }, []);
+
+  useEffect(() => {
+    if (!recaptchaReady || !siteKey || !recaptchaRef.current) return;
+    if (!window.grecaptcha || typeof window.grecaptcha.render !== "function") return;
+    if (recaptchaWidgetId.current !== null) return;
+    recaptchaWidgetId.current = window.grecaptcha.render(recaptchaRef.current, {
+      sitekey: siteKey,
+      callback: (token) => setRecaptchaToken(token),
+      "expired-callback": () => setRecaptchaToken(""),
+      "error-callback": () => setRecaptchaToken(""),
+    });
+  }, [recaptchaReady, siteKey]);
 
   useEffect(() => {
     let active = true;
@@ -255,14 +277,33 @@ export default function AppointmentPage() {
       toast.error(weekendMessage);
       return;
     }
-    const normalizedCaptcha = form.captcha.trim().toUpperCase();
-    const expectedCaptcha = captchaText.trim().toUpperCase();
-    if (!expectedCaptcha || normalizedCaptcha !== expectedCaptcha) {
-      toast.error(captchaErrorMessage);
-      regenerateCaptcha();
+    if (!siteKey) {
+      toast.error(labels.captchaMissingKey);
+      return;
+    }
+    if (!recaptchaToken) {
+      toast.error(labels.captchaRequired);
       return;
     }
     setSubmitting(true);
+    let captchaValid = false;
+    try {
+      const verifyResponse = await fetch("/api/recaptcha/verify", {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({ token: recaptchaToken }),
+      });
+      const verifyData = await verifyResponse.json();
+      captchaValid = verifyResponse.ok && Boolean(verifyData?.success);
+    } catch (error) {
+      captchaValid = false;
+    }
+    if (!captchaValid) {
+      toast.error(labels.captchaFailed);
+      resetRecaptcha();
+      setSubmitting(false);
+      return;
+    }
     try {
       const payload = {
         first_name: form.firstName.trim(),
@@ -273,6 +314,7 @@ export default function AppointmentPage() {
         date: form.appointmentDate,
         time_slot: form.appointmentSlot,
         description: form.details.trim(),
+        recaptcha_token: recaptchaToken,
       };
       const { data } = await axiosClient.post(
         `/api/appointment/create?language_id=${encodeURIComponent(languageId)}`,
@@ -285,7 +327,7 @@ export default function AppointmentPage() {
           : "Appointment submitted successfully.");
       toast.success(message);
       setForm(initialForm);
-      regenerateCaptcha();
+      resetRecaptcha();
     } catch (error) {
       const data = error?.response?.data ?? null;
       const message =
@@ -296,6 +338,7 @@ export default function AppointmentPage() {
           : "Appointment booking failed. Please try again.");
       toast.error(message);
       console.error("Appointment submit error", error);
+      resetRecaptcha();
     } finally {
       setSubmitting(false);
     }
@@ -400,43 +443,15 @@ export default function AppointmentPage() {
                   onChange={handleChange}
                 />
               </label>
-              <div className={`${styles.captchaRow} ${styles.fullRow}`}>
-                <div className={styles.captchaHeader}>
+              <div className={`${styles.recaptchaRow} ${styles.fullRow}`}>
+                <div className={styles.recaptchaHeader}>
                   <span className={fieldStyles.label}>{labels.captchaLabel}</span>
-                  <button
-                    className={styles.captchaRefresh}
-                    type="button"
-                    onClick={regenerateCaptcha}
-                  >
-                    {labels.captchaRefresh}
-                  </button>
                 </div>
-                <div className={styles.captchaCodeRow}>
-                  <div>
-                    <div
-                      className={`${fieldStyles.control} ${styles.captchaCode}`}
-                      aria-live="polite"
-                    >
-                      {captchaText}
-                    </div>
-                  </div>
-                  <div>
-                    <TextField
-                      label=""
-                      name="captcha"
-                      placeholder={labels.captchaPlaceholder}
-                      required
-                      value={form.captcha}
-                      onChange={handleChange}
-                      inputClassName={styles.captchaInput}
-                      style={{
-                        borderTopLeftRadius: 0,
-                        borderBottomLeftRadius: 0,
-                        borderLeft: "none",
-                      }}
-                    />
-                  </div>
-                </div>
+                {siteKey ? (
+                  <div className={styles.recaptchaWidget} ref={recaptchaRef} />
+                ) : (
+                  <p className={styles.recaptchaError}>{labels.captchaMissingKey}</p>
+                )}
               </div>
             </div>
             <div className={styles.actions}>
@@ -447,6 +462,13 @@ export default function AppointmentPage() {
           </form>
         </Container>
       </main>
+      {siteKey ? (
+        <Script
+          src="https://www.google.com/recaptcha/api.js?render=explicit"
+          strategy="afterInteractive"
+          onLoad={() => setRecaptchaReady(true)}
+        />
+      ) : null}
       <SiteFooter />
     </div>
   );

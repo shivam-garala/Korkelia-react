@@ -29,20 +29,6 @@ export default async function ProductDetailsPage({ params, searchParams }) {
   const defaultCarat = readSearchParam(resolvedSearchParams, "carat");
   const defaultCutId = readSearchParam(resolvedSearchParams, "cut_id");
   const designId = readSearchParam(resolvedSearchParams, "design_id");
-  const galleryItems = [
-    { key: "a", variant: "square", src: "/productdetails/1.jpg" },
-    { key: "b", variant: "tall", src: "/productdetails/2.jpg" },
-    { key: "c", variant: "circle", src: "/productdetails/3.jpg" },
-    { key: "d", variant: "wide", src: "/productdetails/4.jpg" },
-    {
-      key: "e",
-      variant: "video",
-      src: "/productdetails/4.jpg",
-      badge: "play",
-      videoSrc: "/productdetails/Rose%20Anim%20Kastehelmi%20Mq%20Rd%201725.mp4",
-    },
-  ];
-
   return (
     <div className={styles.page}>
       <SiteHeader />
@@ -56,13 +42,17 @@ export default async function ProductDetailsPage({ params, searchParams }) {
           {/* <div className={styles.layoutContainer}> */}
             <div className={styles.layout}>
               <div className={styles.gallery}>
-                <ProductGallery items={galleryItems} productId={id ?? ""} />
+                <ProductGallery
+                  productId={id ?? ""}
+                  designId={designId ?? ""}
+                />
               </div>
 
               <div className={styles.customizer}>
                 <ProductCustomizer
                   title={`PRODUCT NAME ${id ? `#${id}` : ""}`}
                   productId={id ?? ""}
+                  designId={designId ?? ""}
                   defaultMetalId={defaultMetalId}
                   defaultKaratId={defaultKaratId}
                   defaultDiamondTypeId={defaultDiamondTypeId}

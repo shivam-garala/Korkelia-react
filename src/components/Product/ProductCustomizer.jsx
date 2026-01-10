@@ -235,42 +235,172 @@ const resolveCategoryId = (details) => {
   );
 };
 
-const readCachedProduct = (productId) => {
+const buildDesignCacheKey = (designId) =>
+  designId ? `design:${designId}` : "";
+
+const hasIdValue = (value) => value !== null && value !== undefined && value !== "";
+
+const getDesignIdCandidates = (entry) => {
+  if (!entry) return [];
+  const candidates = [
+    entry?.design?.id,
+    entry?.design_variant?.id,
+    entry?.designVariant?.id,
+    entry?.design?.design_id,
+    entry?.design?.designId,
+    entry?.design_id,
+    entry?.designId,
+    entry?.design_variant_id,
+    entry?.designVariantId,
+  ];
+  if (candidates.some((value) => hasIdValue(value))) return candidates;
+  return [entry?.id];
+};
+
+const hasDesignId = (entry) => getDesignIdCandidates(entry).some(hasIdValue);
+
+const matchesProductId = (entry, expectedId) => {
+  if (!entry || expectedId === null || expectedId === undefined) return false;
+  const expected = String(expectedId);
+  const candidates = [
+    entry?.id,
+    entry?.product_id,
+    entry?.productId,
+    entry?.product?.id,
+    entry?.product?.product_id,
+    entry?.design?.product_id,
+    entry?.design?.product?.id,
+    entry?.design?.product?.product_id,
+    entry?.design_variant?.product_id,
+    entry?.designVariant?.product_id,
+  ];
+  return candidates.some((value) => value !== null && value !== undefined && String(value) === expected);
+};
+
+const matchesDesignId = (entry, expectedId) => {
+  if (!entry || expectedId === null || expectedId === undefined) return false;
+  const expected = String(expectedId);
+  const candidates = getDesignIdCandidates(entry);
+  return candidates.some((value) => value !== null && value !== undefined && String(value) === expected);
+};
+
+const readCachedProduct = (productId, designId = "") => {
   if (typeof window === "undefined") return null;
   try {
     const raw = window.sessionStorage.getItem("product_list_cache");
     if (!raw) return null;
     const parsed = JSON.parse(raw);
     if (!parsed || typeof parsed !== "object") return null;
-    return parsed[String(productId)] ?? null;
+    const designKey = buildDesignCacheKey(designId);
+    if (designKey && parsed[designKey]) {
+      const byDesign = parsed[designKey];
+      if (!productId || matchesProductId(byDesign, productId)) {
+        return byDesign;
+      }
+    }
+    if (productId) {
+      const byProduct = parsed[String(productId)] ?? null;
+      if (byProduct) {
+        if (!designId) return byProduct;
+        if (matchesDesignId(byProduct, designId)) return byProduct;
+        if (!hasDesignId(byProduct)) return byProduct;
+      }
+    }
+    if (productId || designId) {
+      const entries = Object.values(parsed).filter(
+        (entry) => entry && typeof entry === "object"
+      );
+      const strictMatch = entries.find(
+        (entry) =>
+          (!productId || matchesProductId(entry, productId)) &&
+          (!designId || matchesDesignId(entry, designId))
+      );
+      if (strictMatch) return strictMatch;
+      if (designId) {
+        const designMatch = entries.find((entry) => matchesDesignId(entry, designId));
+        if (designMatch) return designMatch;
+      }
+      if (productId) {
+        const productMatch = entries.find((entry) => matchesProductId(entry, productId));
+        if (productMatch) return productMatch;
+      }
+    }
+    return null;
   } catch (error) {
     console.error("Product cache read failed", error);
     return null;
   }
 };
 
-const updateCacheWithVariant = (productId, variantDetails) => {
+const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
   if (typeof window === "undefined" || !productId || !variantDetails) return;
   try {
     const raw = window.sessionStorage.getItem("product_list_cache");
     const cache = raw ? JSON.parse(raw) : {};
     if (typeof cache !== "object") return;
     
-    const existingProduct = cache[String(productId)] || {};
+    const productKey = String(productId);
+    const existingProduct = cache[productKey] || {};
+    const existingDesign =
+      existingProduct.design ??
+      existingProduct.design_variant ??
+      existingProduct.designVariant ??
+      {};
+    const designId =
+      variantDetails?.id ??
+      existingDesign?.id ??
+      variantDetails?.design_id ??
+      variantDetails?.designId ??
+      variantDetails?.design_variant_id ??
+      variantDetails?.designVariantId ??
+      "";
+    const designKey = buildDesignCacheKey(designId);
     
     // Merge variant details into the product cache
     // Store variantDetails as design since ProductGallery looks for design.images
-    cache[String(productId)] = {
-      ...existingProduct,
-      design: variantDetails,
-      design_variant: variantDetails,
-      designVariant: variantDetails,
+    const incomingImages = Array.isArray(variantDetails?.images)
+      ? variantDetails.images
+      : null;
+    const nextDesign = {
+      ...existingDesign,
+      ...variantDetails,
+      design_translation:
+        variantDetails?.design_translation ?? existingDesign?.design_translation,
+      design_translations:
+        variantDetails?.design_translations ?? existingDesign?.design_translations,
+      translations: variantDetails?.translations ?? existingDesign?.translations,
+      design_variant_name:
+        variantDetails?.design_variant_name ?? existingDesign?.design_variant_name,
+      description: variantDetails?.description ?? existingDesign?.description,
+      product: variantDetails?.product ?? existingDesign?.product,
+      images: incomingImages ?? existingDesign?.images,
+      image: variantDetails?.image ?? existingDesign?.image,
     };
+    const nextProduct = {
+      ...existingProduct,
+      image: variantDetails?.image ?? existingProduct?.image,
+      design: nextDesign,
+      design_variant: nextDesign,
+      designVariant: nextDesign,
+    };
+    cache[productKey] = nextProduct;
+    if (designKey) {
+      cache[designKey] = nextProduct;
+    }
     
     window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
     
     // Dispatch custom event to notify ProductGallery of cache update
-    window.dispatchEvent(new CustomEvent("productCacheUpdated", { detail: { productId } }));
+    window.dispatchEvent(
+      new CustomEvent("productCacheUpdated", {
+        detail: {
+          productId: productKey,
+          designId,
+          userInitiated: options?.userInitiated === true,
+          forceDesign: options?.forceDesign === true,
+        },
+      })
+    );
   } catch (error) {
     console.error("Product cache update failed", error);
   }
@@ -287,7 +417,7 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
 
     const productKey = String(productId);
     const existingProduct = cache[productKey] ?? {};
-    const existingDesign =
+    const existingProductDesign =
       existingProduct.design ??
       existingProduct.design_variant ??
       existingProduct.designVariant ??
@@ -297,12 +427,30 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
       listingItem?.design_variant ??
       listingItem?.designVariant ??
       {};
+    const designId =
+      incomingDesign?.id ??
+      listingItem?.design_id ??
+      listingItem?.designId ??
+      listingItem?.design_variant_id ??
+      listingItem?.designVariantId ??
+      "";
+    const designKey = buildDesignCacheKey(designId);
+    const existingDesignFromKey = designKey
+      ? cache[designKey]?.design ??
+        cache[designKey]?.design_variant ??
+        cache[designKey]?.designVariant ??
+        null
+      : null;
+    const existingDesign = existingDesignFromKey ?? existingProductDesign;
     const existingImages = existingDesign?.images;
     const hasExplicitImages = Array.isArray(existingImages);
-    const nextImages =
-      preserveExplicitImages && hasExplicitImages
-        ? existingImages
-        : incomingDesign?.images ?? existingDesign?.images;
+    const canPreserveImages =
+      preserveExplicitImages &&
+      hasExplicitImages &&
+      (!designId || matchesDesignId(existingDesign, designId));
+    const nextImages = canPreserveImages
+      ? existingImages
+      : incomingDesign?.images ?? existingDesign?.images;
     const nextDesign = {
       ...existingDesign,
       ...incomingDesign,
@@ -329,9 +477,12 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
     };
 
     cache[productKey] = nextProduct;
+    if (designKey) {
+      cache[designKey] = nextProduct;
+    }
     window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
     window.dispatchEvent(
-      new CustomEvent("productCacheUpdated", { detail: { productId: productKey } })
+      new CustomEvent("productCacheUpdated", { detail: { productId: productKey, designId } })
     );
     return nextProduct;
   } catch (error) {
@@ -343,6 +494,7 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
 export default function ProductCustomizer({
   title = "PRODUCT NAME",
   productId = "",
+  designId = "",
   defaultMetalId = "",
   defaultKaratId = "",
   defaultDiamondTypeId = "",
@@ -424,7 +576,7 @@ export default function ProductCustomizer({
 
     const updateCachedProduct = () => {
       if (!active) return;
-      setProductDetails(readCachedProduct(productId));
+      setProductDetails(readCachedProduct(productId, designId));
     };
 
     updateCachedProduct();
@@ -441,7 +593,7 @@ export default function ProductCustomizer({
       active = false;
       window.removeEventListener("productCacheUpdated", handleCacheUpdate);
     };
-  }, [productId]);
+  }, [designId, productId]);
 
   const listingCategoryId = useMemo(
     () => resolveCategoryId(productDetails),
@@ -467,10 +619,24 @@ export default function ProductCustomizer({
       try {
         const list = await fetchProductListEcom(languageId, listingCategoryId);
         if (!active || !Array.isArray(list)) return;
-        const match = list.find((item) => {
+        const matchById = (item) => {
           const id = item?.id ?? item?.product_id ?? item?.productId ?? null;
           return String(id) === String(productId);
-        });
+        };
+        const matchByDesign = (item) => {
+          const itemDesignId =
+            item?.design?.id ??
+            item?.design_id ??
+            item?.designId ??
+            item?.design_variant_id ??
+            item?.designVariantId ??
+            null;
+          return String(itemDesignId) === String(designId);
+        };
+        const match = designId
+          ? list.find((item) => matchById(item) && matchByDesign(item)) ??
+            list.find((item) => matchById(item))
+          : list.find((item) => matchById(item));
         if (match) {
           const updated = updateCacheWithListing(productId, match, {
             preserveExplicitImages: variantEnabled,
@@ -489,7 +655,7 @@ export default function ProductCustomizer({
     return () => {
       active = false;
     };
-  }, [productId, languageId, listingCategoryId, variantEnabled]);
+  }, [productId, languageId, listingCategoryId, variantEnabled, designId]);
 
   useEffect(() => {
     const nextCut = normalizeString(defaultCutId);
@@ -639,9 +805,6 @@ export default function ProductCustomizer({
           { signal: controller.signal }
         );
         const payload = data?.data ?? data;
-        console.log(payload);
-        console.log(controller.signal.aborted);
-
         lastFilterQueryRef.current = queryString;
         setFilterData(payload && typeof payload === "object" ? payload : null);
       } catch (error) {
@@ -821,8 +984,6 @@ export default function ProductCustomizer({
     return Array.from(groups.values());
   }, [variantDetails, filterAvailabilityValue]);
 
-  console.log(filterData);
-  
   const metalOptions = useMemo(() => {
     const list = Array.isArray(filterData?.metals) ? filterData.metals : [];
     return list
@@ -1048,6 +1209,7 @@ export default function ProductCustomizer({
 
   const shouldSkipVariantFetch = useMemo(() => {
     if (!hasPrefilledVariant || !listingDesign) return false;
+    if (designId && !matchesDesignId(listingDesign, designId)) return false;
     const matchesField = (expected, actual) => {
       const normalizedExpected = normalizeString(expected);
       if (!normalizedExpected) return true;
@@ -1071,6 +1233,7 @@ export default function ProductCustomizer({
     selectedQualityId,
     selectedClarityId,
     selectedCarat,
+    designId,
   ]);
 
   // const variantTitle =
@@ -1403,7 +1566,9 @@ export default function ProductCustomizer({
   // Update sessionStorage cache when variantDetails changes
   useEffect(() => {
     if (variantDetails && productId && !variantFromCacheRef.current) {
-      updateCacheWithVariant(productId, variantDetails);
+      updateCacheWithVariant(productId, variantDetails, {
+        userInitiated: userVariantInteractionRef.current,
+      });
     }
   }, [variantDetails, productId]);
 
@@ -1567,7 +1732,6 @@ export default function ProductCustomizer({
 
         <div className={styles.fieldTitle}>{labels.selectMetalColor}</div>
         <div className={styles.metalRow}>
-          {console.log(metalOptions)}
           {metalOptions.map((item) => (
             <button
               key={item.value}

@@ -16,6 +16,9 @@ import {
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
+const buildDesignCacheKey = (designId) =>
+  designId ? `design:${designId}` : "";
+
 const cacheProductList = (items) => {
   if (typeof window === "undefined") return;
   try {
@@ -24,8 +27,19 @@ const cacheProductList = (items) => {
     const cache = parsed && typeof parsed === "object" ? parsed : {};
     items.forEach((item) => {
       const id = item?.id ?? item?.product_id ?? null;
-      if (!id) return;
-      cache[String(id)] = item;
+      const designId =
+        item?.design?.id ??
+        item?.design_id ??
+        item?.designId ??
+        item?.design_variant_id ??
+        item?.designVariantId ??
+        null;
+      if (!id && !designId) return;
+      if (id) cache[String(id)] = item;
+      if (designId) {
+        const designKey = buildDesignCacheKey(designId);
+        if (designKey) cache[designKey] = item;
+      }
     });
     window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
   } catch (error) {
@@ -225,10 +239,24 @@ export default function ProductListingClient() {
             if (primaryDetail?.cut_master_id) {
               query.set("cut_id", String(primaryDetail.cut_master_id));
             }
+            const translations = Array.isArray(design?.design_translations)
+              ? design.design_translations
+              : [];
+            const matchingTranslation = translations.find(
+              (translation) =>
+                String(translation?.language_id ?? "") === String(languageId)
+            );
+            const translatedName =
+              matchingTranslation?.design_variant_name ??
+              matchingTranslation?.product_name ??
+              null;
+
             return {
               id,
               name:
+                translatedName ??
                 design?.design_translation?.design_variant_name ??
+                design?.design_variant_name ??
                 item?.product_name ??
                 item?.name ??
                 "PRODUCT",
