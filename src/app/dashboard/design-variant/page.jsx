@@ -252,6 +252,7 @@ export default function DesignVariantPage() {
   const [searchQuery, setSearchQuery] = useState("");
   const [activeSearch, setActiveSearch] = useState("");
   const [hydrated, setHydrated] = useState(false);
+  const [exporting, setExporting] = useState(false);
   const fallbackImage = "/productlisting/no_image.jpg";
 
   const currentPage = pagination?.currentPage ?? 1;
@@ -288,6 +289,78 @@ export default function DesignVariantPage() {
       })
     );
   }, [dispatch, loadingMore, loading, currentPage, totalPages, activeSearch]);
+
+  const resolveExportFileName = useCallback((headers = {}) => {
+    const disposition =
+      headers["content-disposition"] ??
+      headers["Content-Disposition"] ??
+      "";
+    if (disposition) {
+      const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
+      if (utf8Match?.[1]) {
+        return decodeURIComponent(utf8Match[1]);
+      }
+      const match = disposition.match(/filename="?([^"]+)"?/i);
+      if (match?.[1]) return match[1];
+    }
+    return "design-variant-export.xlsx";
+  }, []);
+
+  const handleExport = useCallback(async () => {
+    if (exporting) return;
+    setExporting(true);
+    try {
+      const response = await axiosClient.get("/api/design/exportDesign", {
+        responseType: "blob",
+      });
+      const blob = response?.data;
+      if (!blob) {
+        toast.error("Export failed. Please try again.");
+        return;
+      }
+      const contentType = response?.headers?.["content-type"] ?? "";
+      if (contentType.includes("application/json")) {
+        const text = await blob.text();
+        try {
+          const parsed = JSON.parse(text);
+          const csvUrl = parsed?.csv_url ?? parsed?.csvUrl ?? "";
+          if (csvUrl) {
+            const link = document.createElement("a");
+            link.href = csvUrl;
+            link.rel = "noopener";
+            document.body.appendChild(link);
+            link.click();
+            link.remove();
+            return;
+          }
+          const message = parsed?.message ?? parsed?.error ?? "Export failed. Please try again.";
+          toast.error(message);
+          return;
+        } catch (error) {
+          const message = text || "Export failed. Please try again.";
+          toast.error(message);
+          return;
+        }
+      }
+      const filename = resolveExportFileName(response?.headers ?? {});
+      const url = window.URL.createObjectURL(blob);
+      const link = document.createElement("a");
+      link.href = url;
+      link.download = filename;
+      document.body.appendChild(link);
+      link.click();
+      link.remove();
+      window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+    } catch (error) {
+      const message =
+        error?.response?.data?.message ??
+        error?.message ??
+        "Export failed. Please try again.";
+      toast.error(message);
+    } finally {
+      setExporting(false);
+    }
+  }, [exporting, resolveExportFileName]);
 
   useEffect(() => {
     dispatch(fetchProductDropdown());
@@ -946,7 +1019,7 @@ export default function DesignVariantPage() {
       filterPlaceholder: "Search Price",
       filterInputStyle: { width: 120 },
     },
-    { key: "details", header: "Diamond Detail", filterable: false, width: 220 },
+    { key: "details", header: "Diamond Detail", filterable: false, width: 270 },
     { key: "image_count", header: "Uploaded Media Count", filterable: false, },
     {
       key: "actions",
@@ -1006,6 +1079,13 @@ export default function DesignVariantPage() {
                     disabled={loading}
                   >
                     {loading ? "Refreshing..." : "Refresh"}
+                  </Button>
+                  <Button
+                    variant="secondary"
+                    onClick={handleExport}
+                    disabled={loading || exporting}
+                  >
+                    {exporting ? "Exporting..." : "Export"}
                   </Button>
                   <Button variant="primarySoft" onClick={openCreate}>
                     Add Design Variant
