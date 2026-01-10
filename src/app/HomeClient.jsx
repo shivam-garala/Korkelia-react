@@ -120,7 +120,7 @@ export default function HomeClient() {
       <main className={styles.main}>
         <Hero
           videoSrc="/homepage/Rings_in_Motion.mp4"
-          posterSrc="/homepage/banner_1.jpg"
+          posterSrc="/homepage/poster_default.png"
           eyebrow={t("home.hero.eyebrow")}
           title={t("home.hero.title")}
           subcopy={t("home.hero.subcopy")}
@@ -141,7 +141,6 @@ export default function HomeClient() {
               ? "/homepage/diamond_guid_desktop.mp4"
               : "/homepage/diamond_guid_mobile.mp4"
           }
-          posterSrc="/homepage/banner_2.jpg"
           mediaPosition={isDesktop ? "right center" : "right bottom"}
           sectionClassName={styles.diamondGuideSection}
           mediaClassName={styles.diamondGuideMedia}

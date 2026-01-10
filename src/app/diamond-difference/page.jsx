@@ -71,7 +71,7 @@ const tabs = [
       en: "OUR COMMITMENT",
       fi: "SERTIFIOITU, EETTINEN JA LÄPINÄKYVÄ",
     },
-    image: "/diamonddifference/commitment.jpeg",
+    image: "/diamonddifference/commitment.jpg",
     alt: "Certified and ethical sourcing",
     body: {
       en: [
@@ -102,7 +102,7 @@ const tabs = [
       en: "BEYOND THE CUT",
       fi: "TIMANTIN TIE JALOKIVEKSI",
     },
-    image: "/diamonddifference/beyond_the_cut.jpeg",
+    image: "/diamonddifference/beyond_the_cut.jpg",
     alt: "Beyond the cut",
     body: {
       en: [

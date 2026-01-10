@@ -59,6 +59,10 @@
   cursor: pointer;
 }
 
+.tab + .tab {
+  border-left: 1px solid #e6e7e8;
+}
+
 .tabActive {
   color: var(--color-heading);
   border-bottom: 2px solid var(--color-menu-accent);
@@ -128,6 +132,22 @@
 
 @media (max-width: 720px) {
   .tabs {
-    grid-template-columns: 1fr;
+    display: flex;
+    overflow-x: auto;
+    overflow-y: hidden;
+    scroll-snap-type: x mandatory;
+    -webkit-overflow-scrolling: touch;
+    scrollbar-width: none;
+    -ms-overflow-style: none;
+  }
+
+  .tabs::-webkit-scrollbar {
+    display: none;
+  }
+
+  .tab {
+    flex: 0 0 auto;
+    white-space: nowrap;
+    scroll-snap-align: start;
   }
 }
