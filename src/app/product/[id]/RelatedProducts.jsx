@@ -162,7 +162,45 @@ const extractRelatedItems = (payload) => {
   return [];
 };
 
-const mapRelatedProduct = (item, fallbackProductId = "") => {
+const resolveTranslatedName = (item, design, languageId) => {
+  if (!languageId) {
+    return (
+      item?.design_variant_name ??
+      item?.designVariantName ??
+      design?.design_translation?.design_variant_name ??
+      design?.design_variant_name ??
+      item?.product_name ??
+      item?.name ??
+      "PRODUCT"
+    );
+  }
+
+  const translations = Array.isArray(design?.design_translations)
+    ? design.design_translations
+    : Array.isArray(item?.design_translations)
+      ? item.design_translations
+      : [];
+  const matching = translations.find(
+    (translation) => String(translation?.language_id ?? "") === String(languageId)
+  );
+  const translatedName =
+    matching?.design_variant_name ??
+    matching?.product_name ??
+    null;
+
+  return (
+    translatedName ??
+    design?.design_translation?.design_variant_name ??
+    design?.design_variant_name ??
+    item?.design_variant_name ??
+    item?.designVariantName ??
+    item?.product_name ??
+    item?.name ??
+    "PRODUCT"
+  );
+};
+
+const mapRelatedProduct = (item, fallbackProductId = "", languageId = "") => {
   const productId = item?.product_id ?? item?.productId ?? item?.id ?? fallbackProductId ?? null;
   const designIdFromItem = item?.design_id ?? item?.designId ?? null;
   if (!productId) return null;
@@ -215,14 +253,7 @@ const mapRelatedProduct = (item, fallbackProductId = "") => {
     designId: resolvedDesignId ? String(resolvedDesignId) : "",
     categoryId: categoryId ? String(categoryId) : "",
     design,
-    name:
-      item?.design_variant_name ??
-      item?.designVariantName ??
-      design?.design_translation?.design_variant_name ??
-      design?.design_variant_name ??
-      item?.product_name ??
-      item?.name ??
-      "PRODUCT",
+    name: resolveTranslatedName(item, design, languageId),
     price:
       item?.price ??
       item?.total_price ??
@@ -323,7 +354,7 @@ export default function RelatedProducts({ productId, designId, columns = 3 }) {
         );
         const payload = data?.data ?? data;
         const list = extractRelatedItems(payload)
-          .map((item) => mapRelatedProduct(item, productId))
+          .map((item) => mapRelatedProduct(item, productId, languageId))
           .filter(Boolean);
         if (active) setProducts(list);
       } catch (error) {
