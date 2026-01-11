@@ -16,6 +16,7 @@ import Icon from "../../../components/ui/Icon.jsx";
 import RadioGroup from "../../../components/ui/RadioGroup.jsx";
 import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import axiosClient from "../../../lib/axiosClient.js";
+import { downloadUrl } from "../../../lib/download.js";
 import radioStyles from "../../../components/ui/RadioGroup.module.css";
 import { toast } from "react-toastify";
 import {
@@ -350,12 +351,7 @@ export default function DesignVariantPage() {
           const parsed = JSON.parse(text);
           const csvUrl = parsed?.csv_url ?? parsed?.csvUrl ?? "";
           if (csvUrl) {
-            const link = document.createElement("a");
-            link.href = csvUrl;
-            link.rel = "noopener";
-            document.body.appendChild(link);
-            link.click();
-            link.remove();
+            downloadUrl(csvUrl);
             exportSucceeded = true;
             return;
           }
@@ -414,7 +410,15 @@ export default function DesignVariantPage() {
         const response = await axiosClient.post(endpoint, payload);
         const responseData = response?.data ?? {};
         const message = responseData?.message ?? "";
+        const csvUrl =
+          responseData?.url ??
+          responseData?.csv_url ??
+          responseData?.csvUrl ??
+          "";
         if (responseData?.success === false) {
+          if (csvUrl) {
+            downloadUrl(csvUrl, { target: "_blank" });
+          }
           toast.error(message || `${actionLabel} failed.`);
           return;
         }
