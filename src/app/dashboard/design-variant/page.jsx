@@ -1,6 +1,6 @@
 'use client';
 
-import { useCallback, useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import AdminHeader from "../../../components/AdminHeader/AdminHeader.jsx";
@@ -255,7 +255,13 @@ export default function DesignVariantPage() {
   const [exporting, setExporting] = useState(false);
   const [exportModalOpen, setExportModalOpen] = useState(false);
   const [exportProductIds, setExportProductIds] = useState([]);
+  const [csvMenuOpen, setCsvMenuOpen] = useState(false);
+  const [csvUploading, setCsvUploading] = useState("");
+  const [csvInputKey, setCsvInputKey] = useState(0);
   const fallbackImage = "/productlisting/no_image.jpg";
+  const csvMenuRef = useRef(null);
+  const csvUploadInputRef = useRef(null);
+  const csvUpdateInputRef = useRef(null);
 
   const closeExportModal = useCallback(() => {
     setExportModalOpen(false);
@@ -386,6 +392,137 @@ export default function DesignVariantPage() {
     }
   }, [exporting, resolveExportFileName, closeExportModal]);
 
+  const handleCsvUpload = useCallback(
+    async (file, mode) => {
+      if (!file) return;
+      const name = String(file.name ?? "").toLowerCase();
+      if (!name.endsWith(".csv")) {
+        toast.error("Please upload a CSV file.");
+        return;
+      }
+
+      const endpoint =
+        mode === "update"
+          ? "/api/design/update-csv"
+          : "/api/design/upload-csv";
+      const actionLabel = mode === "update" ? "Update CSV design" : "Upload CSV";
+
+      setCsvUploading(mode);
+      const payload = new FormData();
+      payload.append("file", file);
+      try {
+        const response = await axiosClient.post(endpoint, payload);
+        const responseData = response?.data ?? {};
+        const message = responseData?.message ?? "";
+        if (responseData?.success === false) {
+          toast.error(message || `${actionLabel} failed.`);
+          return;
+        }
+        if (!responseData?.success || !message) {
+          toast.success(message || `${actionLabel} successful.`);
+        }
+        fetchFirstPage();
+      } catch (error) {
+        const message =
+          error?.response?.data?.message ??
+          error?.message ??
+          `${actionLabel} failed.`;
+        toast.error(message);
+      } finally {
+        setCsvUploading("");
+        setCsvInputKey((prev) => prev + 1);
+      }
+    },
+    [fetchFirstPage]
+  );
+
+  const downloadSampleCsv = useCallback((headers, filename) => {
+    const content = `${headers.join(",")}\n`;
+    const blob = new Blob([content], { type: "text/csv;charset=utf-8" });
+    const url = window.URL.createObjectURL(blob);
+    const link = document.createElement("a");
+    link.href = url;
+    link.download = filename;
+    document.body.appendChild(link);
+    link.click();
+    link.remove();
+    window.setTimeout(() => window.URL.revokeObjectURL(url), 500);
+  }, []);
+
+  const downloadUploadSampleCsv = useCallback(() => {
+    const headers = [
+      "Product Name",
+      "Design Variant Name(EN)",
+      "Design Variant Name(FN)",
+      "Description(EN)-P1",
+      "Description(EN)-P2",
+      "Description(FN)-P1",
+      "Description(FN)-P2",
+      "Metal name",
+      "Karat",
+      "Weight",
+      "Mark Up",
+      "Diamond Cut",
+      "Diamond Carat",
+      "Diamond Type",
+      "Diamond Clarity",
+      "Pcs",
+      "Diamond Position",
+      "Position Visible",
+      "Price flag",
+    ];
+    downloadSampleCsv(headers, "design-variant-sample.csv");
+  }, [downloadSampleCsv]);
+
+  const downloadUpdateSampleCsv = useCallback(() => {
+    const headers = [
+      "SKU Number",
+      "Product Name",
+      "Design Variant Name(EN)",
+      "Design Variant Name(FN)",
+      "Description(EN)-P1",
+      "Description(EN)-P2",
+      "Description(FN)-P1",
+      "Description(FN)-P2",
+      "Metal name",
+      "Karat",
+      "Weight",
+      "Mark Up",
+      "Diamond Cut",
+      "Diamond Carat",
+      "Diamond Type",
+      "Diamond Clarity",
+      "Pcs",
+      "Diamond Position",
+      "Position Visible",
+      "Price flag",
+    ];
+    downloadSampleCsv(headers, "design-variant-update-sample.csv");
+  }, [downloadSampleCsv]);
+
+  const handleCsvFileChange = useCallback(
+    (event, mode) => {
+      const file = event.target.files?.[0];
+      if (!file) return;
+      setCsvMenuOpen(false);
+      handleCsvUpload(file, mode);
+    },
+    [handleCsvUpload]
+  );
+
+  const openCsvPicker = useCallback(
+    (mode) => {
+      if (csvUploading) return;
+      setCsvMenuOpen(false);
+      if (mode === "update") {
+        csvUpdateInputRef.current?.click();
+        return;
+      }
+      csvUploadInputRef.current?.click();
+    },
+    [csvUploading]
+  );
+
   useEffect(() => {
     dispatch(fetchProductDropdown());
     dispatch(fetchMetalRateDropdown());
@@ -396,6 +533,25 @@ export default function DesignVariantPage() {
 
   useEffect(() => {
     setHydrated(true);
+  }, []);
+
+  useEffect(() => {
+    const handleKeyDown = (event) => {
+      if (event.key === "Escape") setCsvMenuOpen(false);
+    };
+
+    const handleMouseDown = (event) => {
+      if (csvMenuRef.current && !csvMenuRef.current.contains(event.target)) {
+        setCsvMenuOpen(false);
+      }
+    };
+
+    document.addEventListener("keydown", handleKeyDown);
+    document.addEventListener("mousedown", handleMouseDown);
+    return () => {
+      document.removeEventListener("keydown", handleKeyDown);
+      document.removeEventListener("mousedown", handleMouseDown);
+    };
   }, []);
 
   useEffect(() => {
@@ -1109,16 +1265,112 @@ export default function DesignVariantPage() {
                   >
                     {loading ? "Refreshing..." : "Refresh"}
                   </Button>
-                  <Button
-                    variant="secondary"
-                    onClick={() => setExportModalOpen(true)}
-                    disabled={loading || exporting}
-                  >
-                    {exporting ? "Exporting..." : "Export"}
-                  </Button>
-                  <Button variant="primarySoft" onClick={openCreate}>
-                    Add Design Variant
-                  </Button>
+                  <div className={styles.csvMenu} ref={csvMenuRef}>
+                    <Button
+                      variant="primarySoft"
+                      className={styles.csvMenuButton}
+                      onClick={() => setCsvMenuOpen((prev) => !prev)}
+                      disabled={loading || Boolean(csvUploading)}
+                      aria-haspopup="menu"
+                      aria-expanded={csvMenuOpen}
+                    >
+                      Add Design Variant
+                    </Button>
+                    {csvMenuOpen ? (
+                      <div className={styles.csvMenuList} role="menu" aria-label="CSV actions">
+                        <button
+                          type="button"
+                          className={styles.csvMenuItem}
+                          role="menuitem"
+                          onClick={() => {
+                            setCsvMenuOpen(false);
+                            openCreate();
+                          }}
+                          disabled={loading}
+                        >
+                          Add Design Variant
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.csvMenuItem}
+                          role="menuitem"
+                          onClick={() => openCsvPicker("upload")}
+                          disabled={loading || Boolean(csvUploading)}
+                        >
+                          {csvUploading === "upload" ? "Uploading CSV..." : "Upload By CSV"}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.csvMenuItem}
+                          role="menuitem"
+                          onClick={() => openCsvPicker("update")}
+                          disabled={loading || Boolean(csvUploading)}
+                        >
+                          {csvUploading === "update"
+                            ? "Updating CSV..."
+                            : "Update By CSV"}
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.csvMenuItem}
+                          role="menuitem"
+                          onClick={() => {
+                            setCsvMenuOpen(false);
+                            downloadUploadSampleCsv();
+                          }}
+                          disabled={loading}
+                        >
+                          Download Sample CSV
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.csvMenuItem}
+                          role="menuitem"
+                          onClick={() => {
+                            setCsvMenuOpen(false);
+                            downloadUpdateSampleCsv();
+                          }}
+                          disabled={loading}
+                        >
+                          Update Sample CSV
+                        </button>
+                        <button
+                          type="button"
+                          className={styles.csvMenuItem}
+                          role="menuitem"
+                          onClick={() => {
+                            setCsvMenuOpen(false);
+                            setExportModalOpen(true);
+                          }}
+                          disabled={loading || exporting}
+                        >
+                          {exporting ? "Exporting..." : "Export"}
+                        </button>
+                      </div>
+                    ) : null}
+                    <input
+                      key={`csv-upload-${csvInputKey}`}
+                      ref={csvUploadInputRef}
+                      className={styles.csvFileInput}
+                      type="file"
+                      accept=".csv,text/csv"
+                      onClick={(event) => {
+                        event.currentTarget.value = null;
+                      }}
+                      onChange={(event) => handleCsvFileChange(event, "upload")}
+                    />
+                    <input
+                      key={`csv-update-${csvInputKey}`}
+                      ref={csvUpdateInputRef}
+                      className={styles.csvFileInput}
+                      type="file"
+                      accept=".csv,text/csv"
+                      onClick={(event) => {
+                        event.currentTarget.value = null;
+                      }}
+                      onChange={(event) => handleCsvFileChange(event, "update")}
+                    />
+                  </div>
                 </div>
               </div>
             </div>
