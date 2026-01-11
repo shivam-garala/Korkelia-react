@@ -253,7 +253,14 @@ export default function DesignVariantPage() {
   const [activeSearch, setActiveSearch] = useState("");
   const [hydrated, setHydrated] = useState(false);
   const [exporting, setExporting] = useState(false);
+  const [exportModalOpen, setExportModalOpen] = useState(false);
+  const [exportProductIds, setExportProductIds] = useState([]);
   const fallbackImage = "/productlisting/no_image.jpg";
+
+  const closeExportModal = useCallback(() => {
+    setExportModalOpen(false);
+    setExportProductIds([]);
+  }, []);
 
   const currentPage = pagination?.currentPage ?? 1;
   const totalPages = pagination?.totalPages ?? 1;
@@ -306,13 +313,25 @@ export default function DesignVariantPage() {
     return "design-variant-export.xlsx";
   }, []);
 
-  const handleExport = useCallback(async () => {
+  const handleExport = useCallback(async (ids = []) => {
     if (exporting) return;
+    const selectedIds = Array.isArray(ids)
+      ? ids.map((id) => String(id)).filter(Boolean)
+      : [];
+    if (!selectedIds.length) {
+      toast.error("Please select at least one product.");
+      return;
+    }
     setExporting(true);
+    let exportSucceeded = false;
     try {
-      const response = await axiosClient.get("/api/design/exportDesign", {
-        responseType: "blob",
-      });
+      const productIdsParam = `[${selectedIds.join(",")}]`;
+      const response = await axiosClient.get(
+        `/api/design/exportDesign?productIDS=${encodeURIComponent(productIdsParam)}`,
+        {
+          responseType: "blob",
+        }
+      );
       const blob = response?.data;
       if (!blob) {
         toast.error("Export failed. Please try again.");
@@ -331,6 +350,7 @@ export default function DesignVariantPage() {
             document.body.appendChild(link);
             link.click();
             link.remove();
+            exportSucceeded = true;
             return;
           }
           const message = parsed?.message ?? parsed?.error ?? "Export failed. Please try again.";
@@ -351,6 +371,7 @@ export default function DesignVariantPage() {
       link.click();
       link.remove();
       window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+      exportSucceeded = true;
     } catch (error) {
       const message =
         error?.response?.data?.message ??
@@ -359,8 +380,11 @@ export default function DesignVariantPage() {
       toast.error(message);
     } finally {
       setExporting(false);
+      if (exportSucceeded) {
+        closeExportModal();
+      }
     }
-  }, [exporting, resolveExportFileName]);
+  }, [exporting, resolveExportFileName, closeExportModal]);
 
   useEffect(() => {
     dispatch(fetchProductDropdown());
@@ -416,6 +440,11 @@ export default function DesignVariantPage() {
     if (!categoryId) return productOptions;
     return productOptions.filter((opt) => String(opt.categoryId) === String(categoryId));
   }, [categoryId, productOptions]);
+
+  const exportProductOptions = useMemo(
+    () => productOptions.map((opt) => ({ value: opt.id, label: opt.label })),
+    [productOptions]
+  );
 
   const metalRateOptions = useMemo(() => {
     const list = Array.isArray(metalRates) ? metalRates : [];
@@ -1082,7 +1111,7 @@ export default function DesignVariantPage() {
                   </Button>
                   <Button
                     variant="secondary"
-                    onClick={handleExport}
+                    onClick={() => setExportModalOpen(true)}
                     disabled={loading || exporting}
                   >
                     {exporting ? "Exporting..." : "Export"}
@@ -1125,6 +1154,44 @@ export default function DesignVariantPage() {
         }}
       />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+
+      <Modal
+        open={exportModalOpen}
+        title="Export Design Variants"
+        onClose={closeExportModal}
+        footer={
+          <div className={crudStyles.formActions}>
+            <Button
+              variant="primarySoft"
+              onClick={() => handleExport(exportProductIds)}
+              disabled={exporting || !exportProductOptions.length}
+            >
+              {exporting ? "Exporting..." : "Export"}
+            </Button>
+            <Button variant="secondary" onClick={closeExportModal} disabled={exporting}>
+              Cancel
+            </Button>
+          </div>
+        }
+      >
+        <div className={crudStyles.form}>
+          <AdminSelectField
+            label="Product"
+            value={exportProductIds}
+            onChange={(event) =>
+              setExportProductIds(
+                Array.isArray(event.target.value) ? event.target.value : []
+              )
+            }
+            disabled={!exportProductOptions.length}
+            placeholder={
+              exportProductOptions.length ? "Select product" : "Loading products..."
+            }
+            options={exportProductOptions}
+            multiple
+          />
+        </div>
+      </Modal>
 
       <Modal
         open={modalOpen}

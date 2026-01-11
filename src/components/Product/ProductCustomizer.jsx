@@ -1354,7 +1354,11 @@ export default function ProductCustomizer({
       Boolean(lastVariantLanguageRef.current) &&
       lastVariantLanguageRef.current !== languageToken;
     if (languageChanged) {
-      lastVariantQueryRef.current = "";
+      lastVariantLanguageRef.current = languageToken;
+      if (active) setVariantLoading(false);
+      return () => {
+        active = false;
+      };
     }
     lastVariantLanguageRef.current = languageToken;
 
