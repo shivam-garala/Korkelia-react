@@ -1,6 +1,6 @@
 ﻿"use client";
 
-import { useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useRef, useState } from "react";
 import Script from "next/script";
 import SiteFooter from "../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../components/Home/SiteHeader.jsx";
@@ -121,7 +121,6 @@ export default function AppointmentPage() {
   const [slotOptions, setSlotOptions] = useState([]);
   const [slotLoading, setSlotLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState("");
-  const [recaptchaReady, setRecaptchaReady] = useState(false);
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
   const recaptchaWidgetId = useRef<number | null>(null);
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
@@ -139,14 +138,9 @@ export default function AppointmentPage() {
     setRecaptchaToken("");
   };
 
-  useEffect(() => {
-    if (typeof window !== "undefined" && window.grecaptcha?.render) {
-      setRecaptchaReady(true);
-    }
-  }, []);
-
-  useEffect(() => {
-    if (!recaptchaReady || !siteKey || !recaptchaRef.current) return;
+  const renderRecaptcha = useCallback(() => {
+    if (typeof window === "undefined") return;
+    if (!siteKey || !recaptchaRef.current) return;
     if (!window.grecaptcha || typeof window.grecaptcha.render !== "function") return;
     if (recaptchaWidgetId.current !== null) return;
     recaptchaWidgetId.current = window.grecaptcha.render(recaptchaRef.current, {
@@ -155,7 +149,11 @@ export default function AppointmentPage() {
       "expired-callback": () => setRecaptchaToken(""),
       "error-callback": () => setRecaptchaToken(""),
     });
-  }, [recaptchaReady, siteKey]);
+  }, [siteKey]);
+
+  useEffect(() => {
+    renderRecaptcha();
+  }, [renderRecaptcha]);
 
   useEffect(() => {
     let active = true;
@@ -466,7 +464,8 @@ export default function AppointmentPage() {
         <Script
           src="https://www.google.com/recaptcha/api.js?render=explicit"
           strategy="afterInteractive"
-          onLoad={() => setRecaptchaReady(true)}
+          onLoad={renderRecaptcha}
+          onReady={renderRecaptcha}
         />
       ) : null}
       <SiteFooter />
