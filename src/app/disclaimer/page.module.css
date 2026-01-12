@@ -51,32 +51,11 @@
   gap: 14px;
 }
 
-.contactSection {
-  gap: 8px;
-}
-
 .sectionTitle {
   margin: 0;
   font-family: var(--font-heading);
   font-weight: 500;
   color: var(--color-heading);
-}
-
-.subsections {
-  display: grid;
-  gap: 16px;
-}
-
-.subsection {
-  display: grid;
-  gap: 8px;
-}
-
-.subTitle {
-  margin: 0;
-  font-weight: 600;
-  color: var(--color-heading);
-  letter-spacing: 0.4px;
 }
 
 .paragraph {
@@ -86,32 +65,3 @@
   line-height: 1.5;
 }
 
-.list {
-  margin: 0;
-  padding-left: 20px;
-  list-style: disc;
-  color: var(--color-muted);
-  display: grid;
-  gap: 6px;
-}
-
-.listItem {
-  font-size: 15px;
-  line-height: 1.5;
-}
-
-.contactLink {
-  color: var(--color-primary);
-  text-decoration: none;
-}
-
-.contactLink:hover,
-.contactLink:focus-visible {
-  text-decoration: underline;
-}
-
-.updated {
-  margin: 6px 0 0;
-  color: var(--color-muted);
-  font-size: 14px;
-}

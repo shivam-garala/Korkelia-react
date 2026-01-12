@@ -15,14 +15,23 @@ export default function CookieBanner() {
   const [preferencesEnabled, setPreferencesEnabled] = useState(false);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
   const [marketingEnabled, setMarketingEnabled] = useState(false);
+  const cookiePolicyHref = "/cookie-policy";
   const policyHref = "/privacy-policy";
 
   const labels =
     language === "fi"
       ? {
           title: "Evasteasetukset",
-          message:
-            "Kaytamme valttamattomia evasteita sivuston toimintaan. Voit valita otatko kayttoon toiminnalliset, analytiikka- ja markkinointievasteet.",
+          messageIntro:
+            "Kaytamme vain valttamattomia evasteita sivuston toimintaan ja evasteasetustesi tallentamiseen.",
+          messageNoAnalytics:
+            "Emme kayta analytiikka- tai markkinointievaisteita tassa vaiheessa.",
+          messageManage: "Voit hallita valintojasi milloin tahansa kohdassa",
+          cookiePreferences: "Evasteasetukset",
+          messageReadMore: "Lue lisaa",
+          cookiePolicy: "Evastekaytanto",
+          and: "ja",
+          privacyPolicy: "Tietosuojakaytanto",
           acceptAll: "Hyvaksy kaikki",
           decline: "Hylkaa ei-valttamattomat",
           save: "Tallenna asetukset",
@@ -35,12 +44,19 @@ export default function CookieBanner() {
           analyticsNote: "Auttaa meita ymmartamaan sivuston kayttoa.",
           marketingTitle: "Markkinointi",
           marketingNote: "Personoitu sisalto ja tarjoukset.",
-          policy: "Tietosuojakaytanto",
         }
       : {
           title: "Cookie preferences",
-          message:
-            "We use necessary cookies to make the site work. You can choose whether to enable preference, analytics, and marketing cookies.",
+          messageIntro:
+            "We use strictly necessary cookies to make the site work and to store your cookie preferences.",
+          messageNoAnalytics:
+            "We do not use analytics or marketing cookies at this stage.",
+          messageManage: "You can manage your choices at any time in",
+          cookiePreferences: "Cookie Preferences",
+          messageReadMore: "Read more in our",
+          cookiePolicy: "Cookie Policy",
+          and: "and",
+          privacyPolicy: "Privacy Policy",
           acceptAll: "Accept all",
           decline: "Reject non-essential",
           save: "Save preferences",
@@ -53,7 +69,6 @@ export default function CookieBanner() {
           analyticsNote: "Helps us understand how the site is used.",
           marketingTitle: "Marketing",
           marketingNote: "Personalized content and offers.",
-          policy: "Privacy Policy",
         };
 
   useEffect(() => {
@@ -86,10 +101,23 @@ export default function CookieBanner() {
       <div className={styles.content}>
         <div className={styles.title}>{labels.title}</div>
         <p className={styles.message}>
-          {labels.message}{" "}
+          {labels.messageIntro} {labels.messageNoAnalytics} {labels.messageManage}{" "}
+          <button
+            type="button"
+            className={styles.linkButton}
+            onClick={() => setShowSettings(true)}
+          >
+            {labels.cookiePreferences}
+          </button>
+          . {labels.messageReadMore}{" "}
+          <a className={styles.link} href={cookiePolicyHref}>
+            {labels.cookiePolicy}
+          </a>{" "}
+          {labels.and}{" "}
           <a className={styles.link} href={policyHref}>
-            {labels.policy}
+            {labels.privacyPolicy}
           </a>
+          .
         </p>
         {showSettings ? (
           <div className={styles.settings}>
