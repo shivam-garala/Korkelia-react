@@ -8,6 +8,22 @@ import fi from "../i18n/fi.json";
 const dictionaries = { en, fi };
 const DEFAULT_LANGUAGE = "en";
 const COOKIE_NAME = "siteLang";
+const CONSENT_COOKIE = "cookieConsent";
+
+const hasPreferenceConsent = () => {
+  const raw = Cookies.get(CONSENT_COOKIE);
+  if (!raw) return false;
+  try {
+    const parsed = JSON.parse(raw);
+    if (typeof parsed?.preferences === "boolean") {
+      return parsed.preferences;
+    }
+    if (parsed?.choice === "accepted") return true;
+    return Boolean(parsed?.analytics || parsed?.marketing);
+  } catch (error) {
+    return false;
+  }
+};
 
 function getByPath(object, path) {
   if (!object) return undefined;
@@ -29,15 +45,21 @@ export function I18nProvider({ children }) {
   const [language, setLanguageState] = useState(DEFAULT_LANGUAGE);
 
   useEffect(() => {
-    const initial = Cookies.get(COOKIE_NAME);
-    if (initial in dictionaries) {
-      setLanguageState(initial);
+    if (hasPreferenceConsent()) {
+      const initial = Cookies.get(COOKIE_NAME);
+      if (initial in dictionaries) {
+        setLanguageState(initial);
+      }
     }
   }, []);
 
   const setLanguage = useCallback((nextLanguage) => {
     const normalized = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
-    Cookies.set(COOKIE_NAME, normalized, { sameSite: "lax" });
+    if (hasPreferenceConsent()) {
+      Cookies.set(COOKIE_NAME, normalized, { sameSite: "lax" });
+    } else {
+      Cookies.remove(COOKIE_NAME, { path: "/" });
+    }
     setLanguageState(normalized);
   }, []);
 

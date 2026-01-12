@@ -240,11 +240,15 @@ export default function NavMenuOverlay({ open, onClose }) {
                 {t("menu.diamondGuide")}
               </Link>
             </li>
-            {/* <li className={styles.item}>
-              <Link className={`${styles.link} ${styles.muted}`} href="#" onClick={onClose} aria-disabled="true">
+            <li className={styles.item}>
+              <Link
+                className={`${styles.link} ${isActive("/shipping-returns") ? styles.activeLink : ""}`}
+                href="/shipping-returns"
+                onClick={onClose}
+              >
                 {t("menu.shippingReturns")}
               </Link>
-            </li> */}
+            </li>
             <li className={styles.item}>
               <Link
                 className={`${styles.link} ${isActive("/contact") ? styles.activeLink : ""}`}

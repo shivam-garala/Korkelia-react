@@ -1,0 +1,112 @@
+.page {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+.main {
+  padding: 0 0 90px;
+}
+
+.topLine {
+  height: 1px;
+  background: color-mix(in srgb, var(--color-primary), transparent 55%);
+  margin: 18px 0 40px;
+}
+
+.header {
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto 38px;
+  display: grid;
+  gap: 14px;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: 2.4px;
+  color: #606062;
+  text-transform: uppercase;
+}
+
+.intro {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.content {
+  max-width: 920px;
+  margin: 0 auto;
+  display: grid;
+  gap: 28px;
+}
+
+.section {
+  display: grid;
+  gap: 14px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  color: var(--color-heading);
+}
+
+.subsections {
+  display: grid;
+  gap: 16px;
+}
+
+.subsection {
+  display: grid;
+  gap: 8px;
+}
+
+.subTitle {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-heading);
+  letter-spacing: 0.4px;
+}
+
+.paragraph {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.list {
+  margin: 0;
+  padding-left: 20px;
+  list-style: disc;
+  color: var(--color-muted);
+  display: grid;
+  gap: 6px;
+}
+
+.listItem {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.contactLink {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.contactLink:hover,
+.contactLink:focus-visible {
+  text-decoration: underline;
+}
+
+.updated {
+  margin: 6px 0 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}
