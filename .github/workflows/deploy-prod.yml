@@ -39,7 +39,7 @@ jobs:
 
             # ---------- FETCH ENV ----------
             echo "🔐 Fetching environment file from S3..."
-            aws s3 cp "s3://$ENV_BUCKET/$ENV_PREFIX/$ENV_FILE" "$ENV_FILE"
+            aws s3 cp "s3://$ENV_BUCKET/$ENV_PREFIX/$ENV_FILE" .env
 
             if [ ! -s "$ENV_FILE" ]; then
               echo "❌ .env file missing or empty"
