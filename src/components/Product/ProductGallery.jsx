@@ -17,6 +17,17 @@ const isVideoItem = (item) =>
   item?.badge === "play" ||
   (item?.variant === "video" && isVideoSrc(item?.src));
 
+const resolveVideoSource = (item) => {
+  if (!item) return "";
+  return item.videoSrc ?? (isVideoSrc(item.src) ? item.src : "");
+};
+
+const hasRenderableMedia = (item) => {
+  if (!item || item.isSkeleton || item.isPlaceholder) return false;
+  if (isVideoItem(item)) return Boolean(resolveVideoSource(item));
+  return Boolean(item.src);
+};
+
 const buildDesignCacheKey = (designId) =>
   designId ? `design:${designId}` : "";
 
@@ -138,6 +149,18 @@ const getMediaKey = (item, index) => {
   );
 };
 
+const buildSlidesKey = (list) =>
+  list
+    .map((item, index) => {
+      if (!item) return `empty-${index}`;
+      const baseKey = getMediaKey(item, index);
+      const src = item.src ?? "";
+      const videoSrc = item.videoSrc ?? "";
+      const variant = item.variant ?? "";
+      return `${baseKey}:${src}:${videoSrc}:${variant}`;
+    })
+    .join("|");
+
 const sortMediaByOrder = (list) =>
   list
     .map((item, index) => ({
@@ -222,9 +245,8 @@ const resolveProductMedia = (product, imageVariants) => {
             : image?.variant && image.variant !== "video"
             ? image.variant
             : imageVariants[index % imageVariants.length];
-        const resolvedSrc = isVideo
-          ? (videoFromSrc ? "" : src)
-          : (src || fallbackByVariant(variant));
+        const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : src;
+        if (!isVideo && !resolvedSrc) return null;
         const next = {
           key: image?.id ?? image?.image_id ?? resolvedSrc ?? resolvedVideoSrc ?? index,
           variant,
@@ -235,13 +257,7 @@ const resolveProductMedia = (product, imageVariants) => {
         return next;
       })
       .filter(Boolean);
-    if (mapped.length) {
-      return { items: mapped, hasExplicitImages: true };
-    }
-    return {
-      items: [{ key: "no-image", variant: "square", src: fallbackByVariant("square") }],
-      hasExplicitImages: true,
-    };
+    return { items: mapped, hasExplicitImages: true };
   }
 
   const fallbackSrc = resolveImageSrc(
@@ -278,6 +294,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
     [designId]
   );
   const [activeDesignId, setActiveDesignId] = useState(explicitDesignId);
+  const [activeDesignBaseId, setActiveDesignBaseId] = useState(explicitDesignId);
   const [useActiveDesign, setUseActiveDesign] = useState(false);
   const imageVariants = useMemo(
     () => ["square", "tall", "circle", "wide"],
@@ -291,17 +308,23 @@ export default function ProductGallery({ items, productId = "", designId = "" })
     propProduct !== null ||
     (items !== null && items !== undefined);
 
-  useEffect(() => {
-    setActiveDesignId(explicitDesignId);
-    setUseActiveDesign(false);
-  }, [explicitDesignId]);
+  const canUseActiveDesignId = useMemo(() => {
+    if (!activeDesignId) return false;
+    if (explicitDesignId) return activeDesignBaseId === explicitDesignId;
+    return activeDesignBaseId === "";
+  }, [activeDesignBaseId, activeDesignId, explicitDesignId]);
+
+  const resolvedDesignId = useMemo(() => {
+    if (useActiveDesign && activeDesignId && canUseActiveDesignId) {
+      return activeDesignId;
+    }
+    if (explicitDesignId) return explicitDesignId;
+    if (activeDesignId && canUseActiveDesignId) return activeDesignId;
+    return "";
+  }, [activeDesignId, canUseActiveDesignId, explicitDesignId, useActiveDesign]);
 
   useEffect(() => {
     const updateCachedProduct = () => {
-      const resolvedDesignId =
-        useActiveDesign && activeDesignId
-          ? activeDesignId
-          : explicitDesignId || activeDesignId;
       setCachedProduct(readCachedProduct(productId, resolvedDesignId));
     };
 
@@ -331,16 +354,13 @@ export default function ProductGallery({ items, productId = "", designId = "" })
         canUpdateDesign
       ) {
         setActiveDesignId(String(updatedDesignId));
+        setActiveDesignBaseId(explicitDesignId);
         if (forceDesign || userInitiated) {
           setUseActiveDesign(true);
         }
       }
       const matchesProduct =
         updatedProductId && String(updatedProductId) === String(productId);
-      const resolvedDesignId =
-        useActiveDesign && activeDesignId
-          ? activeDesignId
-          : explicitDesignId || activeDesignId;
       const matchesDesign =
         updatedDesignId &&
         resolvedDesignId &&
@@ -354,7 +374,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
     return () => {
       window.removeEventListener("productCacheUpdated", handleCacheUpdate);
     };
-  }, [activeDesignId, explicitDesignId, productId, useActiveDesign]);
+  }, [explicitDesignId, productId, resolvedDesignId]);
 
   const { items: cachedItems, hasExplicitImages } = useMemo(
     () => resolveProductMedia(cachedProduct, imageVariants),
@@ -414,9 +434,8 @@ export default function ProductGallery({ items, productId = "", designId = "" })
             : item?.variant && item.variant !== "video"
             ? item.variant
             : imageVariants[index % imageVariants.length];
-        const resolvedSrc = isVideo
-          ? (videoFromSrc ? "" : src)
-          : (src || fallbackByVariant(variant));
+        const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : src;
+        if (!isVideo && !resolvedSrc) return null;
         const next = {
           ...item,
           key: item?.key ?? item?.id ?? resolvedSrc ?? resolvedVideoSrc ?? index,
@@ -430,31 +449,74 @@ export default function ProductGallery({ items, productId = "", designId = "" })
       .filter(Boolean);
   }, [hasArrayItems, items, imageVariants]);
 
-  const slides = useMemo(() => {
+  const mediaSource = useMemo(() => {
     if (hasPropImages) return propItems;
     if (hasExplicitImages) return cachedItems;
-    const base = propItems.length
-      ? propItems
-      : cachedItems.length
-      ? cachedItems
-      : baseItems;
-    if (base.length) return base;
+    if (propItems.length) return propItems;
+    if (cachedItems.length) return cachedItems;
+    return baseItems;
+  }, [baseItems, cachedItems, hasExplicitImages, hasPropImages, propItems]);
+
+  const hasAnyMedia = useMemo(
+    () => mediaSource.some((item) => hasRenderableMedia(item)),
+    [mediaSource]
+  );
+
+  const shouldUseFallback = hasResponse && !hasAnyMedia;
+
+  const slides = useMemo(() => {
     if (!hasResponse) return [];
-    return [{ key: "no-image", variant: "square", src: fallbackByVariant("square") }];
+    if (shouldUseFallback) {
+      return [{ key: "no-image", variant: "square", src: fallbackByVariant("square") }];
+    }
+    return mediaSource;
   }, [
-    baseItems,
-    cachedItems,
-    hasExplicitImages,
-    hasPropImages,
     hasResponse,
-    propItems,
+    mediaSource,
+    shouldUseFallback,
   ]);
 
+  const slidesKey = useMemo(() => buildSlidesKey(slides), [slides]);
+  const [loadedState, setLoadedState] = useState(() => ({
+    key: slidesKey,
+    map: {},
+  }));
+  const [failedState, setFailedState] = useState(() => ({
+    key: slidesKey,
+    map: {},
+  }));
+  const loadedMap = loadedState.key === slidesKey ? loadedState.map : {};
+  const failedMap = failedState.key === slidesKey ? failedState.map : {};
+  const markLoaded = useCallback(
+    (mediaKey) => {
+      if (!mediaKey) return;
+      const key = String(mediaKey);
+      setLoadedState((prev) => {
+        const baseMap = prev.key === slidesKey ? prev.map : {};
+        if (baseMap[key]) {
+          return prev.key === slidesKey ? prev : { key: slidesKey, map: baseMap };
+        }
+        return { key: slidesKey, map: { ...baseMap, [key]: true } };
+      });
+    },
+    [slidesKey]
+  );
+  const markFailed = useCallback(
+    (mediaKey) => {
+      if (!mediaKey) return;
+      const key = String(mediaKey);
+      setFailedState((prev) => {
+        const baseMap = prev.key === slidesKey ? prev.map : {};
+        if (baseMap[key]) {
+          return prev.key === slidesKey ? prev : { key: slidesKey, map: baseMap };
+        }
+        return { key: slidesKey, map: { ...baseMap, [key]: true } };
+      });
+    },
+    [slidesKey]
+  );
   const [open, setOpen] = useState(false);
   const [activeIndex, setActiveIndex] = useState(0);
-  const [galleryIndex, setGalleryIndex] = useState(0);
-  const [loadedMap, setLoadedMap] = useState({});
-  const [failedMap, setFailedMap] = useState({});
   const [touchStartX, setTouchStartX] = useState(null);
   const galleryRef = useRef(null);
   const galleryScrollRaf = useRef(null);
@@ -471,9 +533,40 @@ export default function ProductGallery({ items, productId = "", designId = "" })
 
   const displaySlides = useMemo(() => {
     if (filteredSlides.length) return filteredSlides;
-    if (!hasResponse || hasExplicitImages) return [];
-    return [{ key: "no-image", variant: "square", src: fallbackByVariant("square") }];
-  }, [filteredSlides, hasExplicitImages, hasResponse]);
+    if (!hasResponse) return [];
+    if (shouldUseFallback) {
+      return [{ key: "no-image", variant: "square", src: fallbackByVariant("square") }];
+    }
+    return [];
+  }, [filteredSlides, hasResponse, shouldUseFallback]);
+
+  const displaySlidesKey = useMemo(
+    () => buildSlidesKey(displaySlides),
+    [displaySlides]
+  );
+  const [galleryState, setGalleryState] = useState(() => ({
+    key: displaySlidesKey,
+    index: 0,
+  }));
+  const galleryIndex =
+    galleryState.key === displaySlidesKey ? galleryState.index : 0;
+  const setGalleryIndex = useCallback(
+    (nextIndex) => {
+      setGalleryState((prev) => {
+        const baseIndex = prev.key === displaySlidesKey ? prev.index : 0;
+        const resolved =
+          typeof nextIndex === "function" ? nextIndex(baseIndex) : nextIndex;
+        return { key: displaySlidesKey, index: resolved };
+      });
+    },
+    [displaySlidesKey]
+  );
+  const resolvedActiveIndex = displaySlides.length
+    ? Math.min(activeIndex, displaySlides.length - 1)
+    : 0;
+  const resolvedGalleryIndex = displaySlides.length
+    ? Math.min(galleryIndex, displaySlides.length - 1)
+    : 0;
 
   const showSkeleton = !hasResponse;
   const skeletonSlides = useMemo(
@@ -497,16 +590,19 @@ export default function ProductGallery({ items, productId = "", designId = "" })
         key: `placeholder-${variant}`,
         variant,
         isPlaceholder: true,
-        src: fallbackByVariant(variant),
+        src: shouldUseFallback ? fallbackByVariant(variant) : "",
       }));
     return placeholders.length ? [...displaySlides, ...placeholders] : displaySlides;
-  }, [showSkeleton, skeletonSlides, displaySlides, imageVariants]);
+  }, [showSkeleton, skeletonSlides, displaySlides, imageVariants, shouldUseFallback]);
 
-  const openAt = useCallback((index) => {
-    setActiveIndex(index);
-    setGalleryIndex(index);
-    setOpen(true);
-  }, []);
+  const openAt = useCallback(
+    (index) => {
+      setActiveIndex(index);
+      setGalleryIndex(index);
+      setOpen(true);
+    },
+    [setGalleryIndex]
+  );
 
   const close = useCallback(() => {
     setOpen(false);
@@ -566,18 +662,18 @@ export default function ProductGallery({ items, productId = "", designId = "" })
       setGalleryIndex(nextIndex);
       scrollToGalleryIndex(nextIndex);
     },
-    [displaySlides.length, scrollToGalleryIndex]
+    [displaySlides.length, scrollToGalleryIndex, setGalleryIndex]
   );
 
   const showGalleryPrev = useCallback(() => {
     if (displaySlides.length < 2) return;
-    goToGalleryIndex(galleryIndex - 1);
-  }, [galleryIndex, goToGalleryIndex, displaySlides.length]);
+    goToGalleryIndex(resolvedGalleryIndex - 1);
+  }, [goToGalleryIndex, displaySlides.length, resolvedGalleryIndex]);
 
   const showGalleryNext = useCallback(() => {
     if (displaySlides.length < 2) return;
-    goToGalleryIndex(galleryIndex + 1);
-  }, [galleryIndex, goToGalleryIndex, displaySlides.length]);
+    goToGalleryIndex(resolvedGalleryIndex + 1);
+  }, [goToGalleryIndex, displaySlides.length, resolvedGalleryIndex]);
 
   const handleGalleryScroll = useCallback(() => {
     if (!galleryRef.current) return;
@@ -604,7 +700,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
       });
       setGalleryIndex(bestIndex);
     });
-  }, []);
+  }, [setGalleryIndex]);
 
   useEffect(() => {
     if (!open) return;
@@ -629,17 +725,14 @@ export default function ProductGallery({ items, productId = "", designId = "" })
     };
   }, [open]);
 
-  const handleMediaError = useCallback((mediaKey) => {
-    if (!mediaKey) return;
-    const key = String(mediaKey);
-    setFailedMap((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
-    setLoadedMap((prev) => (prev[key] ? prev : { ...prev, [key]: true }));
-  }, []);
-
-  useEffect(() => {
-    setLoadedMap({});
-    setFailedMap({});
-  }, [slides]);
+  const handleMediaError = useCallback(
+    (mediaKey) => {
+      if (!mediaKey) return;
+      markFailed(mediaKey);
+      markLoaded(mediaKey);
+    },
+    [markFailed, markLoaded]
+  );
 
   useEffect(() => {
     if (!slides.length) return;
@@ -658,7 +751,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
         const video = document.createElement("video");
         const handleLoaded = () => {
           if (!active) return;
-          setLoadedMap((prev) => (prev[itemKey] ? prev : { ...prev, [itemKey]: true }));
+          markLoaded(itemKey);
         };
         const handleError = () => {
           if (!active) return;
@@ -686,7 +779,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
       const img = new ImgCtor();
       const handleLoaded = () => {
         if (!active) return;
-        setLoadedMap((prev) => (prev[itemKey] ? prev : { ...prev, [itemKey]: true }));
+        markLoaded(itemKey);
       };
       const handleError = () => {
         if (!active) return;
@@ -705,25 +798,17 @@ export default function ProductGallery({ items, productId = "", designId = "" })
       active = false;
       cleanups.forEach((cleanup) => cleanup());
     };
-  }, [handleMediaError, slides]);
+  }, [handleMediaError, markLoaded, slides]);
 
   useEffect(() => {
-    setGalleryIndex(0);
     if (displaySlides.length) {
       requestAnimationFrame(() => scrollToGalleryIndex(0));
     }
-  }, [displaySlides, scrollToGalleryIndex]);
+  }, [displaySlidesKey, displaySlides.length, scrollToGalleryIndex]);
 
-  useEffect(() => {
-    if (!displaySlides.length) return;
-    if (activeIndex >= displaySlides.length) {
-      setActiveIndex(0);
-    }
-  }, [activeIndex, displaySlides.length]);
-
-  const active = displaySlides[activeIndex];
+  const active = displaySlides[resolvedActiveIndex];
   const isActiveVideo = active ? isVideoItem(active) : false;
-  const activeKey = active ? getMediaKey(active, activeIndex) : "";
+  const activeKey = active ? getMediaKey(active, resolvedActiveIndex) : "";
   const activeFallback = fallbackByVariant(active?.variant);
   const activeImageSrc =
     active && !isActiveVideo
@@ -737,7 +822,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
       return;
     }
     zoomRef.current?.resetTransform?.();
-  }, [activeIndex, isActiveVideo, open]);
+  }, [resolvedActiveIndex, isActiveVideo, open]);
 
   const handleZoomIn = useCallback(() => {
     if (isActiveVideo) return;
@@ -806,7 +891,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
       </div>
       {displaySlides.length > 1 ? (
         <div className={styles.modalCount}>
-          {activeIndex + 1} / {displaySlides.length}
+          {resolvedActiveIndex + 1} / {displaySlides.length}
         </div>
       ) : null}
       {displaySlides.length > 1 ? (
@@ -823,10 +908,10 @@ export default function ProductGallery({ items, productId = "", designId = "" })
               <button
                 key={item.key ?? item.src ?? index}
                 type="button"
-                className={`${styles.modalDot} ${index === activeIndex ? styles.modalDotActive : ""}`}
+                className={`${styles.modalDot} ${index === resolvedActiveIndex ? styles.modalDotActive : ""}`}
                 onClick={() => setActiveIndex(index)}
                 aria-label={`Show media ${index + 1}`}
-                aria-current={index === activeIndex ? "true" : undefined}
+                aria-current={index === resolvedActiveIndex ? "true" : undefined}
               >
                 <span className={styles.modalDotInner}>
                   {isVideo && videoSrc ? (
@@ -919,10 +1004,10 @@ export default function ProductGallery({ items, productId = "", designId = "" })
                           preload="metadata"
                           poster={imageSrc}
                           onLoadedData={() =>
-                            setLoadedMap((prev) => ({ ...prev, [itemKey]: true }))
+                            markLoaded(itemKey)
                           }
                           onLoadedMetadata={() =>
-                            setLoadedMap((prev) => ({ ...prev, [itemKey]: true }))
+                            markLoaded(itemKey)
                           }
                           onError={() => handleMediaError(itemKey)}
                         >
@@ -935,7 +1020,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
                           alt=""
                           loading="lazy"
                           onLoad={() =>
-                            setLoadedMap((prev) => ({ ...prev, [itemKey]: true }))
+                            markLoaded(itemKey)
                           }
                           onError={() => handleMediaError(itemKey)}
                         />
@@ -947,10 +1032,10 @@ export default function ProductGallery({ items, productId = "", designId = "" })
                           fill
                           sizes="(max-width: 980px) 100vw, 50vw"
                           onLoad={() =>
-                            setLoadedMap((prev) => ({ ...prev, [itemKey]: true }))
+                            markLoaded(itemKey)
                           }
                           onLoadingComplete={() =>
-                            setLoadedMap((prev) => ({ ...prev, [itemKey]: true }))
+                            markLoaded(itemKey)
                           }
                           onError={() => handleMediaError(itemKey)}
                         />
@@ -993,10 +1078,10 @@ export default function ProductGallery({ items, productId = "", designId = "" })
                 <button
                   key={item.key ?? item.src ?? index}
                   type="button"
-                  className={`${styles.galleryDot} ${index === galleryIndex ? styles.galleryDotActive : ""}`}
+                  className={`${styles.galleryDot} ${index === resolvedGalleryIndex ? styles.galleryDotActive : ""}`}
                   onClick={() => goToGalleryIndex(index)}
                   aria-label={`Go to image ${index + 1}`}
-                  aria-current={index === galleryIndex ? "true" : undefined}
+                  aria-current={index === resolvedGalleryIndex ? "true" : undefined}
                 />
               ))}
             </div>
@@ -1006,7 +1091,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
 
       <Modal
         open={open && Boolean(active)}
-        title={`Media ${activeIndex + 1} / ${displaySlides.length}`}
+        title={`Media ${resolvedActiveIndex + 1} / ${displaySlides.length}`}
         onClose={close}
         footer={modalFooter}
         className={styles.sliderModal}
@@ -1047,7 +1132,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
                 </video>
               ) : (
                 <TransformWrapper
-                  key={active.key ?? active.src ?? activeIndex}
+                  key={active.key ?? active.src ?? resolvedActiveIndex}
                   ref={(ref) => {
                     zoomRef.current = ref;
                   }}
