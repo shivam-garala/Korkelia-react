@@ -85,6 +85,7 @@ export default function AppointmentPage() {
           captchaLabel: "Captcha",
           captchaRequired: "Captcha on pakollinen.",
           captchaFailed: "Captcha tarkistus epaonnistui.",
+          captchaLoadFailed: "Captcha lataus epaonnistui.",
           captchaMissingKey: "Captcha ei ole asetettu.",
           details: "Kuvaile koru, josta olet kiinnostunut",
           submit: "Laheta",
@@ -104,6 +105,7 @@ export default function AppointmentPage() {
           captchaLabel: "Captcha",
           captchaRequired: "Captcha is required.",
           captchaFailed: "Captcha verification failed.",
+          captchaLoadFailed: "Captcha failed to load. Please refresh.",
           captchaMissingKey: "Captcha is not configured.",
           details: "Please describe the jewelry item you are interested in",
           submit: "Submit",
@@ -121,6 +123,7 @@ export default function AppointmentPage() {
   const [slotOptions, setSlotOptions] = useState([]);
   const [slotLoading, setSlotLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState("");
+  const [recaptchaLoadError, setRecaptchaLoadError] = useState(false);
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
   const recaptchaWidgetId = useRef<number | null>(null);
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
@@ -143,17 +146,46 @@ export default function AppointmentPage() {
     if (!siteKey || !recaptchaRef.current) return;
     if (!window.grecaptcha || typeof window.grecaptcha.render !== "function") return;
     if (recaptchaWidgetId.current !== null) return;
-    recaptchaWidgetId.current = window.grecaptcha.render(recaptchaRef.current, {
-      sitekey: siteKey,
-      callback: (token) => setRecaptchaToken(token),
-      "expired-callback": () => setRecaptchaToken(""),
-      "error-callback": () => setRecaptchaToken(""),
-    });
-  }, [siteKey]);
+    try {
+      recaptchaWidgetId.current = window.grecaptcha.render(recaptchaRef.current, {
+        sitekey: siteKey,
+        callback: (token) => setRecaptchaToken(token),
+        "expired-callback": () => setRecaptchaToken(""),
+        "error-callback": () => setRecaptchaToken(""),
+      });
+      setRecaptchaLoadError(false);
+    } catch (error) {
+      setRecaptchaLoadError(true);
+    }
+  }, [setRecaptchaLoadError, setRecaptchaToken, siteKey]);
 
   useEffect(() => {
     renderRecaptcha();
   }, [renderRecaptcha]);
+
+  useEffect(() => {
+    if (!siteKey) return;
+    let cancelled = false;
+    let attempts = 0;
+    const maxAttempts = 40;
+    const tryRender = () => {
+      if (cancelled || recaptchaWidgetId.current !== null) return;
+      if (window.grecaptcha && typeof window.grecaptcha.render === "function") {
+        renderRecaptcha();
+        return;
+      }
+      attempts += 1;
+      if (attempts >= maxAttempts) {
+        setRecaptchaLoadError(true);
+        return;
+      }
+      setTimeout(tryRender, 200);
+    };
+    tryRender();
+    return () => {
+      cancelled = true;
+    };
+  }, [renderRecaptcha, siteKey]);
 
   useEffect(() => {
     let active = true;
@@ -446,7 +478,11 @@ export default function AppointmentPage() {
                   <span className={fieldStyles.label}>{labels.captchaLabel}</span>
                 </div>
                 {siteKey ? (
-                  <div className={styles.recaptchaWidget} ref={recaptchaRef} />
+                  recaptchaLoadError ? (
+                    <p className={styles.recaptchaError}>{labels.captchaLoadFailed}</p>
+                  ) : (
+                    <div className={styles.recaptchaWidget} ref={recaptchaRef} />
+                  )
                 ) : (
                   <p className={styles.recaptchaError}>{labels.captchaMissingKey}</p>
                 )}
@@ -466,6 +502,7 @@ export default function AppointmentPage() {
           strategy="afterInteractive"
           onLoad={renderRecaptcha}
           onReady={renderRecaptcha}
+          onError={() => setRecaptchaLoadError(true)}
         />
       ) : null}
       <SiteFooter />

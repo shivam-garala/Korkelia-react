@@ -1,6 +1,7 @@
 'use client';
 
 import { useEffect, useMemo, useState } from "react";
+import Image from "next/image";
 import { usePathname, useRouter } from "next/navigation";
 import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import AdminHeader from "../../../components/AdminHeader/AdminHeader.jsx";
@@ -59,6 +60,8 @@ function normalizeDisplayValue(value) {
   if (value === null || value === undefined) return "";
   return String(value);
 }
+
+const passthroughImageLoader = ({ src }) => src;
 
 function resolveImageSrc(image) {
   if (!image) return "";
@@ -751,11 +754,14 @@ export default function ProductPage() {
                       className={styles.mediaUploadTarget}
                       htmlFor={`product-image-${fileInputKey}`}
                     >
-                      <img
+                      <Image
                         className={`${styles.mediaThumb}${hasAnyImage ? "" : ` ${styles.mediaThumbPlaceholder}`}`}
                         src={previewSrc}
                         alt="Product preview"
-                        loading="lazy"
+                        width={360}
+                        height={360}
+                        loader={passthroughImageLoader}
+                        unoptimized
                       />
                     </label>
                     {hasLocalImage ? (
@@ -908,11 +914,14 @@ export default function ProductPage() {
                       className={styles.mediaUploadTarget}
                       htmlFor={`product-image-${fileInputKey}`}
                     >
-                      <img
+                      <Image
                         className={`${styles.mediaThumb}${hasAnyImage ? "" : ` ${styles.mediaThumbPlaceholder}`}`}
                         src={previewSrc}
                         alt="Product preview"
-                        loading="lazy"
+                        width={360}
+                        height={360}
+                        loader={passthroughImageLoader}
+                        unoptimized
                       />
                     </label>
                     {hasLocalImage ? (
