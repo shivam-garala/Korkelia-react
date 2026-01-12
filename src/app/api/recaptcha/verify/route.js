@@ -5,7 +5,7 @@ const jsonResponse = (body, status = 200) =>
   });
 
 export async function POST(request) {
-  const secret = process.env.RECAPTCHA_SECRET_KEY;
+  const secret = process.env.NEXT_PUBLIC_RECAPTCHA_SECRET_KEY;
   if (!secret) {
     return jsonResponse({ success: false, error: "missing-secret" }, 500);
   }
