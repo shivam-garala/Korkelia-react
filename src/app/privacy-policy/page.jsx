@@ -290,40 +290,50 @@ export default function PrivacyPolicyPage() {
           </div>
 
           <div className={styles.content}>
-            {policyContent.sections.map((section) => (
-              <section key={section.title} className={styles.section}>
-                <h3 className={styles.sectionTitle}>{section.title}</h3>
-                {section.body ? renderParagraphs(section.body, styles.paragraph) : null}
-                {section.list ? renderList(section.list) : null}
-                {section.afterList ? renderParagraphs(section.afterList, styles.paragraph) : null}
-                {section.secondaryList ? renderList(section.secondaryList) : null}
-                {section.subsections ? (
-                  <div className={styles.subsections}>
-                    {section.subsections.map((subsection) => (
-                      <div key={subsection.title} className={styles.subsection}>
-                        <h4 className={styles.subTitle}>{subsection.title}</h4>
-                        {subsection.body
-                          ? renderParagraphs(subsection.body, styles.paragraph)
-                          : null}
-                        {subsection.list ? renderList(subsection.list) : null}
-                        {subsection.afterList
-                          ? renderParagraphs(subsection.afterList, styles.paragraph)
-                          : null}
-                      </div>
-                    ))}
-                  </div>
-                ) : null}
-                {section.contactEmail ? (
-                  <p className={styles.paragraph}>
-                    Email:{" "}
-                    <a className={styles.contactLink} href={`mailto:${section.contactEmail}`}>
-                      {section.contactEmail}
-                    </a>
-                  </p>
-                ) : null}
-                {section.footer ? <p className={styles.updated}>{section.footer}</p> : null}
-              </section>
-            ))}
+            {policyContent.sections.map((section) => {
+              const isContactSection = section.title === "13. Contact";
+              return (
+                <section
+                  key={section.title}
+                  className={
+                    isContactSection
+                      ? `${styles.section} ${styles.contactSection}`
+                      : styles.section
+                  }
+                >
+                  <h3 className={styles.sectionTitle}>{section.title}</h3>
+                  {section.body ? renderParagraphs(section.body, styles.paragraph) : null}
+                  {section.list ? renderList(section.list) : null}
+                  {section.afterList ? renderParagraphs(section.afterList, styles.paragraph) : null}
+                  {section.secondaryList ? renderList(section.secondaryList) : null}
+                  {section.subsections ? (
+                    <div className={styles.subsections}>
+                      {section.subsections.map((subsection) => (
+                        <div key={subsection.title} className={styles.subsection}>
+                          <h4 className={styles.subTitle}>{subsection.title}</h4>
+                          {subsection.body
+                            ? renderParagraphs(subsection.body, styles.paragraph)
+                            : null}
+                          {subsection.list ? renderList(subsection.list) : null}
+                          {subsection.afterList
+                            ? renderParagraphs(subsection.afterList, styles.paragraph)
+                            : null}
+                        </div>
+                      ))}
+                    </div>
+                  ) : null}
+                  {section.contactEmail ? (
+                    <p className={styles.paragraph}>
+                      Email:{" "}
+                      <a className={styles.contactLink} href={`mailto:${section.contactEmail}`}>
+                        {section.contactEmail}
+                      </a>
+                    </p>
+                  ) : null}
+                  {section.footer ? <p className={styles.updated}>{section.footer}</p> : null}
+                </section>
+              );
+            })}
           </div>
         </Container>
       </main>

@@ -301,8 +301,17 @@ export default function ShippingReturnsPage() {
           </div>
 
           <div className={styles.content}>
-            {policyContent.sections.map((section) => (
-              <section key={section.title} className={styles.section}>
+            {policyContent.sections.map((section) => {
+              const isContactSection = section.title === "13) Contact";
+              return (
+                <section
+                  key={section.title}
+                  className={
+                    isContactSection
+                      ? `${styles.section} ${styles.contactSection}`
+                      : styles.section
+                  }
+                >
                 <h3 className={styles.sectionTitle}>{section.title}</h3>
                 {section.body ? renderParagraphs(section.body, styles.paragraph) : null}
                 {section.list ? renderList(section.list) : null}
@@ -329,8 +338,9 @@ export default function ShippingReturnsPage() {
                   </p>
                 ) : null}
                 {section.footer ? <p className={styles.updated}>{section.footer}</p> : null}
-              </section>
-            ))}
+                </section>
+              );
+            })}
           </div>
         </Container>
       </main>

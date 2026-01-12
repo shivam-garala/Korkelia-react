@@ -41,9 +41,12 @@ export default function SiteFooter() {
                 <Link className={styles.link} href="/shipping-returns">
                   {t("footer.links.shippingReturns")}
                 </Link>
-                {/* <Link className={styles.link} href="/cookie-policy">
+                <Link className={styles.link} href="/cookie-policy">
                   {t("footer.links.cookiePolicy")}
-                </Link> */}
+                </Link>
+                <Link className={styles.link} href="/disclaimer">
+                  {t("footer.links.disclaimer")}
+                </Link>
                 <Link className={styles.link} href="/contact">
                   {t("footer.links.contact")}
                 </Link>

@@ -391,7 +391,7 @@ export default function CookiePolicyPage() {
               </p>
             </section>
 
-            <section className={styles.section}>
+            <section className={`${styles.section} ${styles.contactSection}`}>
               <h3 className={styles.sectionTitle}>8. Contact</h3>
               <p className={styles.paragraph}>
                 If you have questions about cookies or personal data processing, contact:

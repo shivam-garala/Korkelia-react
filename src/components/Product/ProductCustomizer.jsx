@@ -782,7 +782,7 @@ export default function ProductCustomizer({
     filterAvailabilityValue === "3" ||
     filterAvailabilityValue === "4";
   const allowCutInQuery = filterAvailabilityValue !== "0" && !hideCutSection;
-  const hideCaratSection = filterAvailabilityValue === "2";
+  const hideCaratSection = filterAvailabilityValue === "2" || filterAvailabilityValue === "3";
   const allowCaratInQuery = filterAvailabilityValue !== "0" && !hideCaratSection;
   const hideClaritySection = filterAvailabilityValue === "3";
   const hideSizeSection = filterAvailabilityValue === "3";
@@ -1270,31 +1270,25 @@ export default function ProductCustomizer({
     designId,
   ]);
 
-  // const variantTitle =
-  //   variantEnabled
-  //     ? resolveTranslationName(
-  //         variantDetails?.design_translation ??
-  //           variantDetails?.design_translations ??
-  //           variantDetails?.translations,
-  //         languageId
-  //       ) ||
-  //       normalizeString(variantDetails?.design_variant_name) ||
-  //       normalizeString(variantDetails?.product_name)
-  //     : "";
+  const variantTranslationSource =
+    variantDetails?.design_translation ??
+    variantDetails?.design_translations ??
+    variantDetails?.translations ??
+    variantDetails?.design_name_array ??
+    variantDetails?.designNameArray ??
+    variantDetails?.product_name_array ??
+    variantDetails?.productNameArray ??
+    variantDetails?.product_translations ??
+    variantDetails?.productTranslations ??
+    null;
+  const variantTitle = variantEnabled
+    ? resolveTranslationName(variantTranslationSource, languageId) ||
+      normalizeString(variantDetails?.design_variant_name) ||
+      normalizeString(variantDetails?.product_name)
+    : "";
   const variantDescription =
     variantEnabled
-      ? resolveTranslationDescription(
-          variantDetails?.design_translation ??
-            variantDetails?.design_translations ??
-            variantDetails?.translations ??
-            variantDetails?.design_name_array ??
-            variantDetails?.designNameArray ??
-            variantDetails?.product_name_array ??
-            variantDetails?.productNameArray ??
-            variantDetails?.product_translations ??
-            variantDetails?.productTranslations,
-          languageId
-        ) ||
+      ? resolveTranslationDescription(variantTranslationSource, languageId) ||
         normalizeString(variantDetails?.description ?? "")
       : "";
 
@@ -1323,8 +1317,7 @@ export default function ProductCustomizer({
   );
 
   const productTitle =
-    // variantTitle ||
-    // normalizeString(productDetails?.product_name) ||
+    variantTitle ||
     translatedTitle ||
     normalizeString(productDetails?.design?.design_variant_name) ||
     normalizeString(productDetails?.product_name) ||
@@ -1365,6 +1358,23 @@ export default function ProductCustomizer({
     }
     
     if (!productId || !selectedMetalId || !selectedKaratId) {
+      setVariantDetails(null);
+      setVariantAdjustedFilters(null);
+      setVariantDesignAvailable(null);
+      setVariantLoading(false);
+      variantFromCacheRef.current = false;
+      return () => {
+        active = false;
+      };
+    }
+
+    // Skip variant API call when is_filter_available is 4 AND coming from listing page redirect (not user filtering)
+    if (
+      filterAvailabilityValue === "4" &&
+      hasPrefilledVariant &&
+      listingDesign &&
+      !userVariantInteractionRef.current
+    ) {
       setVariantDetails(null);
       setVariantAdjustedFilters(null);
       setVariantDesignAvailable(null);
@@ -1497,6 +1507,8 @@ export default function ProductCustomizer({
     allowCaratInQuery,
     shouldSkipVariantFetch,
     listingDesign,
+    filterAvailabilityValue,
+    hasPrefilledVariant,
   ]);
 
   useEffect(() => {
