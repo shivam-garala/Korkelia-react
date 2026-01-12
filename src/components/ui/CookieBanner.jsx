@@ -12,6 +12,7 @@ export default function CookieBanner() {
   const { language } = useI18n();
   const [visible, setVisible] = useState(false);
   const [showSettings, setShowSettings] = useState(false);
+  const [preferencesEnabled, setPreferencesEnabled] = useState(false);
   const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
   const [marketingEnabled, setMarketingEnabled] = useState(false);
   const policyHref = "/privacy-policy";
@@ -21,13 +22,15 @@ export default function CookieBanner() {
       ? {
           title: "Evasteasetukset",
           message:
-            "Kaytamme valttamattomia evasteita sivuston toimintaan. Suostumuksellasi kaytamme myos analytiikka- ja markkinointievasteita.",
+            "Kaytamme valttamattomia evasteita sivuston toimintaan. Voit valita otatko kayttoon toiminnalliset, analytiikka- ja markkinointievasteet.",
           acceptAll: "Hyvaksy kaikki",
           decline: "Hylkaa ei-valttamattomat",
           save: "Tallenna asetukset",
           settings: "Asetukset",
           necessaryTitle: "Valttamattomat",
           necessaryNote: "Aina paalla. Tarvitaan sivuston toimintaan.",
+          preferencesTitle: "Toiminnalliset",
+          preferencesNote: "Muistaa valinnat, kuten kieli ja ulkoasu.",
           analyticsTitle: "Analytiikka",
           analyticsNote: "Auttaa meita ymmartamaan sivuston kayttoa.",
           marketingTitle: "Markkinointi",
@@ -37,13 +40,15 @@ export default function CookieBanner() {
       : {
           title: "Cookie preferences",
           message:
-            "We use necessary cookies to make the site work. With your consent, we also use analytics and marketing cookies.",
+            "We use necessary cookies to make the site work. You can choose whether to enable preference, analytics, and marketing cookies.",
           acceptAll: "Accept all",
           decline: "Reject non-essential",
           save: "Save preferences",
           settings: "Preferences",
           necessaryTitle: "Necessary",
           necessaryNote: "Always on. Required for the site to function.",
+          preferencesTitle: "Preferences",
+          preferencesNote: "Remembers your choices like language and layout.",
           analyticsTitle: "Analytics",
           analyticsNote: "Helps us understand how the site is used.",
           marketingTitle: "Marketing",
@@ -67,6 +72,13 @@ export default function CookieBanner() {
     setVisible(false);
   };
 
+  const applyConsent = (payload) => {
+    if (!payload.preferences) {
+      Cookies.remove("siteLang", { path: "/" });
+    }
+    saveConsent(payload);
+  };
+
   if (!visible) return null;
 
   return (
@@ -88,7 +100,19 @@ export default function CookieBanner() {
               </div>
               <input className={styles.toggle} type="checkbox" checked readOnly disabled />
             </div>
-            {/*<div className={styles.settingRow}>
+            <div className={styles.settingRow}>
+              <div className={styles.settingText}>
+                <div className={styles.settingTitle}>{labels.preferencesTitle}</div>
+                <div className={styles.settingNote}>{labels.preferencesNote}</div>
+              </div>
+              <input
+                className={styles.toggle}
+                type="checkbox"
+                checked={preferencesEnabled}
+                onChange={(event) => setPreferencesEnabled(event.target.checked)}
+              />
+            </div>
+            <div className={styles.settingRow}>
               <div className={styles.settingText}>
                 <div className={styles.settingTitle}>{labels.analyticsTitle}</div>
                 <div className={styles.settingNote}>{labels.analyticsNote}</div>
@@ -111,34 +135,36 @@ export default function CookieBanner() {
                 checked={marketingEnabled}
                 onChange={(event) => setMarketingEnabled(event.target.checked)}
               />
-            </div>*/}
+            </div>
           </div>
         ) : null}
       </div>
       <div className={styles.actions}>
         {showSettings ? (
           <>
-            {/* <button
+            <button
               type="button"
               className={styles.secondaryButton}
               onClick={() =>
-                saveConsent({
+                applyConsent({
                   choice: "rejected",
                   necessary: true,
+                  preferences: false,
                   analytics: false,
                   marketing: false,
                 })
               }
             >
               {labels.decline}
-            </button> */}
+            </button>
             <button
               type="button"
               className={styles.secondaryButton}
               onClick={() =>
-                saveConsent({
+                applyConsent({
                   choice: "accepted",
                   necessary: true,
+                  preferences: true,
                   analytics: true,
                   marketing: true,
                 })
@@ -150,9 +176,10 @@ export default function CookieBanner() {
               type="button"
               className={styles.primaryButton}
               onClick={() =>
-                saveConsent({
+                applyConsent({
                   choice: "custom",
                   necessary: true,
+                  preferences: preferencesEnabled,
                   analytics: analyticsEnabled,
                   marketing: marketingEnabled,
                 })
@@ -163,27 +190,29 @@ export default function CookieBanner() {
           </>
         ) : (
           <>
-            {/* <button
+            <button
               type="button"
               className={styles.secondaryButton}
               onClick={() =>
-                saveConsent({
+                applyConsent({
                   choice: "rejected",
                   necessary: true,
+                  preferences: false,
                   analytics: false,
                   marketing: false,
                 })
               }
             >
               {labels.decline}
-            </button> */}
+            </button>
             <button
               type="button"
               className={styles.primaryButton}
               onClick={() =>
-                saveConsent({
+                applyConsent({
                   choice: "accepted",
                   necessary: true,
+                  preferences: true,
                   analytics: true,
                   marketing: true,
                 })

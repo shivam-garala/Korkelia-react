@@ -35,12 +35,15 @@ export default function SiteFooter() {
             <div>
               <p className={styles.infoTitle}>{t("footer.infoTitle")}</p>
               <nav className={styles.infoLinks} aria-label={t("footer.infoTitle")}>
-                <Link className={styles.link} href="#">
+                <Link className={styles.link} href="/privacy-policy">
                   {t("footer.links.privacy")}
                 </Link>
-                <Link className={styles.link} href="#">
+                <Link className={styles.link} href="/shipping-returns">
                   {t("footer.links.shippingReturns")}
                 </Link>
+                {/* <Link className={styles.link} href="/cookie-policy">
+                  {t("footer.links.cookiePolicy")}
+                </Link> */}
                 <Link className={styles.link} href="/contact">
                   {t("footer.links.contact")}
                 </Link>

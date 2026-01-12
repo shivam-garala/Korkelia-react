@@ -37,7 +37,7 @@ const initialForm = {
 const isWeekendDay = (date) => {
   if (!date) return false;
   const weekday = date.getDay();
-  return weekday === 0 || weekday === 6;
+  return weekday === 0;
 };
 
 const isPastDay = (date) => {
@@ -112,8 +112,8 @@ export default function AppointmentPage() {
         };
   const weekendMessage =
     languageKey === "fi"
-      ? "Lauantai ja sunnuntai eivat ole varattavissa."
-      : "Saturday and Sunday are not available.";
+      ? "Sunnuntai ei ole varattavissa."
+      : "Sunday is not available.";
   const pastDateMessage =
     languageKey === "fi"
       ? "Vain tulevat paivat ovat saatavilla."

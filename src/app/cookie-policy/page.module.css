@@ -1,0 +1,244 @@
+.page {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+.main {
+  padding: 0 0 90px;
+}
+
+.topLine {
+  height: 1px;
+  background: color-mix(in srgb, var(--color-primary), transparent 55%);
+  margin: 18px 0 40px;
+}
+
+.header {
+  text-align: center;
+  max-width: 860px;
+  margin: 0 auto 38px;
+  display: grid;
+  gap: 14px;
+}
+
+.heading {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: 2.4px;
+  color: #606062;
+  text-transform: uppercase;
+}
+
+.intro {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.inlineLink {
+  color: var(--color-primary);
+  text-decoration: underline;
+}
+
+.content {
+  max-width: 920px;
+  margin: 0 auto;
+  display: grid;
+  gap: 28px;
+}
+
+.section {
+  display: grid;
+  gap: 14px;
+}
+
+.sectionTitle {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 500;
+  color: var(--color-heading);
+}
+
+.subsections {
+  display: grid;
+  gap: 16px;
+}
+
+.subsection {
+  display: grid;
+  gap: 8px;
+}
+
+.subTitle {
+  margin: 0;
+  font-weight: 600;
+  color: var(--color-heading);
+  letter-spacing: 0.4px;
+}
+
+.paragraph {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.list {
+  margin: 0;
+  padding-left: 20px;
+  list-style: disc;
+  color: var(--color-muted);
+  display: grid;
+  gap: 6px;
+}
+
+.listItem {
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.preferencesPanel {
+  margin-top: 18px;
+  padding: 18px;
+  border-radius: 12px;
+  border: 1px solid color-mix(in srgb, var(--color-line), transparent 55%);
+  background: #ffffff;
+  display: grid;
+  gap: 12px;
+}
+
+.panelTitle {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-size: 16px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  color: var(--color-heading);
+}
+
+.panelNote {
+  margin: 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}
+
+.panelRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 12px;
+}
+
+.panelText {
+  display: grid;
+  gap: 2px;
+}
+
+.panelLabel {
+  font-size: 12px;
+  font-weight: 600;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+}
+
+.panelHint {
+  font-size: 12px;
+  color: var(--color-muted);
+}
+
+.toggle {
+  width: 18px;
+  height: 18px;
+}
+
+.panelActions {
+  display: flex;
+  flex-wrap: wrap;
+  gap: 10px;
+  justify-content: flex-end;
+}
+
+.primaryButton,
+.secondaryButton {
+  border-radius: 999px;
+  padding: 8px 16px;
+  font-size: 12px;
+  letter-spacing: 0.6px;
+  text-transform: uppercase;
+  cursor: pointer;
+  border: 1px solid transparent;
+  font-family: var(--font-body);
+}
+
+.primaryButton {
+  background: var(--color-primary);
+  color: #ffffff;
+  border-color: var(--color-primary);
+}
+
+.secondaryButton {
+  background: transparent;
+  color: var(--color-heading);
+  border-color: color-mix(in srgb, var(--color-line), transparent 30%);
+}
+
+.secondaryButton:hover {
+  border-color: var(--color-primary);
+  color: var(--color-primary);
+}
+
+.statusMessage {
+  margin: 0;
+  font-size: 13px;
+  color: var(--color-muted);
+}
+
+.tableWrap {
+  width: 100%;
+  overflow-x: auto;
+  border: 1px solid var(--color-border);
+  border-radius: 8px;
+}
+
+.table {
+  width: 100%;
+  border-collapse: collapse;
+  min-width: 640px;
+}
+
+.tableHead {
+  text-align: left;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.6px;
+  color: var(--color-heading);
+  padding: 12px 14px;
+  border-bottom: 1px solid var(--color-border);
+  background: #f8f8f8;
+}
+
+.tableCell {
+  padding: 12px 14px;
+  font-size: 14px;
+  color: var(--color-muted);
+  border-bottom: 1px solid var(--color-border);
+}
+
+.contactLink {
+  color: var(--color-primary);
+  text-decoration: none;
+}
+
+.contactLink:hover,
+.contactLink:focus-visible {
+  text-decoration: underline;
+}
+
+.updated {
+  margin: 6px 0 0;
+  color: var(--color-muted);
+  font-size: 14px;
+}

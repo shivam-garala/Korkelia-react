@@ -777,10 +777,16 @@ export default function ProductCustomizer({
       filterData?.is_filter_available ??
       ""
   );
-  const hideCutSection = filterAvailabilityValue === "2";
+  const hideCutSection =
+    filterAvailabilityValue === "2" ||
+    filterAvailabilityValue === "3" ||
+    filterAvailabilityValue === "4";
   const allowCutInQuery = filterAvailabilityValue !== "0" && !hideCutSection;
   const hideCaratSection = filterAvailabilityValue === "2";
   const allowCaratInQuery = filterAvailabilityValue !== "0" && !hideCaratSection;
+  const hideClaritySection = filterAvailabilityValue === "3";
+  const hideSizeSection = filterAvailabilityValue === "3";
+  const hideEngravingSection = filterAvailabilityValue === "3";
 
   useEffect(() => {
     const controller = new AbortController();
@@ -932,6 +938,9 @@ export default function ProductCustomizer({
     if (!selectedQualityOption?.isLab) return clarityOptions;
     return clarityOptions.filter((opt) => opt.isLab);
   }, [clarityOptions, qualityOptions, quality]);
+  const showQualitySelect = qualityOptions.length > 0;
+  const showClaritySelect = filteredClarityOptions.length > 0 && !hideClaritySection;
+  const showDiamondTypeSection = showQualitySelect || showClaritySelect;
 
   const caratOptions = useMemo(() => {
     const list = Array.isArray(filterData?.carats) ? filterData.carats : [];
@@ -983,6 +992,30 @@ export default function ProductCustomizer({
     });
     return Array.from(groups.values());
   }, [variantDetails, filterAvailabilityValue]);
+
+  const hasCenterDiamond = useMemo(() => {
+    const list =
+      variantDetails?.diamond_details ??
+      listingDesign?.diamond_details ??
+      productDetails?.design?.diamond_details ??
+      productDetails?.design_variant?.diamond_details ??
+      productDetails?.designVariant?.diamond_details ??
+      [];
+    if (!Array.isArray(list) || !list.length) return false;
+    return list.some((detail) => {
+      const value = detail?.is_center ?? detail?.isCenter ?? "";
+      return (
+        value === 1 ||
+        value === "1" ||
+        value === true ||
+        String(value).toLowerCase() === "true"
+      );
+    });
+  }, [listingDesign, productDetails, variantDetails]);
+  const diamondCaratLabel =
+    filterAvailabilityValue === "4" && hasCenterDiamond
+    ? `CENTER ${labels.diamondCaratWeight}`
+    : labels.diamondCaratWeight;
 
   const metalOptions = useMemo(() => {
     const list = Array.isArray(filterData?.metals) ? filterData.metals : [];
@@ -1074,6 +1107,7 @@ export default function ProductCustomizer({
       })
       .filter(Boolean);
   }, [filterData]);
+  const showSizeSection = !hideSizeSection;
 
   const dropdownStyles = useMemo(
     () => ({
@@ -1640,12 +1674,12 @@ export default function ProductCustomizer({
           </>
         ) : null}
 
-        {qualityOptions.length || filteredClarityOptions.length ? (
+        {showDiamondTypeSection ? (
           <>
             <div className={styles.gridFields}>
               <div className={styles.fieldTitle}>{labels.diamondQuality}</div>
               <div style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
-                {qualityOptions.length ? (
+                {showQualitySelect ? (
                   <div>
                     <Select
                       className={styles.select}
@@ -1662,7 +1696,7 @@ export default function ProductCustomizer({
                     />
                   </div>
                 ) : null}
-                {filteredClarityOptions.length ? (
+                {showClaritySelect ? (
                   <div>
                     <Select
                       className={styles.select}
@@ -1687,7 +1721,7 @@ export default function ProductCustomizer({
 
         {!hideCaratSection && caratOptions.length ? (
           <>
-            <div className={styles.fieldTitle}>{labels.diamondCaratWeight}</div>
+            <div className={styles.fieldTitle}>{diamondCaratLabel}</div>
             <div className={styles.pills}>
               {caratOptions.map((value) => (
                 <button
@@ -1713,7 +1747,7 @@ export default function ProductCustomizer({
               {diamondDetailGroups.map((group) => (
                 <div className={styles.diamondDetailGroup} key={group.cutName}>
                   <div className={styles.fieldTitle}>
-                    {group.cutName} {labels.diamondCaratWeight}
+                    {group.cutName} {diamondCaratLabel}
                   </div>
                   <div className={styles.pills}>
                     {group.carats.map((value) => (
@@ -1774,23 +1808,25 @@ export default function ProductCustomizer({
                   ))}
                 </div>
               </div>
-              <div className={styles.divider} aria-hidden />
+              {showSizeSection ? <div className={styles.divider} aria-hidden /> : null}
             </>
           ) : null}
-          <div>
-            <div className={styles.fieldTitle}>{labels.ringSize}</div>
-            <Select
-              className={styles.select}
-              classNamePrefix="customizer"
-              instanceId={sizeId}
-              styles={dropdownStyles}
-              value={sizeOptions.find((opt) => opt.value === size) ?? null}
-              options={sizeOptions}
-              onChange={(option) => setSize(option?.value ?? "")}
-              placeholder="Select Size"
-              isSearchable={false}
-            />
-          </div>
+          {showSizeSection ? (
+            <div>
+              <div className={styles.fieldTitle}>{labels.ringSize}</div>
+              <Select
+                className={styles.select}
+                classNamePrefix="customizer"
+                instanceId={sizeId}
+                styles={dropdownStyles}
+                value={sizeOptions.find((opt) => opt.value === size) ?? null}
+                options={sizeOptions}
+                onChange={(option) => setSize(option?.value ?? "")}
+                placeholder="Select Size"
+                isSearchable={false}
+              />
+            </div>
+          ) : null}
         </div>
         {shouldShowPrice ? (
           <>
@@ -1808,19 +1844,23 @@ export default function ProductCustomizer({
           </>
         ) : null}
 
-        <div className={styles.fieldTitle}>{labels.engraving}</div>
-        <div className={styles.engraveRow}>
-          <input
-            className={styles.input}
-            value={engraving}
-            onChange={(e) => setEngraving(e.target.value)}
-            placeholder={labels.engravingPlaceholder}
-          />
-          <button className={styles.submit} type="button">
-            {labels.submit}
-          </button>
-        </div>
-        <div className={styles.divider} aria-hidden />
+        {!hideEngravingSection ? (
+          <>
+            <div className={styles.fieldTitle}>{labels.engraving}</div>
+            <div className={styles.engraveRow}>
+              <input
+                className={styles.input}
+                value={engraving}
+                onChange={(e) => setEngraving(e.target.value)}
+                placeholder={labels.engravingPlaceholder}
+              />
+              <button className={styles.submit} type="button">
+                {labels.submit}
+              </button>
+            </div>
+            <div className={styles.divider} aria-hidden />
+          </>
+        ) : null}
 
         <button className={styles.enquire} type="button" onClick={() => router.push("/appointment")}>
           {labels.enquireNow}
