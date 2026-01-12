@@ -211,8 +211,23 @@ const resolveProductMedia = (product, imageVariants) => {
   const hasExplicitImages = Array.isArray(design?.images);
   if (hasExplicitImages) {
     const images = sortMediaByOrder(design.images);
-    const mapped = images
-      .map((image, index) => {
+    // Create a map of images by order (1-4)
+    const imagesByOrder = new Map();
+    images.forEach((image) => {
+      const order = normalizeOrderValue(
+        image?.order ?? image?.sort_order ?? image?.sortOrder ?? image?.position,
+        null
+      );
+      if (order !== null && order >= 1 && order <= 4) {
+        imagesByOrder.set(order, image);
+      }
+    });
+
+    // Create array for orders 1-4, with empty placeholders for missing orders
+    const mapped = [];
+    for (let order = 1; order <= 4; order++) {
+      const image = imagesByOrder.get(order);
+      if (image) {
         const src = resolveImageSrc(
           image?.image_url ??
             image?.url ??
@@ -237,26 +252,54 @@ const resolveProductMedia = (product, imageVariants) => {
           videoFromSrc ||
           Boolean(videoSrc);
         const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
-        if (wantsVideo && !resolvedVideoSrc) return null;
+        if (wantsVideo && !resolvedVideoSrc) {
+          // Missing video, create empty placeholder
+          mapped.push({
+            key: `empty-${order}`,
+            variant: imageVariants[(order - 1) % imageVariants.length],
+            src: "",
+            isEmpty: true,
+          });
+          continue;
+        }
         const isVideo = Boolean(resolvedVideoSrc);
         const variant =
           isVideo
             ? "video"
             : image?.variant && image.variant !== "video"
             ? image.variant
-            : imageVariants[index % imageVariants.length];
+            : imageVariants[(order - 1) % imageVariants.length];
         const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : src;
-        if (!isVideo && !resolvedSrc) return null;
+        if (!isVideo && !resolvedSrc) {
+          // Missing image, create empty placeholder
+          mapped.push({
+            key: `empty-${order}`,
+            variant: imageVariants[(order - 1) % imageVariants.length],
+            src: "",
+            isEmpty: true,
+          });
+          continue;
+        }
         const next = {
-          key: image?.id ?? image?.image_id ?? resolvedSrc ?? resolvedVideoSrc ?? index,
+          key: image?.id ?? image?.image_id ?? resolvedSrc ?? resolvedVideoSrc ?? order,
           variant,
           src: resolvedSrc,
           badge: isVideo ? image?.badge ?? "play" : image?.badge,
+          order,
         };
         if (resolvedVideoSrc) next.videoSrc = resolvedVideoSrc;
-        return next;
-      })
-      .filter(Boolean);
+        mapped.push(next);
+      } else {
+        // No image for this order, create empty placeholder
+        mapped.push({
+          key: `empty-${order}`,
+          variant: imageVariants[(order - 1) % imageVariants.length],
+          src: "",
+          isEmpty: true,
+          order,
+        });
+      }
+    }
     return { items: mapped, hasExplicitImages: true };
   }
 
@@ -525,6 +568,8 @@ export default function ProductGallery({ items, productId = "", designId = "" })
   const filteredSlides = useMemo(() => {
     if (!slides.length) return slides;
     return slides.filter((item, index) => {
+      // Exclude empty placeholders from clickable slides
+      if (item?.isEmpty) return false;
       if (!isVideoItem(item)) return true;
       const itemKey = getMediaKey(item, index);
       return !failedMap[itemKey];
@@ -580,10 +625,24 @@ export default function ProductGallery({ items, productId = "", designId = "" })
   );
   const gridSlides = useMemo(() => {
     if (showSkeleton) return skeletonSlides;
-    if (!displaySlides.length) return displaySlides;
-    const present = new Set(displaySlides.map((item) => item?.variant).filter(Boolean));
+    // Use slides (not displaySlides) to include empty placeholders in grid
+    if (!slides.length) return slides;
+    // Filter out only failed videos, but keep empty placeholders
+    const gridItems = slides.filter((item, index) => {
+      if (item?.isEmpty) return true; // Keep empty placeholders
+      if (!isVideoItem(item)) return true;
+      const itemKey = getMediaKey(item, index);
+      return !failedMap[itemKey];
+    });
+    if (!gridItems.length) {
+      if (shouldUseFallback) {
+        return [{ key: "no-image", variant: "square", src: fallbackByVariant("square") }];
+      }
+      return [];
+    }
+    const present = new Set(gridItems.map((item) => item?.variant).filter(Boolean));
     const isOnlyNoImage =
-      displaySlides.length === 1 && displaySlides[0]?.key === "no-image";
+      gridItems.length === 1 && gridItems[0]?.key === "no-image";
     const placeholders = imageVariants
       .filter((variant) => !present.has(variant))
       .map((variant) => ({
@@ -592,8 +651,8 @@ export default function ProductGallery({ items, productId = "", designId = "" })
         isPlaceholder: true,
         src: shouldUseFallback ? fallbackByVariant(variant) : "",
       }));
-    return placeholders.length ? [...displaySlides, ...placeholders] : displaySlides;
-  }, [showSkeleton, skeletonSlides, displaySlides, imageVariants, shouldUseFallback]);
+    return placeholders.length ? [...gridItems, ...placeholders] : gridItems;
+  }, [showSkeleton, skeletonSlides, slides, imageVariants, shouldUseFallback, failedMap]);
 
   const openAt = useCallback(
     (index) => {
@@ -976,7 +1035,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
                       <div className={styles.mediaLoader} />
                     </div>
                   </div>
-                ) : item.isPlaceholder ? (
+                ) : item.isPlaceholder || item.isEmpty ? (
                   <div className={styles.cellButton} aria-hidden="true">
                     <div className={styles.media} aria-hidden>
                       {item.src ? (
@@ -991,7 +1050,22 @@ export default function ProductGallery({ items, productId = "", designId = "" })
                     </div>
                   </div>
                 ) : (
-                  <button type="button" className={styles.cellButton} onClick={() => openAt(index)}>
+                  <button 
+                    type="button" 
+                    className={styles.cellButton} 
+                    onClick={() => {
+                      // Find the index in displaySlides (excluding empty items)
+                      if (item.isEmpty) return;
+                      const displayIndex = displaySlides.findIndex((slide) => 
+                        slide.key === item.key || 
+                        (slide.src && item.src && slide.src === item.src)
+                      );
+                      if (displayIndex >= 0) {
+                        openAt(displayIndex);
+                      }
+                    }}
+                    disabled={item.isEmpty}
+                  >
                     <div className={styles.media} aria-hidden>
                       {!isLoaded ? <div className={styles.mediaLoader} /> : null}
                       {isVideo && !hasFailed ? (
