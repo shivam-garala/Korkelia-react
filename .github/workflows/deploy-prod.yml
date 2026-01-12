@@ -27,7 +27,7 @@ jobs:
             BRANCH="main"
             ENV_BUCKET="production-system-files-storage"
             ENV_PREFIX="env/frontend"
-            ENV_FILE=".env"
+            ENV_FILE=".env.prod.frontend"
             PM2_APP="prod-front"
 
             # ---------- GIT RESET ----------
