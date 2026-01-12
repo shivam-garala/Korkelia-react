@@ -4,17 +4,18 @@ import Image from "next/image";
 
 export default function ProductCard({ href, imageSrc, name, price }) {
   const resolvedSrc = imageSrc || "/productlisting/no_image.jpg";
-  const isRemoteSrc = /^https?:\/\//i.test(resolvedSrc);
   const hasPrice = price !== null && price !== undefined && String(price).trim() !== "";
   const displayPrice = hasPrice ? `${price}` : price ?? "";
   const content = (
     <>
       <div className={styles.media} aria-hidden>
-        {isRemoteSrc ? (
-          <Image className={styles.image} src={resolvedSrc} alt={name ?? ""} />
-        ) : (
-          <Image className={styles.image} src={resolvedSrc} alt={name ?? ""} />
-        )}
+        <Image
+          className={styles.image}
+          src={resolvedSrc}
+          alt={name ?? ""}
+          fill
+          sizes="(max-width: 768px) 50vw, (max-width: 1200px) 33vw, 25vw"
+        />
       </div>
       <div className={styles.rule} aria-hidden />
       <div className={styles.meta}>
