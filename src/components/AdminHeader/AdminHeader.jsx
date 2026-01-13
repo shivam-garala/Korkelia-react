@@ -1,8 +1,7 @@
 'use client';
 
 import Image from "next/image";
-import { useEffect, useState } from "react";
-import LanguageDropdown from "../LanguageDropdown/LanguageDropdown.jsx";
+// import LanguageDropdown from "../LanguageDropdown/LanguageDropdown.jsx";
 import Icon from "../ui/Icon.jsx";
 import GlobalLoader from "../ui/GlobalLoader.jsx";
 import styles from "../../styles/workspace.module.css";
@@ -13,19 +12,13 @@ export default function AdminHeader({
   avatarText = "U",
   actions = null,
 }) {
-  const [mounted, setMounted] = useState(false);
-
-  useEffect(() => {
-    setMounted(true);
-  }, []);
-
   const handleMenuClick = () => {
     if (typeof window !== "undefined") {
       window.dispatchEvent(new CustomEvent("sidebar:toggle"));
     }
   };
 
-  const displayAvatarText = mounted ? avatarText || "U" : "U";
+  const displayAvatarText = avatarText || "U";
 
   return (
     <>

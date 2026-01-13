@@ -224,20 +224,20 @@ export default function NavMenuOverlay({ open, onClose }) {
             </li>
             <li className={styles.item}>
               <Link
-                className={`${styles.link} ${isActive("/diamond-difference") ? styles.activeLink : ""}`}
-                href="/diamond-difference"
-                onClick={onClose}
-              >
-                {t("menu.diamondDifference")}
-              </Link>
-            </li>
-            <li className={styles.item}>
-              <Link
                 className={`${styles.link} ${isActive("/diamond-guide") ? styles.activeLink : ""}`}
                 href="/diamond-guide"
                 onClick={onClose}
               >
                 {t("menu.diamondGuide")}
+              </Link>
+            </li>
+            <li className={styles.item}>
+              <Link
+                className={`${styles.link} ${isActive("/diamond-difference") ? styles.activeLink : ""}`}
+                href="/diamond-difference"
+                onClick={onClose}
+              >
+                {t("menu.diamondDifference")}
               </Link>
             </li>
             <li className={styles.item}>

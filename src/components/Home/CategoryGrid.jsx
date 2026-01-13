@@ -4,12 +4,10 @@ import Skeleton from "../../app/components/ui/Skeleton.jsx";
 import styles from "./CategoryGrid.module.css";
 
 export default function CategoryGrid({
-  title = "CATEGORIES",
+  title = "PRODUCTS",
   categories = [],
   loading = false,
 }) {
-  const isRemoteSrc = (src) => /^https?:\/\//i.test(src);
-
   if (loading) {
     return (
       <section className={styles.section} aria-hidden>
@@ -48,11 +46,7 @@ export default function CategoryGrid({
                 href={category.href}
               >
                 <div className={styles.media} aria-hidden>
-                  {isRemoteSrc(resolvedSrc) ? (
-                    <img className={styles.image} src={resolvedSrc} alt={category.label ?? ""} />
-                  ) : (
-                    <Image className={styles.image} src={resolvedSrc} alt={category.label ?? ""} fill />
-                  )}
+                  <Image className={styles.image} src={resolvedSrc} alt={category.label ?? ""} fill />
                 </div>
                 <p className={styles.label}>{category.label}</p>
               </Link>
