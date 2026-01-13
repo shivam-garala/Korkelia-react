@@ -7,7 +7,7 @@
     "currency": "Euro",
     "share": "JAKAA",
     "appointment": "VARAA AIKA",
-    "ambassador": "OTA YHTEYTTAA SUURLAHETTILAASEEN"
+    "ambassador": "OTA YHTEYTTÄÄ"
   },
   "menu": {
     "home": "Kotiin",
@@ -60,7 +60,7 @@
       "description": ""
     },
     "cta": {
-      "discover": "LOYDA"
+      "discover": "LUE LISÄÄ"
     }
   },
   "footer": {
