@@ -412,9 +412,7 @@ export default function CookiePolicyPage() {
               </div>
 
               <p className={styles.paragraph}>
-                Future changes: If we enable analytics/marketing tools (or introduce third-party CAPTCHA
-                such as Google reCAPTCHA), we will update this Cookie Policy and cookie inventory before
-                activation. Non-essential cookies will be used only with your consent.
+                Future changes: If we enable analytics/marketing tools (we will update this Cookie Policy and cookie inventory before activation. Non-essential cookies will be used only with your consent).
               </p>
             </section>
 
