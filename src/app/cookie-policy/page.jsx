@@ -375,9 +375,10 @@ export default function CookiePolicyPage() {
                   <h4 className={styles.subTitle}>Phase 1 - current setup</h4>
                   <p className={styles.paragraph}>At the time of this version:</p>
                   {renderList([
-                    "We do not use analytics cookies and do not use marketing/advertising cookies.",
-                    "We use a custom-coded cookie banner (not a third-party CMP plugin/tool).",
-                    "We use a text-based CAPTCHA (user-entered verification code) to protect our forms from automated submissions. We do not use third-party CAPTCHA tools (such as Google reCAPTCHA) at this stage.",
+                    "We use Google reCAPTCHA (by Google LLC) to protect our forms from spam and abuse.",
+                    "Google reCAPTCHA may set cookies and process personal data (such as IP address and device information).",
+                    "We use a custom-coded cookie banner to obtain user consent.",
+                    "We do not use analytics or advertising cookies at this stage, except those set by Google reCAPTCHA for security and fraud prevention..",
                   ])}
                 </div>
 
