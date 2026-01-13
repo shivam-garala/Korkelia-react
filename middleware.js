@@ -31,6 +31,14 @@ export function middleware(request) {
   const shouldSetLanguage = !existingLanguage || !SUPPORTED_LANGUAGES.has(existingLanguage);
   let response;
 
+  // Protect API routes (except public ones like recaptcha)
+  const isApiRoute = pathname.startsWith("/api");
+  const isPublicApiRoute = pathname.startsWith("/api/recaptcha");
+  
+  if (isApiRoute && !isPublicApiRoute && !token) {
+    return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
+  }
+
   if (isProtectedPath(pathname) && !token) {
     response = NextResponse.redirect(new URL("/login", request.url));
   } else if (pathname.startsWith("/login") && token) {

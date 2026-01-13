@@ -5,6 +5,7 @@ export const publicRoutes = [
 ];
 
 export const protectedRoutes = [
+  { id: "AR1", name: "admin", path: "/admin", access: "protected" },
   { id: "DR1", name: "dashboard", path: "/dashboard", access: "protected" },
   { id: "DR2", name: "dashboard-orders", path: "/dashboard/orders", access: "protected" },
   { id: "DR4", name: "metal-rate", path: "/dashboard/gold-rate", access: "protected" },

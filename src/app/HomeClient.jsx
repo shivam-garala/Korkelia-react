@@ -161,7 +161,7 @@ export default function HomeClient() {
               ? "/homepage/diamond_deference_desktop.mp4"
               : "/homepage/diamond_deference_desktop.mp4"
           }
-          mediaPosition={isDesktop ? "right center" : "right bottom"}
+          mediaPosition={isDesktop ? "top right" : "top right"}
           sectionClassName={styles.diamondDifferenceSection}
           mediaClassName={styles.diamondDifferenceMedia}
           contentClassName={styles.diamondDifferenceContent}
