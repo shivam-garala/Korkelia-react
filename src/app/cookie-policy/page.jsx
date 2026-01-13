@@ -1,6 +1,6 @@
 "use client";
 
-import { useEffect, useState } from "react";
+import { useState } from "react";
 import Cookies from "js-cookie";
 import SiteFooter from "../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../components/Home/SiteHeader.jsx";
@@ -26,6 +26,13 @@ const cookieInventory = [
     purpose: "Security, load balancing, technical operation",
     duration: "Session / varies by configuration",
   },
+  {
+    name: "siteLang",
+    provider: "Korkeila Helsinki website",
+    category: "Preference / functional",
+    purpose: "Stores user&apos;s language preference (e.g., English, Finnish)",
+    duration: "365 days",
+  },
 ];
 
 const renderList = (items) => (
@@ -38,32 +45,41 @@ const renderList = (items) => (
   </ul>
 );
 
-export default function CookiePolicyPage() {
-  const [preferencesEnabled, setPreferencesEnabled] = useState(false);
-  const [analyticsEnabled, setAnalyticsEnabled] = useState(false);
-  const [marketingEnabled, setMarketingEnabled] = useState(false);
-  const [statusMessage, setStatusMessage] = useState("");
-
-  useEffect(() => {
-    const raw = Cookies.get(COOKIE_KEY);
-    if (!raw) return;
-    try {
-      const parsed = JSON.parse(raw);
-      if (parsed?.choice === "accepted") {
-        setPreferencesEnabled(true);
-        setAnalyticsEnabled(true);
-        setMarketingEnabled(true);
-        return;
-      }
-      setPreferencesEnabled(Boolean(parsed?.preferences));
-      setAnalyticsEnabled(Boolean(parsed?.analytics));
-      setMarketingEnabled(Boolean(parsed?.marketing));
-    } catch (error) {
-      setPreferencesEnabled(false);
-      setAnalyticsEnabled(false);
-      setMarketingEnabled(false);
+const getInitialCookiePreferences = () => {
+  const raw = Cookies.get(COOKIE_KEY);
+  if (!raw) {
+    return {
+      preferences: false,
+      analytics: false,
+      marketing: false,
+    };
+  }
+  try {
+    const parsed = JSON.parse(raw);
+    if (parsed?.choice === "accepted") {
+      return {
+        preferences: true,
+        analytics: true,
+        marketing: true,
+      };
     }
-  }, []);
+    return {
+      preferences: Boolean(parsed?.preferences),
+      analytics: Boolean(parsed?.analytics),
+      marketing: Boolean(parsed?.marketing),
+    };
+  } catch (error) {
+    return {
+      preferences: false,
+      analytics: false,
+      marketing: false,
+    };
+  }
+};
+
+export default function CookiePolicyPage() {
+  const [cookiePreferences, setCookiePreferences] = useState(getInitialCookiePreferences);
+  const [statusMessage, setStatusMessage] = useState("");
 
   const saveConsent = (payload, message) => {
     Cookies.set(COOKIE_KEY, JSON.stringify(payload), {
@@ -79,9 +95,11 @@ export default function CookiePolicyPage() {
   };
 
   const handleAcceptAll = () => {
-    setPreferencesEnabled(true);
-    setAnalyticsEnabled(true);
-    setMarketingEnabled(true);
+    setCookiePreferences({
+      preferences: true,
+      analytics: true,
+      marketing: true,
+    });
     saveConsent(
       {
         choice: "accepted",
@@ -95,9 +113,11 @@ export default function CookiePolicyPage() {
   };
 
   const handleReject = () => {
-    setPreferencesEnabled(false);
-    setAnalyticsEnabled(false);
-    setMarketingEnabled(false);
+    setCookiePreferences({
+      preferences: false,
+      analytics: false,
+      marketing: false,
+    });
     clearOptionalCookies();
     saveConsent(
       {
@@ -112,16 +132,16 @@ export default function CookiePolicyPage() {
   };
 
   const handleSave = () => {
-    if (!preferencesEnabled) {
+    if (!cookiePreferences.preferences) {
       clearOptionalCookies();
     }
     saveConsent(
       {
         choice: "custom",
         necessary: true,
-        preferences: preferencesEnabled,
-        analytics: analyticsEnabled,
-        marketing: marketingEnabled,
+        preferences: cookiePreferences.preferences,
+        analytics: cookiePreferences.analytics,
+        marketing: cookiePreferences.marketing,
       },
       "Cookie preferences updated."
     );
@@ -136,7 +156,7 @@ export default function CookiePolicyPage() {
           <div className={styles.header}>
             <h2 className={styles.heading}>Cookie Policy</h2>
             <p className={styles.intro}>
-              This Cookie Policy explains how Greenbridge Oy (brand: Korkeila Helsinki) ("we", "us") uses
+              This Cookie Policy explains how Greenbridge Oy (brand: Korkeila Helsinki) (&quot;we&quot;, &quot;us&quot;) uses
               cookies and similar technologies on our website, and how you can manage your choices. This
               Cookie Policy should be read together with our{" "}
               <a className={styles.inlineLink} href="/privacy-policy">
@@ -160,7 +180,7 @@ export default function CookiePolicyPage() {
                 "local storage (browser storage used for preferences or technical functions).",
               ])}
               <p className={styles.paragraph}>
-                For simplicity, we refer to all of the above as "cookies".
+                For simplicity, we refer to all of the above as &quot;cookies&quot;.
               </p>
             </section>
 
@@ -274,8 +294,13 @@ export default function CookiePolicyPage() {
                   <input
                     className={styles.toggle}
                     type="checkbox"
-                    checked={preferencesEnabled}
-                    onChange={(event) => setPreferencesEnabled(event.target.checked)}
+                    checked={cookiePreferences.preferences}
+                    onChange={(event) =>
+                      setCookiePreferences((prev) => ({
+                        ...prev,
+                        preferences: event.target.checked,
+                      }))
+                    }
                   />
                 </div>
                 <div className={styles.panelRow}>
@@ -286,8 +311,13 @@ export default function CookiePolicyPage() {
                   <input
                     className={styles.toggle}
                     type="checkbox"
-                    checked={analyticsEnabled}
-                    onChange={(event) => setAnalyticsEnabled(event.target.checked)}
+                    checked={cookiePreferences.analytics}
+                    onChange={(event) =>
+                      setCookiePreferences((prev) => ({
+                        ...prev,
+                        analytics: event.target.checked,
+                      }))
+                    }
                   />
                 </div>
                 <div className={styles.panelRow}>
@@ -298,8 +328,13 @@ export default function CookiePolicyPage() {
                   <input
                     className={styles.toggle}
                     type="checkbox"
-                    checked={marketingEnabled}
-                    onChange={(event) => setMarketingEnabled(event.target.checked)}
+                    checked={cookiePreferences.marketing}
+                    onChange={(event) =>
+                      setCookiePreferences((prev) => ({
+                        ...prev,
+                        marketing: event.target.checked,
+                      }))
+                    }
                   />
                 </div>
                 <div className={styles.panelActions}>
@@ -387,7 +422,7 @@ export default function CookiePolicyPage() {
               <p className={styles.paragraph}>
                 We may update this Cookie Policy when we add or change cookies/tools (e.g., introduce
                 analytics/marketing services). The updated version will be posted on this page with a
-                revised "Last updated" date.
+                revised &quot;Last updated&quot; date.
               </p>
             </section>
 

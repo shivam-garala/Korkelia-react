@@ -30,6 +30,11 @@
   justify-items: center;
 }
 
+.grid > :nth-last-child(1):nth-child(odd) {
+  grid-column: 1 / -1;
+  justify-self: center;
+}
+
 .card {
   display: grid;
   gap: 20px;

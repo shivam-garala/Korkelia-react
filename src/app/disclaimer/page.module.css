@@ -16,7 +16,7 @@
 
 .header {
   text-align: center;
-  max-width: 920px;
+  max-width: 975px;
   margin: 0 auto 38px;
   display: grid;
   gap: 14px;
@@ -24,7 +24,7 @@
 
 .heading {
   margin: 0;
-  font-family: var(--font-heading);
+  font-family: var(--font-nata-sans);
   font-weight: 400;
   letter-spacing: 2.4px;
   color: #606062;
@@ -40,7 +40,7 @@
 }
 
 .content {
-  max-width: 920px;
+  max-width: 975px;
   margin: 0 auto;
   display: grid;
   gap: 28px;
