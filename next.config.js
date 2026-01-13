@@ -22,6 +22,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "d42za7xj4jbwi.cloudfront.net",
       },
+      {
+        protocol: "https",
+        hostname: "d3s5kl2h1nwckf.cloudfront.net",
+      },
     ],
   },
   turbopack: {
