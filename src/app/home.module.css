@@ -13,6 +13,10 @@
   min-height: 100vh;
 }
 
+.diamondDifferenceSection {
+  min-height: 100vh;
+}
+
 @media (max-width: 900px) {
   .diamondGuideSection {
     height: auto;
