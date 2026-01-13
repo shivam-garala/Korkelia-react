@@ -2,7 +2,7 @@ import { NextResponse } from "next/server";
 import { isProtectedPath } from "./src/routes/routes";
 
 const LANGUAGE_COOKIE = "siteLang";
-const DEFAULT_LANGUAGE = "en";
+const DEFAULT_LANGUAGE = "fi";
 const FINNISH_COUNTRY_CODES = new Set(["FI"]);
 const SUPPORTED_LANGUAGES = new Set(["en", "fi"]);
 

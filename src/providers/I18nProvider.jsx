@@ -1,12 +1,12 @@
 "use client";
 
 import Cookies from "js-cookie";
-import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useMemo, useState } from "react";
 import en from "../i18n/en.json";
 import fi from "../i18n/fi.json";
 
 const dictionaries = { en, fi };
-const DEFAULT_LANGUAGE = "en";
+const DEFAULT_LANGUAGE = "fi";
 const COOKIE_NAME = "siteLang";
 const CONSENT_COOKIE = "cookieConsent";
 
@@ -42,16 +42,16 @@ function getByPath(object, path) {
 const I18nContext = createContext(null);
 
 export function I18nProvider({ children }) {
-  const [language, setLanguageState] = useState(DEFAULT_LANGUAGE);
-
-  useEffect(() => {
+  const [language, setLanguageState] = useState(() => {
+    if (typeof window === "undefined") return DEFAULT_LANGUAGE;
     if (hasPreferenceConsent()) {
       const initial = Cookies.get(COOKIE_NAME);
       if (initial in dictionaries) {
-        setLanguageState(initial);
+        return initial;
       }
     }
-  }, []);
+    return DEFAULT_LANGUAGE;
+  });
 
   const setLanguage = useCallback((nextLanguage) => {
     const normalized = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
