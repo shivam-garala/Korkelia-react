@@ -27,7 +27,7 @@ jobs:
             BRANCH="uat"
             ENV_BUCKET="uat-system-files"
             ENV_PREFIX="env/frontend"
-            ENV_FILE=".env.prod.frontend"
+            ENV_FILE=".env.uat.frontend"
             PM2_APP="uat-front"
 
             # ---------- GIT RESET ----------
@@ -41,7 +41,7 @@ jobs:
             echo "🔐 Fetching environment file from S3..."
             aws s3 cp "s3://$ENV_BUCKET/$ENV_PREFIX/$ENV_FILE" .env
 
-            if [ ! -s "$ENV_FILE" ]; then
+            if [ ! -s .env ]; then
               echo "❌ .env file missing or empty"
               exit 1
             fi

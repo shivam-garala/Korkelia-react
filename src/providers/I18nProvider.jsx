@@ -1,7 +1,7 @@
 "use client";
 
 import Cookies from "js-cookie";
-import { createContext, useCallback, useContext, useMemo, useState } from "react";
+import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
 import en from "../i18n/en.json";
 import fi from "../i18n/fi.json";
 
@@ -42,15 +42,18 @@ function getByPath(object, path) {
 const I18nContext = createContext(null);
 
 export function I18nProvider({ children }) {
-  const [language, setLanguageState] = useState(() => {
-    if (typeof window === "undefined") return DEFAULT_LANGUAGE;
+  // Start with default language to match server-side render
+  const [language, setLanguageState] = useState(DEFAULT_LANGUAGE);
+
+  // After hydration, read the cookie and update language if present
+  useEffect(() => {
+    if (typeof window === "undefined") return;
     // Always try to read the saved language preference (reading preferences is allowed)
     const savedLanguage = Cookies.get(COOKIE_NAME);
     if (savedLanguage && savedLanguage in dictionaries) {
-      return savedLanguage;
+      setLanguageState(savedLanguage);
     }
-    return DEFAULT_LANGUAGE;
-  });
+  }, []);
 
   const setLanguage = useCallback((nextLanguage) => {
     const normalized = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
