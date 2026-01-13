@@ -211,95 +211,66 @@ const resolveProductMedia = (product, imageVariants) => {
   const hasExplicitImages = Array.isArray(design?.images);
   if (hasExplicitImages) {
     const images = sortMediaByOrder(design.images);
-    // Create a map of images by order (1-4)
-    const imagesByOrder = new Map();
+    // Process all images with valid orders
+    const mapped = [];
     images.forEach((image) => {
       const order = normalizeOrderValue(
         image?.order ?? image?.sort_order ?? image?.sortOrder ?? image?.position,
         null
       );
-      if (order !== null && order >= 1 && order <= 4) {
-        imagesByOrder.set(order, image);
-      }
-    });
+      // Skip images without valid order
+      if (order === null || order < 1) return;
 
-    // Create array for orders 1-4, with empty placeholders for missing orders
-    const mapped = [];
-    for (let order = 1; order <= 4; order++) {
-      const image = imagesByOrder.get(order);
-      if (image) {
-        const src = resolveImageSrc(
-          image?.image_url ??
-            image?.url ??
-            image?.image ??
-            image?.image_name ??
-            image
-        );
-        const videoSrc = resolveImageSrc(
-          image?.videoSrc ?? image?.video_url ?? image?.videoUrl ?? image?.video ?? ""
-        );
-        const isExplicitVideo =
-          image?.isVideo === true ||
-          image?.is_video === true ||
-          image?.isVideo === 1 ||
-          image?.is_video === 1 ||
-          String(image?.is_video ?? "").toLowerCase() === "yes";
-        const videoFromSrc = isVideoSrc(src);
-        const wantsVideo =
-          isExplicitVideo ||
-          image?.type === "video" ||
-          image?.badge === "play" ||
-          videoFromSrc ||
-          Boolean(videoSrc);
-        const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
-        if (wantsVideo && !resolvedVideoSrc) {
-          // Missing video, create empty placeholder
-          mapped.push({
-            key: `empty-${order}`,
-            variant: imageVariants[(order - 1) % imageVariants.length],
-            src: "",
-            isEmpty: true,
-          });
-          continue;
-        }
-        const isVideo = Boolean(resolvedVideoSrc);
-        const variant =
-          isVideo
-            ? "video"
-            : image?.variant && image.variant !== "video"
-            ? image.variant
-            : imageVariants[(order - 1) % imageVariants.length];
-        const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : src;
-        if (!isVideo && !resolvedSrc) {
-          // Missing image, create empty placeholder
-          mapped.push({
-            key: `empty-${order}`,
-            variant: imageVariants[(order - 1) % imageVariants.length],
-            src: "",
-            isEmpty: true,
-          });
-          continue;
-        }
-        const next = {
-          key: image?.id ?? image?.image_id ?? resolvedSrc ?? resolvedVideoSrc ?? order,
-          variant,
-          src: resolvedSrc,
-          badge: isVideo ? image?.badge ?? "play" : image?.badge,
-          order,
-        };
-        if (resolvedVideoSrc) next.videoSrc = resolvedVideoSrc;
-        mapped.push(next);
-      } else {
-        // No image for this order, create empty placeholder
-        mapped.push({
-          key: `empty-${order}`,
-          variant: imageVariants[(order - 1) % imageVariants.length],
-          src: "",
-          isEmpty: true,
-          order,
-        });
+      const src = resolveImageSrc(
+        image?.image_url ??
+          image?.url ??
+          image?.image ??
+          image?.image_name ??
+          image
+      );
+      const videoSrc = resolveImageSrc(
+        image?.videoSrc ?? image?.video_url ?? image?.videoUrl ?? image?.video ?? ""
+      );
+      const isExplicitVideo =
+        image?.isVideo === true ||
+        image?.is_video === true ||
+        image?.isVideo === 1 ||
+        image?.is_video === 1 ||
+        String(image?.is_video ?? "").toLowerCase() === "yes";
+      const videoFromSrc = isVideoSrc(src);
+      const wantsVideo =
+        isExplicitVideo ||
+        image?.type === "video" ||
+        image?.badge === "play" ||
+        videoFromSrc ||
+        Boolean(videoSrc);
+      const resolvedVideoSrc = videoSrc || (videoFromSrc ? src : "");
+      if (wantsVideo && !resolvedVideoSrc) {
+        // Missing video, skip this item
+        return;
       }
-    }
+      const isVideo = Boolean(resolvedVideoSrc);
+      const variant =
+        isVideo
+          ? "video"
+          : image?.variant && image.variant !== "video"
+          ? image.variant
+          : imageVariants[(order - 1) % imageVariants.length];
+      const resolvedSrc = isVideo ? (videoFromSrc ? "" : src) : src;
+      if (!isVideo && !resolvedSrc) {
+        // Missing image, skip this item
+        return;
+      }
+      const next = {
+        key: image?.id ?? image?.image_id ?? resolvedSrc ?? resolvedVideoSrc ?? order,
+        variant,
+        src: resolvedSrc,
+        badge: isVideo ? image?.badge ?? "play" : image?.badge,
+        order,
+      };
+      if (resolvedVideoSrc) next.videoSrc = resolvedVideoSrc;
+      mapped.push(next);
+    });
     return { items: mapped, hasExplicitImages: true };
   }
 
