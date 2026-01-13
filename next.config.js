@@ -55,6 +55,7 @@ const nextConfig = {
   },
   reactStrictMode: false,
   productionBrowserSourceMaps: false,
+  poweredByHeader: false,
 };
 
 module.exports = nextConfig;
