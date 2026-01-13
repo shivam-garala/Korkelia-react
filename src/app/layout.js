@@ -40,7 +40,7 @@ export async function generateMetadata() {
     title: "Korkeila Helsinki",
     description: description,
     icons: {
-      icon: "/logo/logo.ico",
+      icon: "/favicon.ico",
     },
   };
 }
