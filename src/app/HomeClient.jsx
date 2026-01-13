@@ -188,8 +188,8 @@ export default function HomeClient() {
 
         <FullMediaSection
           mediaType="image"
-          mediaSrc="/homepage/banner_3.jpg"
-          posterSrc="/homepage/banner_3.jpg"
+          mediaSrc={isDesktop ? "/homepage/banner_3.jpg" : "/homepage/banner_mobile_3.jpeg"}
+          posterSrc={isDesktop ? "/homepage/banner_3.jpg" : "/homepage/banner_mobile_3.jpeg"}
           eyebrow={t("home.about.eyebrow")}
           title={t("home.about.title")}
           subtitle={t("home.about.subtitle")}
