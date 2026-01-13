@@ -1,6 +1,6 @@
 import { NextResponse } from "next/server";
 import { extractToken, forwardJson, getAdminApiBaseUrl, readJsonBody } from "../_utils";
-import { rateLimit } from "../../../lib/rateLimit";
+import { rateLimit } from "../../../../lib/rateLimit";
 
 export async function POST(request) {
   // Apply stricter rate limiting to login endpoint (5 requests per 15 minutes)
