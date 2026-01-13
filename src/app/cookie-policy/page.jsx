@@ -33,6 +33,13 @@ const cookieInventory = [
     purpose: "Stores user's language preference (e.g., English, Finnish)",
     duration: "365 days",
   },
+  {
+    name: "GRECAPTCHA (and/orotherreCAPTCHAcookiesdepending on implementation)",
+    provider: "Google reCAPTCHA / Google",
+    category: "Strictlynecessary",
+    purpose: "Anti-botprotection / abuse prevention",
+    duration: "Varies (set by Google)",
+  },
 ];
 
 const renderList = (items) => (
@@ -189,7 +196,7 @@ export default function CookiePolicyPage() {
               <p className={styles.paragraph}>Cookies can be set by:</p>
               {renderList([
                 "First-party cookies - set by our website domain; and",
-                "Third-party cookies - set by external service providers integrated into the site (e.g., analytics, marketing platforms, security/anti-bot tools).",
+                "Third-party cookies - set by external service providers integrated into the site (e.g., analytics, marketing platforms, security/anti-bot tools such as Google reCAPTCHA).",
               ])}
             </section>
 
@@ -197,7 +204,7 @@ export default function CookiePolicyPage() {
               <h3 className={styles.sectionTitle}>3. What cookie categories we use</h3>
               <p className={styles.paragraph}>
                 We use the following categories. The cookie preferences tool on our website allows you to
-                manage nonessential categories.
+                manage non-essential categories.
               </p>
 
               <div className={styles.subsections}>
@@ -210,8 +217,9 @@ export default function CookiePolicyPage() {
                   {renderList([
                     "storing your cookie preference choice,",
                     "website security and abuse prevention,",
-                    "session management and load balancing, and",
-                    "basic functionality required to operate the website.",
+                    "session management and load balancing,",
+                    "basic functionality required to operate the website, and",
+                    "anti-bot protection (including Google reCAPTCHA where implemented).",
                   ])}
                   <p className={styles.paragraph}>
                     Legal basis: strictly necessary cookies are used because they are required for the
@@ -435,7 +443,7 @@ export default function CookiePolicyPage() {
                   korkeila@korkeilahelsinki.fi
                 </a>
               </p>
-              <p className={styles.updated}>Last updated: 12 January 2026</p>
+              <p className={styles.updated}>Last updated: 13 January 2026</p>
             </section>
           </div>
         </Container>
