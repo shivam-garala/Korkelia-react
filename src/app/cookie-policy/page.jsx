@@ -30,7 +30,7 @@ const cookieInventory = [
     name: "siteLang",
     provider: "Korkeila Helsinki website",
     category: "Preference / functional",
-    purpose: "Stores user&apos;s language preference (e.g., English, Finnish)",
+    purpose: "Stores user's language preference (e.g., English, Finnish)",
     duration: "365 days",
   },
 ];

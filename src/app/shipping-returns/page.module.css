@@ -24,7 +24,7 @@
 
 .heading {
   margin: 0;
-  font-family: var(--font-nata-sans);
+  font-family: var(--font-heading);
   font-weight: 400;
   letter-spacing: 2.4px;
   color: #606062;
@@ -57,7 +57,7 @@
 
 .sectionTitle {
   margin: 0;
-  font-family: var(--font-heading);
+  font-family: var(--font-nata-sans);
   font-weight: 500;
   color: var(--color-heading);
 }
