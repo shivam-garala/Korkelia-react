@@ -44,22 +44,18 @@ const I18nContext = createContext(null);
 export function I18nProvider({ children }) {
   const [language, setLanguageState] = useState(() => {
     if (typeof window === "undefined") return DEFAULT_LANGUAGE;
-    if (hasPreferenceConsent()) {
-      const initial = Cookies.get(COOKIE_NAME);
-      if (initial in dictionaries) {
-        return initial;
-      }
+    // Always try to read the saved language preference (reading preferences is allowed)
+    const savedLanguage = Cookies.get(COOKIE_NAME);
+    if (savedLanguage && savedLanguage in dictionaries) {
+      return savedLanguage;
     }
     return DEFAULT_LANGUAGE;
   });
 
   const setLanguage = useCallback((nextLanguage) => {
     const normalized = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
-    if (hasPreferenceConsent()) {
-      Cookies.set(COOKIE_NAME, normalized, { sameSite: "lax" });
-    } else {
-      Cookies.remove(COOKIE_NAME, { path: "/" });
-    }
+    // Always save the language preference (it's a user preference, not tracking)
+    Cookies.set(COOKIE_NAME, normalized, { sameSite: "lax", path: "/", expires: 365 });
     setLanguageState(normalized);
   }, []);
 
