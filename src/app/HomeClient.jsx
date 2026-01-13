@@ -158,8 +158,8 @@ export default function HomeClient() {
           mediaType="video"
           mediaSrc={
             isDesktop
-              ? "/homepage/diamond_difference_desktop.mp4"
-              : "/homepage/diamond_difference_desktop.mp4"
+              ? "/homepage/diamond_deference_desktop.mp4"
+              : "/homepage/diamond_deference_desktop.mp4"
           }
           mediaPosition={isDesktop ? "right center" : "right bottom"}
           sectionClassName={styles.diamondDifferenceSection}
