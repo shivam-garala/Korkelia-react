@@ -34,4 +34,24 @@
     position: absolute;
     inset: 0;
   }
+
+  .diamondDifferenceSection {
+    min-height: auto;
+  }
+
+  .diamondDifferenceMedia {
+    position: relative;
+    height: auto;
+  }
+
+  .diamondDifferenceVideo {
+    width: 100vw;
+    height: auto;
+    object-fit: contain;
+  }
+
+  .diamondDifferenceContent {
+    position: absolute;
+    inset: 0;
+  }
 }

@@ -155,6 +155,26 @@ export default function HomeClient() {
         />
 
         <FullMediaSection
+          mediaType="video"
+          mediaSrc={
+            isDesktop
+              ? "/homepage/diamond_difference_desktop.mp4"
+              : "/homepage/diamond_difference_desktop.mp4"
+          }
+          mediaPosition={isDesktop ? "right center" : "right bottom"}
+          sectionClassName={styles.diamondDifferenceSection}
+          mediaClassName={styles.diamondDifferenceMedia}
+          contentClassName={styles.diamondDifferenceContent}
+          videoClassName={styles.diamondDifferenceVideo}
+          eyebrow={t("home.diamondDifference.eyebrow")}
+          title={t("home.diamondDifference.title")}
+          subtitle={t("home.diamondDifference.subtitle")}
+          description={t("home.diamondDifference.description")}
+          ctaLabel={t("home.cta.discover")}
+          href="/diamond-difference"
+        />
+
+        {/* <FullMediaSection
           mediaType="image"
           mediaSrc="/homepage/banner_1.jpg"
           posterSrc="/homepage/banner_1.jpg"
@@ -164,7 +184,7 @@ export default function HomeClient() {
           description={t("home.diamondDifference.description")}
           ctaLabel={t("home.cta.discover")}
           href="/diamond-difference"
-        />
+        /> */}
 
         <FullMediaSection
           mediaType="image"
