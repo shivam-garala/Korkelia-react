@@ -45,7 +45,7 @@ const contentByLanguage = {
       "Jos sinulla on kysyttävää koruistamme, tarvitset apua täydellisen korun valinnassa tai haluat suunnitella jotain täysin omaa — autamme mielellämme.",
     sections: {
       appointments: {
-        title: "Henkilökohtaiset ajanvaraukset",
+        title: "HENKILÖKOHTAISET AJANVARAUKSET",
         body: "Tuotekysymyksiä tai yksilöllisiä korusuunnittelutapaamisia varten tiimimme palvelee sinua mielellään.",
         cta: "Varaa aika kalenteristamme",
       },
