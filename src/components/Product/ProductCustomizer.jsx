@@ -1339,7 +1339,7 @@ export default function ProductCustomizer({
     normalizeString(productDetails?.product_name) ||
     "";
   const productBasePrice =
-    normalizeString(productDetails?.total_price) ||
+    // normalizeString(productDetails?.total_price) ||
     normalizeString(productDetails?.design?.total_price) ||
     "";
 
