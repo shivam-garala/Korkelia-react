@@ -11,7 +11,7 @@
   },
   "menu": {
     "home": "Kotiin",
-    "about": "Tietoja meistä",
+    "about": "Tietoa meistä",
     "products": "Tuotteet",
     "diamondDifference": "Korkeila Helsinki timanttien ominaisuudet ja erot",
     "diamondGuide": "Korkeila Helsinki Timanttiopas",
@@ -71,7 +71,7 @@
     "links": {
       "privacy": "Tietosuojakäytäntö",
       "shippingReturns": "Toimitus- ja palautuskäytäntö",
-      "cookiePolicy": "Evästetkäytäntö",
+      "cookiePolicy": "Evästekäytäntö",
       "disclaimer": "Vastuuvapauslauseke",
       "contact": "Ota yhteyttä"
     },
