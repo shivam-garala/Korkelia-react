@@ -33,8 +33,8 @@ const tabs = [
   },
   {
     key: "clarity",
-    label: { en: "CLARITY", fi: "SELKEYS" },
-    title: { en: "CLARITY", fi: "SELKEYS" },
+    label: { en: "CLARITY", fi: "PUHTAUS" },
+    title: { en: "CLARITY", fi: "PUHTAUS" },
     image: "/diamondguide/clarity.png",
     alt: "Diamond clarity details",
     body: {
@@ -44,8 +44,8 @@ const tabs = [
   },
   {
     key: "cut",
-    label: { en: "CUT", fi: "LEIKATA" },
-    title: { en: "CUT", fi: "LEIKATA" },
+    label: { en: "CUT", fi: "HIONTA" },
+    title: { en: "CUT", fi: "HIONTA" },
     image: "/diamondguide/cut.png",
     alt: "Diamond cut proportions",
     body: {
