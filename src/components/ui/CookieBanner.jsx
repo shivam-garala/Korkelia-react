@@ -29,7 +29,7 @@ export default function CookieBanner() {
           messageManage: "Voit hallita valintojasi milloin tahansa kohdassa",
           cookiePreferences: "Evasteasetukset",
           messageReadMore: "Lue lisaa",
-          cookiePolicy: "Evästetkäytäntö",
+          cookiePolicy: "Evästekäytäntö",
           and: "ja",
           privacyPolicy: "Tietosuojakaytanto",
           acceptAll: "Hyvaksy kaikki",
