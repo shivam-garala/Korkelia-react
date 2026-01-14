@@ -40,17 +40,17 @@ const contentByLanguage = {
     },
   },
   fi: {
-    heading: "OTA YHTEYTTA",
+    heading: "OTA YHTEYTTÄ",
     lead:
       "Jos sinulla on kysyttävää koruistamme, tarvitset apua täydellisen korun valinnassa tai haluat suunnitella jotain täysin omaa — autamme mielellämme.",
     sections: {
       appointments: {
-        title: "Henkilokohtaiset ajanvaraukset",
+        title: "Henkilökohtaiset ajanvaraukset",
         body: "Tuotekysymyksiä tai yksilöllisiä korusuunnittelutapaamisia varten tiimimme palvelee sinua mielellään.",
         cta: "Varaa aika kalenteristamme",
       },
       visit: {
-        title: "TULE KAYMAAN",
+        title: "TULE KÄYMÄÄN",
         lines: ["Toivotamme sinut lämpimästi tervetulleeksi myymäläämme", "Korkeavuorenkatu 6, 00150 Helsinki"],
       },
       hours: {
