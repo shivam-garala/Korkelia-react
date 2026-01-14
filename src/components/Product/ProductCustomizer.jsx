@@ -783,7 +783,7 @@ export default function ProductCustomizer({
     filterAvailabilityValue === "4";
   const allowCutInQuery = filterAvailabilityValue !== "0" && !hideCutSection;
   const hideCaratSection = filterAvailabilityValue === "2" || filterAvailabilityValue === "3";
-  const allowCaratInQuery = filterAvailabilityValue !== "0" && !hideCaratSection;
+  const allowCaratInQuery = filterAvailabilityValue !== "0" && filterAvailabilityValue !== "4" && !hideCaratSection;
   const hideClaritySection = filterAvailabilityValue === "3";
   const hideSizeSection = filterAvailabilityValue === "3";
   const hideEngravingSection = filterAvailabilityValue === "3";
