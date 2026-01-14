@@ -5,18 +5,18 @@
   },
   "header": {
     "currency": "Euro",
-    "share": "JAKAA",
+    "share": "JAA",
     "appointment": "VARAA AIKA",
-    "ambassador": "OTA YHTEYTTÄÄ"
+    "ambassador": "OTA YHTEYTTÄ"
   },
   "menu": {
     "home": "Kotiin",
-    "about": "Tietoja meista",
+    "about": "Tietoja meistä",
     "products": "Tuotteet",
-    "diamondDifference": "Korkeila Helsinki timantin ero",
+    "diamondDifference": "Korkeila Helsinki timanttien ominaisuudet ja erot",
     "diamondGuide": "Korkeila Helsinki Timanttiopas",
     "shippingReturns": "Toimitus ja palautukset",
-    "contact": "Ota yhteytta",
+    "contact": "Ota yhteyttä",
     "productsSub": {
       "rings": "Sormukset",
       "bracelets": "Rannekorut",
@@ -71,7 +71,7 @@
     "links": {
       "privacy": "Tietosuojakäytäntö",
       "shippingReturns": "Toimitus- ja palautuskäytäntö",
-      "cookiePolicy": "Evastekaytanto",
+      "cookiePolicy": "Evästetkäytäntö",
       "disclaimer": "Vastuuvapauslauseke",
       "contact": "Ota yhteyttä"
     },
