@@ -1,5 +1,5 @@
 import { Geist, Geist_Mono, Marcellus, Nata_Sans } from "next/font/google";
-import { cookies } from "next/headers";
+import { cookies, headers } from "next/headers";
 import "./globals.css";
 import StoreProvider from "../providers/StoreProvider.jsx";
 
@@ -31,23 +31,38 @@ const descriptions = {
   en: "Explore premium handcrafted jewellery at Korkeila Helsinki — elegant designs crafted for timeless beauty and modern lifestyles.",
 };
 
-export async function generateMetadata() {
+const DEFAULT_LANGUAGE = "fi";
+const SUPPORTED_LANGUAGES = new Set(["en", "fi"]);
+
+const normalizeLanguage = (value) => {
+  if (!value) return "";
+  const normalized = String(value).toLowerCase();
+  return SUPPORTED_LANGUAGES.has(normalized) ? normalized : "";
+};
+
+const resolveLanguage = async () => {
+  const headerStore = await headers();
   const cookieStore = await cookies();
-  const language = cookieStore.get("siteLang")?.value || "fi";
+  const headerLanguage = normalizeLanguage(headerStore.get("x-site-lang"));
+  const cookieLanguage = normalizeLanguage(cookieStore.get("siteLang")?.value);
+  return headerLanguage || cookieLanguage || DEFAULT_LANGUAGE;
+};
+
+export async function generateMetadata() {
+  const language = await resolveLanguage();
   const description = descriptions[language] || descriptions.fi;
 
   return {
     title: "Korkeila Helsinki",
     description: description,
     icons: {
-      icon: "/favicon.ico",
+      icon: "/favicon_icon.ico",
     },
   };
 }
 
 export default async function RootLayout({ children }) {
-  const cookieStore = await cookies();
-  const language = cookieStore.get("siteLang")?.value || "fi";
+  const language = await resolveLanguage();
 
   return (
     <html lang={language}>

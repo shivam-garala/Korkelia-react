@@ -6,6 +6,12 @@ const DEFAULT_LANGUAGE = "fi";
 const FINNISH_COUNTRY_CODES = new Set(["FI"]);
 const SUPPORTED_LANGUAGES = new Set(["en", "fi"]);
 
+const normalizeLanguage = (value) => {
+  if (!value) return "";
+  const normalized = String(value).toLowerCase();
+  return SUPPORTED_LANGUAGES.has(normalized) ? normalized : "";
+};
+
 const resolveCountryCode = (request) => {
   const geoCountry = request.geo?.country;
   if (geoCountry) return geoCountry;
@@ -27,8 +33,10 @@ const resolveDefaultLanguage = (request) => {
 export function middleware(request) {
   const token = request.cookies.get("authToken")?.value;
   const { pathname } = request.nextUrl;
-  const existingLanguage = request.cookies.get(LANGUAGE_COOKIE)?.value;
-  const shouldSetLanguage = !existingLanguage || !SUPPORTED_LANGUAGES.has(existingLanguage);
+  const queryLanguage = normalizeLanguage(request.nextUrl.searchParams.get("lang"));
+  const existingLanguage = normalizeLanguage(request.cookies.get(LANGUAGE_COOKIE)?.value);
+  const resolvedLanguage = queryLanguage || existingLanguage || resolveDefaultLanguage(request);
+  const shouldSetLanguage = !existingLanguage || existingLanguage !== resolvedLanguage;
   let response;
 
   // Protect API routes (except public ones like recaptcha)
@@ -44,17 +52,22 @@ export function middleware(request) {
   } else if (pathname.startsWith("/login") && token) {
     response = NextResponse.redirect(new URL("/dashboard", request.url));
   } else {
-    response = NextResponse.next();
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-site-lang", resolvedLanguage);
+    response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
   }
 
   if (shouldSetLanguage) {
-    const language = resolveDefaultLanguage(request);
-    response.cookies.set(LANGUAGE_COOKIE, language, { sameSite: "lax", path: "/" });
+    response.cookies.set(LANGUAGE_COOKIE, resolvedLanguage, { sameSite: "lax", path: "/" });
   }
 
   return response;
 }
 
 export const config = {
-  matcher: ["/((?!_next/static|_next/image|favicon.ico|robots.txt).*)"],
+  matcher: ["/((?!_next/static|_next/image|favicon_icon.ico|robots.txt).*)"],
 };
