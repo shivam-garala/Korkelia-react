@@ -26,13 +26,16 @@ const marcellus = Marcellus({
   weight: "400",
 });
 
+const siteName = "Korkeila Helsinki";
 const descriptions = {
   fi: "Tutustu Korkeila Helsinki ensiluokkaisiin käsintehtyihin koruihin — elegantteihin koruihin, jotka on suunniteltu ajattomaan kauneuteen ja moderniin elämäntyyliin.",
   en: "Explore premium handcrafted jewellery at Korkeila Helsinki — elegant designs crafted for timeless beauty and modern lifestyles.",
 };
 
 const DEFAULT_LANGUAGE = "fi";
+const DEFAULT_SITE_URL = "https://uat.korkeilahelsinki.fi";
 const SUPPORTED_LANGUAGES = new Set(["en", "fi"]);
+const DEFAULT_OG_IMAGE = "/fallback_image/fallback_square_1.jpg";
 
 const normalizeLanguage = (value) => {
   if (!value) return "";
@@ -48,15 +51,48 @@ const resolveLanguage = async () => {
   return headerLanguage || cookieLanguage || DEFAULT_LANGUAGE;
 };
 
+const resolveBaseUrl = async () => {
+  const headerStore = await headers();
+  const forwardedHost = headerStore.get("x-forwarded-host") || headerStore.get("host");
+  const forwardedProto = headerStore.get("x-forwarded-proto") || "https";
+  if (forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+  return process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL;
+};
+
 export async function generateMetadata() {
   const language = await resolveLanguage();
+  const baseUrl = await resolveBaseUrl();
   const description = descriptions[language] || descriptions.fi;
 
   return {
-    title: "Korkeila Helsinki",
+    metadataBase: new URL(baseUrl),
+    title: siteName,
     description: description,
     icons: {
-      icon: "/favicon_icon.ico",
+      icon: "/logo/logo.png",
+      apple: "/logo/logo.png",
+    },
+    openGraph: {
+      type: "website",
+      url: baseUrl,
+      title: siteName,
+      siteName: siteName,
+      description: description,
+      images: [
+        {
+          url: DEFAULT_OG_IMAGE,
+          alt: siteName,
+        },
+      ],
+      locale: language === "fi" ? "fi_FI" : "en_US",
+    },
+    twitter: {
+      card: "summary_large_image",
+      title: siteName,
+      description: description,
+      images: [DEFAULT_OG_IMAGE],
     },
   };
 }
