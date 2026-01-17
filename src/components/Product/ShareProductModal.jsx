@@ -2,6 +2,7 @@
 
 import Image from "next/image";
 import { useMemo, useState } from "react";
+import { usePathname, useSearchParams } from "next/navigation";
 import Modal from "../ui/Modal.jsx";
 import styles from "./ShareProductModal.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
@@ -9,6 +10,8 @@ import { useI18n } from "../../providers/I18nProvider.jsx";
 export default function ShareProductModal({ buttonClassName = "", buttonContent = null }) {
   const [open, setOpen] = useState(false);
   const [copied, setCopied] = useState(false);
+  const pathname = usePathname();
+  const searchParams = useSearchParams();
   const { language } = useI18n();
   const labels =
     language === "fi"
@@ -45,11 +48,28 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
 
   const currentUrl = useMemo(() => {
     if (typeof window === "undefined") return "";
-    return window.location.href;
-  }, []);
+    const base = window.location.origin || "";
+    const path = pathname ?? "";
+    const query = searchParams?.toString();
+    return `${base}${path}${query ? `?${query}` : ""}`;
+  }, [pathname, searchParams]);
+
+  const shareUrl = useMemo(() => {
+    if (!currentUrl) return "";
+    const normalizedLanguage = typeof language === "string" ? language.toLowerCase() : "";
+    if (!normalizedLanguage) return currentUrl;
+    try {
+      const url = new URL(currentUrl);
+      url.searchParams.set("lang", normalizedLanguage);
+      return url.toString();
+    } catch (error) {
+      const separator = currentUrl.includes("?") ? "&" : "?";
+      return `${currentUrl}${separator}lang=${encodeURIComponent(normalizedLanguage)}`;
+    }
+  }, [currentUrl, language]);
 
   const shareLinks = useMemo(() => {
-    const encodedUrl = encodeURIComponent(currentUrl || "");
+    const encodedUrl = encodeURIComponent(shareUrl || "");
     const isMobile = typeof window !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     return {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
@@ -58,16 +78,16 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
         ? `instagram://`
         : `https://www.instagram.com/`,
     };
-  }, [currentUrl]);
+  }, [shareUrl]);
 
   const handleCopy = async () => {
-    if (!currentUrl) return;
+    if (!shareUrl) return;
     try {
-      await navigator.clipboard.writeText(currentUrl);
+      await navigator.clipboard.writeText(shareUrl);
       setCopied(true);
     } catch (error) {
       const input = document.createElement("input");
-      input.value = currentUrl;
+      input.value = shareUrl;
       document.body.appendChild(input);
       input.select();
       document.execCommand("copy");
@@ -75,6 +95,13 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
       setCopied(true);
     }
     setTimeout(() => setCopied(false), 1600);
+  };
+
+  const handleInstagramShare = (event) => {
+    const fallbackUrl = event?.currentTarget?.href;
+    if (!fallbackUrl) return;
+    event.preventDefault();
+    window.open(fallbackUrl, "_blank", "noopener,noreferrer");
   };
 
   return (
@@ -144,6 +171,7 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
             target="_blank"
             rel="noreferrer"
             aria-label={labels.instagramAria}
+            onClick={handleInstagramShare}
           >
             <span className={`${styles.shareIcon} ${styles.instagram}`}>
               <svg viewBox="0 0 24 24" aria-hidden="true">
@@ -158,8 +186,8 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
         </div>
 
         <div className={styles.copyRow}>
-          <div className={styles.copyField} title={currentUrl || ""}>
-            {currentUrl || labels.copyPlaceholder}
+          <div className={styles.copyField} title={shareUrl || ""}>
+            {shareUrl || labels.copyPlaceholder}
           </div>
           <button type="button" className={styles.copyButton} onClick={handleCopy}>
             {copied ? labels.copied : labels.copy}
