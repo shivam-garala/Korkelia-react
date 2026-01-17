@@ -70,13 +70,10 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
 
   const shareLinks = useMemo(() => {
     const encodedUrl = encodeURIComponent(shareUrl || "");
-    const isMobile = typeof window !== "undefined" && /iPhone|iPad|iPod|Android/i.test(navigator.userAgent);
     return {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
       whatsapp: `https://wa.me/?text=${encodedUrl}`,
-      instagram: isMobile
-        ? `instagram://`
-        : `https://www.instagram.com/`,
+      instagram: "https://ig.me/m/korkeilahelsinki",
     };
   }, [shareUrl]);
 
