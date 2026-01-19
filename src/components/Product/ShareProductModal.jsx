@@ -73,31 +73,35 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
     return {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
       whatsapp: `https://wa.me/?text=${encodedUrl}`,
-      instagram: "https://ig.me/m/korkeilahelsinki",
+      instagram: "https://www.instagram.com/",
     };
   }, [shareUrl]);
 
-  const handleCopy = async () => {
-    if (!shareUrl) return;
+  const copyToClipboard = async (value) => {
+    if (!value) return;
     try {
-      await navigator.clipboard.writeText(shareUrl);
-      setCopied(true);
+      await navigator.clipboard.writeText(value);
     } catch (error) {
       const input = document.createElement("input");
-      input.value = shareUrl;
+      input.value = value;
       document.body.appendChild(input);
       input.select();
       document.execCommand("copy");
       document.body.removeChild(input);
-      setCopied(true);
     }
+    setCopied(true);
     setTimeout(() => setCopied(false), 1600);
   };
 
-  const handleInstagramShare = (event) => {
+  const handleCopy = async () => {
+    await copyToClipboard(shareUrl);
+  };
+
+  const handleInstagramShare = async (event) => {
     const fallbackUrl = event?.currentTarget?.href;
     if (!fallbackUrl) return;
     event.preventDefault();
+    await copyToClipboard(shareUrl || window.location.href);
     window.open(fallbackUrl, "_blank", "noopener,noreferrer");
   };
 
