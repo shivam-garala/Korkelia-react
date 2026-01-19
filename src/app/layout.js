@@ -1,30 +1,6 @@
-import { Geist, Geist_Mono, Marcellus, Nata_Sans } from "next/font/google";
 import { cookies, headers } from "next/headers";
 import "./globals.css";
 import StoreProvider from "../providers/StoreProvider.jsx";
-
-const geistSans = Geist({
-  variable: "--font-geist-sans",
-  subsets: ["latin"],
-});
-
-const geistMono = Geist_Mono({
-  variable: "--font-geist-mono",
-  subsets: ["latin"],
-});
-
-const nataSans = Nata_Sans({
-  variable: "--font-nata-sans",
-  subsets: ["latin"],
-  weight: ["300", "400", "500", "600", "700"],
-  adjustFontFallback: false,
-});
-
-const marcellus = Marcellus({
-  variable: "--font-marcellus",
-  subsets: ["latin"],
-  weight: "400",
-});
 
 const siteName = "Korkeila Helsinki";
 const descriptions = {
@@ -35,7 +11,7 @@ const descriptions = {
 const DEFAULT_LANGUAGE = "fi";
 const DEFAULT_SITE_URL = "https://uat.korkeilahelsinki.fi";
 const SUPPORTED_LANGUAGES = new Set(["en", "fi"]);
-const DEFAULT_OG_IMAGE = "/fallback_image/fallback_square_1.jpg";
+const DEFAULT_OG_IMAGE = "/logo/logo.png";
 
 const normalizeLanguage = (value) => {
   if (!value) return "";
@@ -102,10 +78,15 @@ export default async function RootLayout({ children }) {
 
   return (
     <html lang={language}>
-      <body
-        className={`${geistSans.variable} ${geistMono.variable} ${nataSans.variable} ${marcellus.variable}`}
-        suppressHydrationWarning
-      >
+      <head>
+        <link rel="preconnect" href="https://fonts.googleapis.com" />
+        <link rel="preconnect" href="https://fonts.gstatic.com" crossOrigin="anonymous" />
+        <link
+          rel="stylesheet"
+          href="https://fonts.googleapis.com/css2?family=Marcellus&family=Nata+Sans:wght@300;400;500;600;700&display=swap"
+        />
+      </head>
+      <body suppressHydrationWarning>
         <StoreProvider>{children}</StoreProvider>
       </body>
     </html>
