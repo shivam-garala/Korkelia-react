@@ -11,7 +11,7 @@ const descriptions = {
 const DEFAULT_LANGUAGE = "fi";
 const DEFAULT_SITE_URL = "https://uat.korkeilahelsinki.fi";
 const SUPPORTED_LANGUAGES = new Set(["en", "fi"]);
-const DEFAULT_OG_IMAGE = "/logo/logo.png";
+const DEFAULT_OG_IMAGE = "/logo/logo_share.png";
 
 const normalizeLanguage = (value) => {
   if (!value) return "";
