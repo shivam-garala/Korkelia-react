@@ -1781,7 +1781,7 @@ export default function ProductCustomizer({
         ) : null}
 
         <div className={styles.fieldTitle}>{labels.selectMetalColor}</div>
-        <div className={styles.metalRow}>
+        <div className={`${styles.metalRow}${language === "fi" ? ` ${styles.metalRowWrap}` : ""}`}>
           {metalOptions.map((item) => (
             <button
               key={item.value}
