@@ -88,9 +88,9 @@
   inset: 0;
   width: 100%;
   height: 100%;
-  object-fit: cover;
+  object-fit: contain;
   border: none;
-  background: #ffffff;
+  background: #fff;
   display: block;
 }
 
@@ -199,9 +199,11 @@
 }
 
 .video .media {
-  aspect-ratio: 2 / 1;
+  aspect-ratio: 16 / 9;
   padding: 0;
   overflow: hidden;
+  width: auto;
+  height: 435px;
 }
 
 .video {
