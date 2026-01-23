@@ -145,6 +145,7 @@ export default function NavMenuOverlay({ open, onClose }) {
               alt="KORKEILA HELSINKI"
               width={520}
               height={270}
+              
             />
           </Link>
 
