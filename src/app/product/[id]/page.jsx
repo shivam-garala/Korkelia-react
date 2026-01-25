@@ -50,7 +50,8 @@ export default async function ProductDetailsPage({ params, searchParams }) {
 
               <div className={styles.customizer}>
                 <ProductCustomizer
-                  title={`PRODUCT NAME ${id ? `#${id}` : ""}`}
+                  // title={`PRODUCT NAME ${id ? `#${id}` : ""}`}
+                  title={`...`}
                   productId={id ?? ""}
                   designId={designId ?? ""}
                   defaultMetalId={defaultMetalId}
