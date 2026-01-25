@@ -492,7 +492,7 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
 };
 
 export default function ProductCustomizer({
-  title = "PRODUCT NAME",
+  title = "...",
   productId = "",
   designId = "",
   defaultMetalId = "",
@@ -1321,8 +1321,8 @@ export default function ProductCustomizer({
     translatedTitle ||
     normalizeString(productDetails?.design?.design_variant_name) ||
     normalizeString(productDetails?.product_name) ||
-    normalizeString(title) ||
-    "PRODUCT NAME";
+    normalizeString(title)   
+    // || "PRODUCT NAME";
   const productDescription =
     variantDescription ||
     translatedDescription ||
