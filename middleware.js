@@ -5,11 +5,40 @@ const LANGUAGE_COOKIE = "siteLang";
 const DEFAULT_LANGUAGE = "fi";
 const FINNISH_COUNTRY_CODES = new Set(["FI"]);
 const SUPPORTED_LANGUAGES = new Set(["en", "fi"]);
+const REDIRECT_HOME_PATHS = new Set([
+  "/pages/timantin-puhtausluokittelu",
+  "/products/kukkasormus",
+  "/pages/timantin-hiontamuodot",
+  "/pages/timantin-vari",
+  "/pages/jalometallit-ja-niiden-ominaisuudet",
+  "/pages/tietoa-laboratoriossa-valmistetuista-timanteista",
+  "/pages/karaattipaino-selitettyna",
+  "/collections/kultainen-kihlasormus-ajaton-symboli-rakkaudelle",
+  "/pages/timanttikorujen-huolto",
+  "/collections/valkokulta-kihlasormus-tyylikas-valinta-elaman-suurimpaan-lupaukseen",
+  "/pages/meidan-liike",
+  "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus",
+  "/pages/milloin-ja-miten-kosia",
+  "/pages/timanttitietoutta",
+  "/products/kopio-puoliallianssi-sormus-0-33ct-3",
+  "/collections/frontpage",
+  "/products/timanttikorvakorut",
+  "/collections/sileat-kivettomat-sormukset",
+  "/products/kopio-kapea-taysallianssisormus-briljanteilla-0-50ct",
+]);
 
 const normalizeLanguage = (value) => {
   if (!value) return "";
   const normalized = String(value).toLowerCase();
   return SUPPORTED_LANGUAGES.has(normalized) ? normalized : "";
+};
+
+const normalizePathname = (value) => {
+  if (!value) return "/";
+  const normalized = String(value).toLowerCase();
+  return normalized !== "/" && normalized.endsWith("/")
+    ? normalized.slice(0, -1)
+    : normalized;
 };
 
 const resolveCountryCode = (request) => {
@@ -37,6 +66,7 @@ export function middleware(request) {
   const existingLanguage = normalizeLanguage(request.cookies.get(LANGUAGE_COOKIE)?.value);
   const resolvedLanguage = queryLanguage || existingLanguage || resolveDefaultLanguage(request);
   const shouldSetLanguage = !existingLanguage || existingLanguage !== resolvedLanguage;
+  const normalizedPathname = normalizePathname(pathname);
   let response;
 
   // Protect API routes (except public ones like recaptcha)
@@ -47,7 +77,9 @@ export function middleware(request) {
     return NextResponse.json({ message: "Unauthorized" }, { status: 401 });
   }
 
-  if (isProtectedPath(pathname) && !token) {
+  if (REDIRECT_HOME_PATHS.has(normalizedPathname)) {
+    response = NextResponse.redirect(new URL("/", request.url));
+  } else if (isProtectedPath(pathname) && !token) {
     response = NextResponse.redirect(new URL("/login", request.url));
   } else if (pathname.startsWith("/login") && token) {
     response = NextResponse.redirect(new URL("/dashboard", request.url));

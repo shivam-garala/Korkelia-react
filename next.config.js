@@ -1,4 +1,25 @@
-﻿const path = require("path");
+const path = require("path");
+const redirectHomePaths = [
+  "/pages/timantin-puhtausluokittelu",
+  "/products/kukkasormus",
+  "/pages/timantin-hiontamuodot",
+  "/pages/timantin-vari",
+  "/pages/jalometallit-ja-niiden-ominaisuudet",
+  "/pages/tietoa-laboratoriossa-valmistetuista-timanteista",
+  "/pages/karaattipaino-selitettyna",
+  "/collections/kultainen-kihlasormus-ajaton-symboli-rakkaudelle",
+  "/pages/timanttikorujen-huolto",
+  "/collections/valkokulta-kihlasormus-tyylikas-valinta-elaman-suurimpaan-lupaukseen",
+  "/pages/meidan-liike",
+  "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus",
+  "/pages/milloin-ja-miten-kosia",
+  "/pages/timanttitietoutta",
+  "/products/kopio-puoliallianssi-sormus-0-33ct-3",
+  "/collections/frontpage",
+  "/products/timanttikorvakorut",
+  "/collections/sileat-kivettomat-sormukset",
+  "/products/kopio-kapea-taysallianssisormus-briljanteilla-0-50ct",
+];
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -56,6 +77,13 @@ const nextConfig = {
   reactStrictMode: false,
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
+  async redirects() {
+    return redirectHomePaths.map((source) => ({
+      source,
+      destination: "/",
+      permanent: true,
+    }));
+  },
 };
 
 module.exports = nextConfig;
