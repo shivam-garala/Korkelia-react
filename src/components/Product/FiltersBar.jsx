@@ -32,6 +32,8 @@ export default function FiltersBar({
   leftOptions = [],
   rightOptions = [],
   leftMulti = false,
+  leftDisabled = false,
+  rightDisabled = false,
 }) {
   const leftId = useId();
   const rightId = useId();
@@ -70,6 +72,7 @@ export default function FiltersBar({
           hideSelectedOptions={false}
           components={leftMulti ? { Option: CheckboxOption } : undefined}
           isSearchable={false}
+          isDisabled={leftDisabled}
         />
       </div>
       <div className={styles.slotRight}>
@@ -82,6 +85,7 @@ export default function FiltersBar({
           options={rightOptions}
           onChange={(option) => onRightChange?.(option?.value ?? "")}
           isSearchable={false}
+          isDisabled={rightDisabled}
         />
       </div>
     </div>

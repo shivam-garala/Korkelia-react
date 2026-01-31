@@ -17,7 +17,6 @@ const REDIRECT_HOME_PATHS = new Set([
   "/pages/timanttikorujen-huolto",
   "/collections/valkokulta-kihlasormus-tyylikas-valinta-elaman-suurimpaan-lupaukseen",
   "/pages/meidan-liike",
-  "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus",
   "/pages/milloin-ja-miten-kosia",
   "/pages/timanttitietoutta",
   "/products/kopio-puoliallianssi-sormus-0-33ct-3",
@@ -68,6 +67,24 @@ export function middleware(request) {
   const shouldSetLanguage = !existingLanguage || existingLanguage !== resolvedLanguage;
   const normalizedPathname = normalizePathname(pathname);
   let response;
+
+  if (
+    normalizedPathname ===
+      "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus" ||
+    normalizedPathname === "/collections/kihlasormus-naiselle-taydellinen-sormus"
+  ) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-site-lang", resolvedLanguage);
+    response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+    if (shouldSetLanguage) {
+      response.cookies.set(LANGUAGE_COOKIE, resolvedLanguage, { sameSite: "lax", path: "/" });
+    }
+    return response;
+  }
 
   // Protect API routes (except public ones like recaptcha)
   const isApiRoute = pathname.startsWith("/api");

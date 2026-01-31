@@ -11,7 +11,6 @@ const redirectHomePaths = [
   "/pages/timanttikorujen-huolto",
   "/collections/valkokulta-kihlasormus-tyylikas-valinta-elaman-suurimpaan-lupaukseen",
   "/pages/meidan-liike",
-  "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus",
   "/pages/milloin-ja-miten-kosia",
   "/pages/timanttitietoutta",
   "/products/kopio-puoliallianssi-sormus-0-33ct-3",
@@ -78,10 +77,11 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
   async redirects() {
+    const isProduction = process.env.NODE_ENV === "production";
     return redirectHomePaths.map((source) => ({
       source,
       destination: "/",
-      permanent: true,
+      permanent: isProduction,
     }));
   },
 };
