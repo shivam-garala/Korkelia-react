@@ -16,6 +16,7 @@ import { useI18n } from "../../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.korkeilahelsinki.fi";
 
 const buildSortOptions = (labels) => [
   { value: "price-asc", label: labels.lowToHigh },
@@ -25,7 +26,7 @@ const buildSortOptions = (labels) => [
 const introText = (
   <>
     Timanttisormus on enemmän kuin vain koru – se on rakkauden, muiston ja merkityksen symboli.{" "}
-    <a href="https://www.korkeilahelsinki.fi/" rel="noopener noreferrer" target="_blank">
+    <a href={SITE_URL} rel="noopener noreferrer">
       Me Korkeila Helsingillä
     </a>{" "}
     olemme erikoistuneet valmistamaan uniikkeja ja kauniisti viimeisteltyjä timanttisormuksia,
@@ -94,9 +95,11 @@ export default function TimanttisormusCollectionClient() {
         .toLowerCase();
 
     const isThreeStone = (value) =>
-      /(^|\b)3\s*-?\s*stone\b/.test(value) ||
+      /(^|\b)3\s*-?\s*stones?\b/.test(value) ||
       value.includes("three stone") ||
-      value.includes("three-stone");
+      value.includes("three-stone") ||
+      value.includes("three stones") ||
+      value.includes("three-stones");
 
     const matchesAllowed = (label) => {
       const normalized = normalizeLabel(label);
@@ -315,13 +318,12 @@ export default function TimanttisormusCollectionClient() {
                       Laajasta valikoimastamme löydät upeita vaihtoehtoja eri tyyleihin, kivien
                       muotoihin ja kultaväreihin – oli kyseessä kihla-, vihkisormus tai
                       ainutlaatuinen lahja tärkeälle ihmiselle.{" "}
-                      <a
+                      {/* <a
                         href="https://korkeilahelsinki.bridaljewellery.shop/engagement-rings.php?maxDiamondWeight=1.55&maxCentreDiamondWeight=5.00#filtersOpen"
                         rel="noopener noreferrer"
-                        target="_blank"
-                      >
-                        Jokainen timanttisormus
-                      </a>{" "}
+                      > */}
+                        Jokainen timanttisormus {" "}
+                      {/* </a>{" "} */}
                       valmistetaan huolellisesti 14 tai 18 karaatin valkokullasta, keltakullasta
                       tai platinasta.
                     </p>
@@ -523,7 +525,7 @@ export default function TimanttisormusCollectionClient() {
                       sormus käy läpi tarkan laadunvalvonnan ja viimeistelyn.
                     </p>
                     <p className={styles.sectionCopy}>
-                      <a href="https://www.korkeilahelsinki.fi/" rel="noopener noreferrer" target="_blank">
+                      <a href={SITE_URL} rel="noopener noreferrer">
                         Tilaa timanttisormus suoraan verkkokaupasta tai tule käymään liikkeessämme
                       </a>
                       .
@@ -601,7 +603,7 @@ export default function TimanttisormusCollectionClient() {
                     </p>
                     
                     <p className={styles.sectionCopy}>
-                      <a href="https://www.korkeilahelsinki.fi/" rel="noopener noreferrer" target="_blank">
+                      <a href={SITE_URL} rel="noopener noreferrer">
                         Tutustu koko valikoimaan ja löydä timanttisormus
                       </a>
                       , joka tuntuu juuri sinulle tehdyltä.

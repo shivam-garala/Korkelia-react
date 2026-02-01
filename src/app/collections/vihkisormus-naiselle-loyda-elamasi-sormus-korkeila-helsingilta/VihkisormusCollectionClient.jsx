@@ -16,6 +16,7 @@ import { useI18n } from "../../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.korkeilahelsinki.fi";
 
 const buildSortOptions = (labels) => [
   { value: "price-asc", label: labels.lowToHigh },
@@ -25,7 +26,7 @@ const buildSortOptions = (labels) => [
 const introText = (
   <>
     Vihkisormus naiselle ei ole vain koru – se on rakkauden, lupauksen ja elämän tärkeimmän hetken symboli. Me Korkeila Helsingillä autamme sinua löytämään juuri sen oikean, yksilöllisen vihkisormuksen, joka säilyttää merkityksensä vuodesta toiseen. Valikoimastamme löydät kauniit ja laadukkaat vihkisormukset, ja halutessasi voimme myös{" "}
-    <a href="https://www.korkeilahelsinki.fi/collections/kultainen-kihlasormus-ajaton-symboli-rakkaudelle" rel="noopener noreferrer" target="_blank">
+    <a href={`${SITE_URL}/collections/kultainen-kihlasormus-ajaton-symboli-rakkaudelle`} rel="noopener noreferrer">
       suunnitella
     </a> {" "}
     täysin omanlaisesi mallin. {" "}
@@ -42,19 +43,27 @@ const faqs = [
       "Valikoimastamme löydät sekä klassisia että moderneja malleja, kuten valkokultaisia kihlasormuksia ja 14 karaatin valkokultaisia sormuksia.",
       "Kaikki sormukset on valmistettu korkealaatuisista ja eettisesti hankituista materiaaleista, ja voit valita leveyden, värin, koko ja mahdolliset timantit juuri omiin mieltymyksiisi sopiviksi.",
     ],
+  },
+  {
     question: "Voinko suunnitella oman sormuksen?",
     answer: [
       "Kyllä, voit. Me tarjoamme täysin yksilöllisen suunnittelupalvelun, jossa voit luoda oman kauniin sormuksen alusta alkaen. Voit valita materiaaleja kuten valkokultaa, kultaa tai platinaa, timanttien määrän, leveyden ja tyylin.  ",
       "Myös olemassa oleva kihlasormus voidaan yhdistää uniikkiin malliin. Lisäksi me valmistamme ja kunnostamme perintösormuksia näin sormuksesta voi tulla osa perheesi tarinaa.",
     ],
+  },
+  {
     question: "Mikä vaikuttaa sormuksen hintaan?",
     answer: [
       "Sormuksen hinta muodostuu valitun materiaalin, esimerkiksi 14k valkokullan tai kullan mukaan, timanttien määrästä, sormuksen leveyden, koon ja valmistustyön laajuudesta. Voit helposti rajata valikoiman verkkokaupassamme oman budjettisi mukaan. Sormus on sijoitus, joka säilyttää arvonsa ja kauneutensa ajan myötä.",
     ],
+  },
+  {
     question: "Millaisia materiaaleja voin valita?",
     answer: [
       "Voit valita esimerkiksi valkokultaa 14k, 14 karaatin valkokullan, kultaa, punakultaa tai platinaa. Me valmistamme kaikki sormukset korkealaatuisista ja eettisesti hankituista materiaaleista, ja valikoimastamme löytyy myös timanttisormuksia ja harvinaisempia jalokiviä. Valkokultaiset sormukset säilyttävät kiiltonsa pitkään eivätkä tummu kuten hopea.  ",
     ],
+  },
+  {
     question: "Voinko ostaa sormuksen verkkokaupasta?",
     answer: [
       "Ehdottomasti. Verkkokauppamme on turvallinen ja helppokäyttöinen, ja löydät sieltä laajan valikoiman valkokultaisia kihlasormuksia ja muita kauniita sormuksia. Voit selata eri tyylejä, vertailla hintoja, tarkastella yksityiskohtaisia kuvia ja tuotekuvauksia, sekä tilata suoraan verkosta.  ",
@@ -342,11 +351,7 @@ export default function VihkisormusCollectionClient() {
                      Kaunis sormus – valmistamme sen sinulle
                     </h2>
                     <p className={styles.sectionCopy}>
-                      <a
-                        href="https://www.korkeilahelsinki.fi/pages/ota-yhteytta"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <a href={`${SITE_URL}/pages/ota-yhteytta`} rel="noopener noreferrer">
                         Korkeila Helsinki
                       </a>{" "}
                       tunnetaan laadukkaista ja yksilöllisistä koruista, jotka suunnitellaan
@@ -382,8 +387,7 @@ export default function VihkisormusCollectionClient() {
                         Timantit ovat suosittu valinta vihkisormukseen. Timanteilla koristeltu sormus
                         tuo lisää säihkettä ja korostaa korun arvokkuutta.{" "}
                         <a
-                          href="https://www.korkeilahelsinki.fi/pages/koru-opas"
-                          target="_blank"
+                          href={`${SITE_URL}/pages/koru-opas`}
                           rel="noopener noreferrer"
                           className={styles.inlineLink}
                         >
@@ -424,8 +428,7 @@ export default function VihkisormusCollectionClient() {
                       <strong>vihkisormuksia naiselle</strong> – niin klassisia kuin moderneja,
                       timanteilla tai ilman.{" "}
                       <a
-                        href="https://www.korkeilahelsinki.fi/pages/koru-opas"
-                        target="_blank"
+                        href={`${SITE_URL}/pages/koru-opas`}
                         rel="noopener noreferrer"
                         className={styles.inlineLink}
                       >
@@ -476,7 +479,7 @@ export default function VihkisormusCollectionClient() {
 
                     <p className={styles.sectionCopy}>
                     Voit selailla vaihtoehtoja rauhassa {" "}
-                      <a href="https://www.korkeilahelsinki.fi/" rel="noopener noreferrer" target="_blank">
+                      <a href={SITE_URL} rel="noopener noreferrer">
                       verkkokaupassamme
                       </a>
                       , vertailla eri malleja, tutustua hintoihin ja tehdä ostoksen helposti ja turvallisesti. Tai tule paikan päälle boutique-myymäläämme Helsingin Ullanlinnaan, jossa voit nähdä sormukset luonnossa, sovittaa eri kokoja ja keskustella toiveistasi asiantuntevan kultaseppämme kanssa.
@@ -536,6 +539,3 @@ export default function VihkisormusCollectionClient() {
     </div>
   );
 }
-
-
-

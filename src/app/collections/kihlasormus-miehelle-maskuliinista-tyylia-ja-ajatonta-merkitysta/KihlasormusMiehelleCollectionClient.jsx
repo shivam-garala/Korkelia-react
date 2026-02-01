@@ -16,6 +16,7 @@ import { useI18n } from "../../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.korkeilahelsinki.fi";
 
 const buildSortOptions = (labels) => [
   { value: "price-asc", label: labels.lowToHigh },
@@ -26,7 +27,7 @@ const introText = (
   <>
     Kihlasormus miehelle ei ole vain koru – se on lupaus, sitoumus ja osa tärkeää
     elämänvaihetta.{" "}
-    <a href="https://www.korkeilahelsinki.fi/" rel="noopener noreferrer" target="_blank">
+    <a href={SITE_URL} rel="noopener noreferrer">
       Korkeila Helsingillä
     </a>{" "}
     suunnittelemme ja valmistamme miesten kihlasormukset käsityönä, yksilöllisesti ja
@@ -50,11 +51,7 @@ const faqs = [
       <>
         Joissain tapauksissa toinen osapuoli voi kuitenkin yllättää kumppanin ja
         hankkia{" "}
-        <a
-          href="https://www.korkeilahelsinki.fi/pages/ota-yhteytta"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href={`${SITE_URL}/pages/ota-yhteytta`} rel="noopener noreferrer">
           kihlasormuksen lahjaksi
         </a>
         . Mikä tahansa tapa onkin kyseessä, kihlasormuksen valinnassa kannattaa miettiä
@@ -345,8 +342,7 @@ export default function KihlasormusMiehelleCollectionClient() {
                     </h2>
                     <p className={styles.sectionCopy}>
                       <a
-                        href="https://www.korkeilahelsinki.fi/pages/meidan-liike"
-                        target="_blank"
+                        href={`${SITE_URL}/pages/meidan-liike`}
                         rel="noopener noreferrer"
                         className={styles.inlineLink}
                       >
@@ -442,11 +438,7 @@ export default function KihlasormusMiehelleCollectionClient() {
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>Kihlasormus miehelle alkaen 990€</h2>
                     <p className={styles.sectionCopy}>
-                      <a
-                        rel="noopener noreferrer"
-                        href="https://www.korkeilahelsinki.fi/pages/meidan-liike"
-                        target="_blank"
-                      >
+                      <a rel="noopener noreferrer" href={`${SITE_URL}/pages/meidan-liike`}>
                         Korkeila Helsingin
                       </a>{" "}
                       valikoimasta löytyy kihlasormuksia miehille alkaen 990 €. Hinta riippuu
@@ -491,7 +483,8 @@ export default function KihlasormusMiehelleCollectionClient() {
                     <section className={styles.storySection}>
                         <h2 className={styles.storyHeading}>Löydä oikea sormus asiantuntevalla opastuksella tai helposti verkosta</h2>
                         <p className={styles.sectionCopy}>Löydä juuri sinulle sopiva kihlasormus miehelle tai tutustu koko valikoimaan miesten kihlasormuksia verkkosivustollamme:{" "}
-                        <a rel="noopener noreferrer" href="https://www.korkeilahelsinki.fi" target="_blank">Tutustu valikoimaan Korkeila Helsinki</a> {" "} </p>
+                        <a rel="noopener noreferrer" href={SITE_URL}>Tutustu valikoimaan Korkeila Helsinki</a>{" "}
+                      </p>
                         <p className={styles.sectionCopy}>Jos kaipaat henkilökohtaista opastusta tai haluat suunnitella täysin yksilöllisen kihlasormuksen, voit varata ajan asiantuntijamme kanssa – me olemme täällä sinua varten.</p>
                     </section>
                   </section>
@@ -555,6 +548,3 @@ export default function KihlasormusMiehelleCollectionClient() {
     </div>
   );
 }
-
-
-

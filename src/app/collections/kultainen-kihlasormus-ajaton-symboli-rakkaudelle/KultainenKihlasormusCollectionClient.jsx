@@ -16,6 +16,7 @@ import { useI18n } from "../../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.korkeilahelsinki.fi";
 
 const buildSortOptions = (labels) => [
   { value: "price-asc", label: labels.lowToHigh },
@@ -26,34 +27,27 @@ const introText = (
   <>
     Kultainen kihlasormus on klassinen ja kaunis symboli rakkaudelle.
     Valikoimastamme löydät{" "}
-    <a
-      href="https://www.korkeilahelsinki.fi/collections/sormukset"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
+    <a href={`${SITE_URL}/collections/sormukset`} rel="noopener noreferrer">
       kultaisia kihlasormuksia
     </a>{" "}
     useissa malleissa – aina perinteisestä{" "}
     <a
-      href="https://www.korkeilahelsinki.fi/products/kopio-kihlasormus-4mm-bombe-court-premium"
+      href={`${SITE_URL}/products/kopio-kihlasormus-4mm-bombe-court-premium`}
       rel="noopener noreferrer"
-      target="_blank"
     >
       14 karaatin keltakullasta
     </a>{" "}
     moderneihin timanteilla koristeltuihin vaihtoehtoihin, kuten{" "}
     <a
-      href="https://www.korkeilahelsinki.fi/products/kopio-puoliallianssi-sormus-0-33ct-1"
+      href={`${SITE_URL}/products/kopio-puoliallianssi-sormus-0-33ct-1`}
       rel="noopener noreferrer"
-      target="_blank"
     >
       puoliallianssi-sormus
     </a>{" "}
     tai{" "}
     <a
-      href="https://www.korkeilahelsinki.fi/products/kopio-kapea-taysallianssisormus-briljanteilla-0-50ct"
+      href={`${SITE_URL}/products/kopio-kapea-taysallianssisormus-briljanteilla-0-50ct`}
       rel="noopener noreferrer"
-      target="_blank"
     >
       kapea täysallianssisormus
     </a>
@@ -63,51 +57,36 @@ const introText = (
     <br />
     Valikoimasta löytyy myös yksilöllisiä malleja, kuten{" "}
     <a
-      href="https://www.korkeilahelsinki.fi/products/criss-cross-kihlasormus-4-5mm"
+      href={`${SITE_URL}/products/criss-cross-kihlasormus-4-5mm`}
       rel="noopener noreferrer"
-      target="_blank"
     >
       Criss Cross
     </a>
     ,{" "}
-    <a
-      href="https://www.korkeilahelsinki.fi/products/kukkasormus"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
+    <a href={`${SITE_URL}/products/kukkasormus`} rel="noopener noreferrer">
       Kukkasormus
     </a>
     ,{" "}
     <a
-      href="https://www.korkeilahelsinki.fi/products/sun-matt-kihlasormus-5-mm"
+      href={`${SITE_URL}/products/sun-matt-kihlasormus-5-mm`}
       rel="noopener noreferrer"
-      target="_blank"
     >
       Sun Matt
     </a>
     . ja{" "}
     <a
-      href="https://www.korkeilahelsinki.fi/products/ice-matt-kihlasormus-4-5-mm-1"
+      href={`${SITE_URL}/products/ice-matt-kihlasormus-4-5-mm-1`}
       rel="noopener noreferrer"
-      target="_blank"
     >
       Ice Matt
     </a>
     . Tilaa helposti kultaiset kihlasormukset verkkokaupastamme, tai kysy lisää{" "}
-    <a
-      href="https://www.korkeilahelsinki.fi/pages/tilaustyot"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
+    <a href={`${SITE_URL}/pages/tilaustyot`} rel="noopener noreferrer">
       tilaustyöstä
     </a>
     ,{" "}
     jos haluat täysin uniikin sormuksen. Tervetuloa myös tutustumaan{" "}
-    <a
-      href="https://www.korkeilahelsinki.fi/pages/meidan-liike"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
+    <a href={`${SITE_URL}/pages/meidan-liike`} rel="noopener noreferrer">
       meidän liikkeeseemme
     </a>
     .
@@ -181,9 +160,22 @@ export default function KultainenKihlasormusCollectionClient() {
         .trim()
         .toLowerCase();
 
+    const isMensRings = (value) => {
+      const normalized = value.replace(/’/g, "'");
+      return (
+        normalized.includes("men's rings") ||
+        normalized.includes("mens rings") ||
+        normalized.includes("men rings")
+      );
+    };
+
     const matchesAllowed = (label) => {
       const normalized = normalizeLabel(label);
-      return normalized.includes("solitaire") || normalized.includes("halo");
+      return (
+        normalized.includes("solitaire") ||
+        normalized.includes("halo") ||
+        isMensRings(normalized)
+      );
     };
 
     const loadSubCategories = async () => {
@@ -488,26 +480,20 @@ export default function KultainenKihlasormusCollectionClient() {
                     <p className={styles.sectionCopy}>
                       Kultainen kihlasormus on aina klassinen ja kaunis valinta. Valikoimastamme
                       löydät{" "}
-                      <a
-                        rel="noopener"
-                        href="https://www.korkeilahelsinki.fi/collections/sormukset"
-                        target="_blank"
-                      >
+                      <a rel="noopener" href={`${SITE_URL}/collections/sormukset`}>
                         kultaisia kihlasormuksia
                       </a>
                       ,{" "}
                       jotka on valmistettu laadukkaasta kullasta – kuten 14 karaatin{" "}
                       <a
-                        target="_blank"
                         rel="noopener"
-                        href="https://www.korkeilahelsinki.fi/products/kopio-kihlasormus-3mm-bombe-court"
+                        href={`${SITE_URL}/products/kopio-kihlasormus-3mm-bombe-court`}
                       >
                         keltakulta
                       </a>{" "}
                       ja 14k{" "}
                       <a
-                        href="https://www.korkeilahelsinki.fi/products/sun-matt-kihlasormus-5-mm"
-                        target="_blank"
+                        href={`${SITE_URL}/products/sun-matt-kihlasormus-5-mm`}
                         rel="noopener"
                       >
                         keltakultainen
@@ -523,7 +509,7 @@ export default function KultainenKihlasormusCollectionClient() {
                     <p className={styles.sectionCopy}>
                       Hinta alkaa jo 990 €, ja valikoimastamme löytyy aina laadukkaita kultaisia
                       kihlasormuksia. Tilaa helposti{" "}
-                      <a rel="noopener" href="https://www.korkeilahelsinki.fi/" target="_blank">
+                      <a rel="noopener" href={SITE_URL}>
                         kaikki sormukset
                       </a>{" "}
                       verkkokaupastamme ja löydä juuri sinulle sopiva kihlasormus.
@@ -544,11 +530,7 @@ export default function KultainenKihlasormusCollectionClient() {
 
                     <p className={styles.sectionCopy}>
                       Kulta on paitsi kaunis ja arvokas, myös kestävä ja helppohoitoinen materiaali.{" "}
-                      <a
-                        href="https://www.korkeilahelsinki.fi/pages/ota-yhteytta"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <a href={`${SITE_URL}/pages/ota-yhteytta`} rel="noopener noreferrer">
                         Korkeila Helsingillä
                       </a>{" "}
                       kullasta valmistetut sormukset suunnitellaan käyttöä varten – ne eivät ole
@@ -612,8 +594,7 @@ export default function KultainenKihlasormusCollectionClient() {
                     </p>
                     <p className={styles.sectionCopy}>
                       <a
-                        href="https://www.korkeilahelsinki.fi/"
-                        target="_blank"
+                        href={SITE_URL}
                         rel="noopener noreferrer"
                         className={styles.inlineLink}
                       >
@@ -689,6 +670,3 @@ export default function KultainenKihlasormusCollectionClient() {
     </div>
   );
 }
-
-
-
