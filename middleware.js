@@ -5,16 +5,6 @@ const LANGUAGE_COOKIE = "siteLang";
 const DEFAULT_LANGUAGE = "fi";
 const FINNISH_COUNTRY_CODES = new Set(["FI"]);
 const SUPPORTED_LANGUAGES = new Set(["en", "fi"]);
-const EXTERNAL_REDIRECTS = new Map([
-  [
-    "/products/kopio-puoliallianssi-sormus-0-33ct-1",
-    "https://www.korkeilahelsinki.fi/products/kopio-puoliallianssi-sormus-0-33ct-1",
-  ],
-  [
-    "/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct-1",
-    "https://www.korkeilahelsinki.fi/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct-1",
-  ],
-]);
 const REDIRECT_HOME_PATHS = new Set([
   "/pages/timantin-puhtausluokittelu",
   "/products/kukkasormus",
@@ -32,6 +22,20 @@ const REDIRECT_HOME_PATHS = new Set([
   "/products/timanttikorvakorut",
   "/collections/sileat-kivettomat-sormukset",
   "/products/kopio-kapea-taysallianssisormus-briljanteilla-0-50ct",
+  "/collections/sormukset",
+  "/products/kopio-kihlasormus-3mm-bombe-court-premium",
+  "/pages/nain-tilaat-verkkokaupasta",
+  "/products/kopio-kopio-puoliallianssi-sormus-0-33ct",
+  "/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct",
+  "/pages/ota-yhteytta",
+  "/pages/tilaustyopalvelu",
+  "/products/kopio-kihlasormus-4mm-bombe-court-premium",
+  "/products/kopio-puoliallianssi-sormus-0-33ct-1",
+  "/products/sun-matt-kihlasormus-5-mm",
+  "/products/criss-cross-kihlasormus-4-5mm",
+  "/products/ice-matt-kihlasormus-4-5-mm-1",
+  "/pages/tilaustyot",
+  "/pages/koru-opas",
 ]);
 
 const normalizeLanguage = (value) => {
@@ -75,12 +79,6 @@ export function middleware(request) {
   const shouldSetLanguage = !existingLanguage || existingLanguage !== resolvedLanguage;
   const normalizedPathname = normalizePathname(pathname);
   let response;
-
-  if (EXTERNAL_REDIRECTS.has(normalizedPathname)) {
-    return NextResponse.redirect(
-      new URL(EXTERNAL_REDIRECTS.get(normalizedPathname), request.url)
-    );
-  }
 
   if (normalizedPathname === "/collections/kihlasormus-naiselle-taydellinen-sormus") {
     return NextResponse.redirect(

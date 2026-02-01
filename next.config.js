@@ -16,18 +16,20 @@ const redirectHomePaths = [
   "/products/timanttikorvakorut",
   "/collections/sileat-kivettomat-sormukset",
   "/products/kopio-kapea-taysallianssisormus-briljanteilla-0-50ct",
-];
-const externalRedirects = [
-  {
-    source: "/products/kopio-puoliallianssi-sormus-0-33ct-1",
-    destination:
-      "https://www.korkeilahelsinki.fi/products/kopio-puoliallianssi-sormus-0-33ct-1",
-  },
-  {
-    source: "/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct-1",
-    destination:
-      "https://www.korkeilahelsinki.fi/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct-1",
-  },
+  "/collections/sormukset",
+  "/products/kopio-kihlasormus-3mm-bombe-court-premium",
+  "/pages/nain-tilaat-verkkokaupasta",
+  "/products/kopio-kopio-puoliallianssi-sormus-0-33ct",
+  "/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct",
+  "/pages/ota-yhteytta",
+  "/pages/tilaustyopalvelu",
+  "/products/kopio-kihlasormus-4mm-bombe-court-premium",
+  "/products/kopio-puoliallianssi-sormus-0-33ct-1",
+  "/products/sun-matt-kihlasormus-5-mm",
+  "/products/criss-cross-kihlasormus-4-5mm",
+  "/products/ice-matt-kihlasormus-4-5-mm-1",
+  "/pages/tilaustyot",
+  "/pages/koru-opas",
 ];
 
 /** @type {import('next').NextConfig} */
@@ -89,10 +91,6 @@ const nextConfig = {
   async redirects() {
     const isProduction = process.env.NODE_ENV === "production";
     return [
-      ...externalRedirects.map((redirect) => ({
-        ...redirect,
-        permanent: isProduction,
-      })),
       ...redirectHomePaths.map((source) => ({
         source,
         destination: "/",
