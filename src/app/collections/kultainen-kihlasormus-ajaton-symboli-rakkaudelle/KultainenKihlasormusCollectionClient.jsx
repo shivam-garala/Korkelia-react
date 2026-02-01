@@ -76,7 +76,8 @@ const introText = (
       target="_blank"
     >
       Kukkasormus
-    </a>{" "}
+    </a>
+    ,{" "}
     <a
       href="https://www.korkeilahelsinki.fi/products/sun-matt-kihlasormus-5-mm"
       rel="noopener noreferrer"
@@ -614,6 +615,7 @@ export default function KultainenKihlasormusCollectionClient() {
                         href="https://www.korkeilahelsinki.fi/"
                         target="_blank"
                         rel="noopener noreferrer"
+                        className={styles.inlineLink}
                       >
                         Tutustu kultaisten kihlasormusten valikoimaamme täällä
                       </a>

@@ -24,6 +24,7 @@ const REDIRECT_HOME_PATHS = new Set([
   "/products/kopio-kapea-taysallianssisormus-briljanteilla-0-50ct",
   "/collections/sormukset",
   "/products/kopio-kihlasormus-3mm-bombe-court-premium",
+  "/products/kopio-kihlasormus-3mm-bombe-court",
   "/pages/nain-tilaat-verkkokaupasta",
   "/products/kopio-kopio-puoliallianssi-sormus-0-33ct",
   "/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct",

@@ -49,13 +49,13 @@ const faqs = [
     ],
     question: "Mikä vaikuttaa sormuksen hintaan?",
     answer: [
-      "Sormuksen hinta muodostuu valitun materiaalin, esimerkiksi 14k valkokullan tai kullan mukaan, timanttien määrästä, sormuksen leveyden, koon ja valmistustyön laajuudesta. Voit helposti rajata valikoiman verkkokaupassamme oman budjettisi mukaan. Sormus on sijoitus, joka säilyttää arvonsa ja kauneutensa ajan myötä.  ",
+      "Sormuksen hinta muodostuu valitun materiaalin, esimerkiksi 14k valkokullan tai kullan mukaan, timanttien määrästä, sormuksen leveyden, koon ja valmistustyön laajuudesta. Voit helposti rajata valikoiman verkkokaupassamme oman budjettisi mukaan. Sormus on sijoitus, joka säilyttää arvonsa ja kauneutensa ajan myötä.",
     ],
     question: "Millaisia materiaaleja voin valita?",
     answer: [
       "Voit valita esimerkiksi valkokultaa 14k, 14 karaatin valkokullan, kultaa, punakultaa tai platinaa. Me valmistamme kaikki sormukset korkealaatuisista ja eettisesti hankituista materiaaleista, ja valikoimastamme löytyy myös timanttisormuksia ja harvinaisempia jalokiviä. Valkokultaiset sormukset säilyttävät kiiltonsa pitkään eivätkä tummu kuten hopea.  ",
     ],
-      question: "Voinko ostaa sormuksen verkkokaupasta?",
+    question: "Voinko ostaa sormuksen verkkokaupasta?",
     answer: [
       "Ehdottomasti. Verkkokauppamme on turvallinen ja helppokäyttöinen, ja löydät sieltä laajan valikoiman valkokultaisia kihlasormuksia ja muita kauniita sormuksia. Voit selata eri tyylejä, vertailla hintoja, tarkastella yksityiskohtaisia kuvia ja tuotekuvauksia, sekä tilata suoraan verkosta.  ",
       "Jos jokin malli kiinnostaa, voit myös varata ajan myymälään ja kokeilla sormuksia paikan päällä. Halutessasi voit tilata omasta unelmiesi sormuksen helposti verkosta – valitse juuri sinun tyyliisi sopiva malli ja tee siitä osa tarinaasi."
