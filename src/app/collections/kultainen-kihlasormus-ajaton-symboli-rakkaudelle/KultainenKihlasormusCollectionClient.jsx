@@ -362,8 +362,11 @@ export default function KultainenKihlasormusCollectionClient() {
             </header>
             <article className={styles.story}>
               <p className={styles.intro}>{introText}</p>
-              <div className={styles.toggleRow}>
-                <button
+              {!showAllContent ? (
+
+                <div className={styles.toggleRow}>
+
+                  <button
                   className={styles.toggleButton}
                   type="button"
                   onClick={() => setShowAllContent((prev) => !prev)}
@@ -372,7 +375,10 @@ export default function KultainenKihlasormusCollectionClient() {
                 >
                   {showAllContent ? "Näytä vähemmän" : "Lue lisää"}
                 </button>
-              </div>
+
+                </div>
+
+              ) : null}
               {showAllContent ? (
                 <div className={styles.storyBody} id="story-content">
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
@@ -623,8 +629,26 @@ export default function KultainenKihlasormusCollectionClient() {
                   </section>
                 </div>
               ) : null}
+
+              {showAllContent ? (
+
+                <div className={styles.toggleRow}>
+
+                  <button
+                  className={styles.toggleButton}
+                  type="button"
+                  onClick={() => setShowAllContent((prev) => !prev)}
+                  aria-expanded={showAllContent}
+                  aria-controls="story-content"
+                >
+                  {showAllContent ? "Näytä vähemmän" : "Lue lisää"}
+                </button>
+
+                </div>
+
+              ) : null}
               <section className={styles.productSection}>
-                <Container>
+                <Container className={styles.productContainer}>
                   {/*
                   <div className={`${styles.sectionHeader} ${styles.productSectionHeader}`}>
                     <h2 className={`${styles.sectionTitle} ${styles.productHeading}`}>
@@ -663,3 +687,6 @@ export default function KultainenKihlasormusCollectionClient() {
     </div>
   );
 }
+
+
+

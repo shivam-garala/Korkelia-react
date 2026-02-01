@@ -152,6 +152,10 @@
   padding: 20px 0 90px;
 }
 
+.productContainer {
+  padding-inline: 0;
+}
+
 .productSectionHeader {
   margin-bottom: 22px;
 }
@@ -247,6 +251,8 @@
     border-radius: 16px;
   }
 }
+
+
 
 
 

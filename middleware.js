@@ -5,6 +5,16 @@ const LANGUAGE_COOKIE = "siteLang";
 const DEFAULT_LANGUAGE = "fi";
 const FINNISH_COUNTRY_CODES = new Set(["FI"]);
 const SUPPORTED_LANGUAGES = new Set(["en", "fi"]);
+const EXTERNAL_REDIRECTS = new Map([
+  [
+    "/products/kopio-puoliallianssi-sormus-0-33ct-1",
+    "https://www.korkeilahelsinki.fi/products/kopio-puoliallianssi-sormus-0-33ct-1",
+  ],
+  [
+    "/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct-1",
+    "https://www.korkeilahelsinki.fi/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct-1",
+  ],
+]);
 const REDIRECT_HOME_PATHS = new Set([
   "/pages/timantin-puhtausluokittelu",
   "/products/kukkasormus",
@@ -65,6 +75,12 @@ export function middleware(request) {
   const shouldSetLanguage = !existingLanguage || existingLanguage !== resolvedLanguage;
   const normalizedPathname = normalizePathname(pathname);
   let response;
+
+  if (EXTERNAL_REDIRECTS.has(normalizedPathname)) {
+    return NextResponse.redirect(
+      new URL(EXTERNAL_REDIRECTS.get(normalizedPathname), request.url)
+    );
+  }
 
   if (normalizedPathname === "/collections/kihlasormus-naiselle-taydellinen-sormus") {
     return NextResponse.redirect(
