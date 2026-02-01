@@ -24,13 +24,13 @@ const buildSortOptions = (labels) => [
 
 const introText = (
   <>
-    Vihkisormus naiselle ei ole vain koru â€“ se on rakkauden, lupauksen ja elÃ¤mÃ¤n tÃ¤rkeimmÃ¤n hetken symboli. Me Korkeila HelsingillÃ¤ autamme sinua lÃ¶ytÃ¤mÃ¤Ã¤n juuri sen oikean, yksilÃ¶llisen vihkisormuksen, joka sÃ¤ilyttÃ¤Ã¤ merkityksensÃ¤ vuodesta toiseen. Valikoimastamme lÃ¶ydÃ¤t kauniit ja laadukkaat vihkisormukset, ja halutessasi voimme myÃ¶s {" "}
+    Vihkisormus naiselle ei ole vain koru – se on rakkauden, lupauksen ja elämän tärkeimmän hetken symboli. Me Korkeila Helsingillä autamme sinua löytämään juuri sen oikean, yksilöllisen vihkisormuksen, joka säilyttää merkityksensä vuodesta toiseen. Valikoimastamme löydät kauniit ja laadukkaat vihkisormukset, ja halutessasi voimme myös{" "}
     <a href="https://www.korkeilahelsinki.fi/collections/kultainen-kihlasormus-ajaton-symboli-rakkaudelle" rel="noopener noreferrer" target="_blank">
       suunnitella
     </a> {" "}
-    tÃ¤ysin omanlaisesi mallin. {" "}
+    täysin omanlaisesi mallin. {" "}
     <br />
-    <strong>Korkeila Helsinki</strong> on perheyritys Ullanlinnasta, ja olemme <strong>vuodesta 2016</strong> asti valmistaneet kÃ¤sityÃ¶nÃ¤ tehtyjÃ¤ vihkisormuksia, jotka suunnitellaan Suomessa  rakkaudella ja huolella, jotta jokainen vihkisormus olisi yhtÃ¤ ainutlaatuinen kuin sen tarina.
+    <strong>Korkeila Helsinki</strong> on perheyritys Ullanlinnasta, ja olemme <strong>vuodesta 2016</strong> asti valmistaneet käsityönä tehtyjä vihkisormuksia, jotka suunnitellaan ja valmistetaan Suomessa  rakkaudella ja huolella, jotta jokainen vihkisormus olisi yhtä ainutlaatuinen kuin sen tarina.
   </>
 );
 
@@ -301,21 +301,17 @@ export default function VihkisormusCollectionClient() {
             <article className={styles.story}>
               <p className={styles.intro}>{introText}</p>
               {!showAllContent ? (
-
                 <div className={styles.toggleRow}>
-
                   <button
-                  className={styles.toggleButton}
-                  type="button"
-                  onClick={() => setShowAllContent((prev) => !prev)}
-                  aria-expanded={showAllContent}
-                  aria-controls="story-content"
-                >
-                  {showAllContent ? "Näytä vähemmän" : "Lue lisää"}
-                </button>
-
+                    className={styles.toggleButton}
+                    type="button"
+                    onClick={() => setShowAllContent((prev) => !prev)}
+                    aria-expanded={showAllContent}
+                    aria-controls="story-content"
+                  >
+                    {showAllContent ? "Näytä vähemmän" : "Lue lisää"}
+                  </button>
                 </div>
-
               ) : null}
               {showAllContent ? (
                 <div className={styles.storyBody} id="story-content">
