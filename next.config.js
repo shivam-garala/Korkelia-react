@@ -17,6 +17,18 @@ const redirectHomePaths = [
   "/collections/sileat-kivettomat-sormukset",
   "/products/kopio-kapea-taysallianssisormus-briljanteilla-0-50ct",
 ];
+const externalRedirects = [
+  {
+    source: "/products/kopio-puoliallianssi-sormus-0-33ct-1",
+    destination:
+      "https://www.korkeilahelsinki.fi/products/kopio-puoliallianssi-sormus-0-33ct-1",
+  },
+  {
+    source: "/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct-1",
+    destination:
+      "https://www.korkeilahelsinki.fi/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct-1",
+  },
+];
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -76,11 +88,17 @@ const nextConfig = {
   poweredByHeader: false,
   async redirects() {
     const isProduction = process.env.NODE_ENV === "production";
-    return redirectHomePaths.map((source) => ({
-      source,
-      destination: "/",
-      permanent: isProduction,
-    }));
+    return [
+      ...externalRedirects.map((redirect) => ({
+        ...redirect,
+        permanent: isProduction,
+      })),
+      ...redirectHomePaths.map((source) => ({
+        source,
+        destination: "/",
+        permanent: isProduction,
+      })),
+    ];
   },
 };
 
