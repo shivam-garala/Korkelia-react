@@ -1,9 +1,9 @@
 ﻿import KihlasormusCollectionClient from "./KihlasormusCollectionClient.jsx";
 
 export const metadata = {
-  title: "Kihlasormus naiselle – löydä juuri sinulle täydellinen sormus | Korkeila Helsinki",
+  title: "Kihlasormus Naiselle – Tyylikästä muotoilua ja täydellinen valinta – Korkeila Helsinki",
   description:
-    "Tutustu Korkeila Helsingin käsityönä valmistettuihin kihlasormuksiin – klassiset ja modernit vaihtoehdot, eettiset timantit ja yksilöllinen suunnittelu.",
+    "Tutustu upeisiin malleihin ja hyödyllisiiin vinkkeihin, joiden avulla löydät juuri oikean sormuksen tärkeään hetkeen ja kestävään rakkauteen.",
 };
 
 export default function KihlasormusCollectionPage() {

@@ -38,7 +38,7 @@ const introText = (
 
 const faqs = [
   {
-    question: "MTuleeko miehelle kihlasormus?",
+    question: "Tuleeko miehelle kihlasormus?",
     answer: [
       "Kyllä tulee – ja yhä useammin. Miesten kihlasormus ei ollut aiemmin Suomessa yleinen, mutta nykyään se on tavallinen osa kihlautumista. Parit haluavat juhlistaa sitoutumistaan tasapuolisesti, ja yhteinen sormusvalinta koetaan merkitykselliseksi. Miesten sormukset voivat olla yhtä tyylikkäitä kuin naisten, mutta muotoilu, materiaalit ja leveydet suunnitellaan usein miehen käteen ja tyyliin sopiviksi.",
     ],
@@ -480,6 +480,20 @@ export default function KihlasormusMiehelleCollectionClient() {
                         </details>
                       ))}
                     </div>
+                    <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
+                      <Image
+                        src="/link6/SunMatt5_0mm.jpg.jpeg"
+                        alt="Kihlasormus miehelle, kihlasormukset, myös, sormuksen, sormukset, leveys, miesten kihlasormukset, kuten, kohinoor, lisäksi, leveys, kihlasormukset, myös"
+                        fill
+                        sizes="(max-width: 720px) 80vw, 360px"
+                      />
+                    </figure>
+                    <section className={styles.storySection}>
+                        <h2 className={styles.storyHeading}>Löydä oikea sormus asiantuntevalla opastuksella tai helposti verkosta</h2>
+                        <p className={styles.sectionCopy}>Löydä juuri sinulle sopiva kihlasormus miehelle tai tutustu koko valikoimaan miesten kihlasormuksia verkkosivustollamme:{" "}
+                        <a rel="noopener noreferrer" href="https://www.korkeilahelsinki.fi" target="_blank">Tutustu valikoimaan Korkeila Helsinki</a> {" "} </p>
+                        <p className={styles.sectionCopy}>Jos kaipaat henkilökohtaista opastusta tai haluat suunnitella täysin yksilöllisen kihlasormuksen, voit varata ajan asiantuntijamme kanssa – me olemme täällä sinua varten.</p>
+                    </section>
                   </section>
                 </div>
               ) : null}

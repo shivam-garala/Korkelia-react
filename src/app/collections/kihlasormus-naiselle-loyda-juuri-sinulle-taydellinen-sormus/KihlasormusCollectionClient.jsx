@@ -541,8 +541,15 @@ export default function KihlasormusCollectionClient() {
                   <section className={styles.storySection}>
                     <p className={styles.sectionCopy}>Kihla, joka kertoo tarinasi</p>
                     <p className={styles.sectionCopy}>
-                      Kihla ei ole vain metallia ja kiveä – se on lupaus, tarina, tunne. Me
-                      Korkeila Helsingillä olemme sitoutuneet tekemään jokaisesta kihlasormuksesta
+                      Kihla ei ole vain metallia ja kiveä – se on lupaus, tarina, tunne.{" "}
+                      <a
+                        href="https://www.korkeilahelsinki.fi/pages/ota-yhteytta"
+                        rel="noopener noreferrer"
+                        target="_blank"
+                      >
+                        Me Korkeila Helsingillä
+                      </a>{" "}
+                      olemme sitoutuneet tekemään jokaisesta kihlasormuksesta
                       erityisen. Juuri sinunlaisesi. Juuri sellaisen, jota kannat ylpeydellä ja
                       rakkaudella.
                     </p>
@@ -566,6 +573,35 @@ export default function KihlasormusCollectionClient() {
                         </details>
                       ))}
                     </div>
+                    <figure className={styles.storyImage}>
+                    <Image
+                      src="/link2/0daebbc8-a774-4654-a8ad-4f384945aff5.jpeg"
+                      alt="kihlasormus, kihlasormukset, valikoimasta löydät, myös, timanttisormus,"
+                      fill
+                      sizes="(max-width: 960px) 100vw, 720px"
+                    />
+                  </figure>
+            <section className={styles.storySection}>
+                    
+                    <p className={styles.sectionCopy}><strong>Löydä oma kihlasormuksesi Korkeila Helsingin valikoimasta</strong></p>
+
+                    <p className={styles.sectionCopy}>Tutustu nyt verkkokauppaamme osoitteessa 
+                    
+                    {" "}
+                    <a
+                          href="https://www.korkeilahelsinki.fi/"
+                         
+                          rel="noopener noreferrer"
+                          className={styles.inlineLink}
+                        >
+                    Korkeila Helsinki 
+                    </a>{" "}
+                    ja löydä kihlasormus, joka ansaitsee vain parasta.</p>
+
+                    <p className={styles.sectionCopy}>Haluatko yksilöllisen, käsintehdyn ja vastuullisesti valmistetun kihlasormuksen?</p>
+
+                    <p className={styles.sectionCopy}>Varaa aika henkilökohtaiseen suunnitteluhetkeen Ullanlinnan liikkeeseemme jo tänään.</p>
+                    </section>
                   </section>
                 </div>
               ) : null}
