@@ -22,37 +22,126 @@ const buildSortOptions = (labels) => [
   { value: "price-desc", label: labels.highToLow },
 ];
 
-const introText =
-  "Kihlasormus naiselle on paljon enemmän kuin koru – se on lupaus rakkaudesta, yhteisestä tulevaisuudesta ja ainutlaatuisesta tarinasta. Me Korkeila Helsingillä ymmärrämme, että jokainen kihlasormus on henkilökohtainen valinta, joka kantaa syvää tunnetta ja merkitystä. Siksi valmistamme kaikki sormukset käsityönä Helsingissä, käyttäen vain tarkoin valittuja materiaaleja ja eettisesti hankittuja timantteja.";
+const introText = (
+  <>
+    Valkokultainen kihlasormus on ajaton valinta, joka symboloi rakkautta ja
+    sitoutumista. Meiltä{" "}
+    <a
+      href="https://www.korkeilahelsinki.fi/collections/sormukset"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      Korkeila Helsingiltä
+    </a>{" "}
+    löydät kauniit{" "}
+    <a
+      href="https://www.korkeilahelsinki.fi/collections/sileat-kivettomat-sormukset"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      valkokultaiset sormukset
+    </a>{" "}
+    valmistettu aina laadukkaasta{" "}
+    <a
+      href="https://www.korkeilahelsinki.fi/products/kopio-kihlasormus-3mm-bombe-court-premium"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      valkokulta 14k -materiaalista
+    </a>
+    . Saatavilla on eri leveyksiä, värejä ja kokoja, joihin voit halutessasi lisätä
+    timantteja, jolloin syntyy upea{" "}
+    <a
+      href="https://www.korkeilahelsinki.fi/products/kopio-kihlasormus-3mm-bombe-court-premium"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      vihkisormus
+    </a>{" "}
+    <br />
+    <br />
+    Tutustu monipuoliseen{" "}
+    <a
+      href="https://www.korkeilahelsinki.fi/collections/sormukset"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      valikoimaamme
+    </a>
+    ,{" "}
+    jossa on sekä sileitä kihlasormuksia että näyttäviä{" "}
+    <a
+      href="https://www.korkeilahelsinki.fi/products/kopio-kopio-puoliallianssi-sormus-0-33ct"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      timanttisormuksia
+    </a>
+    . Tilauksen tekeminen onnistuu helposti – lue ohjeet{" "}
+    <a
+      href="https://www.korkeilahelsinki.fi/pages/nain-tilaat-verkkokaupasta"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      näin tilaat verkkokaupasta
+    </a>{" "}
+    tai pyydä tarjous juuri omasta unelmasormuksestasi. Löydä oma kaunis{" "}
+    <a
+      href="https://www.korkeilahelsinki.fi/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct"
+      rel="noopener noreferrer"
+      target="_blank"
+    >
+      valkokultainen kihlasormus
+    </a>
+    , joka kestää aikaa ja säilyttää arvonsa aina.
+  </>
+);
 
 const faqs = [
   {
-    question: "Tuleeko kihlasormus vain naiselle?",
+    question: "Kumpi on arvokkaampaa, valkokulta vai kulta?",
     answer: [
-      "Nykyään kihlasormuksia hankitaan usein molemmille osapuolille. Perinteisesti vain naiselle, mutta nykyiset tavat ovat joustavampia – tärkeintä on sopia yhdessä.",
+      "Valkokulta ja keltakulta ovat molemmat arvokkaita jalometalleja, ja niiden arvo määräytyy ensisijaisesti kullan pitoisuuden mukaan. Itse kulta on aina samanarvoista riippumatta siitä, onko se valkokullasta, keltaisesta vai ruusukullasta valmistettu.",
+      "Valkokultainen sormus syntyy, kun puhdasta kultaa sekoitetaan esimerkiksi palladiumiin tai hopeaan, mikä antaa sille vaalean värin. Valkokullan valmistusprosessi on usein työläämpi ja siihen lisätään rodinointi, mikä voi nostaa sormuksen hintaa.",
     ],
   },
   {
-    question: "Mitä eroa on kihla- ja vihkisormuksella?",
+    question: "Voiko kihlasormus olla hopeaa?",
     answer: [
-      "Kihlasormus annetaan yleensä kosinnan yhteydessä, vihkisormus vaihdetaan hääpäivänä. Moni nainen käyttää molempia yhdessä.",
+      "Kihlasormus voi olla myös hopeaa, mutta materiaali on pehmeämpää kuin esimerkiksi valkokulta 14k. Hopea naarmuuntuu ja muotoutuu helpommin, kun taas 14 karaatin valkokulta säilyttää muotonsa ja arvonsa paremmin ajan mittaan.",
+      "Jos haluat kestävän ja kauniin sormuksen, kannattaa valita esimerkiksi valkokultainen kihlasormus, johon voit lisätä timantit – näin siitä syntyy upea vihkisormus.",
     ],
   },
   {
-    question: "Kenen kuuluu ostaa kihlasormukset?",
+    question: "Onko kihla ja kihlasormus sama asia?",
     answer: [
-      "Useimmiten toinen osapuoli ostaa molemmat sormukset, mutta yhä useammin kihlasormukset valitaan ja ostetaan yhdessä.",
+      "Arkikielessä kyllä. “Kihla” tarkoittaa usein juuri kihlasormusta, joka on aina ollut merkki lupauksesta avioliittoon. Alun perin “kihla” viittasi sopimukseen, mutta nykyään se yhdistetään kiinteästi itse sormukseen.",
+      "Meiltä Korkeila Helsingiltä löydät yksilölliset ja käsityönä valmistetut kihlasormukset, joista voit valita juuri teille sopivan mallin. Valikoimastamme löytyy eri leveyksiä, kokoja ja timanttien määrää vaihtelevia vaihtoehtoja – aina klassisista puolipyöreistä malleista näyttäviin timanttisormuksiin.",
     ],
   },
   {
-    question: "Miksi naisilla kaksi sormusta?",
+    question: "Onko valkokulta arvokasta?",
     answer: [
-      "Kihlasormus ja vihkisormus symboloivat kahta eri lupausta: kihlausta ja avioliittoa. Yhdessä ne muodostavat kokonaisuuden, joka kertoo elämän tärkeimmästä liitosta.",
+      "Ehdottomasti. Valkokultainen kihlasormus on arvostettu valinta, koska se yhdistää kullan arvon ja vaaleiden metallien kestävyyden. Esimerkiksi valkokulta 14k sisältää 58,5 % puhdasta kultaa, ja loput seosaineet vaikuttavat sormuksen väriin ja kestävyyteen.",
+      "Lisäksi valkokultaiset sormukset eivät tummu kuten hopea, ja ne säilyttävät kiiltonsa pitkään.",
+      "Timanttien koko, leveys ja istutus vaikuttaa aina tuotteen hintaan, mutta lopputulos on kaunis sormus, joka kertoo omasta tarinastasi.",
+      <>
+        Löydät meiltä helposti{" "}
+        <a
+          href="https://www.korkeilahelsinki.fi/collections/sormukset"
+          target="_blank"
+          rel="noopener noreferrer"
+        >
+          valkokultaiset sormukset
+        </a>
+        , joihin voit lisätä timantteja tai tilata klassisen sileän mallin. Näin
+        varmistat, että kihlasormuksen arvo ja kauneus säilyvät sukupolvien ajan.
+      </>,
     ],
   },
 ];
 
-export default function KihlasormusCollectionClient() {
+export default function ValkokultaKihlasormusCollectionClient() {
   const { language } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
@@ -110,7 +199,9 @@ export default function KihlasormusCollectionClient() {
 
         if (active) {
           setSubCategories(finalOptions);
-          setSubCategoryFilter(finalOptions.map((option) => option.value));
+          setSubCategoryFilter(
+            (filtered.length ? filtered : finalOptions).map((option) => option.value)
+          );
         }
       } catch (error) {
         if (active) {
@@ -263,7 +354,8 @@ export default function KihlasormusCollectionClient() {
             <div className={styles.topLine} aria-hidden />
             <header className={styles.pageHeader}>
               <h1 className={styles.pageTitle}>
-                Kihlasormus naiselle – löydä juuri sinulle täydellinen sormus
+                Valkokulta kihlasormus – tyylikäs valinta elämän suurimpaan
+                lupaukseen
               </h1>
             </header>
             <article className={styles.story}>
@@ -276,26 +368,15 @@ export default function KihlasormusCollectionClient() {
                   aria-expanded={showAllContent}
                   aria-controls="story-content"
                 >
-                  {showAllContent ? "Näytä vähemmän" : "Näytä lisää"}
+                  {showAllContent ? "Näytä vähemmän" : "Lue lisää"}
                 </button>
               </div>
               {showAllContent ? (
                 <div className={styles.storyBody} id="story-content">
-                  <section className={styles.storySection}>
-                    <p className={styles.sectionCopy}>
-                      Kihlasormus naiselle on paljon enemmän kuin koru – se on lupaus rakkaudesta,
-                      yhteisestä tulevaisuudesta ja ainutlaatuisesta tarinasta. Me Korkeila
-                      Helsingillä ymmärrämme, että jokainen kihlasormus on henkilökohtainen
-                      valinta, joka kantaa syvää tunnetta ja merkitystä. Siksi valmistamme kaikki
-                      sormukset käsityönä, käyttäen vain tarkoin valittuja materiaaleja ja
-                      eettisesti hankittuja timantteja.
-                    </p>
-                  </section>
-
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
-                      src="/link2/b90a221c-8867-4c75-89fd-3e546236ea6c.jpeg"
-                      alt="Kihlasormus kädessä"
+                      src="/link4/5177722b-507c-4291-9443-07c947615d5b.jpeg"
+                      alt="myös, kihlasormukset, löydät, leveys, kulta, materiaali, kohinoor, timantti, myymälästä, helposti, koruja, verkkokaupasta, tilaa"
                       fill
                       sizes="(max-width: 720px) 80vw, 360px"
                     />
@@ -303,53 +384,96 @@ export default function KihlasormusCollectionClient() {
 
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                      Valikoimastamme löydät kauniit ja kestävästi valmistetut kihlasormukset
+                      Mikä tekee valkokultaisesta kihlasormuksesta erityisen?
                     </h2>
                     <p className={styles.sectionCopy}>
-                      Valikoimastamme löydät laajan valikoiman kihlasormuksia naiselle – oli haussa
-                      klassisen siro timanttisormus, moderni valkokultainen vaihtoehto tai
-                      yksilöllinen kihlasormus, joka henkii persoonallisuuttasi. Kaikki sormukset
-                      valmistetaan käsityönä, joten voit luottaa niiden laatuun ja kestävyyteen
-                      sukupolvien ajaksi.
+                      Valkokulta on elegantti ja moderni vaihtoehto perinteiselle keltakullalle.
+                      Sen hillitty kiilto ja viileä sävy sopivat erityisesti niille, jotka
+                      arvostavat klassista mutta huomaamatonta tyylikkyyttä. Lisäksi valkokulta
+                      sopii yhteen monien muiden korumateriaalien kanssa – esimerkiksi timantit
+                      pääsevät siinä erityisen hyvin oikeuksiinsa.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      <a
+                        href="https://www.korkeilahelsinki.fi/pages/meidan-liike"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Valkokultaiset kihlasormukset
+                      </a>{" "}
+                      sopivat myös täydellisesti yhdistettäväksi vihkisormukseen, olipa kyseessä
+                      yksinkertainen sormus tai timanttisormus. Siksi valkokultainen kihlasormus on
+                      usein valinta, johon palataan myös vuosien päästä.
+                    </p>
+                    <h2 className={styles.storyHeading}>
+                      Kihlasormus, joka valmistetaan juuri sinulle
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                      Kaikki kihlasormukset suunnitellaan Suomessa, pääosin kierrätetystä kullasta
+                      tai eettisesti tuotetuista raaka-aineista. Valikoimastamme löydät esimerkiksi
+                      puolipyöreä muotoilun, erilaisia leveyksiä ja timanteilla koristeltuja
+                      vaihtoehtoja. Käytämme valkokultaa, jonka laatu ja sävy kestävät aikaa.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      Valitse omasta valikoimastamme 14k valkokultainen kihlasormus tai suunnittele
+                      täysin uniikki sormus yhdessä kanssamme. Meillä voit yhdistää timantteja,
+                      valita sopivan väri- ja pintavaihtoehdon sekä vaikuttaa sormuksen istuvuuteen
+                      ja muotoiluun.
                     </p>
                   </section>
 
                   <figure className={styles.storyImage}>
                     <Image
-                      src="/link2/e08c09ef-e4a9-4737-a4d6-23b987398285.jpeg"
-                      alt="Kihlasormus lähikuvassa"
+                      src="/link4/060a7952-53f1-48f1-9c6d-6de4e44fa1bc.jpeg"
+                      alt="valkokultainen kihlasormus, kihlasormukset, kulta, timantti, timantit, lisää,"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
                   </figure>
 
                   <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Mikä on kihlasormuksen merkitys nykyään?</h2>
-                    <p className={styles.sectionCopy}>
-                      Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naiset
-                      haluavat sormuksen, jota voi käyttää yhdessä vihkisormuksen kanssa – joko
-                      täydentävänä kokonaisuutena tai yksittäisenä koruna. Kihlasormuksen
-                      valinnassa kannattaa huomioida sekä oma tyyli että sormuksen sopivuus
-                      mahdolliseen tulevaan vihkisormukseen.
-                    </p>
-                  </section>
-
-                  <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                      Kihlasormus – ajaton valinta, joka kestää elämän muutokset
+                      Laaja valikoima valkokultaisia kihlasormuksia
                     </h2>
                     <p className={styles.sectionCopy}>
-                      Jokainen kihlasormus valmistetaan yksilöllisesti. Korkeila Helsinki tarjoaa
-                      mahdollisuuden valita sormuksen materiaali – esimerkiksi valkokulta,
-                      keltakulta, ruusukulta, platina tai jopa moderni titaani. Materiaalit ovat
-                      paitsi kauniita myös kestäviä – valinta, joka kestää aikaa ja käyttää.
+                      Verkkokaupasta ja myymälästä löydät runsaasti valkokultaisia kihlasormuksia
+                      eri tyyleissä ja hintaluokissa. Esimerkiksi klassinen valkokultainen
+                      kihlasormus ilman kiveä on saatavilla hintaan 990€, mutta valikoimastamme
+                      löytyy myös ylellisempiä vaihtoehtoja, joihin on lisätty timantteja. Jokainen
+                      sormus on yksilöllinen ja kaunis valinta – löydät varmasti juuri sen oikean.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      Niitä on saatavilla eri leveyksillä ja malleilla, jotta voit valita juuri
+                      sinulle sopivan. Myymälästämme löytyy useita mallikappaleita, joita voit
+                      kokeilla paikan päällä – ja tilata heti, kun täydellinen 14k kihlasormus
+                      löytyy.
+                    </p>
+                    <h2 className={styles.storyHeading}>
+                      Sopivatko valkokultaiset sormukset jokaiselle?
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                      Valkokulta sopii lähes kaikille ihonsävyille ja tyyleille, joten valkokultainen
+                      kihlasormus on usein varma valinta. Se sopii myös niille, jotka haluavat pitää
+                      sormuksensa mahdollisimman huomaamattomana mutta arvokkaana. Valkokultaiset
+                      sormukset sopivat myös hyvin yhteen muiden metallien, kuten platina- tai
+                      ruusukultasormusten, kanssa.
+                    </p>
+                    <h2 className={styles.storyHeading}>
+                      Miten kihlasormuksen hinta muodostuu?
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                      Kihlasormuksen hinta vaihtelee materiaalin, timanttien, työn ja muotoilun
+                      mukaan. Esimerkiksi 14k valkokultaa käytettäessä sormuksen kestävyys ja väri
+                      säilyvät erinomaisesti ajan saatossa. Myös timanttien määrä, koko ja laatu
+                      vaikuttavat lopulliseen hintaan. Meillä voit vaikuttaa sormuksen hintaan
+                      valitsemalla yksityiskohdat itse – aina omaan budjettiisi sopivasti.
                     </p>
                   </section>
 
                   <figure className={styles.storyImage}>
                     <Image
-                      src="/link2/ac63a6a5-9fbe-4023-b744-dc7c965726a3.jpeg"
-                      alt="Kihlasormus esillepanossa"
+                      src="/link4/81926cfa-75e2-484c-982a-6cac0c974b4f.jpeg"
+                      alt="valkokultainen kihlasormus, kihlasormus"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -357,172 +481,41 @@ export default function KihlasormusCollectionClient() {
 
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                      Timanttisormus vai siro kihlasormus? Valinta on sinun
+                      Tilaa valkokultainen kihlasormus helposti
                     </h2>
                     <p className={styles.sectionCopy}>
-                      Timanttisormus on suosittu valinta kihlasormukseksi, mutta myös siro ja
-                      yksinkertainen sormus voi olla kaunis ja merkityksellinen. Meiltä löydät
-                      vaihtoehtoja niin ilman kiviä kuin timanteilla koristeltuina – kaikki
-                      valmistettu käsityönä ja huolella viimeistelty.
+                      Voit tilata valkokultaisen kihlasormuksen helposti verkkokaupastamme tai
+                      vierailla myymälässämme Helsingin Ullanlinnassa. Meiltä löytyy asiantunteva
+                      henkilökunta, joka auttaa sinua valitsemaan juuri teille sopivat
+                      kihlasormukset. Meillä voit myös muokata olemassa olevia sormuksia tai
+                      teettää täysin uuden, juuri sinulle suunnitellun sormuksen.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      Lisäksi tarjoamme kattavan valikoiman myös muita valkokultaisia koruja – kuten
+                      timanttisormuksia, korvakoruja ja riipuksia – jotka sopivat täydellisesti
+                      kihlasormuksen rinnalle.{" "}
+                      <a
+                        href="https://www.korkeilahelsinki.fi/pages/ota-yhteytta"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Tutustu valikoimaan ja löydä omat suosikkisi
+                      </a>
+                      !
                     </p>
                   </section>
 
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                      Laadukkaat materiaalit – hopea, kulta, titaani ja timantti
+                      Usein kysytyt kysymykset - Valkokultainen kihlasormus
                     </h2>
-                    <p className={styles.sectionCopy}>
-                      Sormuksen materiaali on tärkeä osa valintaa. Korkeila Helsingillä kaikki
-                      materiaalit ovat vastuullisesti hankittuja. Valikoimassa on hopea,
-                      keltakulta, valkokulta, ruusukulta, platina ja titaani. Timantit – olivatpa
-                      ne luonnon tai laboratoriossa kasvatettuja – ovat aina eettisesti tuotettuja
-                      ja huolella valikoituja.
-                    </p>
-                  </section>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                      Valikoimastamme löydät myös uniikkeja vaihtoehtoja
-                    </h2>
-                    <p className={styles.sectionCopy}>
-                      Jos etsit jotain todella yksilöllistä, tutustu mittatilaustyönä
-                      valmistettuihin kihlasormuksiimme. Suunnitella oman sormuksesi yhdessä
-                      Korkeila Helsinki kanssa ja valita siihen juuri sinulle sopivan materiaalin,
-                      timantin karaatin koon, värit sekä muut yksityiskohdat.
-                    </p>
-                  </section>
-
-                  <figure className={styles.storyImage}>
-                    <Image
-                      src="/link2/134ab082-fd01-4711-aa73-d780a76a82a4.jpeg"
-                      alt="Kihlasormus lähikuvassa"
-                      fill
-                      sizes="(max-width: 960px) 100vw, 720px"
-                    />
-                  </figure>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Hinta alk. 1800 €</h2>
-                    <p className={styles.sectionCopy}>
-                      Laadukas kihlasormus ei aina tarkoita suurta hintalappua. Meiltä löydät
-                      edullinen, mutta kaunis kihla jo alkaen 1800 €. Useimmat naisten
-                      kihlasormukset sijoittuvat hintahaarukkaan 1800 €–2900 € materiaalista,
-                      timantin karaatin koosta ja mallista riippuen. Saat myös asiantuntevan
-                      opastuksen oikean sormuksen valintaan.
-                    </p>
-                  </section>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                      Kihlasormuksen valinnassa vinkkejä ammattilaisilta
-                    </h2>
-                    <p className={styles.sectionCopy}>
-                      Ota huomioon oma ja kumppanisi tyyli kihlasormusta valitessasi, myös
-                      käyttötarkoitus ja tulevat valinnat – esimerkiksi yhteensopivuus
-                      vihkisormuksen kanssa. Aina varata ajan boutiqueemme Ullanlinnaan ja
-                      keskustella asiantuntijamme kanssa vaihtoehdoista rauhassa.
-                    </p>
-                  </section>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                      Kestäviä kihlasormuksia timanteilla – löydä oma unelmasormuksesi
-                    </h2>
-                    <p className={styles.sectionCopy}>
-                      Kestävä timanttisormus on hyvä valinta naiselle, joka arvostaa laatua ja
-                      ajatonta muotoilua. Timanteilla koristeltu sormus tuo juhlavuutta arkeen ja
-                      säilyttää hohtonsa vuosikymmenien ajan. Myös yksinkertainen kihlasormus
-                      ilman kiviä voi olla tyylikäs ja arvokas – tärkeintä on, että sormus tuntuu
-                      omalta.
-                    </p>
-                  </section>
-
-                  <figure className={styles.storyImage}>
-                    <Image
-                      src="/link2/3ff9666e-0384-4a3d-8262-397e9698849d.jpeg"
-                      alt="Kihlasormus valkoisella taustalla"
-                      fill
-                      sizes="(max-width: 960px) 100vw, 720px"
-                    />
-                  </figure>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Tutustu Korkeila Helsingin verkkokauppaan</h2>
-                    <p className={styles.sectionCopy}>
-                      Kihlasormuksen valinta onnistuu helposti myös verkkokaupasta. Tutustu eri
-                      malleihin, materiaaleihin ja kokoihin suoraan kotisohvalta käsin. Verkkokaupassamme
-                      helposti vertailla sormuksia, suodattaa vaihtoehtoja budjetin, materiaalin tai
-                      karaatin mukaan ja tehdä ostopäätöksen rauhassa.
-                    </p>
-                  </section>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Käsityönä valmistettu kihlasormus on aina uniikki</h2>
-                    <p className={styles.sectionCopy}>
-                      Kaikki kihlasormukset valmistetaan käsityönä. Tämä tarkoittaa, että jokainen
-                      sormus on ainutlaatuinen – suunniteltu juuri sinulle ja viimeistelty
-                      yksityiskohtia myöten. Käsityö takaa sekä laadun että tunnearvon, joka kestää
-                      elämän eri vaiheissa.
-                    </p>
-                  </section>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Vaihtoehtoja kaikille tyyleille ja budjeteille</h2>
-                    <p className={styles.sectionCopy}>
-                      Etsitpä sitten siroa, näyttävää, klassista tai modernia kihlasormusta,
-                      meiltä löytyy sopivia vaihtoehtoja. Kaikki sormukset sopivat yhteen muiden
-                      Korkeila Helsingin korujen kanssa, joten voit luoda täydellisen kokonaisuuden
-                      kihla- ja vihkisormuksen välille.
-                    </p>
-                  </section>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Vihkisormus ja kihlasormus – täydellinen pari</h2>
-                    <p className={styles.sectionCopy}>
-                      Usein kihlasormus toimii parina vihkisormukselle. Voit halutessasi valita
-                      molemmat samasta sarjasta, tai yhdistellä eri tyylejä persoonallisesti.
-                      Vihkisormuksen ja kihlasormuksen yhteensopivuus kannattaa huomioida jo
-                      ensivalinnassa – näin varmistat saumattoman kokonaisuuden.
-                    </p>
-                  </section>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Valitse oikea koko ja istuvuus</h2>
-                    <p className={styles.sectionCopy}>
-                      Sormuksen koko vaikuttaa käyttömukavuuteen, joten oikean koon valinta on
-                      tärkeä osa prosessia. Meiltä saat aina apua koon mittauksessa ja voit
-                      halutessasi tulla liikkeeseemme sovittamaan vaihtoehtoja paikan päälle.
-                    </p>
-                  </section>
-
-                  <figure className={styles.storyImage}>
-                    <Image
-                      src="/link2/10904625-52fe-409d-a55d-7680e207556b.jpeg"
-                      alt="Kihlasormus käytössä"
-                      fill
-                      sizes="(max-width: 960px) 100vw, 720px"
-                    />
-                  </figure>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Kihla, joka kertoo tarinasi</h2>
-                    <p className={styles.sectionCopy}>
-                      Kihla ei ole vain metallia ja kiveä – se on lupaus, tarina, tunne. Me
-                      Korkeila Helsingillä olemme sitoutuneet tekemään jokaisesta kihlasormuksesta
-                      erityisen. Juuri sinunlaisesi. Juuri sellaisen, jota kannat ylpeydellä ja
-                      rakkaudella.
-                    </p>
-                  </section>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Usein kysytyt kysymykset – kihlasormus naiselle</h2>
                     <div className={styles.faqList}>
                       {faqs.map((faq) => (
                         <details key={faq.question} className={styles.faqItem}>
                           <summary className={styles.faqSummary}>{faq.question}</summary>
                           <div className={styles.faqBody}>
-                            {faq.answer.map((line) => (
-                              <p key={line} className={styles.sectionCopy}>
+                            {faq.answer.map((line, index) => (
+                              <p key={`${faq.question}-${index}`} className={styles.sectionCopy}>
                                 {line}
                               </p>
                             ))}
@@ -531,10 +524,43 @@ export default function KihlasormusCollectionClient() {
                       ))}
                     </div>
                   </section>
+
+                  <figure className={styles.storyImage}>
+                    <Image
+                      src="/link4/6a32fd56-b9ca-4427-bbca-708b6775a484.jpeg"
+                      alt="valkokulta kihlasormus, kihlasormus, myös, kihlasormukset, valkokultaiset,"
+                      fill
+                      sizes="(max-width: 960px) 100vw, 720px"
+                    />
+                  </figure>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                      Miksi valita valkokultainen kihlasormus juuri meiltä?
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                      Meillä Korkeila Helsingillä yhdistyvät käsityö, vastuullisuus ja kauneus.
+                      Tarjoamme sinulle mahdollisuuden vaikuttaa sormuksen materiaaliin, väriin,
+                      timanttien kokoon ja tyyliin – lopputuloksena ainutlaatuinen sormus, joka
+                      kestää aikaa.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      Voit tutustua valikoimaan ja tilata valkokultaisen kihlasormuksen jo tänään
+                      verkkokaupastamme:{" "}
+                      <a
+                        href="https://www.korkeilahelsinki.fi/"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Korkeila Helsinki - Valkokultaiset kihlasormukset
+                      </a>
+                    </p>
+                  </section>
                 </div>
               ) : null}
-<section className={styles.productSection}>
+              <section className={styles.productSection}>
                 <Container>
+                  {/*
                   <div className={`${styles.sectionHeader} ${styles.productSectionHeader}`}>
                     <h2 className={`${styles.sectionTitle} ${styles.productHeading}`}>
                       Valikoima kihlasormuksia
@@ -544,6 +570,7 @@ export default function KihlasormusCollectionClient() {
                       kihlasormuksista eri tyyleissä.
                     </p>
                   </div>
+                  */}
                   <div className={styles.filtersRow}>
                     <FiltersBar
                       leftLabel={labels.subCategory}
@@ -567,7 +594,6 @@ export default function KihlasormusCollectionClient() {
                   </div>
                 </Container>
               </section>
-              
             </article>
           </Container>
         </section>
@@ -576,4 +602,3 @@ export default function KihlasormusCollectionClient() {
     </div>
   );
 }
-

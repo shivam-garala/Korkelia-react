@@ -82,17 +82,21 @@
 }
 
 .storyImageSmall {
-  max-width: 600px;
-  min-height: 0;
-  justify-self: stretch;
+  max-width: 360px;
+  min-height: 220px;
+  justify-self: start;
 }
 
-.storyImage :global(img) {
+.storyImage:not(.storyImageSmall) :global(img) {
   position: static !important;
   width: 100% !important;
   height: auto !important;
   display: block;
   object-fit: contain;
+}
+
+.storyImageSmall :global(img) {
+  object-fit: cover;
 }
 
 .storySection {
@@ -227,6 +231,8 @@
 
   .storyImageSmall {
     max-width: 600px;
+    min-height: 200px;
+    justify-self: stretch;
   }
 
   .toggleButton {

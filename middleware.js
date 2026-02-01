@@ -13,9 +13,7 @@ const REDIRECT_HOME_PATHS = new Set([
   "/pages/jalometallit-ja-niiden-ominaisuudet",
   "/pages/tietoa-laboratoriossa-valmistetuista-timanteista",
   "/pages/karaattipaino-selitettyna",
-  "/collections/kultainen-kihlasormus-ajaton-symboli-rakkaudelle",
   "/pages/timanttikorujen-huolto",
-  "/collections/valkokulta-kihlasormus-tyylikas-valinta-elaman-suurimpaan-lupaukseen",
   "/pages/meidan-liike",
   "/pages/milloin-ja-miten-kosia",
   "/pages/timanttitietoutta",
@@ -68,10 +66,18 @@ export function middleware(request) {
   const normalizedPathname = normalizePathname(pathname);
   let response;
 
+  if (normalizedPathname === "/collections/kihlasormus-naiselle-taydellinen-sormus") {
+    return NextResponse.redirect(
+      new URL(
+        "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus",
+        request.url
+      )
+    );
+  }
+
   if (
     normalizedPathname ===
-      "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus" ||
-    normalizedPathname === "/collections/kihlasormus-naiselle-taydellinen-sormus"
+    "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus"
   ) {
     const requestHeaders = new Headers(request.headers);
     requestHeaders.set("x-site-lang", resolvedLanguage);

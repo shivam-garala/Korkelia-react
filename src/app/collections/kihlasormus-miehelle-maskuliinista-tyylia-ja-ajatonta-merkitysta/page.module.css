@@ -73,6 +73,7 @@
 .storyImage {
   position: relative;
   width: 100%;
+  max-width: 600px;
   height: auto;
   min-height: 0;
   border-radius: 22px;
@@ -81,21 +82,17 @@
 }
 
 .storyImageSmall {
-  max-width: 360px;
-  min-height: 220px;
-  justify-self: start;
+  max-width: 600px;
+  min-height: 0;
+  justify-self: stretch;
 }
 
-.storyImage:not(.storyImageSmall) :global(img) {
+.storyImage :global(img) {
   position: static !important;
   width: 100% !important;
   height: auto !important;
   display: block;
   object-fit: contain;
-}
-
-.storyImageSmall :global(img) {
-  object-fit: cover;
 }
 
 .storySection {
@@ -229,9 +226,7 @@
   }
 
   .storyImageSmall {
-    max-width: 100%;
-    min-height: 200px;
-    justify-self: stretch;
+    max-width: 600px;
   }
 
   .toggleButton {
@@ -246,3 +241,6 @@
     border-radius: 16px;
   }
 }
+
+
+
