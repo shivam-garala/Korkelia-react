@@ -16,6 +16,7 @@ import { useI18n } from "../../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.korkeilahelsinki.fi";
 
 const buildSortOptions = (labels) => [
   { value: "price-asc", label: labels.lowToHigh },
@@ -26,7 +27,7 @@ const introText = (
   <>
     Kihlasormus naiselle on paljon enemmän kuin koru – se on lupaus rakkaudesta,
     yhteisestä tulevaisuudesta ja ainutlaatuisesta tarinasta.{" "}
-    <a href="https://www.korkeilahelsinki.fi/" rel="noopener noreferrer" target="_blank">
+    <a href={SITE_URL} rel="noopener noreferrer">
       Me Korkeila Helsingillä
     </a>{" "}
     ymmärrämme, että jokainen kihlasormus on henkilökohtainen valinta, joka kantaa
@@ -345,7 +346,7 @@ export default function KihlasormusCollectionClient() {
                     </h2>
                     <p className={styles.sectionCopy}>
                       Jokainen kihlasormus valmistetaan yksilöllisesti.{" "}
-                      <a href="https://www.korkeilahelsinki.fi/" target="_blank" rel="noopener noreferrer">
+                      <a href={SITE_URL} rel="noopener noreferrer">
                         Korkeila Helsinki
                       </a>{" "}
                       tarjoaa mahdollisuuden valita sormuksen materiaali – esimerkiksi valkokulta,
@@ -378,11 +379,7 @@ export default function KihlasormusCollectionClient() {
                     </h2>
                     <p className={styles.sectionCopy}>
                       Sormuksen materiaali on tärkeä osa valintaa.{" "}
-                      <a
-                        href="https://www.korkeilahelsinki.fi/pages/tilaustyopalvelu"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <a href={`${SITE_URL}/pages/tilaustyopalvelu`} rel="noopener noreferrer">
                         Korkeila Helsingillä
                       </a>{" "}
                       kaikki materiaalit ovat vastuullisesti hankittuja. Valikoimassa on hopea,
@@ -447,8 +444,7 @@ export default function KihlasormusCollectionClient() {
                     </h2>
                     <p className={styles.sectionCopy}>
                       <a
-                        href="https://www.korkeilahelsinki.fi/pages/timanttitietoutta"
-                        target="_blank"
+                        href={`${SITE_URL}/pages/timanttitietoutta`}
                         rel="noopener noreferrer"
                         className={styles.inlineLink}
                       >
@@ -542,11 +538,7 @@ export default function KihlasormusCollectionClient() {
                     <p className={styles.sectionCopy}>Kihla, joka kertoo tarinasi</p>
                     <p className={styles.sectionCopy}>
                       Kihla ei ole vain metallia ja kiveä – se on lupaus, tarina, tunne.{" "}
-                      <a
-                        href="https://www.korkeilahelsinki.fi/pages/ota-yhteytta"
-                        rel="noopener noreferrer"
-                        target="_blank"
-                      >
+                      <a href={`${SITE_URL}/pages/ota-yhteytta`} rel="noopener noreferrer">
                         Me Korkeila Helsingillä
                       </a>{" "}
                       olemme sitoutuneet tekemään jokaisesta kihlasormuksesta
@@ -589,11 +581,10 @@ export default function KihlasormusCollectionClient() {
                     
                     {" "}
                     <a
-                          href="https://www.korkeilahelsinki.fi/"
-                         
-                          rel="noopener noreferrer"
-                          className={styles.inlineLink}
-                        >
+                      href={SITE_URL}
+                      rel="noopener noreferrer"
+                      className={styles.inlineLink}
+                    >
                     Korkeila Helsinki 
                     </a>{" "}
                     ja löydä kihlasormus, joka ansaitsee vain parasta.</p>
@@ -663,6 +654,3 @@ export default function KihlasormusCollectionClient() {
     </div>
   );
 }
-
-
-

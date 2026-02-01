@@ -16,6 +16,7 @@ import { useI18n } from "../../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
+const SITE_URL = process.env.NEXT_PUBLIC_SITE_URL ?? "https://www.korkeilahelsinki.fi";
 
 const buildSortOptions = (labels) => [
   { value: "price-asc", label: labels.lowToHigh },
@@ -26,70 +27,53 @@ const introText = (
   <>
     Valkokultainen kihlasormus on ajaton valinta, joka symboloi rakkautta ja
     sitoutumista. Meiltä{" "}
-    <a
-      href="https://www.korkeilahelsinki.fi/collections/sormukset"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
+    <a href={`${SITE_URL}/collections/sormukset`} rel="noopener noreferrer">
       Korkeila Helsingiltä
     </a>{" "}
     löydät kauniit{" "}
     <a
-      href="https://www.korkeilahelsinki.fi/collections/sileat-kivettomat-sormukset"
+      href={`${SITE_URL}/collections/sileat-kivettomat-sormukset`}
       rel="noopener noreferrer"
-      target="_blank"
     >
       valkokultaiset sormukset
     </a>{" "}
     valmistettu aina laadukkaasta{" "}
     <a
-      href="https://www.korkeilahelsinki.fi/products/kopio-kihlasormus-3mm-bombe-court-premium"
+      href={`${SITE_URL}/products/kopio-kihlasormus-3mm-bombe-court-premium`}
       rel="noopener noreferrer"
-      target="_blank"
     >
       valkokulta 14k -materiaalista
     </a>
     . Saatavilla on eri leveyksiä, värejä ja kokoja, joihin voit halutessasi lisätä
     timantteja, jolloin syntyy upea{" "}
     <a
-      href="https://www.korkeilahelsinki.fi/products/kopio-kihlasormus-3mm-bombe-court-premium"
+      href={`${SITE_URL}/products/kopio-kihlasormus-3mm-bombe-court-premium`}
       rel="noopener noreferrer"
-      target="_blank"
     >
       vihkisormus
     </a>{" "}
     <br />
     <br />
     Tutustu monipuoliseen{" "}
-    <a
-      href="https://www.korkeilahelsinki.fi/collections/sormukset"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
+    <a href={`${SITE_URL}/collections/sormukset`} rel="noopener noreferrer">
       valikoimaamme
     </a>
     ,{" "}
     jossa on sekä sileitä kihlasormuksia että näyttäviä{" "}
     <a
-      href="https://www.korkeilahelsinki.fi/products/kopio-kopio-puoliallianssi-sormus-0-33ct"
+      href={`${SITE_URL}/products/kopio-kopio-puoliallianssi-sormus-0-33ct`}
       rel="noopener noreferrer"
-      target="_blank"
     >
       timanttisormuksia
     </a>
     . Tilauksen tekeminen onnistuu helposti – lue ohjeet{" "}
-    <a
-      href="https://www.korkeilahelsinki.fi/pages/nain-tilaat-verkkokaupasta"
-      rel="noopener noreferrer"
-      target="_blank"
-    >
+    <a href={`${SITE_URL}/pages/nain-tilaat-verkkokaupasta`} rel="noopener noreferrer">
       näin tilaat verkkokaupasta
     </a>{" "}
     tai pyydä tarjous juuri omasta unelmasormuksestasi. Löydä oma kaunis{" "}
     <a
-      href="https://www.korkeilahelsinki.fi/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct"
+      href={`${SITE_URL}/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct`}
       rel="noopener noreferrer"
-      target="_blank"
     >
       valkokultainen kihlasormus
     </a>
@@ -127,11 +111,7 @@ const faqs = [
       "Timanttien koko, leveys ja istutus vaikuttaa aina tuotteen hintaan, mutta lopputulos on kaunis sormus, joka kertoo omasta tarinastasi.",
       <>
         Löydät meiltä helposti{" "}
-        <a
-          href="https://www.korkeilahelsinki.fi/collections/sormukset"
-          target="_blank"
-          rel="noopener noreferrer"
-        >
+        <a href={`${SITE_URL}/collections/sormukset`} rel="noopener noreferrer">
           valkokultaiset sormukset
         </a>
         , joihin voit lisätä timantteja tai tilata klassisen sileän mallin. Näin
@@ -400,11 +380,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
                       pääsevät siinä erityisen hyvin oikeuksiinsa.
                     </p>
                     <p className={styles.sectionCopy}>
-                      <a
-                        href="https://www.korkeilahelsinki.fi/pages/meidan-liike"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <a href={`${SITE_URL}/pages/meidan-liike`} rel="noopener noreferrer">
                         Valkokultaiset kihlasormukset
                       </a>{" "}
                       sopivat myös täydellisesti yhdistettäväksi vihkisormukseen, olipa kyseessä
@@ -500,11 +476,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
                       Lisäksi tarjoamme kattavan valikoiman myös muita valkokultaisia koruja – kuten
                       timanttisormuksia, korvakoruja ja riipuksia – jotka sopivat täydellisesti
                       kihlasormuksen rinnalle.{" "}
-                      <a
-                        href="https://www.korkeilahelsinki.fi/pages/ota-yhteytta"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <a href={`${SITE_URL}/pages/ota-yhteytta`} rel="noopener noreferrer">
                         Tutustu valikoimaan ja löydä omat suosikkisi
                       </a>
                       !
@@ -553,11 +525,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
                     <p className={styles.sectionCopy}>
                       Voit tutustua valikoimaan ja tilata valkokultaisen kihlasormuksen jo tänään
                       verkkokaupastamme:{" "}
-                      <a
-                        href="https://www.korkeilahelsinki.fi/"
-                        target="_blank"
-                        rel="noopener noreferrer"
-                      >
+                      <a href={SITE_URL} rel="noopener noreferrer">
                         Korkeila Helsinki - Valkokultaiset kihlasormukset
                       </a>
                     </p>
