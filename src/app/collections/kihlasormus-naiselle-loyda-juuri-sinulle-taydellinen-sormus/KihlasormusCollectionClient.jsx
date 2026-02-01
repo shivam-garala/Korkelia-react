@@ -22,14 +22,17 @@ const buildSortOptions = (labels) => [
   { value: "price-desc", label: labels.highToLow },
 ];
 
-
 const introText = (
   <>
-    Kihlasormus naiselle on paljon enemmän kuin koru – se on lupaus rakkaudesta, yhteisestä tulevaisuudesta ja ainutlaatuisesta tarinasta.{" "}
+    Kihlasormus naiselle on paljon enemmän kuin koru – se on lupaus rakkaudesta,
+    yhteisestä tulevaisuudesta ja ainutlaatuisesta tarinasta.{" "}
     <a href="https://www.korkeilahelsinki.fi/" rel="noopener noreferrer" target="_blank">
       Me Korkeila Helsingillä
     </a>{" "}
-    ymmärrämme, että jokainen kihlasormus on henkilökohtainen valinta, joka kantaa syvää tunnetta ja merkitystä. Siksi valmistamme kaikki sormukset käsityönä, käyttäen vain tarkoin valittuja materiaaleja ja eettisesti hankittuja timantteja.
+    ymmärrämme, että jokainen kihlasormus on henkilökohtainen valinta, joka kantaa
+    syvää tunnetta ja merkitystä. Siksi valmistamme kaikki sormukset käsityönä,
+    käyttäen vain tarkoin valittuja materiaaleja ja eettisesti hankittuja
+    timantteja.
   </>
 );
 const faqs = [
@@ -288,8 +291,6 @@ export default function KihlasormusCollectionClient() {
               </div>
               {showAllContent ? (
                 <div className={styles.storyBody} id="story-content">
-                 
-
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
                       src="/link2/b90a221c-8867-4c75-89fd-3e546236ea6c.jpeg"
@@ -304,13 +305,22 @@ export default function KihlasormusCollectionClient() {
                       Valikoimastamme löydät kauniit ja kestävästi valmistetut kihlasormukset
                     </h2>
                     <p className={styles.sectionCopy}>
-Valikoimastamme löydät laajan valikoiman <strong>kihlasormuksia naiselle</strong> – oli haussa klassisen siro timanttisormus, moderni valkokultainen vaihtoehto tai yksilöllinen kihlasormus, joka henkii persoonallisuuttasi. Kaikki sormukset valmistetaan käsityönä, joten voit luottaa niiden laatuun ja kestävyyteen sukupolvien ajaksi.
+                      Valikoimastamme löydät laajan valikoiman{" "}
+                      <strong>kihlasormuksia naiselle</strong> – oli haussa klassisen siro
+                      timanttisormus, moderni valkokultainen vaihtoehto tai yksilöllinen
+                      kihlasormus, joka henkii persoonallisuuttasi. Kaikki sormukset valmistetaan
+                      käsityönä, joten voit luottaa niiden laatuun ja kestävyyteen sukupolvien
+                      ajaksi.
                     </p>
                     <h2 className={styles.storyHeading}>
                       Mikä on kihlasormuksen merkitys nykyään?
                     </h2>
                     <p className={styles.sectionCopy}>
-Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naiset haluavat sormuksen, jota voi käyttää yhdessä vihkisormuksen kanssa – joko täydentävänä kokonaisuutena tai yksittäisenä koruna. Kihlasormuksen valinnassa kannattaa huomioida sekä oma tyyli että sormuksen sopivuus mahdolliseen tulevaan vihkisormukseen. 
+                      Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naiset
+                      haluavat sormuksen, jota voi käyttää yhdessä vihkisormuksen kanssa – joko
+                      täydentävänä kokonaisuutena tai yksittäisenä koruna. Kihlasormuksen valinnassa
+                      kannattaa huomioida sekä oma tyyli että sormuksen sopivuus mahdolliseen
+                      tulevaan vihkisormukseen.
                     </p>
                   </section>
 
@@ -323,11 +333,9 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                     />
                   </figure>
 
-                 
-
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                     Kihlasormus – ajaton valinta, joka kestää elämän muutokset
+                      Kihlasormus – ajaton valinta, joka kestää elämän muutokset
                     </h2>
                     <p className={styles.sectionCopy}>
                       Jokainen kihlasormus valmistetaan yksilöllisesti.{" "}
@@ -342,7 +350,10 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                       Timanttisormus vai siro kihlasormus? Valinta on sinun
                     </h2>
                     <p className={styles.sectionCopy}>
-                     Timanttisormus on suosittu valinta kihlasormukseksi, mutta myös siro ja yksinkertainen sormus voi olla kaunis ja merkityksellinen. Meiltä löydät vaihtoehtoja niin ilman kiviä kuin timanteilla koristeltuina – kaikki valmistettu käsityönä ja huolella viimeistelty. 
+                      Timanttisormus on suosittu valinta kihlasormukseksi, mutta myös siro ja
+                      yksinkertainen sormus voi olla kaunis ja merkityksellinen. Meiltä löydät
+                      vaihtoehtoja niin ilman kiviä kuin timanteilla koristeltuina – kaikki
+                      valmistettu käsityönä ja huolella viimeistelty.
                     </p>
                   </section>
 
@@ -355,26 +366,23 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                     />
                   </figure>
 
-                
-
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                     Laadukkaat materiaalit – hopea, kulta, titaani ja timantti
+                      Laadukkaat materiaalit – hopea, kulta, titaani ja timantti
                     </h2>
                     <p className={styles.sectionCopy}>
-                        Sormuksen materiaali on tärkeä osa valintaa.{" "}
-                        <a
-                          href="https://www.korkeilahelsinki.fi/pages/tilaustyopalvelu"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          
-                        >
-                          Korkeila Helsingillä
-                        </a>{" "}
-                        kaikki materiaalit ovat vastuullisesti hankittuja. Valikoimassa on hopea,
-                        keltakulta, valkokulta, ruusukulta, platina ja titaani. Timantit – olivatpa ne
-                        luonnon tai laboratoriossa kasvatettuja – ovat aina eettisesti tuotettuja ja
-                        huolella valikoituja.
+                      Sormuksen materiaali on tärkeä osa valintaa.{" "}
+                      <a
+                        href="https://www.korkeilahelsinki.fi/pages/tilaustyopalvelu"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                      >
+                        Korkeila Helsingillä
+                      </a>{" "}
+                      kaikki materiaalit ovat vastuullisesti hankittuja. Valikoimassa on hopea,
+                      keltakulta, valkokulta, ruusukulta, platina ja titaani. Timantit – olivatpa ne
+                      luonnon tai laboratoriossa kasvatettuja – ovat aina eettisesti tuotettuja ja
+                      huolella valikoituja.
                     </p>
                   </section>
 
@@ -383,7 +391,10 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                       Valikoimastamme löydät myös uniikkeja vaihtoehtoja
                     </h2>
                     <p className={styles.sectionCopy}>
-                      Jos etsit jotain todella yksilöllistä, tutustu mittatilaustyönä valmistettaviin kihlasormuksiimme. Suunnitella oman sormuksesi yhdessä Korkeila Helsinki kanssa ja valita siihen juuri sinulle sopivan materiaalin, timantin karaatin koon, värit sekä muut yksityiskohdat. 
+                      Jos etsit jotain todella yksilöllistä, tutustu mittatilaustyönä
+                      valmistettaviin kihlasormuksiimme. Suunnitella oman sormuksesi yhdessä
+                      Korkeila Helsinki kanssa ja valita siihen juuri sinulle sopivan materiaalin,
+                      timantin karaatin koon, värit sekä muut yksityiskohdat.
                     </p>
                   </section>
 
@@ -402,10 +413,10 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                       Laadukas kihlasormus ei aina tarkoita suurta hintalappua. Meiltä löydät
                       edullinen, mutta kaunis kihla jo alkaen 1800 €. Useimmat naisten
                       kihlasormukset sijoittuvat hintahaarukkaan 1800 €–2900 € materiaalista,
-                      timantin karaatin koosta ja mallista riippuen. Saat myös asiantuntevan
+                      timannin karaatin koosta ja mallista riippuen. Saat myös asiantuntevan
                       opastuksen oikean sormuksen valintaan.
                     </p>
-                     <h2 className={styles.storyHeading}>
+                    <h2 className={styles.storyHeading}>
                       Kihlasormuksen valinnassa vinkkejä ammattilaisilta
                     </h2>
                     <p className={styles.sectionCopy}>
@@ -416,7 +427,6 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                     </p>
                   </section>
 
-                 
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link2/10904625-52fe-409d-a55d-7680e207556b.jpeg"
@@ -430,24 +440,27 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                       Kestäviä kihlasormuksia timanteilla – löydä oma unelmasormuksesi
                     </h2>
                     <p className={styles.sectionCopy}>
-                        <a
-                          href="https://www.korkeilahelsinki.fi/pages/timanttitietoutta"
-                          target="_blank"
-                          rel="noopener noreferrer"
-                          className={styles.inlineLink}
-                        >
-                          Kestävä timanttisormus
-                        </a>{" "}
-                        on hyvä valinta naiselle, joka arvostaa laatua ja ajatonta muotoilua.
-                        Timanteilla koristeltu sormus tuo juhlavuutta arkeen ja säilyttää hohtonsa
-                        vuosikymmenien ajan. Myös yksinkertainen kihlasormus ilman kiviä voi olla
-                        tyylikäs ja arvokas – tärkeintä on, että sormus tuntuu omalta.
+                      <a
+                        href="https://www.korkeilahelsinki.fi/pages/timanttitietoutta"
+                        target="_blank"
+                        rel="noopener noreferrer"
+                        className={styles.inlineLink}
+                      >
+                        Kestävä timanttisormus
+                      </a>{" "}
+                      on hyvä valinta naiselle, joka arvostaa laatua ja ajatonta muotoilua.
+                      Timanteilla koristeltu sormus tuo juhlavuutta arkeen ja säilyttää hohtonsa
+                      vuosikymmenien ajan. Myös yksinkertainen kihlasormus ilman kiviä voi olla
+                      tyylikäs ja arvokas – tärkeintä on, että sormus tuntuu omalta.
                     </p>
-                     <h2 className={styles.storyHeading}>
+                    <h2 className={styles.storyHeading}>
                       Tutustu korkeila Helsingin verkkokauppaan
                     </h2>
                     <p className={styles.sectionCopy}>
-                    Kihlasormuksen valinta onnistuu helposti myös verkkokaupasta. Tutustu eri malleihin, materiaaleihin ja kokoihin suoraan kotisohvalta käsin. Verkkokaupassamme helposti vertailla sormuksia, suodattaa vaihtoehtoja budjetin, materiaalin tai karaatin mukaan ja tehdä ostopäätöksen rauhassa. 
+                      Kihlasormuksen valinta onnistuu helposti myös verkkokaupasta. Tutustu eri
+                      malleihin, materiaaleihin ja kokoihin suoraan kotisohvalta käsin.
+                      Verkkokaupassamme helposti vertailla sormuksia, suodattaa vaihtoehtoja
+                      budjetin, materiaalin tai karaatin mukaan ja tehdä ostopäätöksen rauhassa.
                     </p>
                   </section>
 
@@ -459,17 +472,24 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
                   </figure>
-
-                 
-
                   <section className={styles.storySection}>
-                    <p className={styles.sectionCopy}>Käsityönä valmistettu kihlasormus on aina uniikki:</p>
                     <p className={styles.sectionCopy}>
-                    Kaikki kihlasormukset valmistetaan käsityönä. Tämä tarkoittaa, että jokainen sormus on ainutlaatuinen – suunniteltu juuri sinulle ja viimeistelty yksityiskohtia myöten. Käsityö takaa sekä laadun että tunnearvon, joka kestää elämän eri vaiheissa.
+                      Käsityönä valmistettu kihlasormus on aina uniikki:
                     </p>
-                    <p className={styles.sectionCopy}>Vaihtoehtoja kaikille tyyleille ja budjeteille:</p>
                     <p className={styles.sectionCopy}>
-                      Etsitpä sitten siroa, näyttävää, klassista tai modernia kihlasormusta, meiltä löytyy sopivia vaihtoehtoja. Kaikki sormukset sopivat yhteen muiden Korkeila Helsingin korujen kanssa, joten voit luoda täydellisen kokonaisuuden kihla- ja vihkisormuksen välille.
+                      Kaikki kihlasormukset valmistetaan käsityönä. Tämä tarkoittaa, että jokainen
+                      sormus on ainutlaatuinen – suunniteltu juuri sinulle ja viimeistelty
+                      yksityiskohtia myöten. Käsityö takaa sekä laadun että tunnearvon, joka kestää
+                      elämän eri vaiheissa.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      Vaihtoehtoja kaikille tyyleille ja budjeteille:
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      Etsitpä sitten siroa, näyttävää, klassista tai modernia kihlasormusta,
+                      meiltä löytyy sopivia vaihtoehtoja. Kaikki sormukset sopivat yhteen muiden
+                      Korkeila Helsingin korujen kanssa, joten voit luoda täydellisen kokonaisuuden
+                      kihla- ja vihkisormuksen välille.
                     </p>
                   </section>
 
@@ -483,17 +503,23 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                   </figure>
 
                   <section className={styles.storySection}>
-                    <p className={styles.sectionCopy}>Vihkisormus ja kihlasormus – täydellinen pari:</p>
                     <p className={styles.sectionCopy}>
-                     Usein kihlasormus toimii parina vihkisormukselle. Voit halutessasi valita molemmat samasta sarjasta, tai yhdistellä eri tyylejä persoonallisesti. Vihkisormuksen ja kihlasormuksen yhteensopivuus kannattaa huomioida jo ensivalinnassa – näin varmistat saumattoman kokonaisuuden. 
+                      Vihkisormus ja kihlasormus – täydellinen pari:
                     </p>
-                    
+                    <p className={styles.sectionCopy}>
+                      Usein kihlasormus toimii parina vihkisormukselle. Voit halutessasi valita
+                      molemmat samasta sarjasta, tai yhdistellä eri tyylejä persoonallisesti.
+                      Vihkisormuksen ja kihlasormuksen yhteensopivuus kannattaa huomioida jo
+                      ensivalinnassa – näin varmistat saumattoman kokonaisuuden.
+                    </p>
                   </section>
 
                   <section className={styles.storySection}>
                     <h2 className={styles.sectionCopy}>Valitse oikea koko ja istuvuus:</h2>
                     <p className={styles.sectionCopy}>
-                     Sormuksen koko vaikuttaa käyttömukavuuteen, joten oikean koon valinta on tärkeä osa prosessia. Meiltä saat aina apua koon mittauksessa ja voit halutessasi tulla liikkeeseemme sovittamaan vaihtoehtoja paikan päälle.
+                      Sormuksen koko vaikuttaa käyttömukavuuteen, joten oikean koon valinta on
+                      tärkeä osa prosessia. Meiltä saat aina apua koon mittauksessa ja voit
+                      halutessasi tulla liikkeeseemme sovittamaan vaihtoehtoja paikan päälle.
                     </p>
                   </section>
 
@@ -517,14 +543,16 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                   </section>
 
                   <section className={styles.storySection}>
-                    <h3 className={styles.storySubheading}>Usein kysytyt kysymykset – kihlasormus naiselle</h3>
+                    <h3 className={styles.storySubheading}>
+                      Usein kysytyt kysymykset – kihlasormus naiselle
+                    </h3>
                     <div className={styles.faqList}>
-                      {faqs.map((faq) => (
-                        <details key={faq.question} className={styles.faqItem}>
+                      {faqs.map((faq, index) => (
+                        <details key={`${faq.question}-${index}`} className={styles.faqItem}>
                           <summary className={styles.faqSummary}>{faq.question}</summary>
                           <div className={styles.faqBody}>
-                            {faq.answer.map((line) => (
-                              <p key={line} className={styles.sectionCopy}>
+                            {faq.answer.map((line, lineIndex) => (
+                              <p key={`${faq.question}-${index}-${lineIndex}`} className={styles.sectionCopy}>
                                 {line}
                               </p>
                             ))}
@@ -535,9 +563,9 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                   </section>
                 </div>
               ) : null}
-<section className={styles.productSection}>
+              <section className={styles.productSection}>
                 <Container>
-                {/*
+                  {/*
                   <div className={`${styles.sectionHeader} ${styles.productSectionHeader}`}>
                     <h2 className={`${styles.sectionTitle} ${styles.productHeading}`}>
                       Valikoima kihlasormuksia
@@ -547,7 +575,7 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                       kihlasormuksista eri tyyleissä.
                     </p>
                   </div>
-                */}
+                  */}
                   <div className={styles.filtersRow}>
                     <FiltersBar
                       leftLabel={labels.subCategory}
@@ -563,15 +591,10 @@ Nykyään kihlasormus on sekä symbolinen että esteettinen valinta. Usein naise
                     />
                   </div>
                   <div className={styles.gridWrap}>
-                    <ProductGrid
-                      products={displayedProducts}
-                      columns={3}
-                      loading={productsLoading}
-                    />
+                    <ProductGrid products={displayedProducts} columns={3} loading={productsLoading} />
                   </div>
                 </Container>
               </section>
-              
             </article>
           </Container>
         </section>
