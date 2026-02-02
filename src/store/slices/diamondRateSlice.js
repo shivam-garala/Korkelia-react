@@ -66,15 +66,11 @@ export const createDiamondRate = createAsyncThunk(
 export const updateDiamondRate = createAsyncThunk(
   "diamondRate/update",
   async ({ id, payload }, { rejectWithValue }) => {
-    console.log(payload);
-    
     try {
       const { data } = await axiosClient.put(
         `/api/diamondRate/update/${encodeURIComponent(id)}`,
         payload ?? {}
       );
-      console.log(data);
-      
       return { id, data };
     } catch (error) {
       return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
