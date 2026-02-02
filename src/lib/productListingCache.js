@@ -27,11 +27,12 @@ const fetchCached = async (key, url) => {
   return request;
 };
 
-export const fetchProductListEcom = async (languageId, categoryId) => {
-  const key = buildKey("products", languageId, categoryId);
+export const fetchProductListEcom = async (languageId, categoryId, preferWhite) => {
+  console.log("preferWhite", preferWhite);
+  const key = buildKey("products", languageId, categoryId, preferWhite);
   const url = `/api/product/listEcom?language_id=${encodeURIComponent(
     languageId || "1"
-  )}&category_id=${encodeURIComponent(categoryId || "")}`;
+  )}&category_id=${encodeURIComponent(categoryId || "")}&prefer_white=${preferWhite ? "1" : "0"}`;
   return fetchCached(key, url);
 };
 

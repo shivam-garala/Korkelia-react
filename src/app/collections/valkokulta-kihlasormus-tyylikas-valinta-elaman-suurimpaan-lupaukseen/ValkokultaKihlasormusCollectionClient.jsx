@@ -214,7 +214,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
     const loadProducts = async () => {
       try {
         clearProductListingCache();
-        const list = await fetchProductListEcom(languageId, CATEGORY_ID);
+        const list = await fetchProductListEcom(languageId, CATEGORY_ID, true);
         const mapped = list
           .map((item) => {
             const id = item?.id ?? item?.product_id ?? null;
