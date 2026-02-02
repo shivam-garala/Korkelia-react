@@ -13,11 +13,8 @@ const REDIRECT_HOME_PATHS = new Set([
   "/pages/jalometallit-ja-niiden-ominaisuudet",
   "/pages/tietoa-laboratoriossa-valmistetuista-timanteista",
   "/pages/karaattipaino-selitettyna",
-  "/collections/kultainen-kihlasormus-ajaton-symboli-rakkaudelle",
   "/pages/timanttikorujen-huolto",
-  "/collections/valkokulta-kihlasormus-tyylikas-valinta-elaman-suurimpaan-lupaukseen",
   "/pages/meidan-liike",
-  "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus",
   "/pages/milloin-ja-miten-kosia",
   "/pages/timanttitietoutta",
   "/products/kopio-puoliallianssi-sormus-0-33ct-3",
@@ -25,6 +22,21 @@ const REDIRECT_HOME_PATHS = new Set([
   "/products/timanttikorvakorut",
   "/collections/sileat-kivettomat-sormukset",
   "/products/kopio-kapea-taysallianssisormus-briljanteilla-0-50ct",
+  "/collections/sormukset",
+  "/products/kopio-kihlasormus-3mm-bombe-court-premium",
+  "/products/kopio-kihlasormus-3mm-bombe-court",
+  "/pages/nain-tilaat-verkkokaupasta",
+  "/products/kopio-kopio-puoliallianssi-sormus-0-33ct",
+  "/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct",
+  "/pages/ota-yhteytta",
+  "/pages/tilaustyopalvelu",
+  "/products/kopio-kihlasormus-4mm-bombe-court-premium",
+  "/products/kopio-puoliallianssi-sormus-0-33ct-1",
+  "/products/sun-matt-kihlasormus-5-mm",
+  "/products/criss-cross-kihlasormus-4-5mm",
+  "/products/ice-matt-kihlasormus-4-5-mm-1",
+  "/pages/tilaustyot",
+  "/pages/koru-opas",
 ]);
 
 const normalizeLanguage = (value) => {
@@ -68,6 +80,32 @@ export function middleware(request) {
   const shouldSetLanguage = !existingLanguage || existingLanguage !== resolvedLanguage;
   const normalizedPathname = normalizePathname(pathname);
   let response;
+
+  if (normalizedPathname === "/collections/kihlasormus-naiselle-taydellinen-sormus") {
+    return NextResponse.redirect(
+      new URL(
+        "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus",
+        request.url
+      )
+    );
+  }
+
+  if (
+    normalizedPathname ===
+    "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus"
+  ) {
+    const requestHeaders = new Headers(request.headers);
+    requestHeaders.set("x-site-lang", resolvedLanguage);
+    response = NextResponse.next({
+      request: {
+        headers: requestHeaders,
+      },
+    });
+    if (shouldSetLanguage) {
+      response.cookies.set(LANGUAGE_COOKIE, resolvedLanguage, { sameSite: "lax", path: "/" });
+    }
+    return response;
+  }
 
   // Protect API routes (except public ones like recaptcha)
   const isApiRoute = pathname.startsWith("/api");

@@ -7,11 +7,8 @@ const redirectHomePaths = [
   "/pages/jalometallit-ja-niiden-ominaisuudet",
   "/pages/tietoa-laboratoriossa-valmistetuista-timanteista",
   "/pages/karaattipaino-selitettyna",
-  "/collections/kultainen-kihlasormus-ajaton-symboli-rakkaudelle",
   "/pages/timanttikorujen-huolto",
-  "/collections/valkokulta-kihlasormus-tyylikas-valinta-elaman-suurimpaan-lupaukseen",
   "/pages/meidan-liike",
-  "/collections/kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus",
   "/pages/milloin-ja-miten-kosia",
   "/pages/timanttitietoutta",
   "/products/kopio-puoliallianssi-sormus-0-33ct-3",
@@ -19,6 +16,21 @@ const redirectHomePaths = [
   "/products/timanttikorvakorut",
   "/collections/sileat-kivettomat-sormukset",
   "/products/kopio-kapea-taysallianssisormus-briljanteilla-0-50ct",
+  "/collections/sormukset",
+  "/products/kopio-kihlasormus-3mm-bombe-court-premium",
+  "/products/kopio-kihlasormus-3mm-bombe-court",
+  "/pages/nain-tilaat-verkkokaupasta",
+  "/products/kopio-kopio-puoliallianssi-sormus-0-33ct",
+  "/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct",
+  "/pages/ota-yhteytta",
+  "/pages/tilaustyopalvelu",
+  "/products/kopio-kihlasormus-4mm-bombe-court-premium",
+  "/products/kopio-puoliallianssi-sormus-0-33ct-1",
+  "/products/sun-matt-kihlasormus-5-mm",
+  "/products/criss-cross-kihlasormus-4-5mm",
+  "/products/ice-matt-kihlasormus-4-5-mm-1",
+  "/pages/tilaustyot",
+  "/pages/koru-opas",
 ];
 
 /** @type {import('next').NextConfig} */
@@ -78,11 +90,14 @@ const nextConfig = {
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
   async redirects() {
-    return redirectHomePaths.map((source) => ({
-      source,
-      destination: "/",
-      permanent: true,
-    }));
+    const isProduction = process.env.NODE_ENV === "production";
+    return [
+      ...redirectHomePaths.map((source) => ({
+        source,
+        destination: "/",
+        permanent: isProduction,
+      })),
+    ];
   },
 };
 
