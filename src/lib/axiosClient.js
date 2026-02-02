@@ -4,8 +4,6 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 
-console.log(process.env.NEXT_PUBLIC_API_URL);
-
 const isAdminRoute = () => {
   if (typeof window === "undefined") return false;
   const path = window.location?.pathname ?? "";

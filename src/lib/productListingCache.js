@@ -28,7 +28,6 @@ const fetchCached = async (key, url) => {
 };
 
 export const fetchProductListEcom = async (languageId, categoryId, preferWhite) => {
-  console.log("preferWhite", preferWhite);
   const key = buildKey("products", languageId, categoryId, preferWhite);
   const url = `/api/product/listEcom?language_id=${encodeURIComponent(
     languageId || "1"
