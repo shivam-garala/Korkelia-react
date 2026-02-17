@@ -8,6 +8,7 @@ export const protectedRoutes = [
   { id: "AR1", name: "admin", path: "/admin", access: "protected" },
   { id: "DR1", name: "dashboard", path: "/dashboard", access: "protected" },
   { id: "DR2", name: "dashboard-orders", path: "/dashboard/orders", access: "protected" },
+  { id: "DR3", name: "dashboard-appointment", path: "/dashboard/appointment", access: "protected" },
   { id: "DR4", name: "metal-rate", path: "/dashboard/gold-rate", access: "protected" },
   { id: "DR5", name: "karat-master", path: "/dashboard/karat-master", access: "protected" },
   { id: "DR6", name: "metal-master", path: "/dashboard/metal-master", access: "protected" },

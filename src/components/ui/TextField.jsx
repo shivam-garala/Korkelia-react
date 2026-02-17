@@ -13,6 +13,7 @@ export default function TextField({
   autoComplete = undefined,
   inputMode = "",
   step = undefined,
+  min = undefined,
   disabled = false,
   id = undefined,
   name = "",
@@ -52,6 +53,7 @@ export default function TextField({
         autoComplete={autoComplete || undefined}
         inputMode={inputMode}
         step={step}
+        min={min}
         disabled={disabled}
         id={id}
         name={name}
