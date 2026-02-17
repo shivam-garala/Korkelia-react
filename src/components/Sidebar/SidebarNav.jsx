@@ -47,6 +47,12 @@ export const sidebarSections = [
       { label: "Design Variant", href: "/dashboard/design-variant", icon: "briefcase" },
     ],
   },
+  {
+    title: "Appointment Management",
+    items: [
+      { label: "Appointments", href: "/dashboard/appointment", icon: "receipt" },
+    ],
+  },
 ];
 
 export default function SidebarNav({ activePath }) {
