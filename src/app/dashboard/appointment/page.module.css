@@ -62,6 +62,10 @@
   vertical-align: top;
 }
 
+.actionsCell {
+  white-space: nowrap;
+}
+
 .slotList {
   display: flex;
   flex-wrap: wrap;
