@@ -9,6 +9,7 @@ import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import AdminSelectField from "../../../components/ui/AdminSelectField.jsx";
 import Button from "../../../components/ui/Button.jsx";
+import ConfirmDialog from "../../../components/ui/ConfirmDialog.jsx";
 import { toast } from "react-toastify";
 import axiosClient from "../../../lib/axiosClient.js";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks.js";
@@ -27,6 +28,51 @@ const normalizeSlotLabel = (value) => String(value ?? "").trim();
 
 const toFlagValue = (value) =>
   value === true || value === 1 || value === "1" || value === "true" ? 1 : 0;
+
+const pickValue = (source, keys) => {
+  for (const key of keys) {
+    const value = source?.[key];
+    if (value !== undefined && value !== null && value !== "") return value;
+  }
+  return null;
+};
+
+const normalizeId = (value) => {
+  if (value === null || value === undefined) return "";
+  const normalized = String(value).trim();
+  return normalized;
+};
+
+const resolveDateId = (item) => {
+  const value = pickValue(item, [
+    "date_id",
+    "appointment_date_id",
+    "appointmentDateId",
+    "dateId",
+    "disabled_date_id",
+    "disabledDateId",
+    "appointment_date_time_id",
+    "appointmentDateTimeId",
+    "id",
+  ]);
+  return normalizeId(value);
+};
+
+const resolveTimeSlotId = (slot, fallback) => {
+  const value = pickValue(slot, [
+    "time_slot_id",
+    "timeSlotId",
+    "time_slotId",
+    "slot_id",
+    "slotId",
+    "appointment_time_slot_id",
+    "appointmentTimeSlotId",
+    "disabled_time_slot_id",
+    "disabledTimeSlotId",
+    "id",
+  ]);
+  return normalizeId(value) || normalizeId(fallback);
+};
 
 const createRow = () => ({
   id: `${Date.now()}-${Math.random().toString(16).slice(2)}`,
@@ -69,6 +115,8 @@ export default function AppointmentManagementPage() {
   const [disabledSlotMap, setDisabledSlotMap] = useState({});
   const [disabledLoading, setDisabledLoading] = useState(false);
   const [disabledSlotRows, setDisabledSlotRows] = useState([]);
+  const [deleteTarget, setDeleteTarget] = useState(null);
+  const [deleteSubmitting, setDeleteSubmitting] = useState(false);
   const minDateValue = useMemo(() => {
     const today = new Date();
     today.setHours(0, 0, 0, 0);
@@ -153,17 +201,21 @@ export default function AppointmentManagementPage() {
         return acc;
       }, {});
       setDisabledSlotMap(map);
-      setDisabledSlotRows(
-        items.map((item, index) => ({
-          id: `${item?.date ?? item?.appointment_date ?? "row"}-${index}`,
-          date: String(item?.date ?? item?.appointment_date ?? "").trim(),
+      const mappedRows = items.map((item, index) => {
+        const dateValue = normalizeSlotLabel(item?.date ?? item?.appointment_date);
+        const dateId = resolveDateId(item);
+        return {
+          id: `${dateId || dateValue || "row"}-${index}`,
+          date: dateValue || dateId,
+          dateId,
           disabled_timeSlots: Array.isArray(item?.disabled_timeSlots)
             ? item.disabled_timeSlots
             : Array.isArray(item?.disabled_time_slots)
             ? item.disabled_time_slots
             : [],
-        }))
-      );
+        };
+      });
+      setDisabledSlotRows(mappedRows.filter((row) => Boolean(row.dateId)));
     } catch (error) {
       setDisabledSlotMap({});
       setDisabledSlotRows([]);
@@ -216,6 +268,88 @@ export default function AppointmentManagementPage() {
     setRows((prev) => [...prev, createRow()]);
   };
 
+  const requestDeleteDate = (row) => {
+    const dateId = normalizeId(row?.dateId);
+    if (!dateId) {
+      toast.error("Missing date id for delete.");
+      return;
+    }
+    setDeleteTarget({
+      type: "date",
+      dateId,
+      dateLabel: row?.date || "",
+    });
+  };
+
+  const requestDeleteSlot = (row, slot) => {
+    const dateId = normalizeId(row?.dateId);
+    const timeSlotId = normalizeId(slot?.timeSlotId || slot?.label);
+    if (!dateId) {
+      toast.error("Missing date id for delete.");
+      return;
+    }
+    if (!timeSlotId) {
+      toast.error("Missing time slot id for delete.");
+      return;
+    }
+    setDeleteTarget({
+      type: "slot",
+      dateId,
+      timeSlotId,
+      dateLabel: row?.date || "",
+      slotLabel: slot?.label || "",
+    });
+  };
+
+  const closeDeleteDialog = () => {
+    if (deleteSubmitting) return;
+    setDeleteTarget(null);
+  };
+
+  const confirmDelete = async () => {
+    if (!deleteTarget || deleteSubmitting) return;
+    const dateId = normalizeId(deleteTarget.dateId);
+    if (!dateId) {
+      toast.error("Missing date id for delete.");
+      setDeleteTarget(null);
+      return;
+    }
+    let timeSlotId = normalizeId(deleteTarget.timeSlotId);
+    if (deleteTarget.type === "date") {
+      timeSlotId = timeSlotId || "0";
+    }
+    if (!timeSlotId) {
+      toast.error("Missing time slot id for delete.");
+      return;
+    }
+    setDeleteSubmitting(true);
+    try {
+      const response = await axiosClient.delete(
+        `/api/appointment/delete-disabled-date-and-time-slots/${encodeURIComponent(
+          dateId
+        )}/${encodeURIComponent(timeSlotId)}`
+      );
+      await loadDisabledSlots();
+      if (!response?.data?.message) {
+        toast.success(
+          deleteTarget.type === "date"
+            ? "Disabled date deleted."
+            : "Disabled time slot deleted."
+        );
+      }
+    } catch (error) {
+      toast.error(
+        deleteTarget.type === "date"
+          ? "Unable to delete disabled date."
+          : "Unable to delete disabled time slot."
+      );
+      console.error("Disabled slot delete error", error);
+    } finally {
+      setDeleteSubmitting(false);
+      setDeleteTarget(null);
+    }
+  };
+
   const disabledTableRows = useMemo(() => {
     return disabledSlotRows.map((row) => {
       const slots = Array.isArray(row?.disabled_timeSlots)
@@ -228,12 +362,18 @@ export default function AppointmentManagementPage() {
           );
           if (!label) return null;
           const flag = toFlagValue(slot?.flag ?? slot?.is_selected ?? slot?.selected);
-          return { label, flag };
+          return {
+            label,
+            flag,
+            timeSlotId: resolveTimeSlotId(slot, label),
+          };
         })
-        .filter(Boolean);
+        .filter(Boolean)
+        .filter((slot) => slot.flag !== 1); // hide booked appointments
       return {
         id: row.id,
         date: row.date,
+        dateId: row.dateId,
         slots: normalizedSlots.length ? normalizedSlots : [],
       };
     });
@@ -378,20 +518,22 @@ export default function AppointmentManagementPage() {
                     <tr>
                       <th className={styles.th}>Date</th>
                       <th className={styles.th}>Time Slot</th>
+                      <th className={styles.th}>Action</th>
                     </tr>
                   </thead>
                   <tbody>
                     {disabledLoading ? (
                       <tr>
-                        <td className={styles.td} colSpan={2}>
+                        <td className={styles.td} colSpan={3}>
                           Loading...
                         </td>
                       </tr>
                     ) : disabledTableRows.length ? (
                       disabledTableRows.map((row) => {
-                        const slots = row.slots.length
+                        const hasSlots = row.slots.length > 0;
+                        const slots = hasSlots
                           ? row.slots
-                          : [{ label: "No disabled slots", flag: 0 }];
+                          : [{ label: "No disabled slots", flag: 0, isPlaceholder: true }];
                         return slots.map((slot, index) => (
                           <tr key={`${row.id}-${slot.label}-${index}`}>
                             {index === 0 ? (
@@ -409,12 +551,56 @@ export default function AppointmentManagementPage() {
                                 {slot.flag === 1 ? " (Appointment Booked)" : ""}
                               </span>
                             </td>
+                            <td className={`${styles.td} ${styles.actionsCell}`}>
+                              {hasSlots && slot.flag !== 1 ? (
+                                <Button
+                                  variant="danger"
+                                  size="sm"
+                                  icon="delete"
+                                  iconOnly
+                                  onClick={() => requestDeleteSlot(row, slot)}
+                                  disabled={
+                                    deleteSubmitting ||
+                                    slot.flag === 1 ||
+                                    !row.dateId ||
+                                    !(slot.timeSlotId || slot.label)
+                                  }
+                                  title={
+                                    slot.flag === 1
+                                      ? "Booked slots cannot be deleted."
+                                      : "Delete disabled time slot"
+                                  }
+                                >
+                                  Delete
+                                </Button>
+                              ) : (
+                                <Button
+                                  variant="danger"
+                                  size="sm"
+                                  icon="delete"
+                                  iconOnly
+                                  onClick={() => requestDeleteDate(row)}
+                                  disabled={deleteSubmitting || !row.dateId}
+                                >
+                                  Delete
+                                </Button>
+                                // <Button
+                                //   variant="danger"
+                                //   size="sm"
+                                //   icon="delete"
+                                //   onClick={() => requestDeleteDate(row)}
+                                //   disabled={deleteSubmitting || !row.dateId}
+                                // >
+                                //   Delete Date
+                                // </Button>
+                              )}
+                            </td>
                           </tr>
                         ));
                       })
                     ) : (
                       <tr>
-                        <td className={styles.td} colSpan={2}>
+                        <td className={styles.td} colSpan={3}>
                           No data available
                         </td>
                       </tr>
@@ -443,6 +629,22 @@ export default function AppointmentManagementPage() {
         }}
       />
       <SearchOverlay open={searchOpen} onClose={() => setSearchOpen(false)} />
+      <ConfirmDialog
+        open={Boolean(deleteTarget)}
+        title={
+          deleteTarget?.type === "date"
+            ? "Delete Disabled Date"
+            : "Delete Disabled Time Slot"
+        }
+        message={
+          deleteTarget?.type === "date"
+            ? `Delete the disabled date ${deleteTarget?.dateLabel || ""}? This will make it available again.`
+            : `Delete the disabled time slot ${deleteTarget?.slotLabel || ""} on ${deleteTarget?.dateLabel || "this date"}?`
+        }
+        confirmLabel={deleteSubmitting ? "Deleting..." : "Delete"}
+        onConfirm={confirmDelete}
+        onClose={closeDeleteDialog}
+      />
     </div>
   );
 }

@@ -284,7 +284,11 @@ export default function AppointmentPage() {
             return {
               ...prev,
               phoneCode: mappedCode,
-              phone: trimmedPhone ? `${mappedCode} ${trimmedPhone}` : `${mappedCode} `,
+              phone: mappedCode
+                ? trimmedPhone
+                  ? `+${mappedCode} ${trimmedPhone}`
+                  : `+${mappedCode} `
+                : trimmedPhone,
             };
           });
         }
@@ -497,8 +501,8 @@ export default function AppointmentPage() {
         phoneCode: mappedCode,
         phone: mappedCode
           ? trimmedPhone
-            ? `${mappedCode} ${trimmedPhone}`
-            : `${mappedCode} `
+            ? `+${mappedCode} ${trimmedPhone}`
+            : `+${mappedCode} `
           : trimmedPhone,
       }));
       return;
@@ -511,11 +515,13 @@ export default function AppointmentPage() {
         const restDigits = digitsOnly.startsWith(codeDigits)
           ? digitsOnly.slice(codeDigits.length)
           : digitsOnly;
-        const nextValue = restDigits ? `${codeDigits} ${restDigits}` : `${codeDigits} `;
+        const nextValue = restDigits ? `+${codeDigits} ${restDigits}` : `+${codeDigits} `;
         setForm((prev) => ({ ...prev, phone: nextValue }));
         return;
       }
-      setForm((prev) => ({ ...prev, phone: cleaned }));
+      const digitsOnly = cleaned.replace(/[^\d]/g, "");
+      const nextValue = digitsOnly ? `+${digitsOnly}` : "";
+      setForm((prev) => ({ ...prev, phone: nextValue }));
       return;
     }
     setForm((prev) => ({ ...prev, [name]: value }));
