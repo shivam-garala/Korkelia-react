@@ -48,7 +48,7 @@ const cacheProductList = (items) => {
 };
 
 export default function ProductListingClient() {
-  const { language } = useI18n();
+  const { language, currencyCode } = useI18n();
   const searchParams = useSearchParams();
   const categoryIdParam = searchParams.get("category_id");
   const categoryNameFromParams = searchParams.get("category_name");
@@ -178,7 +178,7 @@ export default function ProductListingClient() {
     const loadProducts = async () => {
       try {
         clearProductListingCache();
-        const list = await fetchProductListEcom(languageId, categoryId);
+        const list = await fetchProductListEcom(languageId, categoryId, currencyCode);
         cacheProductList(list);
         
         // Extract category name directly from first product's design.product.category.category_name
@@ -281,7 +281,7 @@ export default function ProductListingClient() {
     return () => {
       active = false;
     };
-  }, [categoryId, languageId]);
+  }, [categoryId, languageId, currencyCode]);
 
   const displayedProducts = useMemo(() => {
     let list = products;

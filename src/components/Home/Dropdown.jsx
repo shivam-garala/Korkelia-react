@@ -47,13 +47,15 @@ export default function Dropdown({
   }, [ref]);
 
   const iconSrc =
-    leadingIcon === "globe"
+    active?.icon ??
+    (leadingIcon === "globe"
       ? "/icons/world.png"
       : leadingIcon === "currency"
-      ? "/icons/euro.png"
+      ? "/icons/euro.svg"
       : leadingIcon === "menu"
       ? "/icons/menu.png"
-      : null;
+      : null);
+  const iconAlt = active?.iconAlt ?? "";
 
   return (
     <div className={styles.wrap} ref={ref}>
@@ -71,13 +73,13 @@ export default function Dropdown({
           <Image
             className={styles.icon}
             src={iconSrc}
-            alt=""
-            width={16}
-            height={16}
+            alt={iconAlt}
+            width={18}
+            height={18}
             unoptimized
           />
         ) : null}
-        <span>{active?.label}</span>
+        <span className={styles.label}>{active?.label}</span>
         <Image
           className={styles.caret}
           src="/icons/down_Arrow.png"
@@ -107,7 +109,19 @@ export default function Dropdown({
                 setOpen(false);
               }}
             >
-              {option.label}
+              <span className={styles.itemInner}>
+                {option.icon ? (
+                  <Image
+                    className={styles.optionIcon}
+                    src={option.icon}
+                    alt={option.iconAlt ?? ""}
+                    width={18}
+                    height={18}
+                    unoptimized
+                  />
+                ) : null}
+                <span className={styles.optionLabel}>{option.label}</span>
+              </span>
             </button>
           ))}
         </div>
