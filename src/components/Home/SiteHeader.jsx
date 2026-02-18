@@ -11,7 +11,11 @@ import ShareProductModal from "../Product/ShareProductModal.jsx";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { language, setLanguage, t } = useI18n();
+  const { language, setLanguage, currency, setCurrency, t } = useI18n();
+  const languageLabels =
+    language === "fi"
+      ? { en: "englanti", fi: "suomi" }
+      : { en: "English", fi: "Finnish" };
 
   const topBarContent = (
     <>
@@ -22,14 +26,41 @@ export default function SiteHeader() {
           value={language}
           onChange={setLanguage}
           options={[
-            { value: "en", label: "English" },
-            { value: "fi", label: "Finnish" },
+            {
+              value: "en",
+              label: languageLabels.en,
+              icon: "/icons/uk.svg",
+              iconAlt: "United Kingdom flag",
+            },
+            {
+              value: "fi",
+              label: languageLabels.fi,
+              icon: "/icons/finland.svg",
+              iconAlt: "Finland flag",
+            },
           ]}
         />
-        <div className={styles.currency} aria-label="Currency">
-          <Image className={styles.currencyIcon} src="/icons/euro.png" alt="" width={14} height={14} />
-          <span>{t("header.currency")}</span>
-        </div>
+        <Dropdown
+          ariaLabel={t("header.currency")}
+          leadingIcon="currency"
+          value={currency}
+          onChange={setCurrency}
+          options={[
+            {
+              value: "eur",
+              label: "Euro",
+              icon: "/icons/euro.svg",
+              iconAlt: "Euro symbol",
+            },
+            {
+              value: "usd",
+              label: "Dollar",
+              icon: "/icons/dollar.svg",
+              iconAlt: "Dollar symbol",
+            },
+          ]}
+          triggerClassName={styles.currencyTrigger}
+        />
       </div>
 
       <div className={styles.topRight}>

@@ -83,6 +83,12 @@
   height: 14px;
 }
 
+.currencyTrigger {
+  border-color: transparent;
+  padding: 4px 8px;
+  text-transform: uppercase;
+}
+
 .left,
 .right {
   display: flex;
