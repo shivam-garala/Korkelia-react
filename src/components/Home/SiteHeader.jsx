@@ -49,13 +49,13 @@ export default function SiteHeader() {
             {
               value: "eur",
               label: "Euro",
-              icon: "/icons/euro.svg",
+              icon: "/icons/euro.png",
               iconAlt: "Euro symbol",
             },
             {
               value: "usd",
               label: "Dollar",
-              icon: "/icons/dollar.svg",
+              icon: "/icons/dollar.png",
               iconAlt: "Dollar symbol",
             },
           ]}

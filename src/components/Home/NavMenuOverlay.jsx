@@ -8,7 +8,6 @@ import styles from "./NavMenuOverlay.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import { fetchCategoryHomePage } from "../../lib/categoryHomeCache.js";
 import ShareProductModal from "../Product/ShareProductModal.jsx";
-import Dropdown from "./Dropdown";
 
 function Icon({ path, className, style }) {
   return (
@@ -32,11 +31,7 @@ export default function NavMenuOverlay({ open, onClose }) {
   const [productsOpen, setProductsOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-  const { t, language, setLanguage, currency, setCurrency } = useI18n();
-  const languageLabels =
-    language === "fi"
-      ? { en: "englanti", fi: "suomi" }
-      : { en: "English", fi: "Finnish" };
+  const { t, language } = useI18n();
   const pathname = usePathname();
   const languageId = language === "fi" ? "2" : "1";
   const categoriesLoadedRef = useRef({});
@@ -146,7 +141,7 @@ export default function NavMenuOverlay({ open, onClose }) {
           <Link className={styles.brand} href="/" aria-label="Home" onClick={onClose}>
             <Image
               className={styles.brandLogo}
-              src="/logo/logo.png"
+              src="/logo/Logo 1.png"
               alt="KORKEILA HELSINKI"
               width={520}
               height={270}
@@ -159,48 +154,6 @@ export default function NavMenuOverlay({ open, onClose }) {
 
       <div className={styles.content}>
         <div className={styles.contentInner}>
-          <div className={styles.topBar}>
-            <Dropdown
-              ariaLabel={t("common.language")}
-              leadingIcon="globe"
-              value={language}
-              onChange={setLanguage}
-              options={[
-                {
-                  value: "en",
-                  label: languageLabels.en,
-                  icon: "/icons/uk.svg",
-                  iconAlt: "United Kingdom flag",
-                },
-                {
-                  value: "fi",
-                  label: languageLabels.fi,
-                  icon: "/icons/finland.svg",
-                  iconAlt: "Finland flag",
-                },
-              ]}
-            />
-            <Dropdown
-              ariaLabel={t("header.currency")}
-              leadingIcon="currency"
-              value={currency}
-              onChange={setCurrency}
-              options={[
-                {
-                  value: "eur",
-                  label: "Euro",
-                  icon: "/icons/euro.svg",
-                  iconAlt: "Euro symbol",
-                },
-                {
-                  value: "usd",
-                  label: "Dollar",
-                  icon: "/icons/dollar.svg",
-                  iconAlt: "Dollar symbol",
-                },
-              ]}
-            />
-          </div>
           <ul className={styles.menu}>
             <li className={styles.item}>
               <Link

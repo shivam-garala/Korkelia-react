@@ -8,6 +8,7 @@
   display: inline-flex;
   align-items: center;
   gap: 8px;
+  /* width: 135px; */
   border: 1px solid color-mix(in srgb, var(--color-border), transparent 40%);
   background: #ffffff;
   color: #000000;
