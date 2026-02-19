@@ -141,7 +141,7 @@ export default function NavMenuOverlay({ open, onClose }) {
           <Link className={styles.brand} href="/" aria-label="Home" onClick={onClose}>
             <Image
               className={styles.brandLogo}
-              src="/logo/Logo 1.png"
+              src="/logo/logo.png"
               alt="KORKEILA HELSINKI"
               width={520}
               height={270}
