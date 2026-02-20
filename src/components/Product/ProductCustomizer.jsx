@@ -537,7 +537,7 @@ export default function ProductCustomizer({
           customizedForYou: "Räätälöity sinulle",
           selectDiamondCut: "Valitse timantin hionta",
           diamondQuality: "Timanttityyppi",
-          diamondCaratWeight: "TIMANTTI KARAATTI",
+          diamondCaratWeight: "timantin koko",
           selectMetalColor: "Valitse metallin väri",
           metalType: "Metallin tyyppi",
           ringSize: "Sormuksen halkaisija (mm)",
@@ -545,7 +545,7 @@ export default function ProductCustomizer({
           engraving: "Kaiverrus (valinnainen)",
           engravingPlaceholder: "Ole hyvä ja rajoita sanamäärä 10 merkkiin",
           submit: "Lähetä",
-          enquireNow: "Kysy nyt",
+          enquireNow: "kysy lisää",
         }
       : {
           customizedForYou: "CUSTOMIZED FOR YOU",
