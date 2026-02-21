@@ -14,7 +14,7 @@ export default function SiteHeader() {
   const { language, setLanguage, currency, setCurrency, t } = useI18n();
   const languageLabels =
     language === "fi"
-      ? { en: "englanti", fi: "suomi" }
+      ? { en: "Englanti", fi: "Suomi" }
       : { en: "English", fi: "Finnish" };
 
   const topBarContent = (
