@@ -86,7 +86,7 @@
 .currencyTrigger {
   border-color: transparent;
   padding: 4px 8px;
-  text-transform: uppercase;
+  text-transform: capitalize;
 }
 
 .left,
