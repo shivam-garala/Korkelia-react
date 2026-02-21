@@ -17,7 +17,7 @@
   font-weight: 400;
   font-size: 15px;
   letter-spacing: 0.6px;
-  text-transform: uppercase;
+  text-transform: capitalize;
   font-family: var(--font-body);
 }
 

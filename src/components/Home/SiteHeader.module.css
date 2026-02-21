@@ -75,7 +75,7 @@
   font-size: 15px;
   letter-spacing: 0.8px;
   font-weight: 400;
-  text-transform: uppercase;
+  text-transform: capitalize;
 }
 
 .currencyIcon {
