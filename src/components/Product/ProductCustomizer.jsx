@@ -41,6 +41,13 @@ const normalizeString = (value) => {
   return String(value).trim();
 };
 
+const normalizeCutImageKey = (value) =>
+  normalizeString(value)
+    .normalize("NFD")
+    .replace(/[\u0300-\u036f]/g, "")
+    .toUpperCase()
+    .replace(/[^A-Z0-9]/g, "");
+
 const normalizeLanguageToken = (value) => normalizeString(value).toLowerCase();
 
 const resolveLanguageToken = (entry) => {
@@ -537,7 +544,8 @@ export default function ProductCustomizer({
           customizedForYou: "Räätälöity sinulle",
           selectDiamondCut: "Valitse timantin hionta",
           diamondQuality: "Timanttityyppi",
-          diamondCaratWeight: "TIMANTTI KARAATTI",
+          diamondCaratWeight: "timantin koko",
+          centerPrefix: "keskitimantinkoko",
           selectMetalColor: "Valitse metallin väri",
           metalType: "Metallin tyyppi",
           ringSize: "Sormuksen halkaisija (mm)",
@@ -545,13 +553,14 @@ export default function ProductCustomizer({
           engraving: "Kaiverrus (valinnainen)",
           engravingPlaceholder: "Ole hyvä ja rajoita sanamäärä 10 merkkiin",
           submit: "Lähetä",
-          enquireNow: "Kysy nyt",
+          enquireNow: "kysy lisää",
         }
       : {
           customizedForYou: "CUSTOMIZED FOR YOU",
           selectDiamondCut: "SELECT DIAMOND CUT",
           diamondQuality: "DIAMOND TYPE",
           diamondCaratWeight: "DIAMOND CARAT",
+          centerPrefix: "CENTER DIAMOND CARAT",
           selectMetalColor: "SELECT METAL COLOR",
           metalType: "METAL TYPE",
           ringSize: "RING SIZE DIAMETER (mm)",
@@ -849,7 +858,7 @@ export default function ProductCustomizer({
         const label = normalizeString(rawLabel);
         if (!id && !label) return null;
         const codeKey = String(item?.cut_code ?? item?.code ?? "").toUpperCase();
-        const nameKey = label.toUpperCase();
+        const nameKey = normalizeCutImageKey(label);
         const src =
           cutImageByCode[codeKey] ||
           cutImageByName[nameKey] ||
@@ -1014,7 +1023,7 @@ export default function ProductCustomizer({
   }, [listingDesign, productDetails, variantDetails]);
   const diamondCaratLabel =
     filterAvailabilityValue === "4" && hasCenterDiamond
-    ? `CENTER ${labels.diamondCaratWeight}`
+    ? `${labels.centerPrefix}`
     : labels.diamondCaratWeight;
 
   const metalOptions = useMemo(() => {
@@ -1756,10 +1765,11 @@ export default function ProductCustomizer({
         {diamondDetailGroups.length ? (
           <>
             <div className={styles.diamondDetailGroups}>
-              {diamondDetailGroups.map((group) => (
+              {diamondDetailGroups.map((group) => {
+                return (
                 <div className={styles.diamondDetailGroup} key={group.cutName}>
                   <div className={styles.fieldTitle}>
-                    {group.cutName} {diamondCaratLabel}
+                    {group.cutName} {diamondCaratLabel} 
                   </div>
                   <div className={styles.pills}>
                     {group.carats.map((value) => (
@@ -1774,7 +1784,7 @@ export default function ProductCustomizer({
                     ))}
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
             <div className={styles.divider} aria-hidden />
           </>
