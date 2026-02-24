@@ -1,4 +1,4 @@
-﻿"use client";
+"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
@@ -467,9 +467,7 @@ export default function AppointmentPage() {
     const disabledSlots = disabledSlotsByDate[form.appointmentDate] ?? [];
     if (!disabledSlots.length) return slotOptions;
     const disabledSet = new Set(disabledSlots.map((slot) => String(slot)));
-    return slotOptions.map((opt) =>
-      disabledSet.has(String(opt.value)) ? { ...opt, isDisabled: true } : opt
-    );
+    return slotOptions.filter((opt) => !disabledSet.has(String(opt.value)));
   }, [disabledSlotsByDate, form.appointmentDate, slotOptions]);
   useEffect(() => {
     if (!form.appointmentDate) return;
@@ -734,7 +732,7 @@ export default function AppointmentPage() {
                 name="appointmentSlot"
                 placeholder={labels.appointmentSlotPlaceholder}
                 required
-                disabled={slotLoading || disabledLoading || !slotOptions.length}
+                disabled={slotLoading || disabledLoading || !slotOptionsForDate.length}
                 value={form.appointmentSlot}
                 onChange={handleChange}
                 options={slotOptionsForDate}

@@ -23,9 +23,9 @@ export default function CookieBanner() {
       ? {
           title: "Evasteasetukset",
           messageIntro:
-            "Kaytamme vain valttamattomia evasteita sivuston toimintaan ja evasteasetustesi tallentamiseen.",
+            "Kaytamme valttamattomia evasteita sivuston toimintaan ja evasteasetustesi tallentamiseen.",
           messageNoAnalytics:
-            "Emme kayta analytiikka- tai markkinointievaisteita tassa vaiheessa.",
+            "Voit halutessasi sallia analytiikka- ja markkinointievasteet parantamaan palveluamme.",
           messageManage: "Voit hallita valintojasi milloin tahansa kohdassa",
           cookiePreferences: "Evasteasetukset",
           messageReadMore: "Lue lisaa",
@@ -50,7 +50,7 @@ export default function CookieBanner() {
           messageIntro:
             "We use strictly necessary cookies to make the site work and to store your cookie preferences.",
           messageNoAnalytics:
-            "We do not use analytics or marketing cookies at this stage.",
+            "You can optionally allow analytics and marketing cookies to help us improve the experience.",
           messageManage: "You can manage your choices at any time in",
           cookiePreferences: "Cookie Preferences",
           messageReadMore: "Read more in our",
@@ -92,6 +92,9 @@ export default function CookieBanner() {
       Cookies.remove("siteLang", { path: "/" });
     }
     saveConsent(payload);
+    if (typeof window !== "undefined") {
+      window.dispatchEvent(new Event("cookieConsentUpdated"));
+    }
   };
 
   if (!visible) return null;

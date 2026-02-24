@@ -130,7 +130,7 @@ export default function HomeClient() {
 
         <CategoryGrid
           title={t("home.categories.title")}
-          categories={categories.length ? categories : fallbackCategories}
+          categories={categories.length ? categories : []}
           loading={categoriesLoading}
         />
 

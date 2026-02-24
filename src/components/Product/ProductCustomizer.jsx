@@ -538,6 +538,7 @@ export default function ProductCustomizer({
           selectDiamondCut: "Valitse timantin hionta",
           diamondQuality: "Timanttityyppi",
           diamondCaratWeight: "timantin koko",
+          centerPrefix: "keskitimantinkoko",
           selectMetalColor: "Valitse metallin väri",
           metalType: "Metallin tyyppi",
           ringSize: "Sormuksen halkaisija (mm)",
@@ -552,6 +553,7 @@ export default function ProductCustomizer({
           selectDiamondCut: "SELECT DIAMOND CUT",
           diamondQuality: "DIAMOND TYPE",
           diamondCaratWeight: "DIAMOND CARAT",
+          centerPrefix: "CENTER DIAMOND CARAT",
           selectMetalColor: "SELECT METAL COLOR",
           metalType: "METAL TYPE",
           ringSize: "RING SIZE DIAMETER (mm)",
@@ -1014,7 +1016,7 @@ export default function ProductCustomizer({
   }, [listingDesign, productDetails, variantDetails]);
   const diamondCaratLabel =
     filterAvailabilityValue === "4" && hasCenterDiamond
-    ? `CENTER ${labels.diamondCaratWeight}`
+    ? `${labels.centerPrefix}`
     : labels.diamondCaratWeight;
 
   const metalOptions = useMemo(() => {
