@@ -55,16 +55,22 @@ export function I18nProvider({ children }) {
   // Start with default language to match server-side render
   const [language, setLanguageState] = useState(DEFAULT_LANGUAGE);
   const [currency, setCurrencyState] = useState(DEFAULT_CURRENCY);
+  console.log(language, currency);
 
   // After hydration, read the cookie and update language if present
   useEffect(() => {
     if (typeof window === "undefined") return;
     let cancelled = false;
+    console.log("useEffect");
 
     // Always try to read the saved language preference (reading preferences is allowed)
     const savedLanguage = Cookies.get(COOKIE_NAME);
+    console.log(savedLanguage);
+    console.log(savedLanguage in dictionaries);
+    console.log(dictionaries);
+    
     if (savedLanguage && savedLanguage in dictionaries) {
-      // Defer state update to avoid synchronous setState inside effect body.
+      console.log("if");      // Defer state update to avoid synchronous setState inside effect body.
       Promise.resolve().then(() => {
         if (!cancelled) {
           setLanguageState(savedLanguage);
@@ -86,13 +92,16 @@ export function I18nProvider({ children }) {
         cancelled = true;
       };
     }
+    console.log("useEffect after");
 
     const detectLanguageFromCountry = async () => {
+      console.log("detectLanguageFromCountry");
       try {
         const response = await fetch("https://api.country.is/");
         if (!response?.ok) return;
         const data = await response.json();
         const countryCode = String(data?.country ?? "").trim().toUpperCase();
+        console.log(countryCode);
         if (!countryCode) return;
         let nextLanguage = "en";
         let nextCurrency = "eur";
