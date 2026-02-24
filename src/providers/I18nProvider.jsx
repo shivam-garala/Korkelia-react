@@ -7,72 +7,10 @@ import fi from "../i18n/fi.json";
 
 const dictionaries = { en, fi };
 const DEFAULT_LANGUAGE = "en";
+const DEFAULT_CURRENCY = "eur";
 const COOKIE_NAME = "siteLang";
 const CURRENCY_COOKIE = "siteCurrency";
-const DEFAULT_CURRENCY_BY_LANG = {
-  en: "usd",
-  fi: "eur",
-};
 const CONSENT_COOKIE = "cookieConsent";
-
-// Countries that should default to Finnish; update this list as needed.
-const FINNISH_LANGUAGE_COUNTRIES = new Set([
-  "FI",
-  "AX",
-  "SE",
-  "NO",
-  "DK",
-  "IS",
-  "EE",
-  "LV",
-  "LT",
-  "PL",
-  "DE",
-  "FR",
-  "ES",
-  "PT",
-  "IT",
-  "IE",
-  "GB",
-  "NL",
-  "BE",
-  "LU",
-  "CH",
-  "AT",
-  "CZ",
-  "SK",
-  "HU",
-  "SI",
-  "HR",
-  "BA",
-  "RS",
-  "ME",
-  "MK",
-  "AL",
-  "GR",
-  "BG",
-  "RO",
-  "MD",
-  "UA",
-  "BY",
-  "XK",
-  "TR",
-  "CY",
-  "MT",
-  "AD",
-  "SM",
-  "VA",
-  "LI",
-  "FO",
-  "GI",
-  "MC",
-  "GL",
-  "AM",
-  "AZ",
-  "GE",
-  "KZ",
-  "RU",
-]);
 
 const hasPreferenceConsent = () => {
   const raw = Cookies.get(CONSENT_COOKIE);
@@ -111,14 +49,12 @@ const normalizeCurrency = (value) => {
   return "eur";
 };
 
-const defaultCurrencyForLanguage = (lang) => DEFAULT_CURRENCY_BY_LANG[lang] ?? "eur";
-
 export const toCurrencyParam = (currency) => (currency === "usd" ? "SGD" : "EU");
 
 export function I18nProvider({ children }) {
   // Start with default language to match server-side render
   const [language, setLanguageState] = useState(DEFAULT_LANGUAGE);
-  const [currency, setCurrencyState] = useState(defaultCurrencyForLanguage(DEFAULT_LANGUAGE));
+  const [currency, setCurrencyState] = useState(DEFAULT_CURRENCY);
 
   // After hydration, read the cookie and update language if present
   useEffect(() => {
@@ -136,7 +72,7 @@ export function I18nProvider({ children }) {
           if (savedCurrency) {
             setCurrencyState(normalizeCurrency(savedCurrency));
           } else {
-            const nextCurrency = defaultCurrencyForLanguage(savedLanguage);
+            const nextCurrency = DEFAULT_CURRENCY;
             setCurrencyState(nextCurrency);
             Cookies.set(CURRENCY_COOKIE, nextCurrency, {
               sameSite: "lax",
@@ -158,22 +94,33 @@ export function I18nProvider({ children }) {
         const data = await response.json();
         const countryCode = String(data?.country ?? "").trim().toUpperCase();
         if (!countryCode) return;
-        const nextLanguage = FINNISH_LANGUAGE_COUNTRIES.has(countryCode) ? "fi" : "en";
+        let nextLanguage = "en";
+        let nextCurrency = "eur";
+
+        if (countryCode === "FI") {
+          nextLanguage = "fi";
+          nextCurrency = "eur";
+        } else if (countryCode === "SG") {
+          nextLanguage = "en";
+          nextCurrency = "usd";
+        }
+
         if (cancelled) return;
-        const normalized = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
-        Cookies.set(COOKIE_NAME, normalized, {
+        const normalizedLanguage = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
+
+        Cookies.set(COOKIE_NAME, normalizedLanguage, {
           sameSite: "lax",
           path: "/",
           expires: 365,
         });
-        const nextCurrency = defaultCurrencyForLanguage(normalized);
-        Cookies.set(CURRENCY_COOKIE, nextCurrency, {
+        const normalizedCurrency = normalizeCurrency(nextCurrency);
+        Cookies.set(CURRENCY_COOKIE, normalizedCurrency, {
           sameSite: "lax",
           path: "/",
           expires: 365,
         });
-        setCurrencyState(nextCurrency);
-        setLanguageState(normalized);
+        setCurrencyState(normalizedCurrency);
+        setLanguageState(normalizedLanguage);
       } catch (error) {
         if (process.env.NODE_ENV !== "production") {
           console.error("Country-based language detection failed", error);
@@ -192,9 +139,6 @@ export function I18nProvider({ children }) {
     const normalized = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
     // Always save the language preference (it's a user preference, not tracking)
     Cookies.set(COOKIE_NAME, normalized, { sameSite: "lax", path: "/", expires: 365 });
-    const nextCurrency = defaultCurrencyForLanguage(normalized);
-    Cookies.set(CURRENCY_COOKIE, nextCurrency, { sameSite: "lax", path: "/", expires: 365 });
-    setCurrencyState(nextCurrency);
     setLanguageState(normalized);
   }, []);
 
