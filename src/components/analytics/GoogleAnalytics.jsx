@@ -1,35 +1,40 @@
 "use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useEffect, useMemo, useSyncExternalStore } from "react";
 import { usePathname, useSearchParams } from "next/navigation";
 import Script from "next/script";
 import Cookies from "js-cookie";
+import { DEFAULT_CONSENT_STATE, readStoredConsent } from "../../lib/cookieConsent.js";
 
 const GA_ID = process.env.NEXT_PUBLIC_GA_ID;
 const CONSENT_COOKIE = "cookieConsent";
 
-const hasAnalyticsConsent = () => {
-  try {
-    const data = JSON.parse(Cookies.get(CONSENT_COOKIE) || "{}");
-    // Only enable analytics when the user has explicitly allowed analytics (or accepted all).
-    if (data.choice === "accepted") return true;
-    return Boolean(data.analytics);
-  } catch {
-    return false;
-  }
-};
-
 export default function GoogleAnalytics() {
   const pathname = usePathname();
   const searchParams = useSearchParams();
-  const [enabled, setEnabled] = useState(false);
+  const subscribeToConsent = (callback) => {
+    if (typeof window === "undefined") return () => {};
+    window.addEventListener("cookieConsentUpdated", callback);
+    return () => window.removeEventListener("cookieConsentUpdated", callback);
+  };
 
-  useEffect(() => {
-    setEnabled(Boolean(GA_ID) && hasAnalyticsConsent());
-    const handler = () => setEnabled(Boolean(GA_ID) && hasAnalyticsConsent());
-    window.addEventListener("cookieConsentUpdated", handler);
-    return () => window.removeEventListener("cookieConsentUpdated", handler);
-  }, []);
+  const getClientConsent = () => {
+    try {
+      const legacy = Cookies.get(CONSENT_COOKIE);
+      if (legacy) {
+        const parsed = JSON.parse(legacy);
+        return { exists: true, state: readStoredConsent().state ?? parsed };
+      }
+    } catch {
+      // Ignore parse errors and fall back to helper
+    }
+    return readStoredConsent();
+  };
+
+  const getServerConsent = () => ({ exists: true, state: { ...DEFAULT_CONSENT_STATE } });
+
+  const consent = useSyncExternalStore(subscribeToConsent, getClientConsent, getServerConsent);
+  const enabled = Boolean(GA_ID) && Boolean(consent.state.analytics);
 
   const pagePath = useMemo(() => {
     const qs = searchParams.toString();
