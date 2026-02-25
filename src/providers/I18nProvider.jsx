@@ -94,47 +94,36 @@ export function I18nProvider({ children }) {
     }
     console.log("useEffect after");
 
-    const detectLanguageFromCountry = async () => {
-      console.log("detectLanguageFromCountry");
-      try {
-        const response = await fetch("https://api.country.is/");
-        if (!response?.ok) return;
-        const data = await response.json();
-        const countryCode = String(data?.country ?? "").trim().toUpperCase();
-        console.log(countryCode);
-        if (!countryCode) return;
-        let nextLanguage = "en";
-        let nextCurrency = "eur";
+    const detectLanguageFromCountry = () => {
+      const countryCode = String(Cookies.get("siteCountry") ?? "").trim().toUpperCase();
+      if (!countryCode) return;
+      let nextLanguage = "en";
+      let nextCurrency = "eur";
 
-        if (countryCode === "FI") {
-          nextLanguage = "fi";
-          nextCurrency = "eur";
-        } else if (countryCode === "SG") {
-          nextLanguage = "en";
-          nextCurrency = "usd";
-        }
-
-        if (cancelled) return;
-        const normalizedLanguage = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
-
-        Cookies.set(COOKIE_NAME, normalizedLanguage, {
-          sameSite: "lax",
-          path: "/",
-          expires: 365,
-        });
-        const normalizedCurrency = normalizeCurrency(nextCurrency);
-        Cookies.set(CURRENCY_COOKIE, normalizedCurrency, {
-          sameSite: "lax",
-          path: "/",
-          expires: 365,
-        });
-        setCurrencyState(normalizedCurrency);
-        setLanguageState(normalizedLanguage);
-      } catch (error) {
-        if (process.env.NODE_ENV !== "production") {
-          console.error("Country-based language detection failed", error);
-        }
+      if (countryCode === "FI") {
+        nextLanguage = "fi";
+        nextCurrency = "eur";
+      } else if (countryCode === "SG") {
+        nextLanguage = "en";
+        nextCurrency = "usd";
       }
+
+      if (cancelled) return;
+      const normalizedLanguage = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
+
+      Cookies.set(COOKIE_NAME, normalizedLanguage, {
+        sameSite: "lax",
+        path: "/",
+        expires: 365,
+      });
+      const normalizedCurrency = normalizeCurrency(nextCurrency);
+      Cookies.set(CURRENCY_COOKIE, normalizedCurrency, {
+        sameSite: "lax",
+        path: "/",
+        expires: 365,
+      });
+      setCurrencyState(normalizedCurrency);
+      setLanguageState(normalizedLanguage);
     };
 
     detectLanguageFromCountry();
