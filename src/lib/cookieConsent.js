@@ -26,8 +26,10 @@ const toState = (payload) => {
   };
 };
 
-export const readStoredConsent = () => {
-  const raw = Cookies.get(CONSENT_COOKIE_KEY);
+let cachedRaw = null;
+let cachedConsentSnapshot = { exists: false, payload: null, state: { ...DEFAULT_STATE } };
+
+const buildSnapshotFromRaw = (raw) => {
   if (!raw) return { exists: false, payload: null, state: { ...DEFAULT_STATE } };
   try {
     const payload = JSON.parse(raw);
@@ -35,6 +37,19 @@ export const readStoredConsent = () => {
   } catch (error) {
     return { exists: false, payload: null, state: { ...DEFAULT_STATE } };
   }
+};
+
+const computeConsentSnapshot = () => {
+  if (typeof document === "undefined") return cachedConsentSnapshot;
+  const raw = Cookies.get(CONSENT_COOKIE_KEY);
+  if (raw === cachedRaw) return cachedConsentSnapshot;
+  cachedRaw = raw ?? null;
+  cachedConsentSnapshot = buildSnapshotFromRaw(raw);
+  return cachedConsentSnapshot;
+};
+
+export const readStoredConsent = () => {
+  return computeConsentSnapshot();
 };
 
 const dispatchConsentUpdated = () => {
@@ -69,9 +84,23 @@ export const applyConsent = (payload) => {
     clearAnalyticsCookies();
   }
   writeConsentCookie(payload);
+  cachedRaw = JSON.stringify(payload);
+  cachedConsentSnapshot = { exists: true, payload, state: toState(payload) };
   dispatchConsentUpdated();
   return toState(payload);
 };
+
+export const subscribeConsent = (callback) => {
+  if (typeof window === "undefined") return () => {};
+  const handler = () => {
+    computeConsentSnapshot();
+    callback();
+  };
+  window.addEventListener("cookieConsentUpdated", handler);
+  return () => window.removeEventListener("cookieConsentUpdated", handler);
+};
+
+export const getConsentSnapshot = () => computeConsentSnapshot();
 
 export const makePayload = (overrides) => ({
   choice: "custom",

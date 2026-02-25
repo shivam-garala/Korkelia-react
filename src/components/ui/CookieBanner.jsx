@@ -5,25 +5,19 @@ import { useI18n } from "../../providers/I18nProvider.jsx";
 import {
   applyConsent,
   DEFAULT_CONSENT_STATE,
+  getConsentSnapshot,
   makeAcceptAllPayload,
   makePayload,
   makeRejectPayload,
-  readStoredConsent,
+  subscribeConsent,
 } from "../../lib/cookieConsent.js";
 import styles from "./CookieBanner.module.css";
 
 export default function CookieBanner() {
   const { language } = useI18n();
-  const subscribeToConsent = (callback) => {
-    if (typeof window === "undefined") return () => {};
-    window.addEventListener("cookieConsentUpdated", callback);
-    return () => window.removeEventListener("cookieConsentUpdated", callback);
-  };
-
-  const getClientConsent = () => readStoredConsent();
   const getServerConsent = () => ({ exists: true, state: { ...DEFAULT_CONSENT_STATE } });
 
-  const consent = useSyncExternalStore(subscribeToConsent, getClientConsent, getServerConsent);
+  const consent = useSyncExternalStore(subscribeConsent, getConsentSnapshot, getServerConsent);
 
   const [showSettings, setShowSettings] = useState(false);
   const [draft, setDraft] = useState(null);
