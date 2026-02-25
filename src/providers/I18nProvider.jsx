@@ -79,6 +79,11 @@ export function I18nProvider({ children }) {
       enqueue(() => setCurrencyState(normalized));
     }
 
+    console.log("[I18n] savedLanguage", savedLanguage);
+    console.log("[I18n] savedCurrency", savedCurrency);
+    console.log("[I18n] hasSavedLanguage", hasSavedLanguage);
+    console.log("[I18n] hasSavedCurrency", hasSavedCurrency);
+
     const detectLanguageFromCountry = () => {
       const countryCode = String(Cookies.get("siteCountry") ?? "").trim().toUpperCase();
       if (!countryCode) return;
