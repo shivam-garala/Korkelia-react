@@ -3,7 +3,8 @@ import { isProtectedPath } from "./src/routes/routes";
 
 const LANGUAGE_COOKIE = "siteLang";
 const COUNTRY_COOKIE = "siteCountry";
-const DEFAULT_LANGUAGE = "fi";
+// Default to English unless the country is explicitly Finnish.
+const DEFAULT_LANGUAGE = "en";
 const FINNISH_COUNTRY_CODES = new Set(["FI"]);
 const SUPPORTED_LANGUAGES = new Set(["en", "fi"]);
 const REDIRECT_HOME_PATHS = new Set([
@@ -78,11 +79,37 @@ export function middleware(request) {
   const queryLanguage = normalizeLanguage(request.nextUrl.searchParams.get("lang"));
   const existingLanguage = normalizeLanguage(request.cookies.get(LANGUAGE_COOKIE)?.value);
   const countryCode = resolveCountryCode(request);
-  const resolvedLanguage = queryLanguage || existingLanguage || resolveDefaultLanguage(request);
+  const countryIsFinnish = countryCode && FINNISH_COUNTRY_CODES.has(countryCode.toUpperCase());
+  const fallbackLanguage = resolveDefaultLanguage(request);
+
+  let resolvedLanguage = fallbackLanguage;
+  if (queryLanguage) {
+    resolvedLanguage = queryLanguage;
+  } else if (existingLanguage) {
+    // If an old cookie forced Finnish but the country isn't Finnish, switch to fallback.
+    resolvedLanguage =
+      existingLanguage === "fi" && !countryIsFinnish ? fallbackLanguage : existingLanguage;
+  }
   const shouldSetLanguage = !existingLanguage || existingLanguage !== resolvedLanguage;
   const existingCountry = request.cookies.get(COUNTRY_COOKIE)?.value;
   const shouldSetCountry = countryCode && countryCode !== existingCountry;
   const normalizedPathname = normalizePathname(pathname);
+  console.log("[middleware] country detection", {
+    ip: request.ip ?? request.headers.get("x-real-ip") ?? null,
+    forwardedFor: request.headers.get("x-forwarded-for") ?? null,
+    geoCountry: request.geo?.country ?? null,
+    headerCountries: {
+      vercel: request.headers.get("x-vercel-ip-country") ?? null,
+      cf: request.headers.get("cf-ipcountry") ?? null,
+      xCountryCode: request.headers.get("x-country-code") ?? null,
+    },
+    countryCode,
+    existingCountry,
+    resolvedLanguage,
+    fallbackLanguage,
+    queryLanguage,
+    path: pathname,
+  });
   let response;
 
   if (normalizedPathname === "/collections/kihlasormus-naiselle-taydellinen-sormus") {

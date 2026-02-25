@@ -45,7 +45,7 @@ const I18nContext = createContext(null);
 
 const normalizeCurrency = (value) => {
   const normalized = String(value ?? "").toLowerCase();
-  if (normalized === "usd" || normalized === "sgd" || normalized === "dollar") return "usd";
+  if (normalized === "usd" || normalized === "sgd" || normalized === "singapore dollar") return "usd";
   return "eur";
 };
 
@@ -55,44 +55,29 @@ export function I18nProvider({ children }) {
   // Start with default language to match server-side render
   const [language, setLanguageState] = useState(DEFAULT_LANGUAGE);
   const [currency, setCurrencyState] = useState(DEFAULT_CURRENCY);
-  console.log(language, currency);
+  console.log("[I18n] initial state", { language, currency });
 
   // After hydration, read the cookie and update language if present
   useEffect(() => {
     if (typeof window === "undefined") return;
     let cancelled = false;
-    console.log("useEffect");
-
-    // Always try to read the saved language preference (reading preferences is allowed)
-    const savedLanguage = Cookies.get(COOKIE_NAME);
-    console.log(savedLanguage);
-    console.log(savedLanguage in dictionaries);
-    console.log(dictionaries);
-    
-    if (savedLanguage && savedLanguage in dictionaries) {
-      console.log("if");      // Defer state update to avoid synchronous setState inside effect body.
+    const enqueue = (fn) =>
       Promise.resolve().then(() => {
-        if (!cancelled) {
-          setLanguageState(savedLanguage);
-          const savedCurrency = Cookies.get(CURRENCY_COOKIE);
-          if (savedCurrency) {
-            setCurrencyState(normalizeCurrency(savedCurrency));
-          } else {
-            const nextCurrency = DEFAULT_CURRENCY;
-            setCurrencyState(nextCurrency);
-            Cookies.set(CURRENCY_COOKIE, nextCurrency, {
-              sameSite: "lax",
-              path: "/",
-              expires: 365,
-            });
-          }
-        }
+        if (!cancelled) fn();
       });
-      return () => {
-        cancelled = true;
-      };
+
+    const savedLanguage = Cookies.get(COOKIE_NAME);
+    const savedCurrency = Cookies.get(CURRENCY_COOKIE);
+    const hasSavedLanguage = Boolean(savedLanguage && savedLanguage in dictionaries);
+    const hasSavedCurrency = Boolean(savedCurrency);
+
+    if (hasSavedLanguage) {
+      enqueue(() => setLanguageState(savedLanguage));
     }
-    console.log("useEffect after");
+    if (hasSavedCurrency) {
+      const normalized = normalizeCurrency(savedCurrency);
+      enqueue(() => setCurrencyState(normalized));
+    }
 
     const detectLanguageFromCountry = () => {
       const countryCode = String(Cookies.get("siteCountry") ?? "").trim().toUpperCase();
@@ -122,11 +107,21 @@ export function I18nProvider({ children }) {
         path: "/",
         expires: 365,
       });
-      setCurrencyState(normalizedCurrency);
-      setLanguageState(normalizedLanguage);
+      enqueue(() => {
+        setCurrencyState(normalizedCurrency);
+        setLanguageState(normalizedLanguage);
+      });
+      console.log("[I18n] detectCountry", {
+        countryCode,
+        normalizedLanguage,
+        normalizedCurrency,
+      });
     };
 
-    detectLanguageFromCountry();
+    // Run detection when currency is missing (e.g., first visit with only middleware-set language)
+    if (!hasSavedCurrency) {
+      detectLanguageFromCountry();
+    }
 
     return () => {
       cancelled = true;
@@ -138,12 +133,14 @@ export function I18nProvider({ children }) {
     // Always save the language preference (it's a user preference, not tracking)
     Cookies.set(COOKIE_NAME, normalized, { sameSite: "lax", path: "/", expires: 365 });
     setLanguageState(normalized);
+    console.log("[I18n] setLanguage", { nextLanguage: normalized });
   }, []);
 
   const setCurrency = useCallback((nextCurrency) => {
     const normalized = normalizeCurrency(nextCurrency);
     Cookies.set(CURRENCY_COOKIE, normalized, { sameSite: "lax", path: "/", expires: 365 });
     setCurrencyState(normalized);
+    console.log("[I18n] setCurrency", { nextCurrency: normalized });
   }, []);
 
   const dictionary = dictionaries[language] ?? dictionaries[DEFAULT_LANGUAGE];

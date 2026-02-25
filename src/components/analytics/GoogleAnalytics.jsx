@@ -11,8 +11,9 @@ const CONSENT_COOKIE = "cookieConsent";
 const hasAnalyticsConsent = () => {
   try {
     const data = JSON.parse(Cookies.get(CONSENT_COOKIE) || "{}");
+    // Only enable analytics when the user has explicitly allowed analytics (or accepted all).
     if (data.choice === "accepted") return true;
-    return Boolean(data.analytics || data.marketing);
+    return Boolean(data.analytics);
   } catch {
     return false;
   }
