@@ -12,12 +12,21 @@ import {
   subscribeConsent,
 } from "../../lib/cookieConsent.js";
 import styles from "./CookieBanner.module.css";
+import { useEffect } from "react";
+
+// Keep the server snapshot stable to prevent useSyncExternalStore from looping
+// when React re-renders on the server.
+const SERVER_CONSENT_SNAPSHOT = { exists: false, state: { ...DEFAULT_CONSENT_STATE } };
+const getServerConsent = () => SERVER_CONSENT_SNAPSHOT;
 
 export default function CookieBanner() {
   const { language } = useI18n();
-  const getServerConsent = () => ({ exists: true, state: { ...DEFAULT_CONSENT_STATE } });
 
   const consent = useSyncExternalStore(subscribeConsent, getConsentSnapshot, getServerConsent);
+  const [ready, setReady] = useState(false);
+  useEffect(() => {
+    setReady(true);
+  }, []);
 
   const [showSettings, setShowSettings] = useState(false);
   const [draft, setDraft] = useState(null);
@@ -87,7 +96,8 @@ export default function CookieBanner() {
     setShowSettings(false);
   };
 
-  if (consent.exists) return null;
+  // Wait for first client render to decide; avoids SSR flash when consent already stored.
+  if (!ready || consent.exists) return null;
 
   return (
     <div className={styles.banner} role="dialog" aria-live="polite" aria-modal="true">

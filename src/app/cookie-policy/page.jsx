@@ -1,18 +1,23 @@
 "use client";
 
-import { useState } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import Container from "../../components/ui/Container.jsx";
 import SiteFooter from "../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../components/Home/SiteHeader.jsx";
 import {
   DEFAULT_CONSENT_STATE,
   applyConsent,
+  getConsentSnapshot,
   makeAcceptAllPayload,
   makePayload,
   makeRejectPayload,
-  readStoredConsent,
+  subscribeConsent,
 } from "../../lib/cookieConsent.js";
 import styles from "./page.module.css";
+
+// Stable server snapshot fallback for useSyncExternalStore
+const SERVER_CONSENT_SNAPSHOT = { exists: false, state: { ...DEFAULT_CONSENT_STATE } };
+const getServerConsent = () => SERVER_CONSENT_SNAPSHOT;
 
 const cookieInventory = [
   {
@@ -56,10 +61,13 @@ const renderList = (items) => (
 );
 
 export default function CookiePolicyPage() {
-  const [cookiePreferences, setCookiePreferences] = useState(() =>
-    typeof window === "undefined" ? { ...DEFAULT_CONSENT_STATE } : readStoredConsent().state
-  );
+  const consent = useSyncExternalStore(subscribeConsent, getConsentSnapshot, getServerConsent);
+  const [cookiePreferences, setCookiePreferences] = useState(consent.state);
   const [statusMessage, setStatusMessage] = useState("");
+
+  useEffect(() => {
+    setCookiePreferences(consent.state);
+  }, [consent.state]);
 
   const syncSave = (payload) => {
     const state = applyConsent(payload);
