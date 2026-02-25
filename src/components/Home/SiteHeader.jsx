@@ -54,7 +54,7 @@ export default function SiteHeader() {
             },
             {
               value: "usd",
-              label: "Dollar",
+              label: "Singapore Dollar",
               icon: "/icons/dollar.png",
               iconAlt: "Dollar symbol",
             },
