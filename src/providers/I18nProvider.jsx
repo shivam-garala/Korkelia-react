@@ -57,6 +57,8 @@ export function I18nProvider({ children }) {
   const [currency, setCurrencyState] = useState(DEFAULT_CURRENCY);
   console.log("[I18n] initial state", { language, currency });
 
+  const [preferenceConsent, setPreferenceConsent] = useState(() => hasPreferenceConsent());
+
   // After hydration, read the cookie and update language if present
   useEffect(() => {
     if (typeof window === "undefined") return;
@@ -128,23 +130,41 @@ export function I18nProvider({ children }) {
       detectLanguageFromCountry();
     }
 
+    const handleConsentUpdated = () => {
+      const nextHasPreference = hasPreferenceConsent();
+      setPreferenceConsent(nextHasPreference);
+      if (!nextHasPreference) {
+        // When preference consent is withdrawn, reset to defaults so UI no longer
+        // relies on preference cookies that have been cleared.
+        setLanguageState(DEFAULT_LANGUAGE);
+        setCurrencyState(DEFAULT_CURRENCY);
+      }
+    };
+
+    window.addEventListener("cookieConsentUpdated", handleConsentUpdated);
+
     return () => {
       cancelled = true;
+      window.removeEventListener("cookieConsentUpdated", handleConsentUpdated);
     };
   }, []);
 
   const setLanguage = useCallback((nextLanguage) => {
     const normalized = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
-    // Always save the language preference (it's a user preference, not tracking)
-    Cookies.set(COOKIE_NAME, normalized, { sameSite: "lax", path: "/", expires: 365 });
     setLanguageState(normalized);
+    // Only persist the language if preference consent is granted.
+    if (hasPreferenceConsent()) {
+      Cookies.set(COOKIE_NAME, normalized, { sameSite: "lax", path: "/", expires: 365 });
+    }
     console.log("[I18n] setLanguage", { nextLanguage: normalized });
   }, []);
 
   const setCurrency = useCallback((nextCurrency) => {
     const normalized = normalizeCurrency(nextCurrency);
-    Cookies.set(CURRENCY_COOKIE, normalized, { sameSite: "lax", path: "/", expires: 365 });
     setCurrencyState(normalized);
+    if (hasPreferenceConsent()) {
+      Cookies.set(CURRENCY_COOKIE, normalized, { sameSite: "lax", path: "/", expires: 365 });
+    }
     console.log("[I18n] setCurrency", { nextCurrency: normalized });
   }, []);
 

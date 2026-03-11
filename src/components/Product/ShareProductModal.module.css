@@ -59,8 +59,12 @@
   background: #25d366;
 }
 
-.twitter {
-  background: #1d9bf0;
+.instagram {
+  background: radial-gradient(circle at 30% 30%, #feda77 0, #f58529 25%, #dd2a7b 50%, #8134af 75%, #515bd4 100%);
+}
+
+.threads {
+  background: #000000;
 }
 
 .copyRow {

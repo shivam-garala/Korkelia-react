@@ -73,6 +73,9 @@ export default function CookiePolicyPage() {
     const state = applyConsent(payload);
     setCookiePreferences(state);
     setStatusMessage("Cookie preferences updated.");
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
   };
 
   const handleAcceptAll = () => syncSave(makeAcceptAllPayload());
