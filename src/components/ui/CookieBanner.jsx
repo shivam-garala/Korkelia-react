@@ -1,6 +1,6 @@
 "use client";
 
-import { useState, useSyncExternalStore } from "react";
+import { useEffect, useState, useSyncExternalStore } from "react";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import {
   applyConsent,
@@ -12,7 +12,6 @@ import {
   subscribeConsent,
 } from "../../lib/cookieConsent.js";
 import styles from "./CookieBanner.module.css";
-import { useEffect } from "react";
 
 // Keep the server snapshot stable to prevent useSyncExternalStore from looping
 // when React re-renders on the server.
@@ -27,6 +26,16 @@ export default function CookieBanner() {
   useEffect(() => {
     setReady(true);
   }, []);
+
+  // Lock page scrolling while the cookie banner is shown
+  useEffect(() => {
+    if (!ready || consent.exists) return;
+    const originalOverflow = document.body.style.overflow;
+    document.body.style.overflow = "hidden";
+    return () => {
+      document.body.style.overflow = originalOverflow;
+    };
+  }, [ready, consent.exists]);
 
   const [showSettings, setShowSettings] = useState(false);
   const [draft, setDraft] = useState(null);
@@ -94,13 +103,17 @@ export default function CookieBanner() {
     applyConsent(payload);
     setDraft(null);
     setShowSettings(false);
+    if (typeof window !== "undefined") {
+      window.location.reload();
+    }
   };
 
   // Wait for first client render to decide; avoids SSR flash when consent already stored.
   if (!ready || consent.exists) return null;
 
   return (
-    <div className={styles.banner} role="dialog" aria-live="polite" aria-modal="true">
+    <div className={styles.overlay} role="dialog" aria-live="polite" aria-modal="true">
+      <div className={styles.banner}>
       <div className={styles.content}>
         <div className={styles.title}>{labels.title}</div>
         <p className={styles.message}>
@@ -244,6 +257,7 @@ export default function CookieBanner() {
             </button>
           </>
         )}
+      </div>
       </div>
     </div>
   );
