@@ -2,16 +2,40 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Dropdown from "./Dropdown";
 import NavMenuOverlay from "./NavMenuOverlay";
 import styles from "./SiteHeader.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import ShareProductModal from "../Product/ShareProductModal.jsx";
+import axiosClient from "../../lib/axiosClient.js";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { language, setLanguage, currency, setCurrency, t } = useI18n();
+  const [isSgdVisible, setIsSgdVisible] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    axiosClient
+      .get("/api/currencyRate/public-visible")
+      .then(({ data }) => {
+        const list = Array.isArray(data?.data) ? data.data : [];
+        const hasSgd = list.some(
+          (item) => String(item.currency_code || "").toUpperCase() === "SGD"
+        );
+        if (!cancelled) {
+          setIsSgdVisible(hasSgd);
+        }
+      })
+      .catch(() => {
+        // On error, keep default visibility (true) so UI still works
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
   const languageLabels =
     language === "fi"
       ? { en: "Englanti", fi: "Suomi" }
@@ -52,12 +76,16 @@ export default function SiteHeader() {
               icon: "/icons/euro.png",
               iconAlt: "Euro symbol",
             },
-            {
-              value: "usd",
-              label: "Singapore Dollar",
-              icon: "/icons/dollar.png",
-              iconAlt: "Dollar symbol",
-            },
+            ...(isSgdVisible
+              ? [
+                  {
+                    value: "usd",
+                    label: "Singapore Dollar",
+                    icon: "/icons/dollar.png",
+                    iconAlt: "Dollar symbol",
+                  },
+                ]
+              : []),
           ]}
           triggerClassName={styles.currencyTrigger}
         />
