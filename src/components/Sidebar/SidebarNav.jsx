@@ -22,6 +22,12 @@ export const sidebarSections = [
     ],
   },
   {
+    title: "Currency Management",
+    items: [
+      { label: "Currency Rate", href: "/dashboard/currency-rate", icon: "chart" },
+    ],
+  },
+  {
     title: "Diamond Management",
     items: [
       { label: "Diamond Type", href: "/dashboard/diamond-type", icon: "grid" },

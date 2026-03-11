@@ -26,6 +26,7 @@ export const protectedRoutes = [
   { id: "DR18", name: "diamond-rate", path: "/dashboard/diamond-rate", access: "protected" },
   { id: "DR19", name: "design-variant", path: "/dashboard/design-variant", access: "protected" },
   { id: "DR20", name: "gold-color", path: "/dashboard/gold-color", access: "protected" },
+  { id: "DR21", name: "currency-rate", path: "/dashboard/currency-rate", access: "protected" },
 ];
 
 export const allRoutes = [...publicRoutes, ...protectedRoutes];
