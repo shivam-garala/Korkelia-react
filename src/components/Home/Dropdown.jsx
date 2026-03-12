@@ -67,7 +67,7 @@ export default function Dropdown({
         aria-haspopup="listbox"
         aria-expanded={open}
         aria-controls={open && mounted ? menuId : undefined}
-        onClick={() => setOpen((prev) => !prev)}
+        onClick={() => options.length > 1 && setOpen((prev) => !prev)}
       >
         {iconSrc ? (
           <Image
@@ -80,14 +80,16 @@ export default function Dropdown({
           />
         ) : null}
         <span className={styles.label}>{active?.label}</span>
-        <Image
-          className={styles.caret}
-          src="/icons/down_Arrow.png"
-          alt=""
-          width={14}
-          height={9}
-          unoptimized
-        />
+        {options.length > 1 ? (
+          <Image
+            className={styles.caret}
+            src="/icons/down_Arrow.png"
+            alt=""
+            width={14}
+            height={9}
+            unoptimized
+          />
+        ) : null}
       </button>
 
       {open ? (
