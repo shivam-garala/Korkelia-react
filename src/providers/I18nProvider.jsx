@@ -2,6 +2,7 @@
 
 import Cookies from "js-cookie";
 import { createContext, useCallback, useContext, useEffect, useMemo, useState } from "react";
+import axiosClient from "../lib/axiosClient.js";
 import en from "../i18n/en.json";
 import fi from "../i18n/fi.json";
 
@@ -148,6 +149,37 @@ export function I18nProvider({ children }) {
       window.removeEventListener("cookieConsentUpdated", handleConsentUpdated);
     };
   }, []);
+
+  // Check if selected currency is still visible on website; fall back to EUR if not
+  useEffect(() => {
+    if (typeof window === "undefined") return;
+    if (currency === DEFAULT_CURRENCY) return;
+
+    let cancelled = false;
+    axiosClient
+      .get("/api/currencyRate/public-visible")
+      .then(({ data }) => {
+        if (cancelled) return;
+        const list = Array.isArray(data?.data) ? data.data : [];
+        const selectedCode = currency === "usd" ? "SGD" : currency.toUpperCase();
+        const isVisible = list.some(
+          (item) => String(item.currency_code || "").toUpperCase() === selectedCode
+        );
+        if (!isVisible) {
+          setCurrencyState(DEFAULT_CURRENCY);
+          if (hasPreferenceConsent()) {
+            Cookies.set(CURRENCY_COOKIE, DEFAULT_CURRENCY, {
+              sameSite: "lax",
+              path: "/",
+              expires: 365,
+            });
+          }
+        }
+      })
+      .catch(() => {});
+
+    return () => { cancelled = true; };
+  }, [currency]);
 
   const setLanguage = useCallback((nextLanguage) => {
     const normalized = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
