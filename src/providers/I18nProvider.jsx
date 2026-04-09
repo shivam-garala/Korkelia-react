@@ -87,8 +87,11 @@ export function I18nProvider({ children }) {
 
     // ✅ MOVED OUTSIDE - now accessible to handleConsentUpdated
     const detectLanguageFromCountry = () => {
+     
+      console.log("[I18n] 🔍 detectLanguageFromCountry called");
+  console.log("[I18n] hasPreferenceConsent at detection time:", hasPreferenceConsent());
       let siteCountryCookie = Cookies.get("siteCountry");
-
+console.log("[I18n] siteCountry from cookie:", siteCountryCookie);
       if (!siteCountryCookie) {
         const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
         console.log("[I18n] 📍 Browser timezone:", timezone);
@@ -154,14 +157,19 @@ export function I18nProvider({ children }) {
 
     const handleConsentUpdated = () => {
       const nextHasPreference = hasPreferenceConsent();
+      console.log("[I18n] 🔔 Consent Updated Event Fired");
+  console.log("[I18n] hasPreferenceConsent:", nextHasPreference);
+  console.log("[I18n] All cookies:", document.cookie);
       setPreferenceConsent(nextHasPreference);
       
       if (!nextHasPreference) {
+          console.log("[I18n] ❌ Consent withdrawn - resetting to defaults");
         setLanguageState(DEFAULT_LANGUAGE);
         setCurrencyState(DEFAULT_CURRENCY);
       } 
       //this change on 09/04/2026 else added
       else {
+        console.log("[I18n] ✅ Consent accepted - re-detecting language/currency");
         // ✅ Re-detect when consent IS ACCEPTED
         detectLanguageFromCountry();
       }
