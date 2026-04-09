@@ -87,8 +87,18 @@ export function middleware(request) {
     resolvedLanguage = queryLanguage;
   } else if (existingLanguage) {
     // If an old cookie forced Finnish but the country isn't Finnish, switch to fallback.
-    resolvedLanguage =
-      existingLanguage === "fi" && !countryIsFinnish ? fallbackLanguage : existingLanguage;
+    // comment on 09/4/2026 start
+    // resolvedLanguage =
+    //   existingLanguage === "fi" && !countryIsFinnish ? fallbackLanguage : existingLanguage;
+    // comment on 09/4/2026 end
+
+   // this code add on 09/4/2026 start
+    if (existingLanguage === "fi" && countryCode && !countryIsFinnish) {
+    resolvedLanguage = fallbackLanguage;
+  } else {
+    resolvedLanguage = existingLanguage;
+  }
+    //this code add on 09/4/2026 end
   }
   const shouldSetLanguage = !existingLanguage || existingLanguage !== resolvedLanguage;
   const existingCountry = request.cookies.get(COUNTRY_COOKIE)?.value;
