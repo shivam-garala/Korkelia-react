@@ -106,7 +106,8 @@ console.log("[I18n] siteCountry from cookie:", siteCountryCookie);
          }
         if (siteCountryCookie) {
           Cookies.set("siteCountry", siteCountryCookie, {
-            sameSite: "lax",
+             sameSite: "none",  // ✅ Change from "lax" to "none" for HTTPS
+            secure: true, 
             path: "/",
             expires: 365,
           });
@@ -132,7 +133,8 @@ console.log("[I18n] siteCountry from cookie:", siteCountryCookie);
       const normalizedLanguage = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
       if (hasPreferenceConsent()) {
         Cookies.set(COOKIE_NAME, normalizedLanguage, {
-          sameSite: "lax",
+          sameSite: "none",  // ✅ Change from "lax" to "none" for HTTPS
+          secure: true, 
           path: "/",
           expires: 365,
         });
@@ -140,7 +142,8 @@ console.log("[I18n] siteCountry from cookie:", siteCountryCookie);
       
       const normalizedCurrency = normalizeCurrency(nextCurrency);
       Cookies.set(CURRENCY_COOKIE, normalizedCurrency, {
-        sameSite: "lax",
+        sameSite: "none",  // ✅ Change from "lax" to "none" for HTTPS
+        secure: true, 
         path: "/",
         expires: 365,
       });
@@ -202,7 +205,8 @@ console.log("[I18n] siteCountry from cookie:", siteCountryCookie);
           setCurrencyState(DEFAULT_CURRENCY);
           if (hasPreferenceConsent()) {
             Cookies.set(CURRENCY_COOKIE, DEFAULT_CURRENCY, {
-              sameSite: "lax",
+              sameSite: "none",  // ✅ Change from "lax" to "none" for HTTPS
+              secure: true, 
               path: "/",
               expires: 365,
             });
@@ -219,7 +223,7 @@ console.log("[I18n] siteCountry from cookie:", siteCountryCookie);
     setLanguageState(normalized);
     // Only persist the language if preference consent is granted.
     if (hasPreferenceConsent()) {
-      Cookies.set(COOKIE_NAME, normalized, { sameSite: "lax", path: "/", expires: 365 });
+      Cookies.set(COOKIE_NAME, normalized, { sameSite: "none", secure: true, path: "/", expires: 365 });
     }
     console.log("[I18n] setLanguage", { nextLanguage: normalized });
   }, []);
@@ -228,7 +232,7 @@ console.log("[I18n] siteCountry from cookie:", siteCountryCookie);
     const normalized = normalizeCurrency(nextCurrency);
     setCurrencyState(normalized);
     if (hasPreferenceConsent()) {
-      Cookies.set(CURRENCY_COOKIE, normalized, { sameSite: "lax", path: "/", expires: 365 });
+      Cookies.set(CURRENCY_COOKIE, normalized, { sameSite: "none", secure: true, path: "/", expires: 365 });
     }
     console.log("[I18n] setCurrency", { nextCurrency: normalized });
   }, []);
