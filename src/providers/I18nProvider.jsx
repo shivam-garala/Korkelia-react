@@ -89,8 +89,15 @@ export function I18nProvider({ children }) {
 
     const detectLanguageFromCountry = () => {
       const countryCode = String(Cookies.get("siteCountry") ?? "").trim().toUpperCase();
-      if (!countryCode) return;
-      let nextLanguage = "en";
+     // if (!countryCode) return;
+     //date:09/04/2026 94 to 98 are added to provide more insights in case of missing country code, as this is crucial for language and currency detection on first visit.
+       if (!countryCode) {
+    console.log("[I18n] No country detected from siteCountry cookie");
+    return;
+  }
+     console.log("🌍 [I18n] User detected from:", countryCode);  // Show country right away
+    
+     let nextLanguage = "en";
       let nextCurrency = "eur";
 
       if (countryCode === "FI") {
@@ -103,12 +110,14 @@ export function I18nProvider({ children }) {
 
       if (cancelled) return;
       const normalizedLanguage = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
-
+     //this if(hasPreferenceConsent()) added on 09/04/2026.
+      if (hasPreferenceConsent()) {
       Cookies.set(COOKIE_NAME, normalizedLanguage, {
         sameSite: "lax",
         path: "/",
         expires: 365,
       });
+    }
       const normalizedCurrency = normalizeCurrency(nextCurrency);
       Cookies.set(CURRENCY_COOKIE, normalizedCurrency, {
         sameSite: "lax",
