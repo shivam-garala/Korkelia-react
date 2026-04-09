@@ -84,52 +84,36 @@ export function I18nProvider({ children }) {
 
     console.log("[I18n] savedLanguage", savedLanguage);
     console.log("[I18n] savedCurrency", savedCurrency);
-    console.log("[I18n] hasSavedLanguage", hasSavedLanguage);
-    console.log("[I18n] hasSavedCurrency", hasSavedCurrency);
 
+    // ✅ MOVED OUTSIDE - now accessible to handleConsentUpdated
     const detectLanguageFromCountry = () => {
-     //this change 09/04/2026
-     
-     const allCookies = document.cookie
-    .split("; ")
-    .reduce((acc, cookie) => {
-      const [key, value] = cookie.split("=");
-      acc[key] = value;
-      return acc;
-    }, {});
+      let siteCountryCookie = Cookies.get("siteCountry");
 
-  console.log("[I18n] 🍪 All Cookies Available:", allCookies);
-  
-  const siteCountryCookie = Cookies.get("siteCountry");
-  const countryCode1 = String(siteCountryCookie ?? "").trim().toUpperCase();
-  
-  console.log("[I18n] siteCountry cookie value:", siteCountryCookie);
-  console.log("[I18n] Normalized countryCode:", countryCode1);
-  
-  if (!countryCode1) {
-    console.log("[I18n] ⚠️ No country detected from siteCountry cookie");
-    console.log("[I18n] This may happen if:");
-    console.log("  1. Geolocation/IP detection failed in middleware");
-    console.log("  2. Middleware didn't run (check deployment)");
-    console.log("  3. Cookie is set but stripped by browser");
-    return;
-  }
-  
-  console.log("🌍 [I18n] User detected from:", countryCode1);
-     
-     
-     //this chage end 09/04/2026
-     
+      if (!siteCountryCookie) {
+        const timezone = Intl.DateTimeFormat().resolvedOptions().timeZone;
+        console.log("[I18n] 📍 Browser timezone:", timezone);
+        
+        if (timezone.includes("Helsinki") || timezone === "Europe/Helsinki" || timezone === "Europe/Kiev"  || timezone === "Europe/Kyiv") {
+          siteCountryCookie = "FI";
+        } else if (timezone === "Asia/Singapore" || timezone === "Asia/Kuala_Lumpur") {
+          siteCountryCookie = "SG";
+        }
+          if (!siteCountryCookie) {
+              siteCountryCookie = "EN";
+         }
+        if (siteCountryCookie) {
+          Cookies.set("siteCountry", siteCountryCookie, {
+            sameSite: "lax",
+            path: "/",
+            expires: 365,
+          });
+        }
+      }
+
       const countryCode = String(Cookies.get("siteCountry") ?? "").trim().toUpperCase();
-     // if (!countryCode) return;
-     //date:09/04/2026 94 to 98 are added to provide more insights in case of missing country code, as this is crucial for language and currency detection on first visit.
-       if (!countryCode) {
-    console.log("[I18n] No country detected from siteCountry cookie");
-    return;
-  }
-     console.log("🌍 [I18n] User detected from:", countryCode);  // Show country right away
-    
-     let nextLanguage = "en";
+      if (!countryCode) return;
+
+      let nextLanguage = "en";
       let nextCurrency = "eur";
 
       if (countryCode === "FI") {
@@ -141,33 +125,29 @@ export function I18nProvider({ children }) {
       }
 
       if (cancelled) return;
+      
       const normalizedLanguage = nextLanguage in dictionaries ? nextLanguage : DEFAULT_LANGUAGE;
-     //this if(hasPreferenceConsent()) added on 09/04/2026.
       if (hasPreferenceConsent()) {
-      Cookies.set(COOKIE_NAME, normalizedLanguage, {
-        sameSite: "lax",
-        path: "/",
-        expires: 365,
-      });
-    }
+        Cookies.set(COOKIE_NAME, normalizedLanguage, {
+          sameSite: "lax",
+          path: "/",
+          expires: 365,
+        });
+      }
+      
       const normalizedCurrency = normalizeCurrency(nextCurrency);
       Cookies.set(CURRENCY_COOKIE, normalizedCurrency, {
         sameSite: "lax",
         path: "/",
         expires: 365,
       });
+      
       enqueue(() => {
         setCurrencyState(normalizedCurrency);
         setLanguageState(normalizedLanguage);
       });
-      console.log("[I18n] detectCountry", {
-        countryCode,
-        normalizedLanguage,
-        normalizedCurrency,
-      });
     };
 
-    // Run detection when currency is missing (e.g., first visit with only middleware-set language)
     if (!hasSavedCurrency) {
       detectLanguageFromCountry();
     }
@@ -175,11 +155,15 @@ export function I18nProvider({ children }) {
     const handleConsentUpdated = () => {
       const nextHasPreference = hasPreferenceConsent();
       setPreferenceConsent(nextHasPreference);
+      
       if (!nextHasPreference) {
-        // When preference consent is withdrawn, reset to defaults so UI no longer
-        // relies on preference cookies that have been cleared.
         setLanguageState(DEFAULT_LANGUAGE);
         setCurrencyState(DEFAULT_CURRENCY);
+      } 
+      //this change on 09/04/2026 else added
+      else {
+        // ✅ Re-detect when consent IS ACCEPTED
+        detectLanguageFromCountry();
       }
     };
 
