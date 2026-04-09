@@ -88,6 +88,38 @@ export function I18nProvider({ children }) {
     console.log("[I18n] hasSavedCurrency", hasSavedCurrency);
 
     const detectLanguageFromCountry = () => {
+     //this change 09/04/2026
+     
+     const allCookies = document.cookie
+    .split("; ")
+    .reduce((acc, cookie) => {
+      const [key, value] = cookie.split("=");
+      acc[key] = value;
+      return acc;
+    }, {});
+
+  console.log("[I18n] 🍪 All Cookies Available:", allCookies);
+  
+  const siteCountryCookie = Cookies.get("siteCountry");
+  const countryCode1 = String(siteCountryCookie ?? "").trim().toUpperCase();
+  
+  console.log("[I18n] siteCountry cookie value:", siteCountryCookie);
+  console.log("[I18n] Normalized countryCode:", countryCode1);
+  
+  if (!countryCode1) {
+    console.log("[I18n] ⚠️ No country detected from siteCountry cookie");
+    console.log("[I18n] This may happen if:");
+    console.log("  1. Geolocation/IP detection failed in middleware");
+    console.log("  2. Middleware didn't run (check deployment)");
+    console.log("  3. Cookie is set but stripped by browser");
+    return;
+  }
+  
+  console.log("🌍 [I18n] User detected from:", countryCode1);
+     
+     
+     //this chage end 09/04/2026
+     
       const countryCode = String(Cookies.get("siteCountry") ?? "").trim().toUpperCase();
      // if (!countryCode) return;
      //date:09/04/2026 94 to 98 are added to provide more insights in case of missing country code, as this is crucial for language and currency detection on first visit.
