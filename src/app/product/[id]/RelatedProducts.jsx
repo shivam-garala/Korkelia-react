@@ -268,7 +268,7 @@ const mapRelatedProduct = (item, fallbackProductId = "", languageId = "") => {
 };
 
 export default function RelatedProducts({ productId, designId, columns = 3 }) {
-  const { language } = useI18n();
+  const { language, currencyCode } = useI18n();
   const [currentProduct, setCurrentProduct] = useState(null);
   const [products, setProducts] = useState([]);
   const languageId = useMemo(() => (language === "fi" ? "2" : "1"), [language]);
@@ -349,6 +349,7 @@ export default function RelatedProducts({ productId, designId, columns = 3 }) {
         if (currentCategoryId) params.set("category_id", String(currentCategoryId));
         if (currentDesignId) params.set("design_id", String(currentDesignId));
         if (languageId) params.set("language_id", String(languageId));
+        if (currencyCode) params.set("currency", String(currencyCode));
         const { data } = await axiosClient.get(
           `/api/design/related-product-details-ecom?${params.toString()}`
         );
@@ -367,7 +368,7 @@ export default function RelatedProducts({ productId, designId, columns = 3 }) {
     return () => {
       active = false;
     };
-  }, [productId, currentCategoryId, currentDesignId, languageId]);
+  }, [productId, currentCategoryId, currentDesignId, languageId, currencyCode]);
 
   const getProductKey = (product) =>
     product.id ?? product.href ?? product.productId ?? product.name;

@@ -6,11 +6,11 @@ import styles from "./Button.module.css";
 
 export default function Button({
   children,
-  onClick,
+  onClick = undefined,
   type = "button",
   variant = "primary",
   size = "md",
-  icon,
+  icon = undefined,
   iconPosition = "left",
   iconOnly = false,
   debounceMs = 300,

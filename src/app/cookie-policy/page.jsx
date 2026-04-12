@@ -1,15 +1,23 @@
 "use client";
 
-import { useState } from "react";
-import Cookies from "js-cookie";
+import { useEffect, useState, useSyncExternalStore } from "react";
+import Container from "../../components/ui/Container.jsx";
 import SiteFooter from "../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../components/Home/SiteHeader.jsx";
-import Container from "../../components/ui/Container.jsx";
+import {
+  DEFAULT_CONSENT_STATE,
+  applyConsent,
+  getConsentSnapshot,
+  makeAcceptAllPayload,
+  makePayload,
+  makeRejectPayload,
+  subscribeConsent,
+} from "../../lib/cookieConsent.js";
 import styles from "./page.module.css";
 
-const COOKIE_KEY = "cookieConsent";
-const COOKIE_DAYS = 365;
-const OPTIONAL_COOKIES = ["siteLang"];
+// Stable server snapshot fallback for useSyncExternalStore
+const SERVER_CONSENT_SNAPSHOT = { exists: false, state: { ...DEFAULT_CONSENT_STATE } };
+const getServerConsent = () => SERVER_CONSENT_SNAPSHOT;
 
 const cookieInventory = [
   {
@@ -52,107 +60,35 @@ const renderList = (items) => (
   </ul>
 );
 
-const getInitialCookiePreferences = () => {
-  const raw = Cookies.get(COOKIE_KEY);
-  if (!raw) {
-    return {
-      preferences: false,
-      analytics: false,
-      marketing: false,
-    };
-  }
-  try {
-    const parsed = JSON.parse(raw);
-    if (parsed?.choice === "accepted") {
-      return {
-        preferences: true,
-        analytics: true,
-        marketing: true,
-      };
-    }
-    return {
-      preferences: Boolean(parsed?.preferences),
-      analytics: Boolean(parsed?.analytics),
-      marketing: Boolean(parsed?.marketing),
-    };
-  } catch (error) {
-    return {
-      preferences: false,
-      analytics: false,
-      marketing: false,
-    };
-  }
-};
-
 export default function CookiePolicyPage() {
-  const [cookiePreferences, setCookiePreferences] = useState(getInitialCookiePreferences);
+  const consent = useSyncExternalStore(subscribeConsent, getConsentSnapshot, getServerConsent);
+  const [cookiePreferences, setCookiePreferences] = useState(consent.state);
   const [statusMessage, setStatusMessage] = useState("");
 
-  const saveConsent = (payload, message) => {
-    Cookies.set(COOKIE_KEY, JSON.stringify(payload), {
-      expires: COOKIE_DAYS,
-      sameSite: "lax",
-      path: "/",
-    });
-    setStatusMessage(message);
-  };
+  useEffect(() => {
+    setCookiePreferences(consent.state);
+  }, [consent.state]);
 
-  const clearOptionalCookies = () => {
-    OPTIONAL_COOKIES.forEach((name) => Cookies.remove(name, { path: "/" }));
-  };
-
-  const handleAcceptAll = () => {
-    setCookiePreferences({
-      preferences: true,
-      analytics: true,
-      marketing: true,
-    });
-    saveConsent(
-      {
-        choice: "accepted",
-        necessary: true,
-        preferences: true,
-        analytics: true,
-        marketing: true,
-      },
-      "Cookie preferences updated."
-    );
-  };
-
-  const handleReject = () => {
-    setCookiePreferences({
-      preferences: false,
-      analytics: false,
-      marketing: false,
-    });
-    clearOptionalCookies();
-    saveConsent(
-      {
-        choice: "rejected",
-        necessary: true,
-        preferences: false,
-        analytics: false,
-        marketing: false,
-      },
-      "Cookie preferences updated."
-    );
-  };
-
-  const handleSave = () => {
-    if (!cookiePreferences.preferences) {
-      clearOptionalCookies();
+  const syncSave = (payload) => {
+    const state = applyConsent(payload);
+    setCookiePreferences(state);
+    setStatusMessage("Cookie preferences updated.");
+    if (typeof window !== "undefined") {
+      window.location.reload();
     }
-    saveConsent(
-      {
-        choice: "custom",
+  };
+
+  const handleAcceptAll = () => syncSave(makeAcceptAllPayload());
+  const handleReject = () => syncSave(makeRejectPayload());
+  const handleSave = () =>
+    syncSave(
+      makePayload({
         necessary: true,
         preferences: cookiePreferences.preferences,
         analytics: cookiePreferences.analytics,
         marketing: cookiePreferences.marketing,
-      },
-      "Cookie preferences updated."
+      })
     );
-  };
 
   return (
     <div className={styles.page}>
@@ -163,9 +99,9 @@ export default function CookiePolicyPage() {
           <div className={styles.header}>
             <h2 className={styles.heading}>Cookie Policy</h2>
             <p className={styles.intro}>
-              This Cookie Policy explains how Greenbridge Oy (brand: Korkeila Helsinki) (&quot;we&quot;, &quot;us&quot;) uses
-              cookies and similar technologies on our website, and how you can manage your choices. This
-              Cookie Policy should be read together with our{" "}
+              This Cookie Policy explains how Greenbridge Oy (brand: Korkeila Helsinki) (&quot;we&quot;, &quot;us&quot;)
+              uses cookies and similar technologies on our website, and how you can manage your choices.
+              This Cookie Policy should be read together with our{" "}
               <a className={styles.inlineLink} href="/privacy-policy">
                 Privacy Policy
               </a>
@@ -186,9 +122,7 @@ export default function CookiePolicyPage() {
                 "pixels/tags (small code snippets used to measure performance of campaigns), and",
                 "local storage (browser storage used for preferences or technical functions).",
               ])}
-              <p className={styles.paragraph}>
-                For simplicity, we refer to all of the above as &quot;cookies&quot;.
-              </p>
+              <p className={styles.paragraph}>For simplicity, we refer to all of the above as &quot;cookies&quot;.</p>
             </section>
 
             <section className={styles.section}>
@@ -284,9 +218,7 @@ export default function CookiePolicyPage() {
 
               <div className={styles.preferencesPanel} aria-live="polite">
                 <h4 className={styles.panelTitle}>Update cookie preferences</h4>
-                <p className={styles.panelNote}>
-                  Use the options below to update your cookie preferences at any time.
-                </p>
+                <p className={styles.panelNote}>Use the options below to update your cookie preferences at any time.</p>
                 <div className={styles.panelRow}>
                   <div className={styles.panelText}>
                     <div className={styles.panelLabel}>Strictly necessary</div>
@@ -356,26 +288,24 @@ export default function CookiePolicyPage() {
                     Save preferences
                   </button>
                 </div>
-                {statusMessage ? (
-                  <p className={styles.statusMessage}>{statusMessage}</p>
-                ) : null}
+                {statusMessage ? <p className={styles.statusMessage}>{statusMessage}</p> : null}
               </div>
             </section>
 
             <section className={styles.section}>
               <h3 className={styles.sectionTitle}>5. Do we use cookies that process personal data?</h3>
               <p className={styles.paragraph}>
-                Some cookies (especially analytics and marketing cookies) may involve processing of
-                personal data (such as online identifiers or IP addresses). Where this occurs, the
-                processing is described in our Privacy Policy.
+                Some cookies (especially analytics and marketing cookies) may involve processing of personal
+                data (such as online identifiers or IP addresses). Where this occurs, the processing is described
+                in our Privacy Policy.
               </p>
             </section>
 
             <section className={styles.section}>
               <h3 className={styles.sectionTitle}>6. Cookie list (cookies used on the website)</h3>
               <p className={styles.paragraph}>
-                We aim to keep a current list of cookies used on the website. Cookies may change depending
-                on website features and tools enabled.
+                We aim to keep a current list of cookies used on the website. Cookies may change depending on
+                website features and tools enabled.
               </p>
 
               <div className={styles.subsections}>
@@ -420,7 +350,8 @@ export default function CookiePolicyPage() {
               </div>
 
               <p className={styles.paragraph}>
-                Future changes: If we enable analytics/marketing tools (we will update this Cookie Policy and cookie inventory before activation. Non-essential cookies will be used only with your consent).
+                Future changes: If we enable analytics/marketing tools (we will update this Cookie Policy and
+                cookie inventory before activation. Non-essential cookies will be used only with your consent).
               </p>
             </section>
 
@@ -428,8 +359,8 @@ export default function CookiePolicyPage() {
               <h3 className={styles.sectionTitle}>7. Changes to this Cookie Policy</h3>
               <p className={styles.paragraph}>
                 We may update this Cookie Policy when we add or change cookies/tools (e.g., introduce
-                analytics/marketing services). The updated version will be posted on this page with a
-                revised &quot;Last updated&quot; date.
+                analytics/marketing services). The updated version will be posted on this page with a revised
+                &quot;Last updated&quot; date.
               </p>
             </section>
 

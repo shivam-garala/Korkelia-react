@@ -8,6 +8,7 @@ export const protectedRoutes = [
   { id: "AR1", name: "admin", path: "/admin", access: "protected" },
   { id: "DR1", name: "dashboard", path: "/dashboard", access: "protected" },
   { id: "DR2", name: "dashboard-orders", path: "/dashboard/orders", access: "protected" },
+  { id: "DR3", name: "dashboard-appointment", path: "/dashboard/appointment", access: "protected" },
   { id: "DR4", name: "metal-rate", path: "/dashboard/gold-rate", access: "protected" },
   { id: "DR5", name: "karat-master", path: "/dashboard/karat-master", access: "protected" },
   { id: "DR6", name: "metal-master", path: "/dashboard/metal-master", access: "protected" },
@@ -25,6 +26,7 @@ export const protectedRoutes = [
   { id: "DR18", name: "diamond-rate", path: "/dashboard/diamond-rate", access: "protected" },
   { id: "DR19", name: "design-variant", path: "/dashboard/design-variant", access: "protected" },
   { id: "DR20", name: "gold-color", path: "/dashboard/gold-color", access: "protected" },
+  { id: "DR21", name: "currency-rate", path: "/dashboard/currency-rate", access: "protected" },
 ];
 
 export const allRoutes = [...publicRoutes, ...protectedRoutes];

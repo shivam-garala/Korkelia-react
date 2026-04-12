@@ -1,6 +1,7 @@
 import { cookies, headers } from "next/headers";
 import "./globals.css";
 import StoreProvider from "../providers/StoreProvider.jsx";
+import GoogleAnalytics from "../components/analytics/GoogleAnalytics.jsx";
 
 const siteName = "Korkeila Helsinki";
 const descriptions = {
@@ -87,7 +88,10 @@ export default async function RootLayout({ children }) {
         />
       </head>
       <body suppressHydrationWarning>
-        <StoreProvider>{children}</StoreProvider>
+        <StoreProvider>
+          <GoogleAnalytics />
+          {children}
+        </StoreProvider>
       </body>
     </html>
   );

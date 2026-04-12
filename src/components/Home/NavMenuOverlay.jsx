@@ -31,7 +31,7 @@ export default function NavMenuOverlay({ open, onClose }) {
   const [productsOpen, setProductsOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-  const { t, language, setLanguage } = useI18n();
+  const { t, language } = useI18n();
   const pathname = usePathname();
   const languageId = language === "fi" ? "2" : "1";
   const categoriesLoadedRef = useRef({});

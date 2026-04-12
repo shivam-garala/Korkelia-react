@@ -20,6 +20,7 @@ import { downloadUrl } from "../../../lib/download.js";
 import radioStyles from "../../../components/ui/RadioGroup.module.css";
 import { toast } from "react-toastify";
 import {
+  bulkDeleteDesignVariants,
   createDesignVariant,
   deleteDesignVariant,
   fetchCategoryDropdown,
@@ -225,6 +226,8 @@ export default function DesignVariantPage() {
   const [imageModalOpen, setImageModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [bulkDeleteTarget, setBulkDeleteTarget] = useState(false);
+  const [selectedIds, setSelectedIds] = useState([]);
 
   const [categoryId, setCategoryId] = useState("");
   const [productId, setProductId] = useState("");
@@ -281,6 +284,7 @@ export default function DesignVariantPage() {
     (searchValue = searchTerm) => {
       const normalized = String(searchValue ?? "").trim();
       setActiveSearch(normalized);
+      setSelectedIds([]);
       dispatch(
         fetchDesignVariants({
           page: 1,
@@ -1170,7 +1174,51 @@ export default function DesignVariantPage() {
     setDeleteTarget(null);
   };
 
+  const confirmBulkDelete = async () => {
+    if (!selectedIds.length) return;
+    const result = await dispatch(bulkDeleteDesignVariants(selectedIds));
+    if (!result?.error) {
+      toast.success(result?.payload?.data?.message ?? "Deleted successfully");
+    }
+    setSelectedIds([]);
+    setBulkDeleteTarget(false);
+    fetchFirstPage();
+  };
+
+  const toggleSelectAll = useCallback(() => {
+    setSelectedIds((prev) => {
+      const allIds = tableRows.map((row) => row.id);
+      if (prev.length === allIds.length) return [];
+      return allIds;
+    });
+  }, [tableRows]);
+
+  const toggleSelectRow = useCallback((id) => {
+    setSelectedIds((prev) =>
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+    );
+  }, []);
+
   const columns = [
+    {
+      key: "select",
+      header: (
+        <input
+          type="checkbox"
+          checked={tableRows.length > 0 && selectedIds.length === tableRows.length}
+          onChange={toggleSelectAll}
+        />
+      ),
+      filterable: false,
+      width: 40,
+      render: (row) => (
+        <input
+          type="checkbox"
+          checked={selectedIds.includes(row.id)}
+          onChange={() => toggleSelectRow(row.id)}
+        />
+      ),
+    },
     { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     {
       key: "variant_name",
@@ -1269,6 +1317,15 @@ export default function DesignVariantPage() {
                   >
                     {loading ? "Refreshing..." : "Refresh"}
                   </Button>
+                  {selectedIds.length > 0 && (
+                    <Button
+                      variant="danger"
+                      onClick={() => setBulkDeleteTarget(true)}
+                      disabled={loading}
+                    >
+                      Delete Selected ({selectedIds.length})
+                    </Button>
+                  )}
                   <div className={styles.csvMenu} ref={csvMenuRef}>
                     <Button
                       variant="primarySoft"
@@ -1909,6 +1966,14 @@ export default function DesignVariantPage() {
         confirmLabel="Delete"
         onConfirm={confirmDelete}
         onClose={() => setDeleteTarget(null)}
+      />
+      <ConfirmDialog
+        open={bulkDeleteTarget}
+        title="Delete Selected Design Variants"
+        message={`Delete ${selectedIds.length} selected design variant(s)? This action cannot be undone.`}
+        confirmLabel="Delete"
+        onConfirm={confirmBulkDelete}
+        onClose={() => setBulkDeleteTarget(false)}
       />
       <ConfirmDialog
         open={Boolean(imageDeleteTarget)}
