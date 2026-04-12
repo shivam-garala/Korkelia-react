@@ -1,19 +1,20 @@
-﻿"use client";
+"use client";
 
-import { useCallback, useEffect, useRef, useState } from "react";
+import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
 import SiteFooter from "../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../components/Home/SiteHeader.jsx";
 import Container from "../../components/ui/Container.jsx";
 import SelectField from "../../components/ui/SelectField.jsx";
 import TextField from "../../components/ui/TextField.jsx";
+import Button from "../../components/ui/Button.jsx";
 import fieldStyles from "../../components/ui/Fields.module.css";
 import axiosClient from "../../lib/axiosClient.js";
 import { toast } from "react-toastify";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import DatePicker from "react-datepicker";
 import styles from "./page.module.css";
-
+// test comment
 declare global {
   interface Window {
     grecaptcha?: {
@@ -27,6 +28,7 @@ const initialForm = {
   firstName: "",
   lastName: "",
   country: "",
+  phoneCode: "",
   email: "",
   phone: "",
   appointmentDate: "",
@@ -64,6 +66,12 @@ const formatDateValue = (date) => {
   return `${year}-${month}-${day}`;
 };
 
+const normalizeSlotSelection = (value, options) => {
+  if (!value) return "";
+  const validValues = options.map((opt) => String(opt.value));
+  return validValues.includes(String(value)) ? String(value) : "";
+};
+
 export default function AppointmentPage() {
   const { language } = useI18n();
   const languageKey = language === "fi" ? "fi" : "en";
@@ -76,8 +84,9 @@ export default function AppointmentPage() {
           firstName: "Etunimi",
           lastName: "Sukunimi",
           country: "Maa",
+          countryLoadFailed: "Maiden lataus epaonnistui.",
           email: "Sähköposti",
-          phone: "Puhelinnumero (sis. maakoodin)",
+          phone: "Puhelinnumero",
           appointmentDate: "Valitse paiva",
           appointmentDatePlaceholder: "Valitse paiva",
           appointmentSlot: "Valitse aikavali",
@@ -96,8 +105,9 @@ export default function AppointmentPage() {
           firstName: "First Name",
           lastName: "Last Name",
           country: "Country",
+          countryLoadFailed: "Failed to load countries.",
           email: "Email",
-          phone: "Phone Number (Including Country Code)",
+          phone: "Phone Number",
           appointmentDate: "Select Date",
           appointmentDatePlaceholder: "Select a date",
           appointmentSlot: "Select Time Slot",
@@ -118,10 +128,20 @@ export default function AppointmentPage() {
     languageKey === "fi"
       ? "Vain tulevat paivat ovat saatavilla."
       : "Only future dates are available.";
+  const disabledDateMessage =
+    languageKey === "fi"
+      ? "Valittu paiva ei ole saatavilla."
+      : "Selected date is not available.";
   const [form, setForm] = useState(initialForm);
   const [submitting, setSubmitting] = useState(false);
+  const [countryOptions, setCountryOptions] = useState([]);
+  const [countryPhoneMap, setCountryPhoneMap] = useState<Record<string, string>>({});
+  const [countryLoading, setCountryLoading] = useState(false);
   const [slotOptions, setSlotOptions] = useState([]);
   const [slotLoading, setSlotLoading] = useState(false);
+  const [disabledDates, setDisabledDates] = useState<string[]>([]);
+  const [disabledSlotsByDate, setDisabledSlotsByDate] = useState<Record<string, string[]>>({});
+  const [disabledLoading, setDisabledLoading] = useState(false);
   const [recaptchaToken, setRecaptchaToken] = useState("");
   const [recaptchaLoadError, setRecaptchaLoadError] = useState(false);
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
@@ -189,6 +209,113 @@ export default function AppointmentPage() {
 
   useEffect(() => {
     let active = true;
+    const loadCountries = async () => {
+      setCountryLoading(true);
+      try {
+        const { data } = await axiosClient.get("/api/appointment/countries");
+        const countries = data?.data ?? data ?? [];
+        if (!Array.isArray(countries) || !countries.length) {
+          if (active) {
+            setCountryOptions([]);
+            setCountryPhoneMap({});
+            setForm((prev) => ({ ...prev, country: "", phoneCode: "" }));
+          }
+          return;
+        }
+        const normalized = countries
+          .map((country) => {
+            if (country && typeof country === "object") {
+              const label =
+                country.name ??
+                country.country ??
+                country.label ??
+                country.title ??
+                country.value ??
+                country.code ??
+                "";
+              const labelText = String(label).trim();
+              if (!labelText) return null;
+              const phoneCode =
+                country.phone_code ??
+                country.phoneCode ??
+                country.phone ??
+                country.dial_code ??
+                country.dialCode ??
+                country.code ??
+                "";
+              return {
+                value: labelText,
+                label: labelText,
+                phoneCode: String(phoneCode ?? "").trim(),
+              };
+            }
+            const labelText = String(country).trim();
+            if (!labelText) return null;
+            return { value: labelText, label: labelText, phoneCode: "" };
+          })
+          .filter(Boolean);
+        const nextPhoneMap = normalized.reduce<Record<string, string>>((acc, option) => {
+          const key = String(option.value ?? "").trim();
+          if (key && option.phoneCode) {
+            acc[key] = String(option.phoneCode).replace(/\D/g, "");
+          }
+          return acc;
+        }, {});
+        if (active) {
+          setCountryOptions(normalized);
+          setCountryPhoneMap(nextPhoneMap);
+          setForm((prev) => {
+            const hasCountry = normalized.some(
+              (opt) => String(opt.value) === String(prev.country)
+            );
+            if (!hasCountry) {
+              return { ...prev, country: "", phoneCode: "" };
+            }
+            const mappedCode = nextPhoneMap[String(prev.country)] ?? "";
+            if (!mappedCode) {
+              return prev;
+            }
+            const phoneDigits = String(prev.phone ?? "").replace(/\D/g, "");
+            const prevCode = String(prev.phoneCode ?? "");
+            const trimmedPhone =
+              prevCode && phoneDigits.startsWith(prevCode)
+                ? phoneDigits.slice(prevCode.length)
+                : phoneDigits;
+            return {
+              ...prev,
+              phoneCode: mappedCode,
+              phone: mappedCode
+                ? trimmedPhone
+                  ? `+${mappedCode} ${trimmedPhone}`
+                  : `+${mappedCode} `
+                : trimmedPhone,
+            };
+          });
+        }
+      } catch (error) {
+        if (active) {
+          setCountryOptions([]);
+          setCountryPhoneMap({});
+          setForm((prev) => ({ ...prev, country: "", phoneCode: "" }));
+        }
+        const message =
+          error?.response?.data?.message ??
+          error?.response?.data?.error ??
+          labels.countryLoadFailed;
+        toast.error(message);
+        console.error("Appointment countries load error", error);
+      } finally {
+        if (active) setCountryLoading(false);
+      }
+    };
+    loadCountries();
+    return () => {
+      active = false;
+    };
+  }, [labels.countryLoadFailed]);
+
+  useEffect(() => {
+    let active = true;
     const loadSlots = async () => {
       setSlotLoading(true);
       try {
@@ -235,11 +362,10 @@ export default function AppointmentPage() {
         const nextOptions = normalized;
         if (active) {
           setSlotOptions(nextOptions);
-          setForm((prev) =>
-            nextOptions.some((opt) => opt.value === prev.appointmentSlot)
-              ? prev
-              : { ...prev, appointmentSlot: "" }
-          );
+          setForm((prev) => ({
+            ...prev,
+            appointmentSlot: normalizeSlotSelection(prev.appointmentSlot, nextOptions),
+          }));
         }
       } catch (error) {
         if (active) {
@@ -263,12 +389,137 @@ export default function AppointmentPage() {
       active = false;
     };
   }, [languageKey, languageId]);
+  useEffect(() => {
+    let active = true;
+    const loadDisabledSlots = async () => {
+      setDisabledLoading(true);
+      try {
+        const { data } = await axiosClient.get(
+          "/api/appointment/get-disabled-date-and-time-slots"
+        );
+        const items = data?.data ?? [];
+        if (!Array.isArray(items)) {
+          if (active) {
+            setDisabledDates([]);
+            setDisabledSlotsByDate({});
+          }
+          return;
+        }
+        const dateList: string[] = [];
+        const slotsMap: Record<string, string[]> = {};
+        items.forEach((item) => {
+          const dateKey = String(item?.date ?? item?.appointment_date ?? "").trim();
+          if (!dateKey) return;
+          const disabledList = Array.isArray(item?.disabled_timeSlots)
+            ? item.disabled_timeSlots
+            : Array.isArray(item?.disabled_time_slots)
+            ? item.disabled_time_slots
+            : [];
+          if (!disabledList.length) {
+            dateList.push(dateKey);
+            return;
+          }
+          const slots = disabledList
+            .map((slot) =>
+              String(slot?.time_slot ?? slot?.slot ?? slot?.label ?? slot?.value ?? "").trim()
+            )
+            .filter(Boolean);
+          if (slots.length) {
+            slotsMap[dateKey] = Array.from(new Set(slots));
+          }
+        });
+        if (active) {
+          setDisabledDates(dateList);
+          setDisabledSlotsByDate(slotsMap);
+        }
+      } catch (error) {
+        if (active) {
+          setDisabledDates([]);
+          setDisabledSlotsByDate({});
+        }
+        toast.error(
+          languageKey === "fi"
+            ? "Varattujen aikojen lataus epaonnistui."
+            : "Failed to load disabled dates."
+        );
+        console.error("Appointment disabled dates load error", error);
+      } finally {
+        if (active) setDisabledLoading(false);
+      }
+    };
+    loadDisabledSlots();
+    return () => {
+      active = false;
+    };
+  }, [languageKey]);
+  const disabledDateSet = useMemo(() => new Set(disabledDates), [disabledDates]);
+  const isDisabledDate = useCallback(
+    (date) => {
+      if (!date) return false;
+      const formatted = formatDateValue(date);
+      return disabledDateSet.has(formatted);
+    },
+    [disabledDateSet]
+  );
   const selectedDate = parseDateValue(form.appointmentDate);
+  const slotOptionsForDate = useMemo(() => {
+    if (!form.appointmentDate) return slotOptions;
+    const disabledSlots = disabledSlotsByDate[form.appointmentDate] ?? [];
+    if (!disabledSlots.length) return slotOptions;
+    const disabledSet = new Set(disabledSlots.map((slot) => String(slot)));
+    return slotOptions.filter((opt) => !disabledSet.has(String(opt.value)));
+  }, [disabledSlotsByDate, form.appointmentDate, slotOptions]);
+  useEffect(() => {
+    if (!form.appointmentDate) return;
+    if (disabledDateSet.has(form.appointmentDate)) {
+      setForm((prev) => ({ ...prev, appointmentDate: "", appointmentSlot: "" }));
+      return;
+    }
+    const disabledSlots = disabledSlotsByDate[form.appointmentDate] ?? [];
+    if (!disabledSlots.length) return;
+    const disabledSet = new Set(disabledSlots.map((slot) => String(slot)));
+    if (form.appointmentSlot && disabledSet.has(String(form.appointmentSlot))) {
+      setForm((prev) => ({ ...prev, appointmentSlot: "" }));
+    }
+  }, [disabledDateSet, disabledSlotsByDate, form.appointmentDate, form.appointmentSlot]);
   const handleChange = (event) => {
     const { name, value } = event.target;
+    if (name === "country") {
+      const nextCountry = value;
+      const mappedCode = nextCountry ? countryPhoneMap[nextCountry] ?? "" : "";
+      const phoneDigits = String(form.phone ?? "").replace(/\D/g, "");
+      const prevCode = String(form.phoneCode ?? "");
+      const trimmedPhone =
+        prevCode && phoneDigits.startsWith(prevCode)
+          ? phoneDigits.slice(prevCode.length)
+          : phoneDigits;
+      setForm((prev) => ({
+        ...prev,
+        country: nextCountry,
+        phoneCode: mappedCode,
+        phone: mappedCode
+          ? trimmedPhone
+            ? `+${mappedCode} ${trimmedPhone}`
+            : `+${mappedCode} `
+          : trimmedPhone,
+      }));
+      return;
+    }
     if (name === "phone") {
-      const digitsOnly = value.replace(/\D/g, "");
-      setForm((prev) => ({ ...prev, phone: digitsOnly }));
+      const cleaned = value.replace(/[^\d ]/g, "").replace(/\s+/g, " ").replace(/^\s+/, "");
+      if (form.phoneCode) {
+        const digitsOnly = cleaned.replace(/\s/g, "");
+        const codeDigits = String(form.phoneCode ?? "");
+        const restDigits = digitsOnly.startsWith(codeDigits)
+          ? digitsOnly.slice(codeDigits.length)
+          : digitsOnly;
+        const nextValue = restDigits ? `+${codeDigits} ${restDigits}` : `+${codeDigits} `;
+        setForm((prev) => ({ ...prev, phone: nextValue }));
+        return;
+      }
+      const digitsOnly = cleaned.replace(/[^\d]/g, "");
+      const nextValue = digitsOnly ? `+${digitsOnly}` : "";
+      setForm((prev) => ({ ...prev, phone: nextValue }));
       return;
     }
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -288,7 +539,22 @@ export default function AppointmentPage() {
       setForm((prev) => ({ ...prev, appointmentDate: "" }));
       return;
     }
-    setForm((prev) => ({ ...prev, appointmentDate: formatDateValue(date) }));
+    if (isDisabledDate(date)) {
+      toast.error(disabledDateMessage);
+      setForm((prev) => ({ ...prev, appointmentDate: "", appointmentSlot: "" }));
+      return;
+    }
+    const nextDateValue = formatDateValue(date);
+    const disabledSlots = disabledSlotsByDate[nextDateValue] ?? [];
+    const disabledSet = new Set(disabledSlots.map((slot) => String(slot)));
+    const nextSlot = form.appointmentSlot && !disabledSet.has(String(form.appointmentSlot))
+      ? form.appointmentSlot
+      : "";
+    setForm((prev) => ({
+      ...prev,
+      appointmentDate: nextDateValue,
+      appointmentSlot: nextSlot,
+    }));
   };
 
   const handleSubmit = async (event) => {
@@ -305,6 +571,10 @@ export default function AppointmentPage() {
     }
     if (isWeekendDay(appointmentDateValue)) {
       toast.error(weekendMessage);
+      return;
+    }
+    if (isDisabledDate(appointmentDateValue)) {
+      toast.error(disabledDateMessage);
       return;
     }
     if (!siteKey) {
@@ -340,7 +610,7 @@ export default function AppointmentPage() {
         last_name: form.lastName.trim(),
         country: form.country.trim(),
         email: form.email.trim(),
-        phone_number: form.phone.trim(),
+        phone_number: form.phone.replace(/\s+/g, "").trim(),
         date: form.appointmentDate,
         time_slot: form.appointmentSlot,
         description: form.details.trim(),
@@ -405,14 +675,16 @@ export default function AppointmentPage() {
                 value={form.lastName}
                 onChange={handleChange}
               />
-              <TextField
+              <SelectField
                 label={labels.country}
                 name="country"
                 placeholder={labels.country}
                 required
-                autoComplete="country-name"
+                disabled={countryLoading || !countryOptions.length}
                 value={form.country}
                 onChange={handleChange}
+                options={countryOptions}
+                isSearchable
               />
               <TextField
                 label={labels.email}
@@ -441,7 +713,9 @@ export default function AppointmentPage() {
                   onChange={handleDateChange}
                   placeholderText={labels.appointmentDatePlaceholder}
                   dateFormat="yyyy-MM-dd"
-                  filterDate={(date) => !isWeekendDay(date) && !isPastDay(date)}
+                  filterDate={(date) =>
+                    !isWeekendDay(date) && !isPastDay(date) && !isDisabledDate(date)
+                  }
                   minDate={new Date()}
                   className={fieldStyles.control}
                   wrapperClassName={styles.datePickerWrapper}
@@ -458,10 +732,10 @@ export default function AppointmentPage() {
                 name="appointmentSlot"
                 placeholder={labels.appointmentSlotPlaceholder}
                 required
-                disabled={slotLoading || !slotOptions.length}
+                disabled={slotLoading || disabledLoading || !slotOptionsForDate.length}
                 value={form.appointmentSlot}
                 onChange={handleChange}
-                options={slotOptions}
+                options={slotOptionsForDate}
               />
               <label className={`${fieldStyles.field} ${styles.fullRow}`}>
                 <span className={fieldStyles.label}>{labels.details}</span>
@@ -489,9 +763,9 @@ export default function AppointmentPage() {
               </div>
             </div>
             <div className={styles.actions}>
-              <button type="submit" className={styles.submitButton} disabled={submitting}>
+              <Button type="submit" variant="primarySoft" disabled={submitting}>
                 {submitting ? (languageKey === "fi" ? "Lahetaan..." : "Submitting...") : labels.submit}
-              </button>
+              </Button>
             </div>
           </form>
         </Container>

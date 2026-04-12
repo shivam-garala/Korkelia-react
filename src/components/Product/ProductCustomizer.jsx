@@ -510,7 +510,7 @@ export default function ProductCustomizer({
   defaultCutId = "",
 }) {
   const router = useRouter();
-  const { language } = useI18n();
+  const { language, currency, currencyCode } = useI18n();
   const qualityId = useId();
   const clarityId = useId();
   const sizeId = useId();
@@ -616,7 +616,7 @@ export default function ProductCustomizer({
         active = false;
       };
     }
-    const refreshKey = `${languageId}:${productId}:${listingCategoryId}`;
+    const refreshKey = `${languageId}:${productId}:${listingCategoryId}:${currency}`;
     if (lastListingRefreshRef.current === refreshKey) {
       return () => {
         active = false;
@@ -626,7 +626,7 @@ export default function ProductCustomizer({
 
     const refreshListingDetails = async () => {
       try {
-        const list = await fetchProductListEcom(languageId, listingCategoryId);
+        const list = await fetchProductListEcom(languageId, listingCategoryId, currencyCode);
         if (!active || !Array.isArray(list)) return;
         const matchById = (item) => {
           const id = item?.id ?? item?.product_id ?? item?.productId ?? null;
@@ -664,7 +664,7 @@ export default function ProductCustomizer({
     return () => {
       active = false;
     };
-  }, [productId, languageId, listingCategoryId, variantEnabled, designId]);
+  }, [productId, languageId, listingCategoryId, variantEnabled, designId, currency, currencyCode]);
 
   useEffect(() => {
     const nextCut = normalizeString(defaultCutId);
@@ -1419,6 +1419,7 @@ export default function ProductCustomizer({
       product_id: String(productId),
     });
     if (languageId) params.set("language_id", String(languageId));
+    if (currencyCode) params.set("currency", String(currencyCode));
     if (selectedMetalId) params.set("metal_id", String(selectedMetalId));
     if (selectedQualityId) params.set("diamond_type_id", String(selectedQualityId));
     if (selectedClarityId) params.set("clarity_id", String(selectedClarityId));
@@ -1518,6 +1519,7 @@ export default function ProductCustomizer({
     listingDesign,
     filterAvailabilityValue,
     hasPrefilledVariant,
+    currencyCode,
   ]);
 
   useEffect(() => {

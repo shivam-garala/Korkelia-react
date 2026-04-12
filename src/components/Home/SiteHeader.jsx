@@ -2,16 +2,44 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useState } from "react";
 import Dropdown from "./Dropdown";
 import NavMenuOverlay from "./NavMenuOverlay";
 import styles from "./SiteHeader.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import ShareProductModal from "../Product/ShareProductModal.jsx";
+import axiosClient from "../../lib/axiosClient.js";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { language, setLanguage, t } = useI18n();
+  const { language, setLanguage, currency, setCurrency, t } = useI18n();
+  const [isSgdVisible, setIsSgdVisible] = useState(true);
+
+  useEffect(() => {
+    let cancelled = false;
+    axiosClient
+      .get("/api/currencyRate/public-visible")
+      .then(({ data }) => {
+        const list = Array.isArray(data?.data) ? data.data : [];
+        const hasSgd = list.some(
+          (item) => String(item.currency_code || "").toUpperCase() === "SGD"
+        );
+        if (!cancelled) {
+          setIsSgdVisible(hasSgd);
+        }
+      })
+      .catch(() => {
+        // On error, keep default visibility (true) so UI still works
+      });
+
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+  const languageLabels =
+    language === "fi"
+      ? { en: "Englanti", fi: "Suomi" }
+      : { en: "English", fi: "Finnish" };
 
   const topBarContent = (
     <>
@@ -22,14 +50,45 @@ export default function SiteHeader() {
           value={language}
           onChange={setLanguage}
           options={[
-            { value: "en", label: "English" },
-            { value: "fi", label: "Finnish" },
+            {
+              value: "en",
+              label: languageLabels.en,
+              icon: "/icons/uk.svg",
+              iconAlt: "United Kingdom flag",
+            },
+            {
+              value: "fi",
+              label: languageLabels.fi,
+              icon: "/icons/finland.svg",
+              iconAlt: "Finland flag",
+            },
           ]}
         />
-        <div className={styles.currency} aria-label="Currency">
-          <Image className={styles.currencyIcon} src="/icons/euro.png" alt="" width={14} height={14} />
-          <span>{t("header.currency")}</span>
-        </div>
+        <Dropdown
+          ariaLabel={t("header.currency")}
+          leadingIcon="currency"
+          value={currency}
+          onChange={setCurrency}
+          options={[
+            {
+              value: "eur",
+              label: "Euro",
+              icon: "/icons/euro.png",
+              iconAlt: "Euro symbol",
+            },
+            ...(isSgdVisible
+              ? [
+                  {
+                    value: "usd",
+                    label: "Singapore Dollar",
+                    icon: "/icons/dollar.png",
+                    iconAlt: "Dollar symbol",
+                  },
+                ]
+              : []),
+          ]}
+          triggerClassName={styles.currencyTrigger}
+        />
       </div>
 
       <div className={styles.topRight}>

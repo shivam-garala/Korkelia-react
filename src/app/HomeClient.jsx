@@ -130,7 +130,7 @@ export default function HomeClient() {
 
         <CategoryGrid
           title={t("home.categories.title")}
-          categories={categories.length ? categories : fallbackCategories}
+          categories={categories.length ? categories : []}
           loading={categoriesLoading}
         />
 
@@ -159,9 +159,9 @@ export default function HomeClient() {
           mediaSrc={
             isDesktop
               ? "/homepage/diamond_deference_desktop.mp4"
-              : "/homepage/diamond_deference_desktop.mp4"
+              : "/homepage/diamond_deference_mobile.mp4"
           }
-          mediaPosition={isDesktop ? "top right" : "top right"}
+          mediaPosition={isDesktop ? "top right" : "right bottom"}
           sectionClassName={styles.diamondDifferenceSection}
           mediaClassName={styles.diamondDifferenceMedia}
           contentClassName={styles.diamondDifferenceContent}
