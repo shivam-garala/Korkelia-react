@@ -81,6 +81,86 @@
   align-items: flex-start;
 }
 
+.inlineRateCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  min-width: 0;
+  max-width: 100%;
+}
+
+.inlineRateView {
+  display: inline-flex;
+  align-items: center;
+  gap: 2px;
+}
+
+/** Value left, action icon right (design variant weight / mark up). */
+.inlineFieldRow {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 8px;
+  width: 100%;
+  min-width: 0;
+}
+
+.inlineFieldValue {
+  min-width: 0;
+  flex: 1;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  padding: 4px 0;
+  text-align: left;
+}
+
+.inlineFieldRow .inlineRateInput {
+  flex: 1;
+  min-width: 0;
+  max-width: none;
+}
+
+.inlineRateTrigger {
+  margin: 0;
+  padding: 4px 8px;
+  border: 1px dashed transparent;
+  border-radius: 6px;
+  background: transparent;
+  font: inherit;
+  color: inherit;
+  text-align: left;
+  cursor: pointer;
+  max-width: 100%;
+}
+
+.inlineRateTrigger:hover {
+  border-color: color-mix(in srgb, var(--color-primary), transparent 60%);
+  background: color-mix(in srgb, var(--color-primary), transparent 92%);
+}
+
+.inlineRateInput {
+  width: 100%;
+  min-width: 96px;
+  max-width: 140px;
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: 1px solid var(--color-primary);
+  font: inherit;
+  background: #fff;
+  color: var(--color-heading);
+}
+
+.inlineRateInput:focus {
+  outline: none;
+  box-shadow: 0 0 0 2px color-mix(in srgb, var(--color-primary), transparent 70%);
+}
+
+.inlineRateSaving {
+  font-size: 12px;
+  color: var(--color-muted, #64748b);
+}
+
 .actions {
   display: flex;
   gap: 6px;

@@ -1,5 +1,6 @@
 "use client";
 
+import Image from "next/image";
 import { useId, useMemo } from "react";
 import Select from "react-select";
 import fieldStyles from "./Fields.module.css";
@@ -29,6 +30,25 @@ export default function AdminSelectField({
       )
     : options.find((opt) => String(opt.value) === String(normalizedValue)) ?? null;
   const portalTarget = typeof window !== "undefined" ? document.body : null;
+  const hasOptionIcons = useMemo(() => options.some((o) => Boolean(o?.icon)), [options]);
+  const formatOptionLabel = useMemo(() => {
+    if (!hasOptionIcons) return undefined;
+    return (option) => (
+      <div className={styles.optionRow}>
+        {option.icon ? (
+          <Image
+            className={styles.optionIcon}
+            src={option.icon}
+            alt={option.iconAlt ?? ""}
+            width={18}
+            height={14}
+            unoptimized
+          />
+        ) : null}
+        <span>{option.label}</span>
+      </div>
+    );
+  }, [hasOptionIcons]);
   const selectStyles = useMemo(
     () => ({
       container: (base) => ({ ...base, width: "100%" }),
@@ -80,6 +100,7 @@ export default function AdminSelectField({
         value={selectedValue}
         onChange={handleChange}
         options={options}
+        {...(formatOptionLabel ? { formatOptionLabel } : {})}
         isDisabled={disabled}
         placeholder={placeholder}
         isSearchable={isSearchable}

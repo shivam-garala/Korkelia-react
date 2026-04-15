@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useEffect, useMemo, useState } from "react";
 import Image from "next/image";
@@ -34,6 +34,7 @@ import {
 } from "../../../store/slices/categoryMasterSlice.js";
 import {
   fetchSubCategories,
+  fetchSubCategoriesByCategory,
   selectSubCategoryLoading,
   selectSubCategories,
 } from "../../../store/slices/subCategorySlice.js";
@@ -42,7 +43,11 @@ import {
   selectStyleMasters,
 } from "../../../store/slices/styleMasterSlice.js";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks.js";
-import { clearCredentials, selectEmail, selectUserName } from "../../../store/authSlice.js";
+import {
+  clearCredentials,
+  selectEmail,
+  selectUserName,
+} from "../../../store/authSlice.js";
 import layout from "../../../styles/workspace.module.css";
 import styles from "../../../styles/crudPage.module.css";
 
@@ -55,8 +60,10 @@ function pickValue(obj, keys) {
 }
 
 function normalizeDisplayValue(value) {
-  if (value === true || value === "true" || value === 1 || value === "1") return "1";
-  if (value === false || value === "false" || value === 0 || value === "0") return "0";
+  if (value === true || value === "true" || value === 1 || value === "1")
+    return "1";
+  if (value === false || value === "false" || value === 0 || value === "0")
+    return "0";
   if (value === null || value === undefined) return "";
   return String(value);
 }
@@ -93,16 +100,34 @@ function extractProductNames(item) {
     list.forEach((entry) => {
       const languageId = String(
         pickValue(entry, ["language_id", "languageId", "lang_id", "langId"]) ??
-          pickValue(entry?.language, ["id", "language_id", "languageId", "lang_id", "langId"]) ??
-          ""
+          pickValue(entry?.language, [
+            "id",
+            "language_id",
+            "languageId",
+            "lang_id",
+            "langId",
+          ]) ??
+          "",
       );
       const languageName = String(
-        pickValue(entry?.language, ["language_name", "languageName", "name", "label"]) ?? ""
+        pickValue(entry?.language, [
+          "language_name",
+          "languageName",
+          "name",
+          "label",
+        ]) ?? "",
       ).toLowerCase();
-      const name = pickValue(entry, ["product_name", "productName", "name", "label"]);
+      const name = pickValue(entry, [
+        "product_name",
+        "productName",
+        "name",
+        "label",
+      ]);
       if (!name) return;
-      if (languageId === "1" || languageName === "english") nameEn = String(name);
-      if (languageId === "2" || languageName === "finnish") nameFi = String(name);
+      if (languageId === "1" || languageName === "english")
+        nameEn = String(name);
+      if (languageId === "2" || languageName === "finnish")
+        nameFi = String(name);
     });
   }
 
@@ -117,8 +142,19 @@ function buildStyleOptions(list) {
   return items
     .map((item) => {
       const id = pickValue(item, ["id", "style_id", "styleId"]);
-      const label = pickValue(item, ["style_name", "styleName", "name", "label"]);
-      if (id === null || id === undefined || label === null || label === undefined) return null;
+      const label = pickValue(item, [
+        "style_name",
+        "styleName",
+        "name",
+        "label",
+      ]);
+      if (
+        id === null ||
+        id === undefined ||
+        label === null ||
+        label === undefined
+      )
+        return null;
       return { value: String(id), label: String(label) };
     })
     .filter(Boolean);
@@ -152,7 +188,13 @@ export default function ProductPage() {
     if (normalizedEmail.length) {
       const firstChar = normalizedEmail[0];
       const domainChar = normalizedEmail.split("@")[1]?.[0];
-      return [firstChar, domainChar].filter(Boolean).join("").slice(0, 2).toUpperCase() || "U";
+      return (
+        [firstChar, domainChar]
+          .filter(Boolean)
+          .join("")
+          .slice(0, 2)
+          .toUpperCase() || "U"
+      );
     }
     return "U";
   }, [userEmail, userName]);
@@ -161,7 +203,7 @@ export default function ProductPage() {
     () => ({
       menuPortal: (base) => ({ ...base, zIndex: 9999 }),
     }),
-    []
+    [],
   );
 
   const [profileOpen, setProfileOpen] = useState(false);
@@ -192,6 +234,7 @@ export default function ProductPage() {
     style: "",
     is_display: "",
   });
+  const [allSubCategories, setAllSubCategories] = useState([]);
   const fallbackImage = "/productlisting/no_image.jpg";
 
   useEffect(() => {
@@ -208,7 +251,12 @@ export default function ProductPage() {
 
   useEffect(() => {
     dispatch(fetchCategoryDropdown());
-    dispatch(fetchSubCategories());
+    dispatch(fetchSubCategories()).then((result) => {
+      if (result?.error) return;
+      const payload = result?.payload;
+      const list = Array.isArray(payload) ? payload : (payload?.data ?? []);
+      setAllSubCategories(list);
+    });
     dispatch(fetchStyleMasters());
     dispatch(fetchProducts());
   }, [dispatch]);
@@ -229,11 +277,11 @@ export default function ProductPage() {
         setStyleDropdownLoading(true);
         const { data } = await axiosClient.get(
           `/api/styleMaster/dropdown-by-subcategory?sub_category_id=${encodeURIComponent(
-            subCategoryId
-          )}`
+            subCategoryId,
+          )}`,
         );
         const payload = data?.data ?? data;
-        const list = Array.isArray(payload) ? payload : payload?.data ?? [];
+        const list = Array.isArray(payload) ? payload : (payload?.data ?? []);
         if (active) setStyleDropdownItems(list);
       } catch (error) {
         if (active) setStyleDropdownItems([]);
@@ -254,34 +302,85 @@ export default function ProductPage() {
     return list
       .map((item) => {
         const id = pickValue(item, ["id", "category_id", "categoryId"]);
-        const label = pickValue(item, ["category_name", "categoryName", "name", "label"]);
-        if (id === null || id === undefined || label === null || label === undefined) return null;
+        const label = pickValue(item, [
+          "category_name",
+          "categoryName",
+          "name",
+          "label",
+        ]);
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
         return { value: String(id), label: String(label) };
       })
       .filter(Boolean);
   }, [categories]);
 
-  const subCategoryOptions = useMemo(() => {
+  const subCategoryLookupOptions = useMemo(() => {
+    const list = Array.isArray(allSubCategories) ? allSubCategories : [];
+    return list
+      .map((item) => {
+        const id = pickValue(item, ["id", "sub_category_id", "subCategoryId"]);
+        const label = pickValue(item, [
+          "sub_category_name",
+          "subCategoryName",
+          "name",
+          "label",
+        ]);
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
+        return { value: String(id), label: String(label) };
+      })
+      .filter(Boolean);
+  }, [allSubCategories]);
+
+  const filteredSubCategoryOptions = useMemo(() => {
+    if (!categoryId) return [];
     const list = Array.isArray(subCategories) ? subCategories : [];
     return list
       .map((item) => {
         const id = pickValue(item, ["id", "sub_category_id", "subCategoryId"]);
-        const label = pickValue(item, ["sub_category_name", "subCategoryName", "name", "label"]);
-        const parentId = pickValue(item, ["category_id", "categoryId", "category"]);
-        if (id === null || id === undefined || label === null || label === undefined) return null;
+        const label = pickValue(item, [
+          "sub_category_name",
+          "subCategoryName",
+          "name",
+          "label",
+        ]);
+        const parentId = pickValue(item, [
+          "category_id",
+          "categoryId",
+          "category",
+        ]);
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
         return {
           value: String(id),
           label: String(label),
-          categoryId: parentId !== null && parentId !== undefined ? String(parentId) : "",
+          categoryId:
+            parentId !== null && parentId !== undefined ? String(parentId) : "",
         };
       })
-      .filter(Boolean);
-  }, [subCategories]);
-
-  const filteredSubCategoryOptions = useMemo(
-    () => subCategoryOptions,
-    [subCategoryOptions]
-  );
+      .filter(Boolean)
+      .filter(
+        (option) =>
+          !option.categoryId ||
+          String(option.categoryId) === String(categoryId),
+      );
+  }, [categoryId, subCategories]);
 
   const styleOptions = useMemo(() => {
     return buildStyleOptions(stylesList);
@@ -297,42 +396,96 @@ export default function ProductPage() {
       { value: "1", label: "Yes" },
       { value: "0", label: "No" },
     ],
-    []
+    [],
   );
 
   const tableRows = useMemo(() => {
     const rows = Array.isArray(items) ? items : [];
     return rows.map((item, index) => {
-      const id = pickValue(item, ["id", "product_id", "productId"]) ?? index + 1;
+      const id =
+        pickValue(item, ["id", "product_id", "productId"]) ?? index + 1;
       const productName = pickValue(item, ["product_name"]);
-      const rawCategoryId = pickValue(item, ["category_id", "categoryId", "category"]);
-      const rawSubCategoryId = pickValue(item, ["sub_category_id", "subCategoryId", "subCategory"]);
+      const rawCategoryId = pickValue(item, [
+        "category_id",
+        "categoryId",
+        "category",
+      ]);
+      const rawSubCategoryId = pickValue(item, [
+        "sub_category_id",
+        "subCategoryId",
+        "subCategory",
+      ]);
       const rawStyleId = pickValue(item, ["style_id", "styleId", "style"]);
       const categoryLabel =
         item?.category?.category_name ??
         item?.category?.categoryName ??
         item?.category?.name ??
-        pickValue(item, ["category_name", "categoryName", "category_label", "categoryLabel", "name"]) ??
-        categoryOptions.find((option) => String(option.value) === String(rawCategoryId))?.label ??
-        (rawCategoryId !== null && rawCategoryId !== undefined ? String(rawCategoryId) : "-");
+        pickValue(item, [
+          "category_name",
+          "categoryName",
+          "category_label",
+          "categoryLabel",
+          "name",
+        ]) ??
+        categoryOptions.find(
+          (option) => String(option.value) === String(rawCategoryId),
+        )?.label ??
+        (rawCategoryId !== null && rawCategoryId !== undefined
+          ? String(rawCategoryId)
+          : "-");
       const subCategoryLabel =
         item?.sub_category?.sub_category_name ??
         item?.sub_category?.subCategoryName ??
         item?.sub_category?.name ??
-        pickValue(item, ["sub_category_name", "subCategoryName", "sub_category_label", "subCategoryLabel"]) ??
-        subCategoryOptions.find((option) => String(option.value) === String(rawSubCategoryId))?.label ??
-        (rawSubCategoryId !== null && rawSubCategoryId !== undefined ? String(rawSubCategoryId) : "-");
+        pickValue(item, [
+          "sub_category_name",
+          "subCategoryName",
+          "sub_category_label",
+          "subCategoryLabel",
+        ]) ??
+        subCategoryLookupOptions.find(
+          (option) => String(option.value) === String(rawSubCategoryId),
+        )?.label ??
+        (rawSubCategoryId !== null && rawSubCategoryId !== undefined
+          ? String(rawSubCategoryId)
+          : "-");
       const styleLabel =
         item?.style?.style_name ??
         item?.style?.styleName ??
         item?.style?.name ??
-        pickValue(item, ["style_name", "styleName", "style_label", "styleLabel", "name"]) ??
-        styleOptions.find((option) => String(option.value) === String(rawStyleId))?.label ??
-        (rawStyleId !== null && rawStyleId !== undefined ? String(rawStyleId) : "-");
-      const rawDisplay = pickValue(item, ["is_display", "isDisplay", "display", "display_status"]);
+        pickValue(item, [
+          "style_name",
+          "styleName",
+          "style_label",
+          "styleLabel",
+          "name",
+        ]) ??
+        styleOptions.find(
+          (option) => String(option.value) === String(rawStyleId),
+        )?.label ??
+        (rawStyleId !== null && rawStyleId !== undefined
+          ? String(rawStyleId)
+          : "-");
+      const rawDisplay = pickValue(item, [
+        "is_display",
+        "isDisplay",
+        "display",
+        "display_status",
+      ]);
       const displayValue = normalizeDisplayValue(rawDisplay);
-      const displayLabel = displayValue === "1" ? "Yes" : displayValue === "0" ? "No" : displayValue || "-";
-      const imageValue = pickValue(item, ["image", "image_url", "imageUrl", "image_path", "imagePath"]);
+      const displayLabel =
+        displayValue === "1"
+          ? "Yes"
+          : displayValue === "0"
+            ? "No"
+            : displayValue || "-";
+      const imageValue = pickValue(item, [
+        "image",
+        "image_url",
+        "imageUrl",
+        "image_path",
+        "imagePath",
+      ]);
       const resolvedImage = resolveImageSrc(imageValue);
 
       return {
@@ -348,33 +501,67 @@ export default function ProductPage() {
         _raw: item,
       };
     });
-  }, [categoryOptions, items, styleOptions, subCategoryOptions]);
+  }, [categoryOptions, items, styleOptions, subCategoryLookupOptions]);
 
   const filteredRows = useMemo(() => {
-    const normalize = (value) => String(value ?? "").trim().toLowerCase();
+    const normalize = (value) =>
+      String(value ?? "")
+        .trim()
+        .toLowerCase();
     const noQuery = normalize(filters.no);
     const categoryQuery = normalize(filters.category);
     const subCategoryQuery = normalize(filters.sub_category);
     const styleQuery = normalize(filters.style);
     const displayQuery = normalize(filters.is_display);
     const productNameQuery = normalize(filters.product_name);
-    if (!noQuery && !categoryQuery && !subCategoryQuery && !styleQuery && !displayQuery && !productNameQuery) return tableRows;
+    if (
+      !noQuery &&
+      !categoryQuery &&
+      !subCategoryQuery &&
+      !styleQuery &&
+      !displayQuery &&
+      !productNameQuery
+    )
+      return tableRows;
 
     return tableRows.filter((row) => {
       const noMatches = noQuery
-        ? normalize(row.no).includes(noQuery) || normalize(row.id).includes(noQuery)
+        ? normalize(row.no).includes(noQuery) ||
+          normalize(row.id).includes(noQuery)
         : true;
-      const categoryMatches = categoryQuery ? normalize(row.category).includes(categoryQuery) : true;
+      const categoryMatches = categoryQuery
+        ? normalize(row.category).includes(categoryQuery)
+        : true;
       const subCategoryMatches = subCategoryQuery
         ? normalize(row.sub_category).includes(subCategoryQuery)
         : true;
-      const styleMatches = styleQuery ? normalize(row.style).includes(styleQuery) : true;
-      const displayMatches = displayQuery ? normalize(row.is_display).includes(displayQuery) : true;
-      const productNameMatches = productNameQuery ? normalize(row.product_name).includes(productNameQuery) : true;
-      return noMatches && categoryMatches && subCategoryMatches && styleMatches && displayMatches && productNameMatches;
+      const styleMatches = styleQuery
+        ? normalize(row.style).includes(styleQuery)
+        : true;
+      const displayMatches = displayQuery
+        ? normalize(row.is_display).includes(displayQuery)
+        : true;
+      const productNameMatches = productNameQuery
+        ? normalize(row.product_name).includes(productNameQuery)
+        : true;
+      return (
+        noMatches &&
+        categoryMatches &&
+        subCategoryMatches &&
+        styleMatches &&
+        displayMatches &&
+        productNameMatches
+      );
     });
-  }, [filters.category, filters.is_display, filters.no, filters.style, filters.sub_category, filters.product_name, tableRows]);
-
+  }, [
+    filters.category,
+    filters.is_display,
+    filters.no,
+    filters.style,
+    filters.sub_category,
+    filters.product_name,
+    tableRows,
+  ]);
 
   const openCreate = () => {
     setEditingId(null);
@@ -405,40 +592,76 @@ export default function ProductPage() {
       source = payload?.data ?? payload;
     }
 
-    const rawCategoryId = pickValue(source, ["category_id", "categoryId", "category"]);
-    const rawSubCategoryId = pickValue(source, ["sub_category_id", "subCategoryId", "subCategory"]);
+    const rawCategoryId = pickValue(source, [
+      "category_id",
+      "categoryId",
+      "category",
+    ]);
+    const rawSubCategoryId = pickValue(source, [
+      "sub_category_id",
+      "subCategoryId",
+      "subCategory",
+    ]);
     const rawStyleId = pickValue(source, ["style_id", "styleId", "style"]);
     const { nameEn, nameFi } = extractProductNames(source);
-    const rawImage = pickValue(source, ["image", "image_url", "imageUrl", "image_path", "imagePath"]);
+    const rawImage = pickValue(source, [
+      "image",
+      "image_url",
+      "imageUrl",
+      "image_path",
+      "imagePath",
+    ]);
     const resolvedCategoryName =
       source?.category?.category_name ??
       source?.category?.categoryName ??
       source?.category?.name ??
       pickValue(source, ["category_name", "categoryName", "name"]) ??
-      categoryOptions.find((option) => String(option.value) === String(rawCategoryId))?.label ??
+      categoryOptions.find(
+        (option) => String(option.value) === String(rawCategoryId),
+      )?.label ??
       "";
     const resolvedSubCategoryName =
       source?.subCategory?.sub_category_name ??
       source?.subCategory?.subCategoryName ??
       source?.subCategory?.name ??
       pickValue(source, ["sub_category_name", "subCategoryName", "name"]) ??
-      subCategoryOptions.find((option) => String(option.value) === String(rawSubCategoryId))?.label ??
+      subCategoryLookupOptions.find(
+        (option) => String(option.value) === String(rawSubCategoryId),
+      )?.label ??
       "";
     const resolvedStyleName =
       source?.style?.style_name ??
       source?.style?.styleName ??
       source?.style?.name ??
       pickValue(source, ["style_name", "styleName", "name"]) ??
-      styleOptions.find((option) => String(option.value) === String(rawStyleId))?.label ??
+      styleOptions.find((option) => String(option.value) === String(rawStyleId))
+        ?.label ??
       "";
-    const rawDisplay = pickValue(source, ["is_display", "isDisplay", "display", "display_status"]);
+    const rawDisplay = pickValue(source, [
+      "is_display",
+      "isDisplay",
+      "display",
+      "display_status",
+    ]);
 
     setEditingId(rawId ?? null);
-    setCategoryId(rawCategoryId !== undefined && rawCategoryId !== null ? String(rawCategoryId) : "");
+    setCategoryId(
+      rawCategoryId !== undefined && rawCategoryId !== null
+        ? String(rawCategoryId)
+        : "",
+    );
     setCategoryName(resolvedCategoryName ? String(resolvedCategoryName) : "");
-    setSubCategoryId(rawSubCategoryId !== undefined && rawSubCategoryId !== null ? String(rawSubCategoryId) : "");
-    setSubCategoryName(resolvedSubCategoryName ? String(resolvedSubCategoryName) : "");
-    setStyleId(rawStyleId !== undefined && rawStyleId !== null ? String(rawStyleId) : "");
+    setSubCategoryId(
+      rawSubCategoryId !== undefined && rawSubCategoryId !== null
+        ? String(rawSubCategoryId)
+        : "",
+    );
+    setSubCategoryName(
+      resolvedSubCategoryName ? String(resolvedSubCategoryName) : "",
+    );
+    setStyleId(
+      rawStyleId !== undefined && rawStyleId !== null ? String(rawStyleId) : "",
+    );
     setStyleName(resolvedStyleName ? String(resolvedStyleName) : "");
     setProductNameEn(nameEn);
     setProductNameFi(nameFi);
@@ -447,6 +670,13 @@ export default function ProductPage() {
     setImagePreviewUrl("");
     setExistingImageUrl(resolveImageSrc(rawImage));
     setFileInputKey((prev) => prev + 1);
+    if (
+      rawCategoryId !== undefined &&
+      rawCategoryId !== null &&
+      String(rawCategoryId) !== ""
+    ) {
+      dispatch(fetchSubCategoriesByCategory(rawCategoryId));
+    }
     setModalOpen(true);
   };
 
@@ -491,7 +721,9 @@ export default function ProductPage() {
 
     const payload = buildPayload();
 
-    const action = editingId ? updateProduct({ id: editingId, payload }) : createProduct(payload);
+    const action = editingId
+      ? updateProduct({ id: editingId, payload })
+      : createProduct(payload);
 
     const result = await dispatch(action);
     if (!result?.error) {
@@ -518,18 +750,52 @@ export default function ProductPage() {
   };
 
   const columns = [
-    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
-    { key: "product_name", header: "Product Name", filterable: true, filterPlaceholder: "Search Product Name" },
-    { key: "category", header: "Category", filterable: true, filterPlaceholder: "Search Category" },
-    { key: "sub_category", header: "Sub Category", filterable: true, filterPlaceholder: "Search Sub Category" },
-    { key: "style", header: "Style", filterable: true, filterPlaceholder: "Search Style" },
-    { key: "is_display", header: "Display", filterable: true, filterPlaceholder: "Search Display" },
+    {
+      key: "no",
+      header: "No.",
+      filterable: false,
+      filterPlaceholder: "Search No.",
+    },
+    {
+      key: "product_name",
+      header: "Product Name",
+      filterable: true,
+      filterPlaceholder: "Search Product Name",
+    },
+    {
+      key: "category",
+      header: "Category",
+      filterable: true,
+      filterPlaceholder: "Search Category",
+    },
+    {
+      key: "sub_category",
+      header: "Sub Category",
+      filterable: true,
+      filterPlaceholder: "Search Sub Category",
+    },
+    {
+      key: "style",
+      header: "Style",
+      filterable: true,
+      filterPlaceholder: "Search Style",
+    },
+    {
+      key: "is_display",
+      header: "Display",
+      filterable: true,
+      filterPlaceholder: "Search Display",
+    },
     {
       key: "image",
       header: "Image",
       filterable: false,
       customRender: (row) => {
-        return <DesignZoomModal imgPath={row?.s3Url ? `${row?.s3Url}?v=${Date.now()}` : ""} />;
+        return (
+          <DesignZoomModal
+            imgPath={row?.s3Url ? `${row?.s3Url}?v=${Date.now()}` : ""}
+          />
+        );
       },
     },
     {
@@ -538,10 +804,22 @@ export default function ProductPage() {
       filterable: false,
       render: (row) => (
         <div className={styles.actions}>
-          <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon="edit"
+            iconOnly
+            onClick={() => openEdit(row._raw)}
+          >
             Edit
           </Button>
-          <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
+          <Button
+            variant="danger"
+            size="sm"
+            icon="delete"
+            iconOnly
+            onClick={() => handleDelete(row.id)}
+          >
             Delete
           </Button>
         </div>
@@ -566,7 +844,8 @@ export default function ProductPage() {
               <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
                 <Button
                   variant="secondary"
-                  icon="refresh" iconOnly
+                  icon="refresh"
+                  iconOnly
                   onClick={() => dispatch(fetchProducts())}
                   disabled={loading}
                 >
@@ -577,7 +856,6 @@ export default function ProductPage() {
                 </Button>
               </div>
             </div>
-
 
             <DataTable
               columns={columns}
@@ -621,7 +899,12 @@ export default function ProductPage() {
         }}
         footer={
           <div className={styles.formActions}>
-            <Button variant="primarySoft" type="submit" form="product-form" disabled={loading}>
+            <Button
+              variant="primarySoft"
+              type="submit"
+              form="product-form"
+              disabled={loading}
+            >
               {editingId ? "Update" : "Create"}
             </Button>
             <Button
@@ -641,333 +924,408 @@ export default function ProductPage() {
         }
       >
         {(() => {
-          const previewSrc = imagePreviewUrl || existingImageUrl || fallbackImage;
+          const previewSrc =
+            imagePreviewUrl || existingImageUrl || fallbackImage;
           const hasLocalImage = Boolean(imagePreviewUrl);
           const hasAnyImage = hasLocalImage || Boolean(existingImageUrl);
           return (
-        <form id="product-form" className={styles.form} onSubmit={submit}>
-          {editingId ? (
-            <>
-              <div className={styles.formRow3}>
-                <label className={fieldStyles.field}>
-                  <span className={fieldStyles.label}>Category</span>
-                  <Select
-                    className={styles.select}
-                    classNamePrefix="adminSelect"
-                    value={categoryOptions.find((option) => option.value === categoryId) ?? null}
-                    onChange={(option) => {
-                      const nextId = option?.value ?? "";
-                      const selected = categoryOptions.find((opt) => opt.value === nextId);
-                      setCategoryId(nextId);
-                      setCategoryName(selected?.label ?? "");
-                    }}
-                    isDisabled={!categoryOptions.length}
-                    placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
-                    options={categoryOptions}
-                    menuPortalTarget={portalTarget}
-                    menuPosition="fixed"
-                    styles={selectMenuStyles}
-                  />
-                </label>
-                <label className={fieldStyles.field}>
-                  <span className={fieldStyles.label}>Sub Category</span>
-                  <Select
-                    className={styles.select}
-                    classNamePrefix="adminSelect"
-                    value={filteredSubCategoryOptions.find((option) => option.value === subCategoryId) ?? null}
-                    onChange={(option) => {
-                      const nextId = option?.value ?? "";
-                      const selected = filteredSubCategoryOptions.find((opt) => opt.value === nextId);
-                      setSubCategoryId(nextId);
-                      setSubCategoryName(selected?.label ?? "");
-                      setStyleId("");
-                      setStyleName("");
-                    }}
-                    isDisabled={!filteredSubCategoryOptions.length}
-                    placeholder={
-                      subCategoryLoading
-                        ? "Loading sub categories..."
-                        : filteredSubCategoryOptions.length
-                        ? "Select sub category"
-                        : "No sub categories"
-                    }
-                    options={filteredSubCategoryOptions}
-                    menuPortalTarget={portalTarget}
-                    menuPosition="fixed"
-                    styles={selectMenuStyles}
-                  />
-                </label>
-                <label className={fieldStyles.field}>
-                  <span className={fieldStyles.label}>Style</span>
-                  <Select
-                    className={styles.select}
-                    classNamePrefix="adminSelect"
-                    value={styleOptions.find((option) => option.value === styleId) ?? null}
-                    onChange={(option) => {
-                      const nextId = option?.value ?? "";
-                      const selected = styleDropdownOptions.find((opt) => opt.value === nextId);
-                      setStyleId(nextId);
-                      setStyleName(selected?.label ?? "");
-                    }}
-                    isDisabled={
-                      subCategoryId
-                        ? styleDropdownLoading || !styleDropdownOptions.length
-                        : !styleOptions.length
-                    }
-                    placeholder={
-                      subCategoryId
-                        ? styleDropdownLoading
-                          ? "Loading styles..."
-                          : styleDropdownOptions.length
-                          ? "Select style"
-                          : "No styles found"
-                        : styleOptions.length
-                        ? "Select style"
-                        : "Loading styles..."
-                    }
-                    options={styleDropdownOptions}
-                    menuPortalTarget={portalTarget}
-                    menuPosition="fixed"
-                    styles={selectMenuStyles}
-                  />
-                </label>
-              </div>
-              <div className={styles.formRow2}>
-                <TextField
-                  label="Product Name (English)"
-                  value={productNameEn}
-                  onChange={(e) => setProductNameEn(e.target.value)}
-                  required
-                />
-                <TextField
-                  label="Product Name (Finnish)"
-                  value={productNameFi}
-                  onChange={(e) => setProductNameFi(e.target.value)}
-                  required
-                />
-              </div>
-              <div className={styles.formRow3}>
-                <div className={fieldStyles.field}>
-                  <span className={fieldStyles.label}>Image</span>
-                  <div className={styles.mediaCard}>
-                    <label
-                      className={styles.mediaUploadTarget}
-                      htmlFor={`product-image-${fileInputKey}`}
-                    >
-                      <Image
-                        className={`${styles.mediaThumb}${hasAnyImage ? "" : ` ${styles.mediaThumbPlaceholder}`}`}
-                        src={previewSrc}
-                        alt="Product preview"
-                        width={360}
-                        height={360}
-                        loader={passthroughImageLoader}
-                        unoptimized
+            <form id="product-form" className={styles.form} onSubmit={submit}>
+              {editingId ? (
+                <>
+                  <div className={styles.formRow3}>
+                    <label className={fieldStyles.field}>
+                      <span className={fieldStyles.label}>Category</span>
+                      <Select
+                        className={styles.select}
+                        classNamePrefix="adminSelect"
+                        value={
+                          categoryOptions.find(
+                            (option) => option.value === categoryId,
+                          ) ?? null
+                        }
+                        onChange={(option) => {
+                          const nextId = option?.value ?? "";
+                          const selected = categoryOptions.find(
+                            (opt) => opt.value === nextId,
+                          );
+                          setCategoryId(nextId);
+                          setCategoryName(selected?.label ?? "");
+                          setSubCategoryId("");
+                          setSubCategoryName("");
+                          setStyleId("");
+                          setStyleName("");
+                          if (nextId)
+                            dispatch(fetchSubCategoriesByCategory(nextId));
+                        }}
+                        isDisabled={!categoryOptions.length}
+                        placeholder={
+                          categoryOptions.length
+                            ? "Select category"
+                            : "Loading categories..."
+                        }
+                        options={categoryOptions}
+                        menuPortalTarget={portalTarget}
+                        menuPosition="fixed"
+                        styles={selectMenuStyles}
                       />
                     </label>
-                    {hasLocalImage ? (
-                      <button
-                        type="button"
-                        className={styles.mediaDeleteButton}
-                        onClick={() => {
-                          setImageFile(null);
-                          setImagePreviewUrl("");
-                          setFileInputKey((prev) => prev + 1);
+                    <label className={fieldStyles.field}>
+                      <span className={fieldStyles.label}>Sub Category</span>
+                      <Select
+                        className={styles.select}
+                        classNamePrefix="adminSelect"
+                        value={
+                          filteredSubCategoryOptions.find(
+                            (option) => option.value === subCategoryId,
+                          ) ?? null
+                        }
+                        onChange={(option) => {
+                          const nextId = option?.value ?? "";
+                          const selected = filteredSubCategoryOptions.find(
+                            (opt) => opt.value === nextId,
+                          );
+                          setSubCategoryId(nextId);
+                          setSubCategoryName(selected?.label ?? "");
+                          setStyleId("");
+                          setStyleName("");
                         }}
-                        aria-label="Remove image"
-                      >
-                        <Icon name="delete" size={16} />
-                      </button>
-                    ) : null}
-                    <input
-                      key={fileInputKey}
-                      id={`product-image-${fileInputKey}`}
-                      className={styles.mediaFileInput}
-                      type="file"
-                      accept="image/*"
-                      onClick={(e) => {
-                        e.currentTarget.value = null;
-                      }}
-                      onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
-                    />
-                  </div>
-                </div>
-                <label className={fieldStyles.field}>
-                  <span className={fieldStyles.label}>Display</span>
-                  <Select
-                    className={styles.select}
-                    classNamePrefix="adminSelect"
-                    value={displayOptions.find((option) => option.value === isDisplay) ?? null}
-                    onChange={(option) => setIsDisplay(option?.value ?? "")}
-                    options={displayOptions}
-                    menuPortalTarget={portalTarget}
-                    menuPosition="fixed"
-                    styles={selectMenuStyles}
-                  />
-                </label>
-              </div>
-            </>
-          ) : (
-            <>
-              <div className={styles.formRow3}>
-                <label className={fieldStyles.field}>
-                  <span className={fieldStyles.label}>Category</span>
-                  <Select
-                    className={styles.select}
-                    classNamePrefix="adminSelect"
-                    value={categoryOptions.find((option) => option.value === categoryId) ?? null}
-                    onChange={(option) => {
-                      const nextId = option?.value ?? "";
-                      const selected = categoryOptions.find((opt) => opt.value === nextId);
-                      setCategoryId(nextId);
-                      setCategoryName(selected?.label ?? "");
-                    }}
-                    isDisabled={!categoryOptions.length}
-                    placeholder={categoryOptions.length ? "Select category" : "Loading categories..."}
-                    options={categoryOptions}
-                    menuPortalTarget={portalTarget}
-                    menuPosition="fixed"
-                    styles={selectMenuStyles}
-                  />
-                </label>
-                <label className={fieldStyles.field}>
-                  <span className={fieldStyles.label}>Sub Category</span>
-                  <Select
-                    className={styles.select}
-                    classNamePrefix="adminSelect"
-                    value={filteredSubCategoryOptions.find((option) => option.value === subCategoryId) ?? null}
-                    onChange={(option) => {
-                      const nextId = option?.value ?? "";
-                      const selected = filteredSubCategoryOptions.find((opt) => opt.value === nextId);
-                      setSubCategoryId(nextId);
-                      setSubCategoryName(selected?.label ?? "");
-                      setStyleId("");
-                      setStyleName("");
-                    }}
-                    isDisabled={!filteredSubCategoryOptions.length}
-                    placeholder={
-                      subCategoryLoading
-                        ? "Loading sub categories..."
-                        : filteredSubCategoryOptions.length
-                        ? "Select sub category"
-                        : "No sub categories"
-                    }
-                    options={filteredSubCategoryOptions}
-                    menuPortalTarget={portalTarget}
-                    menuPosition="fixed"
-                    styles={selectMenuStyles}
-                  />
-                </label>
-                <label className={fieldStyles.field}>
-                  <span className={fieldStyles.label}>Style</span>
-                  <Select
-                    className={styles.select}
-                    classNamePrefix="adminSelect"
-                    value={styleOptions.find((option) => option.value === styleId) ?? null}
-                    onChange={(option) => {
-                      const nextId = option?.value ?? "";
-                      const selected = styleDropdownOptions.find((opt) => opt.value === nextId);
-                      setStyleId(nextId);
-                      setStyleName(selected?.label ?? "");
-                    }}
-                    isDisabled={
-                      subCategoryId
-                        ? styleDropdownLoading || !styleDropdownOptions.length
-                        : !styleOptions.length
-                    }
-                    placeholder={
-                      subCategoryId
-                        ? styleDropdownLoading
-                          ? "Loading styles..."
-                          : styleDropdownOptions.length
-                          ? "Select style"
-                          : "No styles found"
-                        : styleOptions.length
-                        ? "Select style"
-                        : "Loading styles..."
-                    }
-                    options={styleDropdownOptions}
-                    menuPortalTarget={portalTarget}
-                    menuPosition="fixed"
-                    styles={selectMenuStyles}
-                  />
-                </label>
-              </div>
-              <div className={styles.formRow2}>
-                <TextField
-                  label="Product Name (English)"
-                  value={productNameEn}
-                  onChange={(e) => setProductNameEn(e.target.value)}
-                  required
-                />
-                <TextField
-                  label="Product Name (Finnish)"
-                  value={productNameFi}
-                  onChange={(e) => setProductNameFi(e.target.value)}
-                  required
-                />
-              </div>
-              <div className={styles.formRow3}>
-                <div className={fieldStyles.field}>
-                  <span className={fieldStyles.label}>Image</span>
-                  <div className={styles.mediaCard}>
-                    <label
-                      className={styles.mediaUploadTarget}
-                      htmlFor={`product-image-${fileInputKey}`}
-                    >
-                      <Image
-                        className={`${styles.mediaThumb}${hasAnyImage ? "" : ` ${styles.mediaThumbPlaceholder}`}`}
-                        src={previewSrc}
-                        alt="Product preview"
-                        width={360}
-                        height={360}
-                        loader={passthroughImageLoader}
-                        unoptimized
+                        isDisabled={!filteredSubCategoryOptions.length}
+                        placeholder={
+                          !categoryId
+                            ? "Select category first"
+                            : subCategoryLoading
+                              ? "Loading sub categories..."
+                              : filteredSubCategoryOptions.length
+                                ? "Select sub category"
+                                : "No sub categories"
+                        }
+                        options={filteredSubCategoryOptions}
+                        menuPortalTarget={portalTarget}
+                        menuPosition="fixed"
+                        styles={selectMenuStyles}
                       />
                     </label>
-                    {hasLocalImage ? (
-                      <button
-                        type="button"
-                        className={styles.mediaDeleteButton}
-                        onClick={() => {
-                          setImageFile(null);
-                          setImagePreviewUrl("");
-                          setFileInputKey((prev) => prev + 1);
+                    <label className={fieldStyles.field}>
+                      <span className={fieldStyles.label}>Style</span>
+                      <Select
+                        className={styles.select}
+                        classNamePrefix="adminSelect"
+                        value={
+                          styleOptions.find(
+                            (option) => option.value === styleId,
+                          ) ?? null
+                        }
+                        onChange={(option) => {
+                          const nextId = option?.value ?? "";
+                          const selected = styleDropdownOptions.find(
+                            (opt) => opt.value === nextId,
+                          );
+                          setStyleId(nextId);
+                          setStyleName(selected?.label ?? "");
                         }}
-                        aria-label="Remove image"
-                      >
-                        <Icon name="delete" size={16} />
-                      </button>
-                    ) : null}
-                    <input
-                      key={fileInputKey}
-                      id={`product-image-${fileInputKey}`}
-                      className={styles.mediaFileInput}
-                      type="file"
-                      accept="image/*"
-                      onClick={(e) => {
-                        e.currentTarget.value = null;
-                      }}
-                      onChange={(e) => setImageFile(e.target.files?.[0] ?? null)}
+                        isDisabled={
+                          subCategoryId
+                            ? styleDropdownLoading ||
+                              !styleDropdownOptions.length
+                            : !styleOptions.length
+                        }
+                        placeholder={
+                          subCategoryId
+                            ? styleDropdownLoading
+                              ? "Loading styles..."
+                              : styleDropdownOptions.length
+                                ? "Select style"
+                                : "No styles found"
+                            : styleOptions.length
+                              ? "Select style"
+                              : "Loading styles..."
+                        }
+                        options={styleDropdownOptions}
+                        menuPortalTarget={portalTarget}
+                        menuPosition="fixed"
+                        styles={selectMenuStyles}
+                      />
+                    </label>
+                  </div>
+                  <div className={styles.formRow2}>
+                    <TextField
+                      label="Product Name (English)"
+                      value={productNameEn}
+                      onChange={(e) => setProductNameEn(e.target.value)}
+                      required
+                    />
+                    <TextField
+                      label="Product Name (Finnish)"
+                      value={productNameFi}
+                      onChange={(e) => setProductNameFi(e.target.value)}
+                      required
                     />
                   </div>
-                </div>
-                <label className={fieldStyles.field}>
-                  <span className={fieldStyles.label}>Display</span>
-                  <Select
-                    className={styles.select}
-                    classNamePrefix="adminSelect"
-                    value={displayOptions.find((option) => option.value === isDisplay) ?? null}
-                    onChange={(option) => setIsDisplay(option?.value ?? "")}
-                    options={displayOptions}
-                    menuPortalTarget={portalTarget}
-                    menuPosition="fixed"
-                    styles={selectMenuStyles}
-                  />
-                </label>
-              </div>
-            </>
-          )}
-        </form>
+                  <div className={styles.formRow3}>
+                    <div className={fieldStyles.field}>
+                      <span className={fieldStyles.label}>Image</span>
+                      <div className={styles.mediaCard}>
+                        <label
+                          className={styles.mediaUploadTarget}
+                          htmlFor={`product-image-${fileInputKey}`}
+                        >
+                          <Image
+                            className={`${styles.mediaThumb}${hasAnyImage ? "" : ` ${styles.mediaThumbPlaceholder}`}`}
+                            src={previewSrc}
+                            alt="Product preview"
+                            width={360}
+                            height={360}
+                            loader={passthroughImageLoader}
+                            unoptimized
+                          />
+                        </label>
+                        {hasLocalImage ? (
+                          <button
+                            type="button"
+                            className={styles.mediaDeleteButton}
+                            onClick={() => {
+                              setImageFile(null);
+                              setImagePreviewUrl("");
+                              setFileInputKey((prev) => prev + 1);
+                            }}
+                            aria-label="Remove image"
+                          >
+                            <Icon name="delete" size={16} />
+                          </button>
+                        ) : null}
+                        <input
+                          key={fileInputKey}
+                          id={`product-image-${fileInputKey}`}
+                          className={styles.mediaFileInput}
+                          type="file"
+                          accept="image/*"
+                          onClick={(e) => {
+                            e.currentTarget.value = null;
+                          }}
+                          onChange={(e) =>
+                            setImageFile(e.target.files?.[0] ?? null)
+                          }
+                        />
+                      </div>
+                    </div>
+                    <label className={fieldStyles.field}>
+                      <span className={fieldStyles.label}>Display</span>
+                      <Select
+                        className={styles.select}
+                        classNamePrefix="adminSelect"
+                        value={
+                          displayOptions.find(
+                            (option) => option.value === isDisplay,
+                          ) ?? null
+                        }
+                        onChange={(option) => setIsDisplay(option?.value ?? "")}
+                        options={displayOptions}
+                        menuPortalTarget={portalTarget}
+                        menuPosition="fixed"
+                        styles={selectMenuStyles}
+                      />
+                    </label>
+                  </div>
+                </>
+              ) : (
+                <>
+                  <div className={styles.formRow3}>
+                    <label className={fieldStyles.field}>
+                      <span className={fieldStyles.label}>Category</span>
+                      <Select
+                        className={styles.select}
+                        classNamePrefix="adminSelect"
+                        value={
+                          categoryOptions.find(
+                            (option) => option.value === categoryId,
+                          ) ?? null
+                        }
+                        onChange={(option) => {
+                          const nextId = option?.value ?? "";
+                          const selected = categoryOptions.find(
+                            (opt) => opt.value === nextId,
+                          );
+                          setCategoryId(nextId);
+                          setCategoryName(selected?.label ?? "");
+                          setSubCategoryId("");
+                          setSubCategoryName("");
+                          setStyleId("");
+                          setStyleName("");
+                          if (nextId)
+                            dispatch(fetchSubCategoriesByCategory(nextId));
+                        }}
+                        isDisabled={!categoryOptions.length}
+                        placeholder={
+                          categoryOptions.length
+                            ? "Select category"
+                            : "Loading categories..."
+                        }
+                        options={categoryOptions}
+                        menuPortalTarget={portalTarget}
+                        menuPosition="fixed"
+                        styles={selectMenuStyles}
+                      />
+                    </label>
+                    <label className={fieldStyles.field}>
+                      <span className={fieldStyles.label}>Sub Category</span>
+                      <Select
+                        className={styles.select}
+                        classNamePrefix="adminSelect"
+                        value={
+                          filteredSubCategoryOptions.find(
+                            (option) => option.value === subCategoryId,
+                          ) ?? null
+                        }
+                        onChange={(option) => {
+                          const nextId = option?.value ?? "";
+                          const selected = filteredSubCategoryOptions.find(
+                            (opt) => opt.value === nextId,
+                          );
+                          setSubCategoryId(nextId);
+                          setSubCategoryName(selected?.label ?? "");
+                          setStyleId("");
+                          setStyleName("");
+                        }}
+                        isDisabled={!filteredSubCategoryOptions.length}
+                        placeholder={
+                          !categoryId
+                            ? "Select category first"
+                            : subCategoryLoading
+                              ? "Loading sub categories..."
+                              : filteredSubCategoryOptions.length
+                                ? "Select sub category"
+                                : "No sub categories"
+                        }
+                        options={filteredSubCategoryOptions}
+                        menuPortalTarget={portalTarget}
+                        menuPosition="fixed"
+                        styles={selectMenuStyles}
+                      />
+                    </label>
+                    <label className={fieldStyles.field}>
+                      <span className={fieldStyles.label}>Style</span>
+                      <Select
+                        className={styles.select}
+                        classNamePrefix="adminSelect"
+                        value={
+                          styleOptions.find(
+                            (option) => option.value === styleId,
+                          ) ?? null
+                        }
+                        onChange={(option) => {
+                          const nextId = option?.value ?? "";
+                          const selected = styleDropdownOptions.find(
+                            (opt) => opt.value === nextId,
+                          );
+                          setStyleId(nextId);
+                          setStyleName(selected?.label ?? "");
+                        }}
+                        isDisabled={
+                          subCategoryId
+                            ? styleDropdownLoading ||
+                              !styleDropdownOptions.length
+                            : !styleOptions.length
+                        }
+                        placeholder={
+                          subCategoryId
+                            ? styleDropdownLoading
+                              ? "Loading styles..."
+                              : styleDropdownOptions.length
+                                ? "Select style"
+                                : "No styles found"
+                            : styleOptions.length
+                              ? "Select style"
+                              : "Loading styles..."
+                        }
+                        options={styleDropdownOptions}
+                        menuPortalTarget={portalTarget}
+                        menuPosition="fixed"
+                        styles={selectMenuStyles}
+                      />
+                    </label>
+                  </div>
+                  <div className={styles.formRow2}>
+                    <TextField
+                      label="Product Name (English)"
+                      value={productNameEn}
+                      onChange={(e) => setProductNameEn(e.target.value)}
+                      required
+                    />
+                    <TextField
+                      label="Product Name (Finnish)"
+                      value={productNameFi}
+                      onChange={(e) => setProductNameFi(e.target.value)}
+                      required
+                    />
+                  </div>
+                  <div className={styles.formRow3}>
+                    <div className={fieldStyles.field}>
+                      <span className={fieldStyles.label}>Image</span>
+                      <div className={styles.mediaCard}>
+                        <label
+                          className={styles.mediaUploadTarget}
+                          htmlFor={`product-image-${fileInputKey}`}
+                        >
+                          <Image
+                            className={`${styles.mediaThumb}${hasAnyImage ? "" : ` ${styles.mediaThumbPlaceholder}`}`}
+                            src={previewSrc}
+                            alt="Product preview"
+                            width={360}
+                            height={360}
+                            loader={passthroughImageLoader}
+                            unoptimized
+                          />
+                        </label>
+                        {hasLocalImage ? (
+                          <button
+                            type="button"
+                            className={styles.mediaDeleteButton}
+                            onClick={() => {
+                              setImageFile(null);
+                              setImagePreviewUrl("");
+                              setFileInputKey((prev) => prev + 1);
+                            }}
+                            aria-label="Remove image"
+                          >
+                            <Icon name="delete" size={16} />
+                          </button>
+                        ) : null}
+                        <input
+                          key={fileInputKey}
+                          id={`product-image-${fileInputKey}`}
+                          className={styles.mediaFileInput}
+                          type="file"
+                          accept="image/*"
+                          onClick={(e) => {
+                            e.currentTarget.value = null;
+                          }}
+                          onChange={(e) =>
+                            setImageFile(e.target.files?.[0] ?? null)
+                          }
+                        />
+                      </div>
+                    </div>
+                    <label className={fieldStyles.field}>
+                      <span className={fieldStyles.label}>Display</span>
+                      <Select
+                        className={styles.select}
+                        classNamePrefix="adminSelect"
+                        value={
+                          displayOptions.find(
+                            (option) => option.value === isDisplay,
+                          ) ?? null
+                        }
+                        onChange={(option) => setIsDisplay(option?.value ?? "")}
+                        options={displayOptions}
+                        menuPortalTarget={portalTarget}
+                        menuPosition="fixed"
+                        styles={selectMenuStyles}
+                      />
+                    </label>
+                  </div>
+                </>
+              )}
+            </form>
           );
         })()}
       </Modal>

@@ -152,7 +152,7 @@ export function middleware(request) {
   }
 
   // Protect API routes (except explicitly public ones)
-  const PUBLIC_API_ROUTES = ["/api/recaptcha"];
+  const PUBLIC_API_ROUTES = ["/api/recaptcha", "/api/geo"];
   const isApiRoute = pathname.startsWith("/api");
   const isPublicApiRoute = PUBLIC_API_ROUTES.some((route) => pathname.startsWith(route));
   

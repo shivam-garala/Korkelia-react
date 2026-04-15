@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
 import { toast } from "react-toastify";
@@ -39,6 +46,43 @@ const metalColorByCode = {
 const normalizeString = (value) => {
   if (value === null || value === undefined) return "";
   return String(value).trim();
+};
+
+/** Unwrap common API envelopes so design fields (e.g. total_price) sit on one object. */
+const unwrapVariantPayload = (raw) => {
+  if (raw == null) return null;
+  if (Array.isArray(raw)) return raw[0] ?? null;
+  if (typeof raw !== "object") return raw;
+  const inner =
+    raw?.data?.data ??
+    raw?.data?.design ??
+    (raw.data && typeof raw.data === "object" && !Array.isArray(raw.data)
+      ? raw.data
+      : null) ??
+    raw?.result ??
+    raw?.payload;
+  return inner && typeof inner === "object" ? inner : raw;
+};
+
+/** Prefer formatted total_price string, then numeric price, from design or product. */
+const pickTotalPrice = (source) => {
+  if (!source || typeof source !== "object") return "";
+  const candidates = [
+    source.total_price,
+    source.totalPrice,
+    source.price,
+    source.design?.total_price,
+    source.design?.totalPrice,
+  ];
+  for (const c of candidates) {
+    if (c === null || c === undefined) continue;
+    if (typeof c === "number" && Number.isFinite(c)) {
+      return String(c);
+    }
+    const s = normalizeString(c);
+    if (s) return s;
+  }
+  return "";
 };
 
 const normalizeLanguageToken = (value) => normalizeString(value).toLowerCase();
@@ -199,21 +243,17 @@ const resolveListingDefaults = (details) => {
   const diamondRate = diamondDetail?.diamond_rate ?? null;
   return {
     cut: normalizeString(
-      diamondDetail?.cut_master_id ?? diamondDetail?.cut_master?.id ?? ""
+      diamondDetail?.cut_master_id ?? diamondDetail?.cut_master?.id ?? "",
     ),
     quality: normalizeString(diamondRate?.diamond_type_id ?? ""),
     clarity: normalizeString(diamondRate?.clarity_id ?? ""),
     carat: normalizeString(
       diamondRate?.diamond_master?.carat ??
         diamondRate?.diamond_master_id?.carat ??
-        ""
+        "",
     ),
-    metal: normalizeString(
-      metalRate?.metal_id ?? metalRate?.metal?.id ?? ""
-    ),
-    karat: normalizeString(
-      metalRate?.karat_id ?? metalRate?.karat?.id ?? ""
-    ),
+    metal: normalizeString(metalRate?.metal_id ?? metalRate?.metal?.id ?? ""),
+    karat: normalizeString(metalRate?.karat_id ?? metalRate?.karat?.id ?? ""),
   };
 };
 
@@ -231,14 +271,15 @@ const resolveCategoryId = (details) => {
       design?.categoryId ??
       design?.product?.category_id ??
       design?.product?.categoryId ??
-      ""
+      "",
   );
 };
 
 const buildDesignCacheKey = (designId) =>
   designId ? `design:${designId}` : "";
 
-const hasIdValue = (value) => value !== null && value !== undefined && value !== "";
+const hasIdValue = (value) =>
+  value !== null && value !== undefined && value !== "";
 
 const getDesignIdCandidates = (entry) => {
   if (!entry) return [];
@@ -274,14 +315,20 @@ const matchesProductId = (entry, expectedId) => {
     entry?.design_variant?.product_id,
     entry?.designVariant?.product_id,
   ];
-  return candidates.some((value) => value !== null && value !== undefined && String(value) === expected);
+  return candidates.some(
+    (value) =>
+      value !== null && value !== undefined && String(value) === expected,
+  );
 };
 
 const matchesDesignId = (entry, expectedId) => {
   if (!entry || expectedId === null || expectedId === undefined) return false;
   const expected = String(expectedId);
   const candidates = getDesignIdCandidates(entry);
-  return candidates.some((value) => value !== null && value !== undefined && String(value) === expected);
+  return candidates.some(
+    (value) =>
+      value !== null && value !== undefined && String(value) === expected,
+  );
 };
 
 const readCachedProduct = (productId, designId = "") => {
@@ -308,20 +355,24 @@ const readCachedProduct = (productId, designId = "") => {
     }
     if (productId || designId) {
       const entries = Object.values(parsed).filter(
-        (entry) => entry && typeof entry === "object"
+        (entry) => entry && typeof entry === "object",
       );
       const strictMatch = entries.find(
         (entry) =>
           (!productId || matchesProductId(entry, productId)) &&
-          (!designId || matchesDesignId(entry, designId))
+          (!designId || matchesDesignId(entry, designId)),
       );
       if (strictMatch) return strictMatch;
       if (designId) {
-        const designMatch = entries.find((entry) => matchesDesignId(entry, designId));
+        const designMatch = entries.find((entry) =>
+          matchesDesignId(entry, designId),
+        );
         if (designMatch) return designMatch;
       }
       if (productId) {
-        const productMatch = entries.find((entry) => matchesProductId(entry, productId));
+        const productMatch = entries.find((entry) =>
+          matchesProductId(entry, productId),
+        );
         if (productMatch) return productMatch;
       }
     }
@@ -338,7 +389,7 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
     const raw = window.sessionStorage.getItem("product_list_cache");
     const cache = raw ? JSON.parse(raw) : {};
     if (typeof cache !== "object") return;
-    
+
     const productKey = String(productId);
     const existingProduct = cache[productKey] || {};
     const existingDesign =
@@ -355,7 +406,7 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
       variantDetails?.designVariantId ??
       "";
     const designKey = buildDesignCacheKey(designId);
-    
+
     // Merge variant details into the product cache
     // Store variantDetails as design since ProductGallery looks for design.images
     const incomingImages = Array.isArray(variantDetails?.images)
@@ -365,12 +416,16 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
       ...existingDesign,
       ...variantDetails,
       design_translation:
-        variantDetails?.design_translation ?? existingDesign?.design_translation,
+        variantDetails?.design_translation ??
+        existingDesign?.design_translation,
       design_translations:
-        variantDetails?.design_translations ?? existingDesign?.design_translations,
-      translations: variantDetails?.translations ?? existingDesign?.translations,
+        variantDetails?.design_translations ??
+        existingDesign?.design_translations,
+      translations:
+        variantDetails?.translations ?? existingDesign?.translations,
       design_variant_name:
-        variantDetails?.design_variant_name ?? existingDesign?.design_variant_name,
+        variantDetails?.design_variant_name ??
+        existingDesign?.design_variant_name,
       description: variantDetails?.description ?? existingDesign?.description,
       product: variantDetails?.product ?? existingDesign?.product,
       images: incomingImages ?? existingDesign?.images,
@@ -387,9 +442,9 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
     if (designKey) {
       cache[designKey] = nextProduct;
     }
-    
+
     window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
-    
+
     // Dispatch custom event to notify ProductGallery of cache update
     window.dispatchEvent(
       new CustomEvent("productCacheUpdated", {
@@ -399,7 +454,7 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
           userInitiated: options?.userInitiated === true,
           forceDesign: options?.forceDesign === true,
         },
-      })
+      }),
     );
   } catch (error) {
     console.error("Product cache update failed", error);
@@ -436,10 +491,10 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
       "";
     const designKey = buildDesignCacheKey(designId);
     const existingDesignFromKey = designKey
-      ? cache[designKey]?.design ??
+      ? (cache[designKey]?.design ??
         cache[designKey]?.design_variant ??
         cache[designKey]?.designVariant ??
-        null
+        null)
       : null;
     const existingDesign = existingDesignFromKey ?? existingProductDesign;
     const existingImages = existingDesign?.images;
@@ -450,17 +505,21 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
       (!designId || matchesDesignId(existingDesign, designId));
     const nextImages = canPreserveImages
       ? existingImages
-      : incomingDesign?.images ?? existingDesign?.images;
+      : (incomingDesign?.images ?? existingDesign?.images);
     const nextDesign = {
       ...existingDesign,
       ...incomingDesign,
       design_translation:
-        incomingDesign?.design_translation ?? existingDesign?.design_translation,
+        incomingDesign?.design_translation ??
+        existingDesign?.design_translation,
       design_translations:
-        incomingDesign?.design_translations ?? existingDesign?.design_translations,
-      translations: incomingDesign?.translations ?? existingDesign?.translations,
+        incomingDesign?.design_translations ??
+        existingDesign?.design_translations,
+      translations:
+        incomingDesign?.translations ?? existingDesign?.translations,
       design_variant_name:
-        incomingDesign?.design_variant_name ?? existingDesign?.design_variant_name,
+        incomingDesign?.design_variant_name ??
+        existingDesign?.design_variant_name,
       description: incomingDesign?.description ?? existingDesign?.description,
       product: incomingDesign?.product ?? existingDesign?.product,
       images: nextImages,
@@ -482,7 +541,9 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
     }
     window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
     window.dispatchEvent(
-      new CustomEvent("productCacheUpdated", { detail: { productId: productKey, designId } })
+      new CustomEvent("productCacheUpdated", {
+        detail: { productId: productKey, designId },
+      }),
     );
     return nextProduct;
   } catch (error) {
@@ -516,11 +577,17 @@ export default function ProductCustomizer({
   const [variantDesignAvailable, setVariantDesignAvailable] = useState(null);
   const [defaultsApplied, setDefaultsApplied] = useState(false);
   const [cut, setCut] = useState(() => normalizeString(defaultCutId));
-  const [quality, setQuality] = useState(() => normalizeString(defaultDiamondTypeId));
-  const [clarity, setClarity] = useState(() => normalizeString(defaultClarityId));
+  const [quality, setQuality] = useState(() =>
+    normalizeString(defaultDiamondTypeId),
+  );
+  const [clarity, setClarity] = useState(() =>
+    normalizeString(defaultClarityId),
+  );
   const [carat, setCarat] = useState(() => normalizeString(defaultCarat));
   const [metal, setMetal] = useState(() => normalizeString(defaultMetalId));
-  const [metalType, setMetalType] = useState(() => normalizeString(defaultKaratId));
+  const [metalType, setMetalType] = useState(() =>
+    normalizeString(defaultKaratId),
+  );
   const [size, setSize] = useState("");
   const [engraving, setEngraving] = useState("");
   const lastFilterQueryRef = useRef("");
@@ -599,7 +666,7 @@ export default function ProductCustomizer({
 
   const listingCategoryId = useMemo(
     () => resolveCategoryId(productDetails),
-    [productDetails]
+    [productDetails],
   );
 
   useEffect(() => {
@@ -619,7 +686,11 @@ export default function ProductCustomizer({
 
     const refreshListingDetails = async () => {
       try {
-        const list = await fetchProductListEcom(languageId, listingCategoryId, currencyCode);
+        const list = await fetchProductListEcom(
+          languageId,
+          listingCategoryId,
+          currencyCode,
+        );
         if (!active || !Array.isArray(list)) return;
         const matchById = (item) => {
           const id = item?.id ?? item?.product_id ?? item?.productId ?? null;
@@ -636,8 +707,8 @@ export default function ProductCustomizer({
           return String(itemDesignId) === String(designId);
         };
         const match = designId
-          ? list.find((item) => matchById(item) && matchByDesign(item)) ??
-            list.find((item) => matchById(item))
+          ? (list.find((item) => matchById(item) && matchByDesign(item)) ??
+            list.find((item) => matchById(item)))
           : list.find((item) => matchById(item));
         if (match) {
           const updated = updateCacheWithListing(productId, match, {
@@ -657,7 +728,15 @@ export default function ProductCustomizer({
     return () => {
       active = false;
     };
-  }, [productId, languageId, listingCategoryId, variantEnabled, designId, currency, currencyCode]);
+  }, [
+    productId,
+    languageId,
+    listingCategoryId,
+    variantEnabled,
+    designId,
+    currency,
+    currencyCode,
+  ]);
 
   useEffect(() => {
     const nextCut = normalizeString(defaultCutId);
@@ -679,12 +758,12 @@ export default function ProductCustomizer({
     setVariantEnabled(
       Boolean(
         nextCut ||
-          nextQuality ||
-          nextClarity ||
-          nextCarat ||
-          nextMetal ||
-          nextKarat
-      )
+        nextQuality ||
+        nextClarity ||
+        nextCarat ||
+        nextMetal ||
+        nextKarat,
+      ),
     );
     setDefaultsApplied(false);
     skipNextVariantFetchRef.current = false;
@@ -706,7 +785,7 @@ export default function ProductCustomizer({
 
   const listingDefaults = useMemo(
     () => resolveListingDefaults(productDetails),
-    [productDetails]
+    [productDetails],
   );
   const listingDesign =
     productDetails?.design ??
@@ -777,15 +856,19 @@ export default function ProductCustomizer({
       listingDesign?.is_filter_available ??
       productDetails?.is_filter_available ??
       filterData?.is_filter_available ??
-      ""
+      "",
   );
   const hideCutSection =
     filterAvailabilityValue === "2" ||
     filterAvailabilityValue === "3" ||
     filterAvailabilityValue === "4";
   const allowCutInQuery = filterAvailabilityValue !== "0" && !hideCutSection;
-  const hideCaratSection = filterAvailabilityValue === "2" || filterAvailabilityValue === "3";
-  const allowCaratInQuery = filterAvailabilityValue !== "0" && filterAvailabilityValue !== "4" && !hideCaratSection;
+  const hideCaratSection =
+    filterAvailabilityValue === "2" || filterAvailabilityValue === "3";
+  const allowCaratInQuery =
+    filterAvailabilityValue !== "0" &&
+    filterAvailabilityValue !== "4" &&
+    !hideCaratSection;
   const hideClaritySection = filterAvailabilityValue === "3";
   const hideSizeSection = filterAvailabilityValue === "3";
   const hideEngravingSection = filterAvailabilityValue === "3";
@@ -810,7 +893,7 @@ export default function ProductCustomizer({
       try {
         const { data } = await axiosClient.get(
           `/api/design/filter-dropdowns-ecom?${queryString}`,
-          { signal: controller.signal }
+          { signal: controller.signal },
         );
         const payload = data?.data ?? data;
         lastFilterQueryRef.current = queryString;
@@ -850,7 +933,9 @@ export default function ProductCustomizer({
         const id = normalizeString(rawId);
         const label = normalizeString(rawLabel);
         if (!id && !label) return null;
-        const codeKey = String(item?.cut_code ?? item?.code ?? "").toUpperCase();
+        const codeKey = String(
+          item?.cut_code ?? item?.code ?? "",
+        ).toUpperCase();
         const nameKey = label.toUpperCase();
         const src =
           cutImageByCode[codeKey] ||
@@ -901,7 +986,9 @@ export default function ProductCustomizer({
   }, [filterData]);
 
   const clarityOptions = useMemo(() => {
-    const list = Array.isArray(filterData?.clarities) ? filterData.clarities : [];
+    const list = Array.isArray(filterData?.clarities)
+      ? filterData.clarities
+      : [];
     return list
       .map((item) => {
         const rawValue =
@@ -941,7 +1028,8 @@ export default function ProductCustomizer({
     return clarityOptions.filter((opt) => opt.isLab);
   }, [clarityOptions, qualityOptions, quality]);
   const showQualitySelect = qualityOptions.length > 0;
-  const showClaritySelect = filteredClarityOptions.length > 0 && !hideClaritySection;
+  const showClaritySelect =
+    filteredClarityOptions.length > 0 && !hideClaritySection;
   const showDiamondTypeSection = showQualitySelect || showClaritySelect;
 
   const caratOptions = useMemo(() => {
@@ -949,11 +1037,7 @@ export default function ProductCustomizer({
     return list
       .map((item) => {
         const value =
-          item?.carat_name ??
-          item?.name ??
-          item?.carat ??
-          item?.value ??
-          item;
+          item?.carat_name ?? item?.name ?? item?.carat ?? item?.value ?? item;
         const label = normalizeString(value);
         return label ? label : null;
       })
@@ -973,14 +1057,14 @@ export default function ProductCustomizer({
           detail?.cut_master?.name ??
           detail?.cut_name ??
           detail?.cut ??
-          ""
+          "",
       );
       const caratValue = normalizeString(
         detail?.diamond_rate?.diamond_master?.carat ??
           detail?.diamond_rate?.diamond_master_id?.carat ??
           detail?.diamond_rate?.carat ??
           detail?.carat ??
-          ""
+          "",
       );
       if (!cutName || !caratValue) return;
       const key = cutName.toUpperCase();
@@ -1016,8 +1100,8 @@ export default function ProductCustomizer({
   }, [listingDesign, productDetails, variantDetails]);
   const diamondCaratLabel =
     filterAvailabilityValue === "4" && hasCenterDiamond
-    ? `${labels.centerPrefix}`
-    : labels.diamondCaratWeight;
+      ? `${labels.centerPrefix}`
+      : labels.diamondCaratWeight;
 
   const metalOptions = useMemo(() => {
     const list = Array.isArray(filterData?.metals) ? filterData.metals : [];
@@ -1039,9 +1123,10 @@ export default function ProductCustomizer({
         const value = normalizeString(rawValue);
         const label = normalizeString(rawLabel);
         if (!value && !label) return null;
-        const codeKey = String(item?.metal_code ?? item?.code ?? "").toUpperCase();
-        const color =
-          item?.color ?? metalColorByCode[codeKey] ?? "#e5e7eb";
+        const codeKey = String(
+          item?.metal_code ?? item?.code ?? "",
+        ).toUpperCase();
+        const color = item?.color ?? metalColorByCode[codeKey] ?? "#e5e7eb";
         return {
           value: value || label,
           label: label.toUpperCase() || "METAL",
@@ -1075,7 +1160,10 @@ export default function ProductCustomizer({
           rawId ??
           "";
         const label = normalizeString(rawLabel);
-        const value = rawId !== null && rawId !== undefined ? normalizeString(rawId) : label;
+        const value =
+          rawId !== null && rawId !== undefined
+            ? normalizeString(rawId)
+            : label;
         if (!value) return null;
         return {
           value,
@@ -1090,14 +1178,19 @@ export default function ProductCustomizer({
   }, [filterData]);
 
   const filteredMetalTypeOptions = useMemo(() => {
-    const selectedMetalOption = metalOptions.find((opt) => opt.value === metal) ?? null;
+    const selectedMetalOption =
+      metalOptions.find((opt) => opt.value === metal) ?? null;
     if (!selectedMetalOption) return metalTypeOptions;
     const isPlatinumMetal = Boolean(selectedMetalOption.isPlatinum);
-    return metalTypeOptions.filter((opt) => Boolean(opt.isPlatinum) === isPlatinumMetal);
+    return metalTypeOptions.filter(
+      (opt) => Boolean(opt.isPlatinum) === isPlatinumMetal,
+    );
   }, [metal, metalOptions, metalTypeOptions]);
 
   const sizeOptions = useMemo(() => {
-    const list = Array.isArray(filterData?.ring_sizes) ? filterData.ring_sizes : [];
+    const list = Array.isArray(filterData?.ring_sizes)
+      ? filterData.ring_sizes
+      : [];
     return list
       .map((item) => {
         const rawValue = item?.value ?? item?.size ?? item?.id ?? "";
@@ -1142,8 +1235,8 @@ export default function ProductCustomizer({
         backgroundColor: state.isSelected
           ? "var(--color-primary-soft)"
           : state.isFocused
-          ? "color-mix(in srgb, var(--color-primary), transparent 85%)"
-          : "transparent",
+            ? "color-mix(in srgb, var(--color-primary), transparent 85%)"
+            : "transparent",
         color: "var(--color-heading)",
         ":active": {
           backgroundColor: "var(--color-primary-soft)",
@@ -1166,7 +1259,7 @@ export default function ProductCustomizer({
         color: "var(--color-heading)",
       }),
     }),
-    []
+    [],
   );
   const qualityDropdownStyles = useMemo(
     () => ({
@@ -1176,7 +1269,7 @@ export default function ProductCustomizer({
         minWidth: 100,
       }),
     }),
-    [dropdownStyles]
+    [dropdownStyles],
   );
 
   useEffect(() => {
@@ -1222,25 +1315,35 @@ export default function ProductCustomizer({
 
   useEffect(() => {
     if (!filteredMetalTypeOptions.length) return;
-    if (metalType && filteredMetalTypeOptions.some((opt) => opt.value === metalType)) {
+    if (
+      metalType &&
+      filteredMetalTypeOptions.some((opt) => opt.value === metalType)
+    ) {
       return;
     }
     setMetalType(filteredMetalTypeOptions[0].value);
   }, [filteredMetalTypeOptions, metalType]);
 
   useEffect(() => {
-    if (size && sizeOptions.length && !sizeOptions.some((opt) => opt.value === size)) {
+    if (
+      size &&
+      sizeOptions.length &&
+      !sizeOptions.some((opt) => opt.value === size)
+    ) {
       setSize("");
     }
   }, [sizeOptions, size]);
 
   const selectedCutId = cutOptions.find((opt) => opt.id === cut)?.id ?? "";
-  const selectedQualityId = qualityOptions.find((opt) => opt.value === quality)?.value ?? "";
+  const selectedQualityId =
+    qualityOptions.find((opt) => opt.value === quality)?.value ?? "";
   const selectedClarityId =
     filteredClarityOptions.find((opt) => opt.value === clarity)?.value ?? "";
-  const selectedMetalId = metalOptions.find((opt) => opt.value === metal)?.value ?? "";
+  const selectedMetalId =
+    metalOptions.find((opt) => opt.value === metal)?.value ?? "";
   const selectedKaratId =
-    filteredMetalTypeOptions.find((opt) => opt.value === metalType)?.value ?? "";
+    filteredMetalTypeOptions.find((opt) => opt.value === metalType)?.value ??
+    "";
   const selectedCarat = carat ? String(carat) : "";
 
   const shouldSkipVariantFetch = useMemo(() => {
@@ -1288,11 +1391,10 @@ export default function ProductCustomizer({
       normalizeString(variantDetails?.design_variant_name) ||
       normalizeString(variantDetails?.product_name)
     : "";
-  const variantDescription =
-    variantEnabled
-      ? resolveTranslationDescription(variantTranslationSource, languageId) ||
-        normalizeString(variantDetails?.description ?? "")
-      : "";
+  const variantDescription = variantEnabled
+    ? resolveTranslationDescription(variantTranslationSource, languageId) ||
+      normalizeString(variantDetails?.description ?? "")
+    : "";
 
   const productTranslationSource =
     productDetails?.design?.design_translation ??
@@ -1312,10 +1414,13 @@ export default function ProductCustomizer({
     productDetails?.product_translations ??
     productDetails?.productTranslations ??
     null;
-  const translatedTitle = resolveTranslationName(productTranslationSource, languageId);
+  const translatedTitle = resolveTranslationName(
+    productTranslationSource,
+    languageId,
+  );
   const translatedDescription = resolveTranslationDescription(
     productTranslationSource,
-    languageId
+    languageId,
   );
 
   const productTitle =
@@ -1323,8 +1428,8 @@ export default function ProductCustomizer({
     translatedTitle ||
     normalizeString(productDetails?.design?.design_variant_name) ||
     normalizeString(productDetails?.product_name) ||
-    normalizeString(title)   
-    // || "PRODUCT NAME";
+    normalizeString(title);
+  // || "PRODUCT NAME";
   const productDescription =
     variantDescription ||
     translatedDescription ||
@@ -1335,19 +1440,19 @@ export default function ProductCustomizer({
         productDetails?.design_translations ??
         productDetails?.design?.description ??
         productDetails?.description,
-      languageId
+      languageId,
     ) ||
     normalizeString(productDetails?.design?.design_variant_name) ||
     normalizeString(productDetails?.product_name) ||
     "";
   const productBasePrice =
-    // normalizeString(productDetails?.total_price) ||
-    normalizeString(productDetails?.design?.total_price) ||
+    pickTotalPrice(productDetails?.design) ||
+    pickTotalPrice(productDetails) ||
     "";
 
   useEffect(() => {
     let active = true;
-    
+
     if (!variantEnabled) {
       setVariantDetails(null);
       setVariantAdjustedFilters(null);
@@ -1358,7 +1463,7 @@ export default function ProductCustomizer({
         active = false;
       };
     }
-    
+
     if (!productId || !selectedMetalId || !selectedKaratId) {
       setVariantDetails(null);
       setVariantAdjustedFilters(null);
@@ -1389,6 +1494,7 @@ export default function ProductCustomizer({
 
     if (skipNextVariantFetchRef.current) {
       skipNextVariantFetchRef.current = false;
+      if (active) setVariantLoading(false);
       return () => {
         active = false;
       };
@@ -1414,10 +1520,13 @@ export default function ProductCustomizer({
     if (languageId) params.set("language_id", String(languageId));
     if (currencyCode) params.set("currency", String(currencyCode));
     if (selectedMetalId) params.set("metal_id", String(selectedMetalId));
-    if (selectedQualityId) params.set("diamond_type_id", String(selectedQualityId));
+    if (selectedQualityId)
+      params.set("diamond_type_id", String(selectedQualityId));
     if (selectedClarityId) params.set("clarity_id", String(selectedClarityId));
-    if (selectedCarat && allowCaratInQuery) params.set("carat", String(selectedCarat));
-    if (selectedCutId && allowCutInQuery) params.set("cut_id", String(selectedCutId));
+    if (selectedCarat && allowCaratInQuery)
+      params.set("carat", String(selectedCarat));
+    if (selectedCutId && allowCutInQuery)
+      params.set("cut_id", String(selectedCutId));
     if (selectedKaratId) {
       params.set("karat_id", String(selectedKaratId));
     }
@@ -1431,7 +1540,9 @@ export default function ProductCustomizer({
       variantFromCacheRef.current = true;
       lastVariantQueryRef.current = queryString;
       if (active) {
-        setVariantDetails((prev) => (prev === listingDesign ? prev : listingDesign));
+        setVariantDetails((prev) =>
+          prev === listingDesign ? prev : listingDesign,
+        );
         setVariantAdjustedFilters(null);
         setVariantDesignAvailable(null);
         setVariantLoading(false);
@@ -1452,25 +1563,27 @@ export default function ProductCustomizer({
     const loadVariant = async () => {
       try {
         const { data } = await axiosClient.get(
-          `/api/design/variant-details-ecom?${queryString}`
+          `/api/design/variant-details-ecom?${queryString}`,
         );
         if (active) {
           const response = data ?? null;
-          const payload = response?.data ?? response ?? null;
+          const payload = unwrapVariantPayload(
+            response?.data ?? response ?? null,
+          );
           setVariantDetails(payload);
           setVariantAdjustedFilters(
             response?.adjusted_filters ??
               payload?.adjusted_filters ??
               response?.adjustedFilters ??
               payload?.adjustedFilters ??
-              null
+              null,
           );
           setVariantDesignAvailable(
             response?.is_design_avl ??
               payload?.is_design_avl ??
               response?.isDesignAvailable ??
               payload?.isDesignAvailable ??
-              null
+              null,
           );
         }
       } catch (error) {
@@ -1537,12 +1650,20 @@ export default function ProductCustomizer({
         adjusted.diamondTypeId ??
         adjusted.type_id ??
         adjusted.typeId ??
-        ""
+        "",
     );
-    const nextClarity = normalizeString(adjusted.clarity_id ?? adjusted.clarityId ?? "");
-    const nextCarat = normalizeString(adjusted.carat ?? adjusted.carat_weight ?? adjusted.caratWeight ?? "");
-    const nextMetal = normalizeString(adjusted.metal_id ?? adjusted.metalId ?? "");
-    const nextKarat = normalizeString(adjusted.karat_id ?? adjusted.karatId ?? "");
+    const nextClarity = normalizeString(
+      adjusted.clarity_id ?? adjusted.clarityId ?? "",
+    );
+    const nextCarat = normalizeString(
+      adjusted.carat ?? adjusted.carat_weight ?? adjusted.caratWeight ?? "",
+    );
+    const nextMetal = normalizeString(
+      adjusted.metal_id ?? adjusted.metalId ?? "",
+    );
+    const nextKarat = normalizeString(
+      adjusted.karat_id ?? adjusted.karatId ?? "",
+    );
 
     const canUseOption = (value, options, matcher) => {
       if (!value) return false;
@@ -1551,36 +1672,59 @@ export default function ProductCustomizer({
     };
 
     if (!hideCutSection) {
-      const canUseCut = canUseOption(nextCut, cutOptions, (opt, value) => opt.id === value);
+      const canUseCut = canUseOption(
+        nextCut,
+        cutOptions,
+        (opt, value) => opt.id === value,
+      );
       if (nextCut && nextCut !== cut && canUseCut) {
         setCut(nextCut);
       }
     }
 
-    const canUseQuality = canUseOption(nextQuality, qualityOptions, (opt, value) => opt.value === value);
+    const canUseQuality = canUseOption(
+      nextQuality,
+      qualityOptions,
+      (opt, value) => opt.value === value,
+    );
     if (nextQuality && nextQuality !== quality && canUseQuality) {
       setQuality(nextQuality);
     }
 
-    const canUseClarity = canUseOption(nextClarity, clarityOptions, (opt, value) => opt.value === value);
+    const canUseClarity = canUseOption(
+      nextClarity,
+      clarityOptions,
+      (opt, value) => opt.value === value,
+    );
     if (nextClarity && nextClarity !== clarity && canUseClarity) {
       setClarity(nextClarity);
     }
 
     if (!hideCaratSection) {
-      const canUseCarat = nextCarat && (!caratOptions.length || caratOptions.includes(nextCarat));
+      const canUseCarat =
+        nextCarat && (!caratOptions.length || caratOptions.includes(nextCarat));
       if (nextCarat && nextCarat !== carat && canUseCarat) {
         setCarat(nextCarat);
       }
     }
 
-    const canUseMetal = canUseOption(nextMetal, metalOptions, (opt, value) => opt.value === value);
+    const canUseMetal = canUseOption(
+      nextMetal,
+      metalOptions,
+      (opt, value) => opt.value === value,
+    );
     if (nextMetal && nextMetal !== metal && canUseMetal) {
       setMetal(nextMetal);
     }
 
-    const metalTypeList = filteredMetalTypeOptions.length ? filteredMetalTypeOptions : metalTypeOptions;
-    const canUseKarat = canUseOption(nextKarat, metalTypeList, (opt, value) => opt.value === value);
+    const metalTypeList = filteredMetalTypeOptions.length
+      ? filteredMetalTypeOptions
+      : metalTypeOptions;
+    const canUseKarat = canUseOption(
+      nextKarat,
+      metalTypeList,
+      (opt, value) => opt.value === value,
+    );
     if (nextKarat && nextKarat !== metalType && canUseKarat) {
       setMetalType(nextKarat);
     }
@@ -1631,7 +1775,9 @@ export default function ProductCustomizer({
     // First check from variantDetails or productDetails if available
     const metalRate = variantEnabled
       ? variantDetails?.metal_rate
-      : productDetails?.design?.metal_rate ?? productDetails?.design_variant?.metal_rate ?? productDetails?.designVariant?.metal_rate;
+      : (productDetails?.design?.metal_rate ??
+        productDetails?.design_variant?.metal_rate ??
+        productDetails?.designVariant?.metal_rate);
     const metalNameFromDetails = metalRate?.metal?.metal_name ?? "";
     if (metalNameFromDetails) {
       return normalizeString(metalNameFromDetails).toLowerCase() === "platinum";
@@ -1642,13 +1788,9 @@ export default function ProductCustomizer({
     return normalizeString(metalNameFromOption).toLowerCase() === "platinum";
   }, [variantEnabled, variantDetails, productDetails, metalOptions, metal]);
 
-  const variantPrice =
-    variantDetails?.total_price ??
-    variantDetails?.price ??
-    variantDetails?.rate ??
-    variantDetails?.metal_rate ??
-    null;
-  const displayPrice = variantPrice ?? (productBasePrice || null);
+  const variantPriceStr = pickTotalPrice(variantDetails);
+  const displayPrice =
+    variantPriceStr || (productBasePrice ? productBasePrice : null);
   const shouldShowPrice = true;
 
   return (
@@ -1680,7 +1822,11 @@ export default function ProductCustomizer({
                   }}
                 >
                   <div className={styles.cutIcon} aria-hidden>
-                    <img className={styles.cutIconImage} src={item.src} alt="" />
+                    <img
+                      className={styles.cutIconImage}
+                      src={item.src}
+                      alt=""
+                    />
                   </div>
                   <div className={styles.cutLabel}>{item.label}</div>
                 </button>
@@ -1694,7 +1840,9 @@ export default function ProductCustomizer({
           <>
             <div className={styles.gridFields}>
               <div className={styles.fieldTitle}>{labels.diamondQuality}</div>
-              <div style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
+              <div
+                style={{ display: "flex", flexDirection: "row", gap: "16px" }}
+              >
                 {showQualitySelect ? (
                   <div>
                     <Select
@@ -1702,7 +1850,10 @@ export default function ProductCustomizer({
                       classNamePrefix="customizer"
                       instanceId={qualityId}
                       styles={qualityDropdownStyles}
-                      value={qualityOptions.find((opt) => opt.value === quality) ?? null}
+                      value={
+                        qualityOptions.find((opt) => opt.value === quality) ??
+                        null
+                      }
                       options={qualityOptions}
                       onChange={(option) => {
                         markVariantInteraction();
@@ -1719,7 +1870,11 @@ export default function ProductCustomizer({
                       classNamePrefix="customizer"
                       instanceId={clarityId}
                       styles={dropdownStyles}
-                      value={filteredClarityOptions.find((opt) => opt.value === clarity) ?? null}
+                      value={
+                        filteredClarityOptions.find(
+                          (opt) => opt.value === clarity,
+                        ) ?? null
+                      }
                       options={filteredClarityOptions}
                       onChange={(option) => {
                         markVariantInteraction();
@@ -1785,7 +1940,9 @@ export default function ProductCustomizer({
         ) : null}
 
         <div className={styles.fieldTitle}>{labels.selectMetalColor}</div>
-        <div className={`${styles.metalRow}${language === "fi" ? ` ${styles.metalRowWrap}` : ""}`}>
+        <div
+          className={`${styles.metalRow}${language === "fi" ? ` ${styles.metalRowWrap}` : ""}`}
+        >
           {metalOptions.map((item) => (
             <button
               key={item.value}
@@ -1796,7 +1953,11 @@ export default function ProductCustomizer({
                 setMetal(item.value);
               }}
             >
-              <span className={styles.dot} style={{ background: item.color }} aria-hidden />
+              <span
+                className={styles.dot}
+                style={{ background: item.color }}
+                aria-hidden
+              />
               <span className={styles.dotLabel}>{item.label}</span>
             </button>
           ))}
@@ -1824,7 +1985,9 @@ export default function ProductCustomizer({
                   ))}
                 </div>
               </div>
-              {showSizeSection ? <div className={styles.divider} aria-hidden /> : null}
+              {showSizeSection ? (
+                <div className={styles.divider} aria-hidden />
+              ) : null}
             </>
           ) : null}
           {showSizeSection ? (
@@ -1878,7 +2041,11 @@ export default function ProductCustomizer({
           </>
         ) : null}
 
-        <button className={styles.enquire} type="button" onClick={() => router.push("/appointment")}>
+        <button
+          className={styles.enquire}
+          type="button"
+          onClick={() => router.push("/appointment")}
+        >
           {labels.enquireNow}
         </button>
       </div>

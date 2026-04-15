@@ -2,40 +2,55 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useEffect, useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Dropdown from "./Dropdown";
 import NavMenuOverlay from "./NavMenuOverlay";
 import styles from "./SiteHeader.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import ShareProductModal from "../Product/ShareProductModal.jsx";
 import axiosClient from "../../lib/axiosClient.js";
+import {
+  optionEuroForPublicDropdown,
+  optionFromPublicRateRow,
+} from "../../constants/currencyOptions.js";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
   const { language, setLanguage, currency, setCurrency, t } = useI18n();
-  const [isSgdVisible, setIsSgdVisible] = useState(true);
+  const [publicRates, setPublicRates] = useState([]);
 
   useEffect(() => {
     let cancelled = false;
     axiosClient
       .get("/api/currencyRate/public-visible")
       .then(({ data }) => {
+        if (cancelled) return;
         const list = Array.isArray(data?.data) ? data.data : [];
-        const hasSgd = list.some(
-          (item) => String(item.currency_code || "").toUpperCase() === "SGD"
-        );
-        if (!cancelled) {
-          setIsSgdVisible(hasSgd);
-        }
+        setPublicRates(list);
       })
       .catch(() => {
-        // On error, keep default visibility (true) so UI still works
+        if (!cancelled) setPublicRates([]);
       });
-
     return () => {
       cancelled = true;
     };
   }, []);
+
+  /** Admin-visible rates; ensure EUR appears when selected but not returned by API (e.g. CN geo fallback). */
+  const currencyDropdownOptions = useMemo(() => {
+    const mapped = publicRates.map(optionFromPublicRateRow).filter(Boolean);
+    if (mapped.length === 0) {
+      return [optionEuroForPublicDropdown()];
+    }
+    const hasEur = mapped.some(
+      (o) => String(o?.value ?? "").trim().toLowerCase() === "eur",
+    );
+    if (currency === "eur" && !hasEur) {
+      return [optionEuroForPublicDropdown(), ...mapped];
+    }
+    return mapped;
+  }, [publicRates, currency]);
+
   const languageLabels =
     language === "fi"
       ? { en: "Englanti", fi: "Suomi" }
@@ -64,31 +79,16 @@ export default function SiteHeader() {
             },
           ]}
         />
-        <Dropdown
-          ariaLabel={t("header.currency")}
-          leadingIcon="currency"
-          value={currency}
-          onChange={setCurrency}
-          options={[
-            {
-              value: "eur",
-              label: "Euro",
-              icon: "/icons/euro.png",
-              iconAlt: "Euro symbol",
-            },
-            ...(isSgdVisible
-              ? [
-                  {
-                    value: "usd",
-                    label: "Singapore Dollar",
-                    icon: "/icons/dollar.png",
-                    iconAlt: "Dollar symbol",
-                  },
-                ]
-              : []),
-          ]}
-          triggerClassName={styles.currencyTrigger}
-        />
+        <div className={styles.currencyRow}>
+          <Dropdown
+            ariaLabel={t("header.currency")}
+            leadingIcon="currency"
+            value={currency}
+            onChange={setCurrency}
+            options={currencyDropdownOptions}
+            triggerClassName={styles.currencyTrigger}
+          />
+        </div>
       </div>
 
       <div className={styles.topRight}>

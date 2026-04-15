@@ -1,6 +1,6 @@
 'use client';
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import AdminHeader from "../../../components/AdminHeader/AdminHeader.jsx";
@@ -136,6 +136,21 @@ function formatDiamondMasterLabel(item, fallbackId) {
   return carat !== null && carat !== undefined ? String(carat) : "-";
 }
 
+function buildDiamondRateUpdatePayload(raw, rate) {
+  return {
+    diamond_master_id: Number(
+      pickValue(raw, ["diamond_master_id", "diamondMasterId", "diamond_master"])
+    ),
+    diamond_type_id: Number(
+      pickValue(raw, ["diamond_type_id", "diamondTypeId", "diamond_type"])
+    ),
+    clarity_id: Number(
+      pickValue(raw, ["clarity_id", "clarityId", "diamond_clarity_id"])
+    ),
+    rate: Number(rate),
+  };
+}
+
 export default function DiamondRatePage() {
   const pathname = usePathname();
   const router = useRouter();
@@ -173,6 +188,9 @@ export default function DiamondRatePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [inlineRateEditId, setInlineRateEditId] = useState(null);
+  const [inlineRateDraft, setInlineRateDraft] = useState("");
+  const [savingRateId, setSavingRateId] = useState(null);
 
   const [diamondMasterId, setDiamondMasterId] = useState("");
   const [diamondTypeId, setDiamondTypeId] = useState("");
@@ -351,28 +369,162 @@ export default function DiamondRatePage() {
     setDeleteTarget(null);
   };
 
-  const columns = [
-    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
-    { key: "diamond_master", header: "Carat", filterable: true, filterPlaceholder: "Search Carat" },
-    { key: "diamond_type", header: "Diamond Type", filterable: true, filterPlaceholder: "Search Type" },
-    { key: "clarity", header: "Clarity", filterable: true, filterPlaceholder: "Search Clarity" },
-    { key: "rate", header: "Rate Per Carat", filterable: true, filterPlaceholder: "Search Rate Per Carat" },
-    {
-      key: "actions",
-      header: "Action",
-      filterable: false,
-      render: (row) => (
-        <div className={styles.actions}>
-          <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
-            Edit
-          </Button>
-          <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
-            Delete
-          </Button>
-        </div>
-      ),
+  const cancelInlineRateEdit = useCallback(() => {
+    setInlineRateEditId(null);
+    setInlineRateDraft("");
+  }, []);
+
+  const startInlineRateEdit = useCallback(
+    (row) => {
+      if (savingRateId) return;
+      const current = row.rate === "-" ? "" : String(row.rate);
+      setInlineRateEditId(row.id);
+      setInlineRateDraft(current);
     },
-  ];
+    [savingRateId]
+  );
+
+  const commitInlineRateEdit = useCallback(
+    async (row, draftValue) => {
+      if (savingRateId) return;
+      const trimmed = String(draftValue ?? "").trim();
+      if (trimmed === "") {
+        cancelInlineRateEdit();
+        return;
+      }
+      const next = Number(trimmed);
+      if (Number.isNaN(next)) {
+        cancelInlineRateEdit();
+        return;
+      }
+      const prevRaw = pickValue(row._raw, ["rate", "diamond_rate", "diamondRate", "value"]);
+      const prevNum = Number(prevRaw);
+      if (!Number.isNaN(prevNum) && prevNum === next) {
+        cancelInlineRateEdit();
+        return;
+      }
+      const raw = row._raw;
+      const payload = buildDiamondRateUpdatePayload(raw, next);
+      if (
+        [payload.diamond_master_id, payload.diamond_type_id, payload.clarity_id].some((n) =>
+          Number.isNaN(n)
+        )
+      ) {
+        cancelInlineRateEdit();
+        return;
+      }
+      setSavingRateId(row.id);
+      const result = await dispatch(updateDiamondRate({ id: row.id, payload }));
+      setSavingRateId(null);
+      if (!result?.error) {
+        await dispatch(fetchDiamondRates());
+        cancelInlineRateEdit();
+      }
+    },
+    [savingRateId, dispatch, cancelInlineRateEdit]
+  );
+
+  const columns = useMemo(
+    () => [
+      { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
+      { key: "diamond_master", header: "Carat", filterable: true, filterPlaceholder: "Search Carat" },
+      {
+        key: "diamond_type",
+        header: "Diamond Type",
+        filterable: true,
+        filterPlaceholder: "Search Type",
+      },
+      { key: "clarity", header: "Clarity", filterable: true, filterPlaceholder: "Search Clarity" },
+      {
+        key: "rate",
+        header: "Rate Per Carat",
+        filterable: true,
+        filterPlaceholder: "Search Rate Per Carat",
+        render: (row) => {
+          const isEditing = inlineRateEditId === row.id;
+          const isSaving = savingRateId === row.id && isEditing;
+          if (isEditing) {
+            return (
+              <div className={styles.inlineRateCell}>
+                <input
+                  type="number"
+                  step="0.01"
+                  className={styles.inlineRateInput}
+                  value={inlineRateDraft}
+                  onChange={(e) => setInlineRateDraft(e.target.value)}
+                  onBlur={(e) => void commitInlineRateEdit(row, e.target.value)}
+                  onKeyDown={(e) => {
+                    if (e.key === "Enter") {
+                      e.preventDefault();
+                      e.currentTarget.blur();
+                    }
+                    if (e.key === "Escape") {
+                      e.preventDefault();
+                      cancelInlineRateEdit();
+                    }
+                  }}
+                  disabled={isSaving}
+                  autoFocus
+                  aria-label="Rate per carat"
+                />
+                {isSaving ? <span className={styles.inlineRateSaving}>Saving…</span> : null}
+              </div>
+            );
+          }
+          return (
+            <div className={styles.inlineRateCell}>
+              <div className={styles.inlineRateView}>
+                <button
+                  type="button"
+                  className={styles.inlineRateTrigger}
+                  onClick={() => startInlineRateEdit(row)}
+                  disabled={Boolean(savingRateId)}
+                  title="Click to edit rate"
+                >
+                  {row.rate}
+                </button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon="edit"
+                  iconOnly
+                  onClick={() => startInlineRateEdit(row)}
+                  disabled={Boolean(savingRateId)}
+                  aria-label="Edit rate per carat"
+                  title="Edit rate"
+                >
+                  Edit rate
+                </Button>
+              </div>
+            </div>
+          );
+        },
+      },
+      {
+        key: "actions",
+        header: "Action",
+        filterable: false,
+        render: (row) => (
+          <div className={styles.actions}>
+            <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
+              Edit
+            </Button>
+            <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
+              Delete
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    [
+      inlineRateEditId,
+      inlineRateDraft,
+      savingRateId,
+      cancelInlineRateEdit,
+      commitInlineRateEdit,
+      startInlineRateEdit,
+    ]
+  );
 
   return (
     <div className={layout.page}>

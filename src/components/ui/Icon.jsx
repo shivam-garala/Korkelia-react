@@ -1,5 +1,38 @@
 "use client";
 
+/**
+ * Right-pointing icons (24×24, `fill="currentColor"`):
+ * - `arrowRight` / `arrow-right` — bar + head (navigation / “next”)
+ * - `chevronRight` / `chevron-right` — compact › (menus, breadcrumbs)
+ * - `play` — triangle forward (media)
+ */
+const ARROW_RIGHT_ICON = {
+  viewBox: "0 0 24 24",
+  paths: [
+    "M4 11h11.17l-2.59-2.59L14 7l6 6-6 6-1.41-1.41L15.17 13H4v-2z",
+  ],
+};
+
+const CHEVRON_RIGHT_ICON = {
+  viewBox: "0 0 24 24",
+  paths: [
+    "M8.59 16.59L13.17 12 8.59 7.41 10 6l6 6-6 6-1.41-1.41z",
+  ],
+};
+
+/**
+ * Bold rounded checkmark (stroke) — short leg upper-right → bend → long leg to upper-left.
+ * Same geometry as Feather “check”; use `className` / parent color for green (#15803d etc.).
+ */
+const CHECK_ICON = {
+  viewBox: "0 0 24 24",
+  paths: [],
+  stroke: {
+    d: "M20 6L9 17l-5-5",
+    width: 2.75,
+  },
+};
+
 const ICONS = {
   search: {
     viewBox: "0 0 24 24",
@@ -140,30 +173,44 @@ const ICONS = {
       "M6.23 8.73a1 1 0 0 1 1.41 0L12 13.09l4.36-4.36a1 1 0 0 1 1.41 1.41l-5.07 5.07a1 1 0 0 1-1.41 0L6.23 10.14a1 1 0 0 1 0-1.41z",
     ],
   },
+  check: CHECK_ICON,
+  checkmark: CHECK_ICON,
 };
 
 export default function Icon({ name, size = 16, className, title }) {
   const icon = ICONS[name];
   if (!icon) return null;
+  const useStroke = Boolean(icon.stroke?.d);
   return (
     <svg
       className={className}
       viewBox={icon.viewBox}
       width={size}
       height={size}
-      fill="currentColor"
+      fill={useStroke ? "none" : "currentColor"}
       aria-hidden={title ? undefined : true}
       role={title ? "img" : "presentation"}
     >
       {title ? <title>{title}</title> : null}
-      {icon.paths.map((path) => (
+      {useStroke ? (
         <path
-          key={path}
-          d={path}
-          fillRule={icon.fillRule}
-          clipRule={icon.clipRule}
+          d={icon.stroke.d}
+          fill="none"
+          stroke="currentColor"
+          strokeWidth={icon.stroke.width ?? 2.5}
+          strokeLinecap="round"
+          strokeLinejoin="round"
         />
-      ))}
+      ) : (
+        icon.paths.map((path) => (
+          <path
+            key={path}
+            d={path}
+            fillRule={icon.fillRule}
+            clipRule={icon.clipRule}
+          />
+        ))
+      )}
     </svg>
   );
 }
