@@ -102,14 +102,20 @@ export default function CurrencyRatePage() {
   }, [rates]);
 
   const currencySelectOptions = useMemo(() => {
+    const availableOptions = CURRENCY_OPTIONS.filter(
+      (option) => String(option?.value ?? "").toUpperCase() !== "EUR"
+    );
     const code = String(currencyCode || "").toUpperCase();
-    if (code && !getCurrencyOption(code)) {
+    const isListed = availableOptions.some(
+      (option) => String(option?.value ?? "").toUpperCase() === code
+    );
+    if (code && !isListed) {
       return [
         { value: code, label: `${code} — (saved code; pick a listed currency to replace)` },
-        ...CURRENCY_OPTIONS,
+        ...availableOptions,
       ];
     }
-    return CURRENCY_OPTIONS;
+    return availableOptions;
   }, [currencyCode]);
 
   const filteredRows = useMemo(() => {

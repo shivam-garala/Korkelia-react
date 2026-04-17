@@ -1513,6 +1513,7 @@ export default function DesignVariantPage() {
                   iconPosition="right"
                   iconOnly
                   type="button"
+                  className={crudStyles.inlineRateSaveButton}
                   disabled={isSaving}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() =>
@@ -1613,6 +1614,7 @@ export default function DesignVariantPage() {
                   iconPosition="right"
                   iconOnly
                   type="button"
+                  className={crudStyles.inlineRateSaveButton}
                   disabled={isSaving}
                   onMouseDown={(e) => e.preventDefault()}
                   onClick={() =>

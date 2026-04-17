@@ -22,7 +22,7 @@ const CHEVRON_RIGHT_ICON = {
 
 /**
  * Bold rounded checkmark (stroke) — short leg upper-right → bend → long leg to upper-left.
- * Same geometry as Feather “check”; use `className` / parent color for green (#15803d etc.).
+ * Green ring matches common “success” affordance; checkmark still follows `currentColor`.
  */
 const CHECK_ICON = {
   viewBox: "0 0 24 24",
@@ -181,6 +181,7 @@ export default function Icon({ name, size = 16, className, title }) {
   const icon = ICONS[name];
   if (!icon) return null;
   const useStroke = Boolean(icon.stroke?.d);
+  const ring = icon.ring;
   return (
     <svg
       className={className}
@@ -192,6 +193,16 @@ export default function Icon({ name, size = 16, className, title }) {
       role={title ? "img" : "presentation"}
     >
       {title ? <title>{title}</title> : null}
+      {ring ? (
+        <circle
+          cx={ring.cx}
+          cy={ring.cy}
+          r={ring.r}
+          fill="none"
+          stroke={ring.color ?? "#16a34a"}
+          strokeWidth={ring.width ?? 1.5}
+        />
+      ) : null}
       {useStroke ? (
         <path
           d={icon.stroke.d}

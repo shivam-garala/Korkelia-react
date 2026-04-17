@@ -446,28 +446,50 @@ export default function DiamondRatePage() {
           if (isEditing) {
             return (
               <div className={styles.inlineRateCell}>
-                <input
-                  type="number"
-                  step="0.01"
-                  className={styles.inlineRateInput}
-                  value={inlineRateDraft}
-                  onChange={(e) => setInlineRateDraft(e.target.value)}
-                  onBlur={(e) => void commitInlineRateEdit(row, e.target.value)}
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      e.currentTarget.blur();
+                <div className={styles.inlineFieldRow}>
+                  <input
+                    type="number"
+                    step="0.01"
+                    className={styles.inlineRateInput}
+                    value={inlineRateDraft}
+                    onChange={(e) => setInlineRateDraft(e.target.value)}
+                    onBlur={(e) => void commitInlineRateEdit(row, e.target.value)}
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        void commitInlineRateEdit(row, inlineRateDraft);
+                      }
+                      if (e.key === "Escape") {
+                        e.preventDefault();
+                        cancelInlineRateEdit();
+                      }
+                    }}
+                    disabled={isSaving}
+                    autoFocus
+                    aria-label="Rate per carat"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon="check"
+                    iconPosition="right"
+                    iconOnly
+                    type="button"
+                    className={styles.inlineRateSaveButton}
+                    disabled={isSaving}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() =>
+                      void commitInlineRateEdit(row, inlineRateDraft)
                     }
-                    if (e.key === "Escape") {
-                      e.preventDefault();
-                      cancelInlineRateEdit();
-                    }
-                  }}
-                  disabled={isSaving}
-                  autoFocus
-                  aria-label="Rate per carat"
-                />
-                {isSaving ? <span className={styles.inlineRateSaving}>Saving…</span> : null}
+                    aria-label="Save rate per carat"
+                    title="Update rate"
+                  >
+                    Update rate
+                  </Button>
+                </div>
+                {isSaving ? (
+                  <span className={styles.inlineRateSaving}>Saving…</span>
+                ) : null}
               </div>
             );
           }

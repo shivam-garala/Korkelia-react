@@ -161,6 +161,18 @@
   color: var(--color-muted, #64748b);
 }
 
+/** Inline table save (check) — matches success / check icon affordance */
+.inlineRateSaveButton {
+  border-color: #16a34a;
+  color: #16a34a;
+}
+
+.inlineRateSaveButton:not(:disabled):hover {
+  background: color-mix(in srgb, #16a34a, transparent 92%);
+  border-color: #15803d;
+  color: #15803d;
+}
+
 .actions {
   display: flex;
   gap: 6px;
