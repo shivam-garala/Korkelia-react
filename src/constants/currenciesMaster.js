@@ -55,7 +55,7 @@ export const CURRENCIES_MASTER = [
   {
     code: "AUD",
     name: "Australian Dollar",
-    symbol: "$",
+    symbol: "AU$",
     country: "Australia",
     countryCode: "AU",
   },
@@ -83,7 +83,7 @@ export const CURRENCIES_MASTER = [
   {
     code: "BBD",
     name: "Barbadian Dollar",
-    symbol: "$",
+    symbol: "BBD$",
     country: "Barbados",
     countryCode: "BB",
   },
@@ -118,14 +118,14 @@ export const CURRENCIES_MASTER = [
   {
     code: "BMD",
     name: "Bermudan Dollar",
-    symbol: "$",
+    symbol: "BMD$",
     country: "Bermuda",
     countryCode: "BM",
   },
   {
     code: "BND",
     name: "Brunei Dollar",
-    symbol: "$",
+    symbol: "BN$",
     country: "Brunei",
     countryCode: "BN",
   },
@@ -146,7 +146,7 @@ export const CURRENCIES_MASTER = [
   {
     code: "BSD",
     name: "Bahamian Dollar",
-    symbol: "$",
+    symbol: "BS$",
     country: "Bahamas",
     countryCode: "BS",
   },
@@ -174,7 +174,7 @@ export const CURRENCIES_MASTER = [
   {
     code: "BZD",
     name: "Belize Dollar",
-    symbol: "$",
+    symbol: "BZ$",
     country: "Belize",
     countryCode: "BZ",
   },
@@ -182,7 +182,7 @@ export const CURRENCIES_MASTER = [
   {
     code: "CAD",
     name: "Canadian Dollar",
-    symbol: "$",
+    symbol: "CA$",
     country: "Canada",
     countryCode: "CA",
   },
@@ -297,7 +297,7 @@ export const CURRENCIES_MASTER = [
   {
     code: "FJD",
     name: "Fijian Dollar",
-    symbol: "$",
+    symbol: "FJ$",
     country: "Fiji",
     countryCode: "FJ",
   },
@@ -327,7 +327,7 @@ export const CURRENCIES_MASTER = [
   {
     code: "HKD",
     name: "Hong Kong Dollar",
-    symbol: "$",
+    symbol: "HK$",
     country: "Hong Kong",
     countryCode: "HK",
   },
@@ -480,7 +480,7 @@ export const CURRENCIES_MASTER = [
   {
     code: "NZD",
     name: "New Zealand Dollar",
-    symbol: "$",
+    symbol: "NZ$",
     country: "New Zealand",
     countryCode: "NZ",
   },
@@ -562,7 +562,7 @@ export const CURRENCIES_MASTER = [
   {
     code: "SGD",
     name: "Singapore Dollar",
-    symbol: "$",
+    symbol: "S$",
     country: "Singapore",
     countryCode: "SG",
   },
@@ -599,7 +599,7 @@ export const CURRENCIES_MASTER = [
   {
     code: "USD",
     name: "United States Dollar",
-    symbol: "$",
+    symbol: "US$",
     country: "United States",
     countryCode: "US",
   },
