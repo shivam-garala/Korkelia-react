@@ -174,6 +174,9 @@ export default function DiamondRatePage() {
   const [editingId, setEditingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
 
+  const [inlineEditingId, setInlineEditingId] = useState(null);
+  const [inlineEditRate, setInlineEditRate] = useState("");
+
   const [diamondMasterId, setDiamondMasterId] = useState("");
   const [diamondTypeId, setDiamondTypeId] = useState("");
   const [clarityId, setClarityId] = useState("");
@@ -351,12 +354,140 @@ export default function DiamondRatePage() {
     setDeleteTarget(null);
   };
 
+  const startInlineEdit = (rawId, rawRate) => {
+    setInlineEditingId(rawId);
+    setInlineEditRate(rawRate !== null && rawRate !== undefined ? String(rawRate) : "");
+  };
+
+  const cancelInlineEdit = () => {
+    setInlineEditingId(null);
+    setInlineEditRate("");
+  };
+
+  const saveInlineEdit = async (row) => {
+    if (!inlineEditingId || inlineEditRate === "") return;
+
+    const payload = {
+      diamond_master_id: Number(pickValue(row, ["diamond_master_id", "diamondMasterId"])),
+      diamond_type_id: Number(pickValue(row, ["diamond_type_id", "diamondTypeId"])),
+      clarity_id: Number(pickValue(row, ["clarity_id", "clarityId"])),
+      rate: Number(inlineEditRate),
+    };
+
+    const result = await dispatch(updateDiamondRate({ id: inlineEditingId, payload }));
+    if (!result?.error) {
+      setInlineEditingId(null);
+      setInlineEditRate("");
+      dispatch(fetchDiamondRates());
+    }
+  };
+
   const columns = [
     { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
     { key: "diamond_master", header: "Carat", filterable: true, filterPlaceholder: "Search Carat" },
     { key: "diamond_type", header: "Diamond Type", filterable: true, filterPlaceholder: "Search Type" },
     { key: "clarity", header: "Clarity", filterable: true, filterPlaceholder: "Search Clarity" },
-    { key: "rate", header: "Rate Per Carat", filterable: true, filterPlaceholder: "Search Rate Per Carat" },
+    {
+      key: "rate",
+      header: "Rate Per Carat",
+      filterable: true,
+      filterPlaceholder: "Search Rate Per Carat",
+      render: (row) => {
+        const isEditing = inlineEditingId === row.id;
+        return (
+          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
+            {isEditing ? (
+              <>
+                <input
+                  type="number"
+                  step="0.01"
+                  value={inlineEditRate}
+                  onChange={(e) => setInlineEditRate(e.target.value)}
+                  style={{
+                    padding: "8px 12px",
+                    border: "2px solid #007bff",
+                    borderRadius: "6px",
+                    width: "110px",
+                    fontSize: "14px",
+                    fontWeight: "500",
+                    boxShadow: "0 2px 4px rgba(0, 123, 255, 0.1)",
+                    transition: "all 0.2s",
+                  }}
+                  autoFocus
+                />
+              <Button
+  variant="primarySoft"
+  size="sm"
+  icon="check"
+  onClick={() => saveInlineEdit(row._raw)}
+  title="Save"
+  style={{
+    backgroundColor: "#28a745",
+    color: "#fff",
+    padding: "6px 12px",
+    borderRadius: "6px",
+    border: "none",
+    cursor: "pointer",
+    transition: "background-color 0.2s",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px" // space between icon and text
+  }}
+>
+  Save
+</Button>
+                <Button
+  variant="danger"
+  size="sm"
+  icon="close"
+  onClick={cancelInlineEdit}
+  title="Cancel"
+  style={{
+    backgroundColor: "#dc3545",
+    color: "#fff",
+    padding: "6px 12px",
+    borderRadius: "6px",
+    border: "none",
+    cursor: "pointer",
+    transition: "background-color 0.2s",
+    display: "flex",
+    alignItems: "center",
+    gap: "6px" // space between icon and text
+  }}
+>
+  Cancel
+</Button>
+              </>
+            ) : (
+              <>
+                <span
+                  onClick={() => startInlineEdit(row.id, row.rate)}
+                  style={{
+                    cursor: "pointer",
+                    padding: "6px 12px",
+                    borderRadius: "6px",
+                    backgroundColor: "transparent",
+                    transition: "all 0.2s ease",
+                    fontWeight: "500",
+                    fontSize: "14px",
+                  }}
+                  onMouseEnter={(e) => {
+                    e.target.style.backgroundColor = "#e7f3ff";
+                    e.target.style.color = "#007bff";
+                  }}
+                  onMouseLeave={(e) => {
+                    e.target.style.backgroundColor = "transparent";
+                    e.target.style.color = "inherit";
+                  }}
+                >
+                  {row.rate}
+                </span>
+              </>
+            )}
+          </div>
+        );
+      },
+    },
     {
       key: "actions",
       header: "Action",

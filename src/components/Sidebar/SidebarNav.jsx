@@ -57,6 +57,7 @@ export const sidebarSections = [
     title: "Appointment Management",
     items: [
       { label: "Appointments", href: "/dashboard/appointment", icon: "receipt" },
+      { label: "Inquiries", href: "/dashboard/inquiries", icon: "bag" },
     ],
   },
 ];
