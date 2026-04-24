@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -34,9 +34,14 @@ import {
   selectDiamondClarities,
 } from "../../../store/slices/diamondClaritySlice.js";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks.js";
-import { clearCredentials, selectEmail, selectUserName } from "../../../store/authSlice.js";
+import {
+  clearCredentials,
+  selectEmail,
+  selectUserName,
+} from "../../../store/authSlice.js";
 import layout from "../../../styles/workspace.module.css";
 import styles from "../../../styles/crudPage.module.css";
+import { formatDecimalStringForInput } from "../../../lib/decimalString.js";
 
 function pickValue(obj, keys) {
   for (const key of keys) {
@@ -72,7 +77,7 @@ function extractTypeNames(item) {
       "diamondTypeTranslations",
       "diamond_type_translation",
       "diamondTypeTranslation",
-    ])
+    ]),
   );
   let nameEn = "";
   let nameFi = "";
@@ -80,11 +85,22 @@ function extractTypeNames(item) {
   list.forEach((entry) => {
     const languageId = String(
       pickValue(entry, ["language_id", "languageId", "lang_id", "langId"]) ??
-        pickValue(entry?.language, ["id", "language_id", "languageId", "lang_id", "langId"]) ??
-        ""
+        pickValue(entry?.language, [
+          "id",
+          "language_id",
+          "languageId",
+          "lang_id",
+          "langId",
+        ]) ??
+        "",
     );
     const languageName = String(
-      pickValue(entry?.language, ["language_name", "languageName", "name", "label"]) ?? ""
+      pickValue(entry?.language, [
+        "language_name",
+        "languageName",
+        "name",
+        "label",
+      ]) ?? "",
     ).toLowerCase();
     const name = pickValue(entry, [
       "type_name",
@@ -125,13 +141,16 @@ function resolveTypeLabel(item) {
         "diamondTypeName",
         "name",
         "label",
-      ]) ?? ""
+      ]) ?? "",
     )
   );
 }
 
 function formatDiamondMasterLabel(item, fallbackId) {
-  if (!item) return fallbackId !== undefined && fallbackId !== null ? String(fallbackId) : "-";
+  if (!item)
+    return fallbackId !== undefined && fallbackId !== null
+      ? String(fallbackId)
+      : "-";
   const carat = pickValue(item, ["carat"]);
   return carat !== null && carat !== undefined ? String(carat) : "-";
 }
@@ -139,13 +158,17 @@ function formatDiamondMasterLabel(item, fallbackId) {
 function buildDiamondRateUpdatePayload(raw, rate) {
   return {
     diamond_master_id: Number(
-      pickValue(raw, ["diamond_master_id", "diamondMasterId", "diamond_master"])
+      pickValue(raw, [
+        "diamond_master_id",
+        "diamondMasterId",
+        "diamond_master",
+      ]),
     ),
     diamond_type_id: Number(
-      pickValue(raw, ["diamond_type_id", "diamondTypeId", "diamond_type"])
+      pickValue(raw, ["diamond_type_id", "diamondTypeId", "diamond_type"]),
     ),
     clarity_id: Number(
-      pickValue(raw, ["clarity_id", "clarityId", "diamond_clarity_id"])
+      pickValue(raw, ["clarity_id", "clarityId", "diamond_clarity_id"]),
     ),
     rate: Number(rate),
   };
@@ -178,7 +201,13 @@ export default function DiamondRatePage() {
     if (normalizedEmail.length) {
       const firstChar = normalizedEmail[0];
       const domainChar = normalizedEmail.split("@")[1]?.[0];
-      return [firstChar, domainChar].filter(Boolean).join("").slice(0, 2).toUpperCase() || "U";
+      return (
+        [firstChar, domainChar]
+          .filter(Boolean)
+          .join("")
+          .slice(0, 2)
+          .toUpperCase() || "U"
+      );
     }
     return "U";
   }, [userEmail, userName]);
@@ -226,9 +255,20 @@ export default function DiamondRatePage() {
     const list = Array.isArray(diamondTypes) ? diamondTypes : [];
     return list
       .map((item) => {
-        const id = pickValue(item, ["id", "type_id", "diamond_type_id", "typeId"]);
+        const id = pickValue(item, [
+          "id",
+          "type_id",
+          "diamond_type_id",
+          "typeId",
+        ]);
         const label = resolveTypeLabel(item);
-        if (id === null || id === undefined || label === null || label === undefined) return null;
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
         return { id: String(id), label: String(label) };
       })
       .filter(Boolean);
@@ -238,9 +278,26 @@ export default function DiamondRatePage() {
     const list = Array.isArray(diamondClarities) ? diamondClarities : [];
     return list
       .map((item) => {
-        const id = pickValue(item, ["id", "clarity_id", "diamond_clarity_id", "clarityId"]);
-        const label = pickValue(item, ["clarity", "clarity_name", "clarityName", "name", "label"]);
-        if (id === null || id === undefined || label === null || label === undefined) return null;
+        const id = pickValue(item, [
+          "id",
+          "clarity_id",
+          "diamond_clarity_id",
+          "clarityId",
+        ]);
+        const label = pickValue(item, [
+          "clarity",
+          "clarity_name",
+          "clarityName",
+          "name",
+          "label",
+        ]);
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
         return { id: String(id), label: String(label) };
       })
       .filter(Boolean);
@@ -249,23 +306,50 @@ export default function DiamondRatePage() {
   const tableRows = useMemo(() => {
     const rows = Array.isArray(items) ? items : [];
     return rows.map((item, index) => {
-      const id = pickValue(item, ["id", "diamond_rate_id", "diamondRateId"]) ?? index + 1;
-      const rawDiamondMasterId = pickValue(item, ["diamond_master_id", "diamondMasterId", "diamond_master"]);
-      const rawDiamondTypeId = pickValue(item, ["diamond_type_id", "diamondTypeId", "diamond_type"]);
-      const rawClarityId = pickValue(item, ["clarity_id", "clarityId", "diamond_clarity_id"]);
+      const id =
+        pickValue(item, ["id", "diamond_rate_id", "diamondRateId"]) ??
+        index + 1;
+      const rawDiamondMasterId = pickValue(item, [
+        "diamond_master_id",
+        "diamondMasterId",
+        "diamond_master",
+      ]);
+      const rawDiamondTypeId = pickValue(item, [
+        "diamond_type_id",
+        "diamondTypeId",
+        "diamond_type",
+      ]);
+      const rawClarityId = pickValue(item, [
+        "clarity_id",
+        "clarityId",
+        "diamond_clarity_id",
+      ]);
 
-      const diamondMasterFromRelation = item?.diamond_master ?? item?.diamondMaster ?? null;
+      const diamondMasterFromRelation =
+        item?.diamond_master ?? item?.diamondMaster ?? null;
       const diamondMasterLabel = diamondMasterFromRelation
-        ? formatDiamondMasterLabel(diamondMasterFromRelation, rawDiamondMasterId)
-        : diamondMasterOptions.find((opt) => String(opt.id) === String(rawDiamondMasterId))
-            ?.label ??
-          (rawDiamondMasterId !== null && rawDiamondMasterId !== undefined ? String(rawDiamondMasterId) : "-");
+        ? formatDiamondMasterLabel(
+            diamondMasterFromRelation,
+            rawDiamondMasterId,
+          )
+        : (diamondMasterOptions.find(
+            (opt) => String(opt.id) === String(rawDiamondMasterId),
+          )?.label ??
+          (rawDiamondMasterId !== null && rawDiamondMasterId !== undefined
+            ? String(rawDiamondMasterId)
+            : "-"));
 
-      const diamondTypeFromRelation = resolveTypeLabel(item?.diamond_type ?? item?.diamondType ?? null) || null;
+      const diamondTypeFromRelation =
+        resolveTypeLabel(item?.diamond_type ?? item?.diamondType ?? null) ||
+        null;
       const diamondTypeLabel =
         diamondTypeFromRelation ??
-        diamondTypeOptions.find((opt) => String(opt.id) === String(rawDiamondTypeId))?.label ??
-        (rawDiamondTypeId !== null && rawDiamondTypeId !== undefined ? String(rawDiamondTypeId) : "-");
+        diamondTypeOptions.find(
+          (opt) => String(opt.id) === String(rawDiamondTypeId),
+        )?.label ??
+        (rawDiamondTypeId !== null && rawDiamondTypeId !== undefined
+          ? String(rawDiamondTypeId)
+          : "-");
 
       const clarityFromRelation =
         item?.clarity?.clarity ??
@@ -274,10 +358,25 @@ export default function DiamondRatePage() {
         null;
       const clarityLabel =
         clarityFromRelation ??
-        clarityOptions.find((opt) => String(opt.id) === String(rawClarityId))?.label ??
-        (rawClarityId !== null && rawClarityId !== undefined ? String(rawClarityId) : "-");
+        clarityOptions.find((opt) => String(opt.id) === String(rawClarityId))
+          ?.label ??
+        (rawClarityId !== null && rawClarityId !== undefined
+          ? String(rawClarityId)
+          : "-");
 
-      const rateValue = pickValue(item, ["rate", "diamond_rate", "diamondRate", "value"]);
+      const rateValue = pickValue(item, [
+        "rate",
+        "diamond_rate",
+        "diamondRate",
+        "value",
+      ]);
+      const isMissing =
+        rateValue === null ||
+        rateValue === undefined ||
+        (typeof rateValue === "string" && !String(rateValue).trim());
+      const rateForRow = isMissing
+        ? "-"
+        : formatDecimalStringForInput(rateValue);
 
       return {
         no: index + 1,
@@ -285,32 +384,58 @@ export default function DiamondRatePage() {
         diamond_master: diamondMasterLabel ?? "-",
         diamond_type: diamondTypeLabel ?? "-",
         clarity: clarityLabel ?? "-",
-        rate: rateValue ?? "-",
+        rate: rateForRow,
         _raw: item,
       };
     });
   }, [clarityOptions, diamondMasterOptions, diamondTypeOptions, items]);
 
   const filteredRows = useMemo(() => {
-    const normalize = (value) => String(value ?? "").trim().toLowerCase();
+    const normalize = (value) =>
+      String(value ?? "")
+        .trim()
+        .toLowerCase();
     const noQuery = normalize(filters.no);
     const masterQuery = normalize(filters.diamond_master);
     const typeQuery = normalize(filters.diamond_type);
     const clarityQuery = normalize(filters.clarity);
     const rateQuery = normalize(filters.rate);
-    if (!noQuery && !masterQuery && !typeQuery && !clarityQuery && !rateQuery) return tableRows;
+    if (!noQuery && !masterQuery && !typeQuery && !clarityQuery && !rateQuery)
+      return tableRows;
 
     return tableRows.filter((row) => {
       const noMatches = noQuery
-        ? normalize(row.no).includes(noQuery) || normalize(row.id).includes(noQuery)
+        ? normalize(row.no).includes(noQuery) ||
+          normalize(row.id).includes(noQuery)
         : true;
-      const masterMatches = masterQuery ? normalize(row.diamond_master).includes(masterQuery) : true;
-      const typeMatches = typeQuery ? normalize(row.diamond_type).includes(typeQuery) : true;
-      const clarityMatches = clarityQuery ? normalize(row.clarity).includes(clarityQuery) : true;
-      const rateMatches = rateQuery ? normalize(row.rate).includes(rateQuery) : true;
-      return noMatches && masterMatches && typeMatches && clarityMatches && rateMatches;
+      const masterMatches = masterQuery
+        ? normalize(row.diamond_master).includes(masterQuery)
+        : true;
+      const typeMatches = typeQuery
+        ? normalize(row.diamond_type).includes(typeQuery)
+        : true;
+      const clarityMatches = clarityQuery
+        ? normalize(row.clarity).includes(clarityQuery)
+        : true;
+      const rateMatches = rateQuery
+        ? normalize(row.rate).includes(rateQuery)
+        : true;
+      return (
+        noMatches &&
+        masterMatches &&
+        typeMatches &&
+        clarityMatches &&
+        rateMatches
+      );
     });
-  }, [filters.clarity, filters.diamond_master, filters.diamond_type, filters.no, filters.rate, tableRows]);
+  }, [
+    filters.clarity,
+    filters.diamond_master,
+    filters.diamond_type,
+    filters.no,
+    filters.rate,
+    tableRows,
+  ]);
 
   const openCreate = () => {
     setEditingId(null);
@@ -323,16 +448,49 @@ export default function DiamondRatePage() {
 
   const openEdit = (row) => {
     const rawId = pickValue(row, ["id", "diamond_rate_id", "diamondRateId"]);
-    const rawDiamondMasterId = pickValue(row, ["diamond_master_id", "diamondMasterId", "diamond_master"]);
-    const rawDiamondTypeId = pickValue(row, ["diamond_type_id", "diamondTypeId", "diamond_type"]);
-    const rawClarityId = pickValue(row, ["clarity_id", "clarityId", "diamond_clarity_id"]);
-    const rawRate = pickValue(row, ["rate", "diamond_rate", "diamondRate", "value"]);
+    const rawDiamondMasterId = pickValue(row, [
+      "diamond_master_id",
+      "diamondMasterId",
+      "diamond_master",
+    ]);
+    const rawDiamondTypeId = pickValue(row, [
+      "diamond_type_id",
+      "diamondTypeId",
+      "diamond_type",
+    ]);
+    const rawClarityId = pickValue(row, [
+      "clarity_id",
+      "clarityId",
+      "diamond_clarity_id",
+    ]);
+    const rawRate = pickValue(row, [
+      "rate",
+      "diamond_rate",
+      "diamondRate",
+      "value",
+    ]);
 
     setEditingId(rawId ?? null);
-    setDiamondMasterId(rawDiamondMasterId !== null && rawDiamondMasterId !== undefined ? String(rawDiamondMasterId) : "");
-    setDiamondTypeId(rawDiamondTypeId !== null && rawDiamondTypeId !== undefined ? String(rawDiamondTypeId) : "");
-    setClarityId(rawClarityId !== null && rawClarityId !== undefined ? String(rawClarityId) : "");
-    setRate(rawRate !== null && rawRate !== undefined ? String(rawRate) : "");
+    setDiamondMasterId(
+      rawDiamondMasterId !== null && rawDiamondMasterId !== undefined
+        ? String(rawDiamondMasterId)
+        : "",
+    );
+    setDiamondTypeId(
+      rawDiamondTypeId !== null && rawDiamondTypeId !== undefined
+        ? String(rawDiamondTypeId)
+        : "",
+    );
+    setClarityId(
+      rawClarityId !== null && rawClarityId !== undefined
+        ? String(rawClarityId)
+        : "",
+    );
+    setRate(
+      rawRate === null || rawRate === undefined
+        ? ""
+        : formatDecimalStringForInput(rawRate),
+    );
     setModalOpen(true);
   };
 
@@ -374,14 +532,18 @@ export default function DiamondRatePage() {
     setInlineRateDraft("");
   }, []);
 
+  // ✅ FIX 1: Use parseFloat → String instead of formatDecimalStringForInput
+  // This prevents float precision garbage like 454444.559999999998
   const startInlineRateEdit = useCallback(
     (row) => {
       if (savingRateId) return;
-      const current = row.rate === "-" ? "" : String(row.rate);
+      const raw = row.rate === "-" ? "" : row.rate;
+      const parsed = parseFloat(raw);
+      const clean = isNaN(parsed) ? "" : String(parsed);
       setInlineRateEditId(row.id);
-      setInlineRateDraft(current);
+      setInlineRateDraft(clean);
     },
-    [savingRateId]
+    [savingRateId],
   );
 
   const commitInlineRateEdit = useCallback(
@@ -392,13 +554,19 @@ export default function DiamondRatePage() {
         cancelInlineRateEdit();
         return;
       }
-      const next = Number(trimmed);
+      // ✅ FIX 3: Use parseFloat instead of Number to correctly handle decimals
+      const next = parseFloat(trimmed);
       if (Number.isNaN(next)) {
         cancelInlineRateEdit();
         return;
       }
-      const prevRaw = pickValue(row._raw, ["rate", "diamond_rate", "diamondRate", "value"]);
-      const prevNum = Number(prevRaw);
+      const prevRaw = pickValue(row._raw, [
+        "rate",
+        "diamond_rate",
+        "diamondRate",
+        "value",
+      ]);
+      const prevNum = parseFloat(prevRaw);
       if (!Number.isNaN(prevNum) && prevNum === next) {
         cancelInlineRateEdit();
         return;
@@ -406,9 +574,11 @@ export default function DiamondRatePage() {
       const raw = row._raw;
       const payload = buildDiamondRateUpdatePayload(raw, next);
       if (
-        [payload.diamond_master_id, payload.diamond_type_id, payload.clarity_id].some((n) =>
-          Number.isNaN(n)
-        )
+        [
+          payload.diamond_master_id,
+          payload.diamond_type_id,
+          payload.clarity_id,
+        ].some((n) => Number.isNaN(n))
       ) {
         cancelInlineRateEdit();
         return;
@@ -421,20 +591,35 @@ export default function DiamondRatePage() {
         cancelInlineRateEdit();
       }
     },
-    [savingRateId, dispatch, cancelInlineRateEdit]
+    [savingRateId, dispatch, cancelInlineRateEdit],
   );
 
   const columns = useMemo(
     () => [
-      { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
-      { key: "diamond_master", header: "Carat", filterable: true, filterPlaceholder: "Search Carat" },
+      {
+        key: "no",
+        header: "No.",
+        filterable: false,
+        filterPlaceholder: "Search No.",
+      },
+      {
+        key: "diamond_master",
+        header: "Carat",
+        filterable: true,
+        filterPlaceholder: "Search Carat",
+      },
       {
         key: "diamond_type",
         header: "Diamond Type",
         filterable: true,
         filterPlaceholder: "Search Type",
       },
-      { key: "clarity", header: "Clarity", filterable: true, filterPlaceholder: "Search Clarity" },
+      {
+        key: "clarity",
+        header: "Clarity",
+        filterable: true,
+        filterPlaceholder: "Search Clarity",
+      },
       {
         key: "rate",
         header: "Rate Per Carat",
@@ -450,10 +635,19 @@ export default function DiamondRatePage() {
                   <input
                     type="number"
                     step="0.01"
+                    min="0"
                     className={styles.inlineRateInput}
                     value={inlineRateDraft}
-                    onChange={(e) => setInlineRateDraft(e.target.value)}
-                    onBlur={(e) => void commitInlineRateEdit(row, e.target.value)}
+                    // ✅ FIX 2: Sanitize input on every keystroke to remove leading zeros
+                    onChange={(e) => {
+                      let val = e.target.value;
+                      // Remove leading zeros before digits, but allow "0.5", "0.", ""
+                      val = val.replace(/^0+(?=\d)/, "");
+                      setInlineRateDraft(val);
+                    }}
+                    onBlur={(e) =>
+                      void commitInlineRateEdit(row, e.target.value)
+                    }
                     onKeyDown={(e) => {
                       if (e.key === "Enter") {
                         e.preventDefault();
@@ -528,10 +722,22 @@ export default function DiamondRatePage() {
         filterable: false,
         render: (row) => (
           <div className={styles.actions}>
-            <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="edit"
+              iconOnly
+              onClick={() => openEdit(row._raw)}
+            >
               Edit
             </Button>
-            <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
+            <Button
+              variant="danger"
+              size="sm"
+              icon="delete"
+              iconOnly
+              onClick={() => handleDelete(row.id)}
+            >
               Delete
             </Button>
           </div>
@@ -545,7 +751,7 @@ export default function DiamondRatePage() {
       cancelInlineRateEdit,
       commitInlineRateEdit,
       startInlineRateEdit,
-    ]
+    ],
   );
 
   return (
@@ -577,7 +783,6 @@ export default function DiamondRatePage() {
                 </Button>
               </div>
             </div>
-
 
             <DataTable
               columns={columns}
@@ -617,7 +822,12 @@ export default function DiamondRatePage() {
         }}
         footer={
           <div className={styles.formActions}>
-            <Button variant="primarySoft" type="submit" form="diamond-rate-form" disabled={loading}>
+            <Button
+              variant="primarySoft"
+              type="submit"
+              form="diamond-rate-form"
+              disabled={loading}
+            >
               {editingId ? "Update" : "Create"}
             </Button>
             <Button
@@ -640,8 +850,15 @@ export default function DiamondRatePage() {
               onChange={(e) => setDiamondMasterId(e.target.value)}
               required
               disabled={!diamondMasterOptions.length}
-              placeholder={diamondMasterOptions.length ? "Select carat" : "Loading carats..."}
-              options={diamondMasterOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+              placeholder={
+                diamondMasterOptions.length
+                  ? "Select carat"
+                  : "Loading carats..."
+              }
+              options={diamondMasterOptions.map((opt) => ({
+                value: opt.id,
+                label: opt.label,
+              }))}
             />
             <AdminSelectField
               label="Diamond Type"
@@ -649,8 +866,13 @@ export default function DiamondRatePage() {
               onChange={(e) => setDiamondTypeId(e.target.value)}
               required
               disabled={!diamondTypeOptions.length}
-              placeholder={diamondTypeOptions.length ? "Select type" : "Loading types..."}
-              options={diamondTypeOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+              placeholder={
+                diamondTypeOptions.length ? "Select type" : "Loading types..."
+              }
+              options={diamondTypeOptions.map((opt) => ({
+                value: opt.id,
+                label: opt.label,
+              }))}
             />
             <AdminSelectField
               label="Clarity"
@@ -658,15 +880,28 @@ export default function DiamondRatePage() {
               onChange={(e) => setClarityId(e.target.value)}
               required
               disabled={!clarityOptions.length}
-              placeholder={clarityOptions.length ? "Select clarity" : "Loading clarities..."}
-              options={clarityOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+              placeholder={
+                clarityOptions.length
+                  ? "Select clarity"
+                  : "Loading clarities..."
+              }
+              options={clarityOptions.map((opt) => ({
+                value: opt.id,
+                label: opt.label,
+              }))}
             />
             <TextField
               label="Rate"
               type="number"
               step="0.01"
+              min="0"
               value={rate}
-              onChange={(e) => setRate(e.target.value)}
+              onChange={(e) => {
+                let val = e.target.value;
+                // ✅ FIX 2 (modal form): Remove leading zeros before digits
+                val = val.replace(/^0+(?=\d)/, "");
+                setRate(val);
+              }}
               required
               preventWheel
             />

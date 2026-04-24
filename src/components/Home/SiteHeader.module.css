@@ -96,15 +96,15 @@
   letter-spacing: 0.12em;
   color: #606062;
   line-height: 1;
+ 
 }
 
 .currencyTrigger {
-  border: 1px solid #000000;
-  border-radius: 9999px;
   padding: 6px 14px;
   text-transform: none;
   letter-spacing: 0.02em;
   font-size: 15px;
+  border: none !important;
 }
 
 .left,

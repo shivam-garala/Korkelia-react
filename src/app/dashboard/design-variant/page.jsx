@@ -1,4 +1,4 @@
-'use client';
+"use client";
 
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
@@ -39,16 +39,24 @@ import {
   selectDesignVariants,
   updateDesignVariant,
 } from "../../../store/slices/designVariantSlice.js";
-import { fetchCutMasters, selectCutMasters } from "../../../store/slices/cutMasterSlice.js";
+import {
+  fetchCutMasters,
+  selectCutMasters,
+} from "../../../store/slices/cutMasterSlice.js";
 import {
   fetchDiamondRateDropdown,
   selectDiamondRates,
 } from "../../../store/slices/diamondRateSlice.js";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks.js";
-import { clearCredentials, selectEmail, selectUserName } from "../../../store/authSlice.js";
+import {
+  clearCredentials,
+  selectEmail,
+  selectUserName,
+} from "../../../store/authSlice.js";
 import layout from "../../../styles/workspace.module.css";
 import crudStyles from "../../../styles/crudPage.module.css";
 import styles from "./page.module.css";
+import { formatDecimalStringForInput } from "../../../lib/decimalString.js";
 
 function pickValue(obj, keys) {
   for (const key of keys) {
@@ -98,16 +106,21 @@ function formatDetailSummary(details) {
 }
 
 function resolveProductLabel(item) {
-  const translations = pickValue(item, ["product_translations", "productTranslations", "product_name_array"]);
+  const translations = pickValue(item, [
+    "product_translations",
+    "productTranslations",
+    "product_name_array",
+  ]);
   if (Array.isArray(translations)) {
     const english = translations.find((entry) => {
       const languageId = String(
         pickValue(entry, ["language_id", "languageId"]) ??
           pickValue(entry?.language, ["id", "language_id", "languageId"]) ??
-          ""
+          "",
       );
       const languageName = String(
-        pickValue(entry?.language, ["language_name", "languageName", "name"]) ?? ""
+        pickValue(entry?.language, ["language_name", "languageName", "name"]) ??
+          "",
       ).toLowerCase();
       return languageId === "1" || languageName === "english";
     });
@@ -141,11 +154,22 @@ function extractVariantTranslations(item) {
     list.forEach((entry) => {
       const languageId = String(
         pickValue(entry, ["language_id", "languageId", "lang_id", "langId"]) ??
-          pickValue(entry?.language, ["id", "language_id", "languageId", "lang_id", "langId"]) ??
-          ""
+          pickValue(entry?.language, [
+            "id",
+            "language_id",
+            "languageId",
+            "lang_id",
+            "langId",
+          ]) ??
+          "",
       );
       const languageName = String(
-        pickValue(entry?.language, ["language_name", "languageName", "name", "label"]) ?? ""
+        pickValue(entry?.language, [
+          "language_name",
+          "languageName",
+          "name",
+          "label",
+        ]) ?? "",
       ).toLowerCase();
       const name = pickValue(entry, [
         "design_variant_name",
@@ -155,7 +179,11 @@ function extractVariantTranslations(item) {
         "name",
         "label",
       ]);
-      const description = pickValue(entry, ["description", "design_description", "designDescription"]);
+      const description = pickValue(entry, [
+        "description",
+        "design_description",
+        "designDescription",
+      ]);
       if (languageId === "1" || languageName === "english") {
         if (name) nameEn = String(name);
         if (description) descriptionEn = String(description);
@@ -176,8 +204,13 @@ function extractVariantTranslations(item) {
     "label",
   ]);
   if (!nameEn && fallbackName) nameEn = String(fallbackName);
-  const fallbackDescription = pickValue(item, ["description", "design_description", "designDescription"]);
-  if (!descriptionEn && fallbackDescription) descriptionEn = String(fallbackDescription);
+  const fallbackDescription = pickValue(item, [
+    "description",
+    "design_description",
+    "designDescription",
+  ]);
+  if (!descriptionEn && fallbackDescription)
+    descriptionEn = String(fallbackDescription);
 
   return { nameEn, nameFi, descriptionEn, descriptionFi };
 }
@@ -220,20 +253,37 @@ function mapSourceToFormState(source) {
   const rawProductId = pickValue(source, ["product_id", "productId"]);
   const rawProductName = pickValue(source, ["product_name", "productName"]);
   const rawMetalRateId = pickValue(source, ["metal_rate_id", "metalRateId"]);
-  const rawMetalRateName = pickValue(source, ["metal_rate_name", "metalRateName"]);
-  const rawCategoryId = pickValue(source, ["category_id", "categoryId", "category_master_id"]);
+  const rawMetalRateName = pickValue(source, [
+    "metal_rate_name",
+    "metalRateName",
+  ]);
+  const rawCategoryId = pickValue(source, [
+    "category_id",
+    "categoryId",
+    "category_master_id",
+  ]);
   const detailList = normalizeDetailList(
-    pickValue(source, ["diamond_design_detail", "diamond_design_details", "diamond_details"]) ??
-      source?.diamond_design_detail
+    pickValue(source, [
+      "diamond_design_detail",
+      "diamond_design_details",
+      "diamond_details",
+    ]) ?? source?.diamond_design_detail,
   );
   const imageList = normalizeDetailList(
-    pickValue(source, ["images", "design_images", "designImages", "designImagesList"]) ??
-      source?.images
+    pickValue(source, [
+      "images",
+      "design_images",
+      "designImages",
+      "designImagesList",
+    ]) ?? source?.images,
   );
   let nextListingSelection = "";
   if (Array.isArray(imageList)) {
     const listingItem = imageList.find(
-      (img) => Number(pickValue(img, ["is_product_listing", "isProductListing"]) ?? 0) === 1
+      (img) =>
+        Number(
+          pickValue(img, ["is_product_listing", "isProductListing"]) ?? 0,
+        ) === 1,
     );
     if (listingItem) {
       const listingSrc =
@@ -242,7 +292,9 @@ function mapSourceToFormState(source) {
       if (isVideoAsset(listingSrc)) {
         nextListingSelection = "video";
       } else {
-        const orderValue = Number(pickValue(listingItem, ["order", "sort_order"]));
+        const orderValue = Number(
+          pickValue(listingItem, ["order", "sort_order"]),
+        );
         const slotIndex = Number.isFinite(orderValue) ? orderValue - 1 : -1;
         if (slotIndex >= 0 && slotIndex < 4) {
           nextListingSelection = `image-${slotIndex}`;
@@ -250,7 +302,8 @@ function mapSourceToFormState(source) {
       }
     }
   }
-  const { nameEn, nameFi, descriptionEn, descriptionFi } = extractVariantTranslations(source);
+  const { nameEn, nameFi, descriptionEn, descriptionFi } =
+    extractVariantTranslations(source);
   const rawPriceFlag = pickValue(source, [
     "price_flag",
     "priceFlag",
@@ -260,18 +313,33 @@ function mapSourceToFormState(source) {
     "isPurchase",
   ]);
   const priceFlagValue =
-    rawPriceFlag === 1 || rawPriceFlag === "1" || String(rawPriceFlag).toLowerCase() === "yes"
+    rawPriceFlag === 1 ||
+    rawPriceFlag === "1" ||
+    String(rawPriceFlag).toLowerCase() === "yes"
       ? "yes"
       : "no";
-  const weightStr = String(
-    pickValue(source, ["weight", "metal_weight", "product_weight"]) ?? ""
-  );
-  const markUpStr = String(pickValue(source, ["mark_up", "markUp", "markup"]) ?? "");
+  const rawWeight = pickValue(source, [
+    "weight",
+    "metal_weight",
+    "product_weight",
+  ]);
+  const rawMarkUp = pickValue(source, ["mark_up", "markUp", "markup"]);
+  const weightStr =
+    rawWeight === null || rawWeight === undefined
+      ? ""
+      : formatDecimalStringForInput(rawWeight);
+  const markUpStr =
+    rawMarkUp === null || rawMarkUp === undefined
+      ? ""
+      : formatDecimalStringForInput(rawMarkUp);
 
   const detailRows = detailList.map((detail, idx) => {
     const rawIsCenter = pickValue(detail, ["is_center", "isCenter"]);
     const isCenterValue = rawIsCenter === 1 || rawIsCenter === "1" ? "1" : "0";
-    const rawPositionVisible = pickValue(detail, ["position_visible", "positionVisible"]);
+    const rawPositionVisible = pickValue(detail, [
+      "position_visible",
+      "positionVisible",
+    ]);
     const positionVisibleValue =
       rawPositionVisible === 0 ||
       rawPositionVisible === "0" ||
@@ -280,13 +348,22 @@ function mapSourceToFormState(source) {
         : "1";
     return {
       key: `persisted-${idx}-${pickValue(detail, ["id"]) ?? idx}`,
-      id: pickValue(detail, ["id", "detail_id", "diamond_design_detail_id"]) ?? null,
+      id:
+        pickValue(detail, ["id", "detail_id", "diamond_design_detail_id"]) ??
+        null,
       cutId: String(pickValue(detail, ["cut_id", "cutId"]) ?? ""),
       cutCode: String(pickValue(detail, ["cut_code", "cutCode", "code"]) ?? ""),
       cutName: String(pickValue(detail, ["cut_name", "cutName", "name"]) ?? ""),
-      diamondRateId: String(pickValue(detail, ["diamond_rate_id", "diamondRateId"]) ?? ""),
+      diamondRateId: String(
+        pickValue(detail, ["diamond_rate_id", "diamondRateId"]) ?? "",
+      ),
       diamondRateName: String(
-        pickValue(detail, ["diamond_rate_name", "diamondRateName", "rate_name", "name"]) ?? ""
+        pickValue(detail, [
+          "diamond_rate_name",
+          "diamondRateName",
+          "rate_name",
+          "name",
+        ]) ?? "",
       ),
       pcs: String(pickValue(detail, ["pcs", "pieces", "diamond_pcs"]) ?? ""),
       isCenter: isCenterValue,
@@ -297,23 +374,34 @@ function mapSourceToFormState(source) {
   const existingImages = Array.isArray(imageList)
     ? imageList.map((img, idx) => {
         const imageUrl = pickValue(img, ["image_url", "url", "src"]) ?? null;
-        const imageName = pickValue(img, ["image", "file_name", "filename"]) ?? null;
+        const imageName =
+          pickValue(img, ["image", "file_name", "filename"]) ?? null;
         return {
           id: pickValue(img, ["id", "image_id"]) ?? null,
           image: imageName,
           image_url: imageUrl,
           order: pickValue(img, ["order", "sort_order"]) ?? idx + 1,
-          is_product_listing: pickValue(img, ["is_product_listing", "isProductListing"]) ?? 0,
+          is_product_listing:
+            pickValue(img, ["is_product_listing", "isProductListing"]) ?? 0,
           isVideo: isVideoAsset(imageUrl ?? imageName),
         };
       })
     : [];
 
   return {
-    categoryId: rawCategoryId !== null && rawCategoryId !== undefined ? String(rawCategoryId) : "",
-    productId: rawProductId !== null && rawProductId !== undefined ? String(rawProductId) : "",
+    categoryId:
+      rawCategoryId !== null && rawCategoryId !== undefined
+        ? String(rawCategoryId)
+        : "",
+    productId:
+      rawProductId !== null && rawProductId !== undefined
+        ? String(rawProductId)
+        : "",
     productName: rawProductName ? String(rawProductName) : "",
-    metalRateId: rawMetalRateId !== null && rawMetalRateId !== undefined ? String(rawMetalRateId) : "",
+    metalRateId:
+      rawMetalRateId !== null && rawMetalRateId !== undefined
+        ? String(rawMetalRateId)
+        : "",
     metalRateName: rawMetalRateName ? String(rawMetalRateName) : "",
     weight: weightStr,
     markUp: markUpStr,
@@ -353,10 +441,14 @@ function buildDesignVariantFormData({
   editingId,
 }) {
   const selectedProduct = productOptions.find((opt) => opt.id === productId);
-  const selectedMetalRate = metalRateOptions.find((opt) => opt.id === metalRateId);
+  const selectedMetalRate = metalRateOptions.find(
+    (opt) => opt.id === metalRateId,
+  );
   const detailPayload = detailRows.map((row) => {
     const cutOption = cutOptions.find((opt) => opt.id === row.cutId);
-    const diamondOption = diamondRateOptions.find((opt) => opt.id === row.diamondRateId);
+    const diamondOption = diamondRateOptions.find(
+      (opt) => opt.id === row.diamondRateId,
+    );
     const detail = {
       cut_id: row.cutId,
       cut_code: row.cutCode || cutOption?.code || cutOption?.label || "",
@@ -375,7 +467,10 @@ function buildDesignVariantFormData({
   payload.append("product_id", productId);
   payload.append("product_name", productName || selectedProduct?.label || "");
   payload.append("metal_rate_id", metalRateId);
-  payload.append("metal_rate_name", metalRateName || selectedMetalRate?.label || "");
+  payload.append(
+    "metal_rate_name",
+    metalRateName || selectedMetalRate?.label || "",
+  );
   if (editingId) {
     payload.append("weight", String(weight ?? ""));
     payload.append("mark_up", String(markUp ?? ""));
@@ -489,7 +584,13 @@ export default function DesignVariantPage() {
     if (normalizedEmail.length) {
       const firstChar = normalizedEmail[0];
       const domainChar = normalizedEmail.split("@")[1]?.[0];
-      return [firstChar, domainChar].filter(Boolean).join("").slice(0, 2).toUpperCase() || "U";
+      return (
+        [firstChar, domainChar]
+          .filter(Boolean)
+          .join("")
+          .slice(0, 2)
+          .toUpperCase() || "U"
+      );
     }
     return "U";
   }, [userEmail, userName]);
@@ -554,7 +655,7 @@ export default function DesignVariantPage() {
   const hasMore = currentPage < totalPages;
   const searchTerm = useMemo(
     () => String(searchQuery ?? "").trim(),
-    [searchQuery]
+    [searchQuery],
   );
 
   const fetchFirstPage = useCallback(
@@ -567,10 +668,10 @@ export default function DesignVariantPage() {
           page: 1,
           limit: PAGE_LIMIT,
           ...(normalized ? { search: normalized } : {}),
-        })
+        }),
       );
     },
-    [dispatch, searchTerm]
+    [dispatch, searchTerm],
   );
 
   const handleLoadMore = useCallback(() => {
@@ -581,15 +682,13 @@ export default function DesignVariantPage() {
         page: currentPage + 1,
         limit: PAGE_LIMIT,
         ...(activeSearch ? { search: activeSearch } : {}),
-      })
+      }),
     );
   }, [dispatch, loadingMore, loading, currentPage, totalPages, activeSearch]);
 
   const resolveExportFileName = useCallback((headers = {}) => {
     const disposition =
-      headers["content-disposition"] ??
-      headers["Content-Disposition"] ??
-      "";
+      headers["content-disposition"] ?? headers["Content-Disposition"] ?? "";
     if (disposition) {
       const utf8Match = disposition.match(/filename\*=UTF-8''([^;]+)/i);
       if (utf8Match?.[1]) {
@@ -601,73 +700,79 @@ export default function DesignVariantPage() {
     return "design-variant-export.xlsx";
   }, []);
 
-  const handleExport = useCallback(async (ids = []) => {
-    if (exporting) return;
-    const selectedIds = Array.isArray(ids)
-      ? ids.map((id) => String(id)).filter(Boolean)
-      : [];
-    if (!selectedIds.length) {
-      toast.error("Please select at least one product.");
-      return;
-    }
-    setExporting(true);
-    let exportSucceeded = false;
-    try {
-      const productIdsParam = `[${selectedIds.join(",")}]`;
-      const response = await axiosClient.get(
-        `/api/design/exportDesign?productIDS=${encodeURIComponent(productIdsParam)}`,
-        {
-          responseType: "blob",
-        }
-      );
-      const blob = response?.data;
-      if (!blob) {
-        toast.error("Export failed. Please try again.");
+  const handleExport = useCallback(
+    async (ids = []) => {
+      if (exporting) return;
+      const selectedIds = Array.isArray(ids)
+        ? ids.map((id) => String(id)).filter(Boolean)
+        : [];
+      if (!selectedIds.length) {
+        toast.error("Please select at least one product.");
         return;
       }
-      const contentType = response?.headers?.["content-type"] ?? "";
-      if (contentType.includes("application/json")) {
-        const text = await blob.text();
-        try {
-          const parsed = JSON.parse(text);
-          const csvUrl = parsed?.csv_url ?? parsed?.csvUrl ?? "";
-          if (csvUrl) {
-            downloadUrl(csvUrl);
-            exportSucceeded = true;
-            return;
-          }
-          const message = parsed?.message ?? parsed?.error ?? "Export failed. Please try again.";
-          toast.error(message);
-          return;
-        } catch (error) {
-          const message = text || "Export failed. Please try again.";
-          toast.error(message);
+      setExporting(true);
+      let exportSucceeded = false;
+      try {
+        const productIdsParam = `[${selectedIds.join(",")}]`;
+        const response = await axiosClient.get(
+          `/api/design/exportDesign?productIDS=${encodeURIComponent(productIdsParam)}`,
+          {
+            responseType: "blob",
+          },
+        );
+        const blob = response?.data;
+        if (!blob) {
+          toast.error("Export failed. Please try again.");
           return;
         }
+        const contentType = response?.headers?.["content-type"] ?? "";
+        if (contentType.includes("application/json")) {
+          const text = await blob.text();
+          try {
+            const parsed = JSON.parse(text);
+            const csvUrl = parsed?.csv_url ?? parsed?.csvUrl ?? "";
+            if (csvUrl) {
+              downloadUrl(csvUrl);
+              exportSucceeded = true;
+              return;
+            }
+            const message =
+              parsed?.message ??
+              parsed?.error ??
+              "Export failed. Please try again.";
+            toast.error(message);
+            return;
+          } catch (error) {
+            const message = text || "Export failed. Please try again.";
+            toast.error(message);
+            return;
+          }
+        }
+        const filename = resolveExportFileName(response?.headers ?? {});
+        const url = window.URL.createObjectURL(blob);
+        const link = document.createElement("a");
+        link.href = url;
+        link.download = filename;
+        document.body.appendChild(link);
+        link.click();
+        link.remove();
+        window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
+        exportSucceeded = true;
+      } catch (error) {
+        const message =
+          error?.response?.data?.message ??
+          error?.message ??
+          "Export failed. Please try again.";
+        toast.error(message);
+      } finally {
+        setExporting(false);
+        if (exportSucceeded) {
+          closeExportModal();
+        }
       }
-      const filename = resolveExportFileName(response?.headers ?? {});
-      const url = window.URL.createObjectURL(blob);
-      const link = document.createElement("a");
-      link.href = url;
-      link.download = filename;
-      document.body.appendChild(link);
-      link.click();
-      link.remove();
-      window.setTimeout(() => window.URL.revokeObjectURL(url), 1000);
-      exportSucceeded = true;
-    } catch (error) {
-      const message =
-        error?.response?.data?.message ??
-        error?.message ??
-        "Export failed. Please try again.";
-      toast.error(message);
-    } finally {
-      setExporting(false);
-      if (exportSucceeded) {
-        closeExportModal();
-      }
-    }
-  }, [exporting, resolveExportFileName, closeExportModal]);
+    },
+    [exporting, resolveExportFileName, closeExportModal],
+  );
 
   const handleCsvUpload = useCallback(
     async (file, mode) => {
@@ -679,10 +784,9 @@ export default function DesignVariantPage() {
       }
 
       const endpoint =
-        mode === "update"
-          ? "/api/design/update-csv"
-          : "/api/design/upload-csv";
-      const actionLabel = mode === "update" ? "Update CSV design" : "Upload CSV";
+        mode === "update" ? "/api/design/update-csv" : "/api/design/upload-csv";
+      const actionLabel =
+        mode === "update" ? "Update CSV design" : "Upload CSV";
 
       setCsvUploading(mode);
       const payload = new FormData();
@@ -718,7 +822,7 @@ export default function DesignVariantPage() {
         setCsvInputKey((prev) => prev + 1);
       }
     },
-    [fetchFirstPage]
+    [fetchFirstPage],
   );
 
   const downloadSampleCsv = useCallback((headers, filename) => {
@@ -792,7 +896,7 @@ export default function DesignVariantPage() {
       setCsvMenuOpen(false);
       handleCsvUpload(file, mode);
     },
-    [handleCsvUpload]
+    [handleCsvUpload],
   );
 
   const openCsvPicker = useCallback(
@@ -805,7 +909,7 @@ export default function DesignVariantPage() {
       }
       csvUploadInputRef.current?.click();
     },
-    [csvUploading]
+    [csvUploading],
   );
 
   useEffect(() => {
@@ -857,8 +961,19 @@ export default function DesignVariantPage() {
     return list
       .map((item) => {
         const id = pickValue(item, ["id", "category_id", "categoryId"]);
-        const label = pickValue(item, ["category_name", "categoryName", "name", "label"]);
-        if (id === null || id === undefined || label === null || label === undefined) return null;
+        const label = pickValue(item, [
+          "category_name",
+          "categoryName",
+          "name",
+          "label",
+        ]);
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
         return { id: String(id), label: String(label) };
       })
       .filter(Boolean);
@@ -870,21 +985,38 @@ export default function DesignVariantPage() {
       .map((item) => {
         const id = pickValue(item, ["id", "product_id", "productId"]);
         const label = resolveProductLabel(item);
-        const catId = pickValue(item, ["category_id", "categoryId", "category_master_id", "categoryMasterId"]);
-        if (id === null || id === undefined || label === null || label === undefined) return null;
-        return { id: String(id), label: String(label), categoryId: catId ?? "" };
+        const catId = pickValue(item, [
+          "category_id",
+          "categoryId",
+          "category_master_id",
+          "categoryMasterId",
+        ]);
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
+        return {
+          id: String(id),
+          label: String(label),
+          categoryId: catId ?? "",
+        };
       })
       .filter(Boolean);
   }, [products]);
 
   const filteredProductOptions = useMemo(() => {
     if (!categoryId) return productOptions;
-    return productOptions.filter((opt) => String(opt.categoryId) === String(categoryId));
+    return productOptions.filter(
+      (opt) => String(opt.categoryId) === String(categoryId),
+    );
   }, [categoryId, productOptions]);
 
   const exportProductOptions = useMemo(
     () => productOptions.map((opt) => ({ value: opt.id, label: opt.label })),
-    [productOptions]
+    [productOptions],
   );
 
   const metalRateOptions = useMemo(() => {
@@ -892,8 +1024,19 @@ export default function DesignVariantPage() {
     return list
       .map((item) => {
         const id = pickValue(item, ["id", "metal_rate_id", "metalRateId"]);
-        const label = pickValue(item, ["metal_rate_name", "metalRateName", "name", "label"]);
-        if (id === null || id === undefined || label === null || label === undefined) return null;
+        const label = pickValue(item, [
+          "metal_rate_name",
+          "metalRateName",
+          "name",
+          "label",
+        ]);
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
         return { id: String(id), label: String(label) };
       })
       .filter(Boolean);
@@ -907,7 +1050,13 @@ export default function DesignVariantPage() {
         const code = pickValue(item, ["cut_code", "cutCode", "code"]);
         const name = pickValue(item, ["cut_name", "cutName", "name"]);
         const label = code ?? name;
-        if (id === null || id === undefined || label === null || label === undefined) return null;
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
         return { id: String(id), label: String(label), code: code ?? label };
       })
       .filter(Boolean);
@@ -925,7 +1074,13 @@ export default function DesignVariantPage() {
           "name",
           "label",
         ]);
-        if (id === null || id === undefined || label === null || label === undefined) return null;
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
         return { id: String(id), label: String(label) };
       })
       .filter(Boolean);
@@ -939,19 +1094,43 @@ export default function DesignVariantPage() {
       const rawMetalRateId = pickValue(item, ["metal_rate_id", "metalRateId"]);
       const productLabel =
         pickValue(item, ["product_name", "productName"]) ??
-        productOptions.find((opt) => String(opt.id) === String(rawProductId))?.label ??
-        (rawProductId !== null && rawProductId !== undefined ? String(rawProductId) : "-");
+        productOptions.find((opt) => String(opt.id) === String(rawProductId))
+          ?.label ??
+        (rawProductId !== null && rawProductId !== undefined
+          ? String(rawProductId)
+          : "-");
       const metalRateLabel =
         pickValue(item, ["metal_rate_name", "metalRateName"]) ??
-        metalRateOptions.find((opt) => String(opt.id) === String(rawMetalRateId))?.label ??
-        (rawMetalRateId !== null && rawMetalRateId !== undefined ? String(rawMetalRateId) : "-");
+        metalRateOptions.find(
+          (opt) => String(opt.id) === String(rawMetalRateId),
+        )?.label ??
+        (rawMetalRateId !== null && rawMetalRateId !== undefined
+          ? String(rawMetalRateId)
+          : "-");
       const priceValue = pickValue(item, ["total_price", "totalPrice"]);
       const detailList = normalizeDetailList(
-        pickValue(item, ["diamond_design_detail", "diamond_design_details", "diamond_details"]) ??
-          item?.diamond_design_detail
+        pickValue(item, [
+          "diamond_design_detail",
+          "diamond_design_details",
+          "diamond_details",
+        ]) ?? item?.diamond_design_detail,
       );
       const { nameEn, nameFi } = extractVariantTranslations(item);
       const variantLabel = nameEn || nameFi || "-";
+      const rawWeight = pickValue(item, ["weight"]);
+      const rawMarkUp = pickValue(item, ["mark_up", "markUp"]);
+      const weightValue =
+        rawWeight === null ||
+        rawWeight === undefined ||
+        String(rawWeight).trim() === ""
+          ? "-"
+          : formatDecimalStringForInput(rawWeight);
+      const markUpValue =
+        rawMarkUp === null ||
+        rawMarkUp === undefined ||
+        String(rawMarkUp).trim() === ""
+          ? "-"
+          : formatDecimalStringForInput(rawMarkUp);
 
       return {
         no: index + 1,
@@ -959,8 +1138,8 @@ export default function DesignVariantPage() {
         variant_name: variantLabel,
         product: productLabel ?? "-",
         metal_rate: metalRateLabel ?? "-",
-        weight: pickValue(item, ["weight"]) ?? "-",
-        mark_up: pickValue(item, ["mark_up", "markUp"]) ?? "-",
+        weight: weightValue,
+        mark_up: markUpValue,
         price: priceValue ?? "-",
         details: formatDetailSummary(detailList),
         image_count: pickValue(item, ["image_count"]) ?? 0,
@@ -1025,7 +1204,7 @@ export default function DesignVariantPage() {
       parts.detailRows.map((detail, idx) => ({
         ...detail,
         key: `${Date.now()}-${idx}`,
-      }))
+      })),
     );
     setImageFiles(Array(4).fill(null));
     setVideoFile(null);
@@ -1066,7 +1245,9 @@ export default function DesignVariantPage() {
   }, []);
 
   useEffect(() => {
-    const nextUrls = imageFiles.map((file) => (file ? URL.createObjectURL(file) : ""));
+    const nextUrls = imageFiles.map((file) =>
+      file ? URL.createObjectURL(file) : "",
+    );
     setLocalImageUrls(nextUrls);
     return () => {
       nextUrls.forEach((url) => {
@@ -1124,7 +1305,7 @@ export default function DesignVariantPage() {
         setImageDeletingId(stringId);
         await axiosClient.delete(`/api/design/delete-image/${stringId}`);
         setExistingImages((prev) =>
-          prev.filter((item) => String(item?.id ?? "") !== stringId)
+          prev.filter((item) => String(item?.id ?? "") !== stringId),
         );
         setListingSelection((prev) => {
           if (image?.isVideo && prev === "video") return "";
@@ -1144,7 +1325,7 @@ export default function DesignVariantPage() {
         setImageDeleteTarget(null);
       }
     },
-    [imageDeletingId]
+    [imageDeletingId],
   );
 
   const requestImageDelete = useCallback((image) => {
@@ -1156,9 +1337,12 @@ export default function DesignVariantPage() {
     const slots = Array(4).fill(null);
     // In create mode, use related variant images if available, otherwise use existing images
     // In edit mode, use existing images
-    const list = !editingId && relatedVariantImages.length > 0
-      ? relatedVariantImages
-      : (Array.isArray(existingImages) ? existingImages : []);
+    const list =
+      !editingId && relatedVariantImages.length > 0
+        ? relatedVariantImages
+        : Array.isArray(existingImages)
+          ? existingImages
+          : [];
 
     list.forEach((img, index) => {
       if (img?.isVideo) return;
@@ -1177,9 +1361,12 @@ export default function DesignVariantPage() {
   const previewVideo = useMemo(() => {
     // In create mode, check related variant images first, then existing images
     // In edit mode, check existing images
-    const list = !editingId && relatedVariantImages.length > 0
-      ? relatedVariantImages
-      : (Array.isArray(existingImages) ? existingImages : []);
+    const list =
+      !editingId && relatedVariantImages.length > 0
+        ? relatedVariantImages
+        : Array.isArray(existingImages)
+          ? existingImages
+          : [];
     return list.find((img) => img?.isVideo) ?? null;
   }, [existingImages, relatedVariantImages, editingId]);
 
@@ -1198,7 +1385,7 @@ export default function DesignVariantPage() {
       });
       setFileInputKey((prev) => prev + 1);
     },
-    [previewSlots]
+    [previewSlots],
   );
 
   const handleRemoveLocalVideo = useCallback(() => {
@@ -1214,7 +1401,7 @@ export default function DesignVariantPage() {
 
   const updateDetailRow = (key, updates) => {
     setDetailRows((prev) =>
-      prev.map((row) => (row.key === key ? { ...row, ...updates } : row))
+      prev.map((row) => (row.key === key ? { ...row, ...updates } : row)),
     );
   };
 
@@ -1241,7 +1428,7 @@ export default function DesignVariantPage() {
     }
 
     const missingDetails = detailRows.some(
-      (row) => !row.cutId || !row.diamondRateId || !row.pcs
+      (row) => !row.cutId || !row.diamondRateId || !row.pcs,
     );
     if (missingDetails) {
       toast.error("Fill cut, diamond rate, and pcs for each detail row.");
@@ -1320,7 +1507,7 @@ export default function DesignVariantPage() {
 
   const toggleSelectRow = useCallback((id) => {
     setSelectedIds((prev) =>
-      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id]
+      prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   }, []);
 
@@ -1328,15 +1515,21 @@ export default function DesignVariantPage() {
     setInlineFieldEdit(null);
   }, []);
 
+  // ✅ FIX 1: Use parseFloat → String instead of formatDecimalStringForInput
+  // Prevents float precision garbage like 454444.559999999998 when editing
   const startInlineFieldEdit = useCallback(
     (tableRow, field) => {
       if (savingVariantId) return;
       const val = field === "weight" ? tableRow.weight : tableRow.mark_up;
-      const draft =
-        val === "-" || val === null || val === undefined || val === "" ? "" : String(val);
+      const raw =
+        val === "-" || val === null || val === undefined || val === ""
+          ? ""
+          : val;
+      const parsed = parseFloat(raw);
+      const draft = isNaN(parsed) ? "" : String(parsed);
       setInlineFieldEdit({ rowId: tableRow.id, field, draft });
     },
-    [savingVariantId]
+    [savingVariantId],
   );
 
   const commitInlineFieldEdit = useCallback(
@@ -1348,14 +1541,17 @@ export default function DesignVariantPage() {
         cancelInlineFieldEdit();
         return;
       }
-      const nextNum = Number(trimmed);
+      // ✅ FIX 3: Use parseFloat instead of Number for correct decimal handling
+      const nextNum = parseFloat(trimmed);
       if (Number.isNaN(nextNum)) {
         toast.error("Enter a valid number.");
         cancelInlineFieldEdit();
         return;
       }
       const prevW = String(pickValue(tableRow._raw, ["weight"]) ?? "");
-      const prevM = String(pickValue(tableRow._raw, ["mark_up", "markUp"]) ?? "");
+      const prevM = String(
+        pickValue(tableRow._raw, ["mark_up", "markUp"]) ?? "",
+      );
       const nextWeight = field === "weight" ? trimmed : prevW;
       const nextMarkUp = field === "mark_up" ? trimmed : prevM;
       if (nextWeight === prevW && nextMarkUp === prevM) {
@@ -1376,8 +1572,12 @@ export default function DesignVariantPage() {
           weight: nextWeight,
           markUp: nextMarkUp,
         };
-        const previewSlotsInline = computePreviewSlotsFromExisting(merged.existingImages);
-        const previewVideoInline = computePreviewVideoFromExisting(merged.existingImages);
+        const previewSlotsInline = computePreviewSlotsFromExisting(
+          merged.existingImages,
+        );
+        const previewVideoInline = computePreviewVideoFromExisting(
+          merged.existingImages,
+        );
         const fd = buildDesignVariantFormData({
           productId: merged.productId,
           productName: merged.productName,
@@ -1402,7 +1602,9 @@ export default function DesignVariantPage() {
           listingSelection: merged.listingSelection,
           editingId: id,
         });
-        const updateResult = await dispatch(updateDesignVariant({ id, payload: fd }));
+        const updateResult = await dispatch(
+          updateDesignVariant({ id, payload: fd }),
+        );
         if (!updateResult?.error) {
           fetchFirstPage();
         }
@@ -1420,8 +1622,11 @@ export default function DesignVariantPage() {
       productOptions,
       metalRateOptions,
       fetchFirstPage,
-    ]
+    ],
   );
+
+  // ✅ FIX 2 helper: Sanitize leading zeros on every keystroke
+  const sanitizeDecimalInput = (val) => val.replace(/^0+(?=\d)/, "");
 
   const columns = [
     {
@@ -1429,7 +1634,9 @@ export default function DesignVariantPage() {
       header: (
         <input
           type="checkbox"
-          checked={tableRows.length > 0 && selectedIds.length === tableRows.length}
+          checked={
+            tableRows.length > 0 && selectedIds.length === tableRows.length
+          }
           onChange={toggleSelectAll}
         />
       ),
@@ -1443,7 +1650,12 @@ export default function DesignVariantPage() {
         />
       ),
     },
-    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
+    {
+      key: "no",
+      header: "No.",
+      filterable: false,
+      filterPlaceholder: "Search No.",
+    },
     {
       key: "variant_name",
       header: "Design Variant Name",
@@ -1458,7 +1670,12 @@ export default function DesignVariantPage() {
       filterPlaceholder: "Search Product",
       width: 220,
     },
-    { key: "metal_rate", header: "Metal Rate", filterable: false, filterPlaceholder: "Search Metal Rate" },
+    {
+      key: "metal_rate",
+      header: "Metal Rate",
+      filterable: false,
+      filterPlaceholder: "Search Metal Rate",
+    },
     {
       key: "weight",
       header: "Weight",
@@ -1467,7 +1684,8 @@ export default function DesignVariantPage() {
       filterInputStyle: { width: 120 },
       render: (row) => {
         const isEditing =
-          inlineFieldEdit?.rowId === row.id && inlineFieldEdit?.field === "weight";
+          inlineFieldEdit?.rowId === row.id &&
+          inlineFieldEdit?.field === "weight";
         const isSaving = savingVariantId === row.id && isEditing;
         if (isEditing) {
           return (
@@ -1476,12 +1694,17 @@ export default function DesignVariantPage() {
                 <input
                   type="number"
                   step="0.01"
+                  min="0"
                   className={crudStyles.inlineRateInput}
                   value={inlineFieldEdit.draft}
+                  // ✅ FIX 2: Strip leading zeros on every keystroke
                   onChange={(e) =>
                     setInlineFieldEdit((prev) =>
                       prev && prev.rowId === row.id && prev.field === "weight"
-                        ? { ...prev, draft: e.target.value }
+                        ? {
+                            ...prev,
+                            draft: sanitizeDecimalInput(e.target.value),
+                          }
                         : prev,
                     )
                   }
@@ -1538,7 +1761,10 @@ export default function DesignVariantPage() {
         return (
           <div className={crudStyles.inlineRateCell}>
             <div className={crudStyles.inlineFieldRow}>
-              <span className={crudStyles.inlineFieldValue} title={String(row.weight ?? "")}>
+              <span
+                className={crudStyles.inlineFieldValue}
+                title={String(row.weight ?? "")}
+              >
                 {row.weight}
               </span>
               <Button
@@ -1568,7 +1794,8 @@ export default function DesignVariantPage() {
       filterInputStyle: { width: 120 },
       render: (row) => {
         const isEditing =
-          inlineFieldEdit?.rowId === row.id && inlineFieldEdit?.field === "mark_up";
+          inlineFieldEdit?.rowId === row.id &&
+          inlineFieldEdit?.field === "mark_up";
         const isSaving = savingVariantId === row.id && isEditing;
         if (isEditing) {
           return (
@@ -1577,12 +1804,17 @@ export default function DesignVariantPage() {
                 <input
                   type="number"
                   step="0.01"
+                  min="0"
                   className={crudStyles.inlineRateInput}
                   value={inlineFieldEdit.draft}
+                  // ✅ FIX 2: Strip leading zeros on every keystroke
                   onChange={(e) =>
                     setInlineFieldEdit((prev) =>
                       prev && prev.rowId === row.id && prev.field === "mark_up"
-                        ? { ...prev, draft: e.target.value }
+                        ? {
+                            ...prev,
+                            draft: sanitizeDecimalInput(e.target.value),
+                          }
                         : prev,
                     )
                   }
@@ -1639,7 +1871,10 @@ export default function DesignVariantPage() {
         return (
           <div className={crudStyles.inlineRateCell}>
             <div className={crudStyles.inlineFieldRow}>
-              <span className={crudStyles.inlineFieldValue} title={String(row.mark_up ?? "")}>
+              <span
+                className={crudStyles.inlineFieldValue}
+                title={String(row.mark_up ?? "")}
+              >
                 {row.mark_up}
               </span>
               <Button
@@ -1669,17 +1904,29 @@ export default function DesignVariantPage() {
       filterInputStyle: { width: 120 },
     },
     { key: "details", header: "Diamond Detail", filterable: false, width: 270 },
-    { key: "image_count", header: "Uploaded Media Count", filterable: false, },
+    { key: "image_count", header: "Uploaded Media Count", filterable: false },
     {
       key: "actions",
       header: "Action",
       filterable: false,
       render: (row) => (
         <div className={crudStyles.actions}>
-          <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
+          <Button
+            variant="ghost"
+            size="sm"
+            icon="edit"
+            iconOnly
+            onClick={() => openEdit(row._raw)}
+          >
             Edit
           </Button>
-          <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
+          <Button
+            variant="danger"
+            size="sm"
+            icon="delete"
+            iconOnly
+            onClick={() => handleDelete(row.id)}
+          >
             Delete
           </Button>
         </div>
@@ -1750,7 +1997,11 @@ export default function DesignVariantPage() {
                       Add Design Variant
                     </Button>
                     {csvMenuOpen ? (
-                      <div className={styles.csvMenuList} role="menu" aria-label="CSV actions">
+                      <div
+                        className={styles.csvMenuList}
+                        role="menu"
+                        aria-label="CSV actions"
+                      >
                         <button
                           type="button"
                           className={styles.csvMenuItem}
@@ -1770,7 +2021,9 @@ export default function DesignVariantPage() {
                           onClick={() => openCsvPicker("upload")}
                           disabled={loading || Boolean(csvUploading)}
                         >
-                          {csvUploading === "upload" ? "Uploading CSV..." : "Upload By CSV"}
+                          {csvUploading === "upload"
+                            ? "Uploading CSV..."
+                            : "Upload By CSV"}
                         </button>
                         <button
                           type="button"
@@ -1848,7 +2101,6 @@ export default function DesignVariantPage() {
               </div>
             </div>
 
-
             <DataTable
               columns={columns}
               rows={tableRows}
@@ -1893,7 +2145,11 @@ export default function DesignVariantPage() {
             >
               {exporting ? "Exporting..." : "Export"}
             </Button>
-            <Button variant="secondary" onClick={closeExportModal} disabled={exporting}>
+            <Button
+              variant="secondary"
+              onClick={closeExportModal}
+              disabled={exporting}
+            >
               Cancel
             </Button>
           </div>
@@ -1905,12 +2161,14 @@ export default function DesignVariantPage() {
             value={exportProductIds}
             onChange={(event) =>
               setExportProductIds(
-                Array.isArray(event.target.value) ? event.target.value : []
+                Array.isArray(event.target.value) ? event.target.value : [],
               )
             }
             disabled={!exportProductOptions.length}
             placeholder={
-              exportProductOptions.length ? "Select product" : "Loading products..."
+              exportProductOptions.length
+                ? "Select product"
+                : "Loading products..."
             }
             options={exportProductOptions}
             multiple
@@ -1929,7 +2187,12 @@ export default function DesignVariantPage() {
         }}
         footer={
           <div className={crudStyles.formActions}>
-            <Button variant="primarySoft" type="submit" form="design-variant-form" disabled={loading}>
+            <Button
+              variant="primarySoft"
+              type="submit"
+              form="design-variant-form"
+              disabled={loading}
+            >
               {editingId ? "Update" : "Create"}
             </Button>
             <Button
@@ -1945,7 +2208,11 @@ export default function DesignVariantPage() {
           </div>
         }
       >
-        <form id="design-variant-form" className={crudStyles.form} onSubmit={submit}>
+        <form
+          id="design-variant-form"
+          className={crudStyles.form}
+          onSubmit={submit}
+        >
           <div className={crudStyles.formRow2}>
             {/* <AdminSelectField
               label="Category"
@@ -1965,28 +2232,46 @@ export default function DesignVariantPage() {
               value={productId}
               onChange={(e) => {
                 const nextId = e.target.value;
-                const selected = filteredProductOptions.find((opt) => opt.id === nextId);
+                const selected = filteredProductOptions.find(
+                  (opt) => opt.id === nextId,
+                );
                 setProductId(nextId);
                 setProductName(selected?.label ?? "");
               }}
               required
               disabled={!filteredProductOptions.length}
-              placeholder={filteredProductOptions.length ? "Select product" : "Loading products..."}
-              options={filteredProductOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+              placeholder={
+                filteredProductOptions.length
+                  ? "Select product"
+                  : "Loading products..."
+              }
+              options={filteredProductOptions.map((opt) => ({
+                value: opt.id,
+                label: opt.label,
+              }))}
             />
             <AdminSelectField
               label="Metal Rate"
               value={metalRateId}
               onChange={(e) => {
                 const nextId = e.target.value;
-                const selected = metalRateOptions.find((opt) => opt.id === nextId);
+                const selected = metalRateOptions.find(
+                  (opt) => opt.id === nextId,
+                );
                 setMetalRateId(nextId);
                 setMetalRateName(selected?.label ?? "");
               }}
               required
               disabled={!metalRateOptions.length}
-              placeholder={metalRateOptions.length ? "Select metal rate" : "Loading metal rates..."}
-              options={metalRateOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+              placeholder={
+                metalRateOptions.length
+                  ? "Select metal rate"
+                  : "Loading metal rates..."
+              }
+              options={metalRateOptions.map((opt) => ({
+                value: opt.id,
+                label: opt.label,
+              }))}
             />
           </div>
 
@@ -1995,8 +2280,10 @@ export default function DesignVariantPage() {
               label="Weight"
               type="number"
               step="0.01"
+              min="0"
               value={weight}
-              onChange={(e) => setWeight(e.target.value)}
+              // ✅ FIX 2 (modal form): Strip leading zeros on every keystroke
+              onChange={(e) => setWeight(sanitizeDecimalInput(e.target.value))}
               required
               preventWheel
             />
@@ -2004,8 +2291,10 @@ export default function DesignVariantPage() {
               label="Mark Up"
               type="number"
               step="0.01"
+              min="0"
               value={markUp}
-              onChange={(e) => setMarkUp(e.target.value)}
+              // ✅ FIX 2 (modal form): Strip leading zeros on every keystroke
+              onChange={(e) => setMarkUp(sanitizeDecimalInput(e.target.value))}
               required
               preventWheel
             />
@@ -2063,7 +2352,9 @@ export default function DesignVariantPage() {
                 type="button"
                 onClick={() => {
                   if (!editingId && (!productId || !metalRateId)) {
-                    toast.error("Please select Product and Metal Rate before uploading images");
+                    toast.error(
+                      "Please select Product and Metal Rate before uploading images",
+                    );
                     return;
                   }
                   setImageModalOpen(true);
@@ -2103,7 +2394,9 @@ export default function DesignVariantPage() {
                   value={row.cutId}
                   onChange={(e) => {
                     const nextId = e.target.value;
-                    const selected = cutOptions.find((opt) => opt.id === nextId);
+                    const selected = cutOptions.find(
+                      (opt) => opt.id === nextId,
+                    );
                     updateDetailRow(row.key, {
                       cutId: nextId,
                       cutCode: selected?.code ?? "",
@@ -2112,15 +2405,22 @@ export default function DesignVariantPage() {
                   }}
                   required
                   disabled={!cutOptions.length}
-                  placeholder={cutOptions.length ? "Select cut" : "Loading cuts..."}
-                  options={cutOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+                  placeholder={
+                    cutOptions.length ? "Select cut" : "Loading cuts..."
+                  }
+                  options={cutOptions.map((opt) => ({
+                    value: opt.id,
+                    label: opt.label,
+                  }))}
                 />
                 <AdminSelectField
                   label=""
                   value={row.diamondRateId}
                   onChange={(e) => {
                     const nextId = e.target.value;
-                    const selected = diamondRateOptions.find((opt) => opt.id === nextId);
+                    const selected = diamondRateOptions.find(
+                      (opt) => opt.id === nextId,
+                    );
                     updateDetailRow(row.key, {
                       diamondRateId: nextId,
                       diamondRateName: selected?.label ?? "",
@@ -2128,22 +2428,33 @@ export default function DesignVariantPage() {
                   }}
                   required
                   disabled={!diamondRateOptions.length}
-                  placeholder={diamondRateOptions.length ? "Select diamond rate" : "Loading diamond rates..."}
-                  options={diamondRateOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+                  placeholder={
+                    diamondRateOptions.length
+                      ? "Select diamond rate"
+                      : "Loading diamond rates..."
+                  }
+                  options={diamondRateOptions.map((opt) => ({
+                    value: opt.id,
+                    label: opt.label,
+                  }))}
                 />
                 <TextField
                   label=""
                   type="number"
                   step="1"
                   value={row.pcs}
-                  onChange={(e) => updateDetailRow(row.key, { pcs: e.target.value })}
+                  onChange={(e) =>
+                    updateDetailRow(row.key, { pcs: e.target.value })
+                  }
                   required
                   preventWheel
                 />
                 <AdminSelectField
                   label=""
                   value={row.isCenter}
-                  onChange={(e) => updateDetailRow(row.key, { isCenter: e.target.value })}
+                  onChange={(e) =>
+                    updateDetailRow(row.key, { isCenter: e.target.value })
+                  }
                   required
                   placeholder="Select type"
                   options={[
@@ -2154,7 +2465,11 @@ export default function DesignVariantPage() {
                 <AdminSelectField
                   label=""
                   value={row.positionVisible}
-                  onChange={(e) => updateDetailRow(row.key, { positionVisible: e.target.value })}
+                  onChange={(e) =>
+                    updateDetailRow(row.key, {
+                      positionVisible: e.target.value,
+                    })
+                  }
                   required
                   placeholder="Select visibility"
                   options={[
@@ -2186,7 +2501,11 @@ export default function DesignVariantPage() {
         bodyClassName={styles.imageModalBody}
         footer={
           <div className={crudStyles.formActions}>
-            <Button variant="secondary" type="button" onClick={() => setImageModalOpen(false)}>
+            <Button
+              variant="secondary"
+              type="button"
+              onClick={() => setImageModalOpen(false)}
+            >
               Close
             </Button>
           </div>
@@ -2201,7 +2520,8 @@ export default function DesignVariantPage() {
             const hasLocal = Boolean(localUrl);
             const hasAny = hasExisting || hasLocal;
             const isSelected = listingSelection === `image-${index}`;
-            const isDeleting = existing?.id && imageDeletingId === String(existing.id);
+            const isDeleting =
+              existing?.id && imageDeletingId === String(existing.id);
             const allowListing = hasAny;
             return (
               <div
@@ -2249,7 +2569,9 @@ export default function DesignVariantPage() {
                     onClick={(e) => {
                       e.currentTarget.value = null;
                     }}
-                    onChange={(e) => updateImageFile(index, e.target.files?.[0] ?? null)}
+                    onChange={(e) =>
+                      updateImageFile(index, e.target.files?.[0] ?? null)
+                    }
                   />
                 </div>
                 <label
@@ -2271,10 +2593,15 @@ export default function DesignVariantPage() {
                     onChange={() => setListingSelection(`image-${index}`)}
                   />
                   <span
-                    className={[radioStyles.indicator, styles.listingIndicator].join(" ")}
+                    className={[
+                      radioStyles.indicator,
+                      styles.listingIndicator,
+                    ].join(" ")}
                     aria-hidden
                   />
-                  <span className={[radioStyles.text, styles.listingText].join(" ")}>
+                  <span
+                    className={[radioStyles.text, styles.listingText].join(" ")}
+                  >
                     Set as listing
                   </span>
                 </label>
@@ -2311,7 +2638,10 @@ export default function DesignVariantPage() {
                   </button>
                 ) : null}
                 <label
-                  className={[styles.imageUploadTarget, styles.ratioOneTwo].join(" ")}
+                  className={[
+                    styles.imageUploadTarget,
+                    styles.ratioOneTwo,
+                  ].join(" ")}
                   htmlFor={`video-slot-${fileInputKey}`}
                 >
                   {hasVideo ? (
@@ -2337,7 +2667,9 @@ export default function DesignVariantPage() {
                     onClick={(e) => {
                       e.currentTarget.value = null;
                     }}
-                    onChange={(e) => updateVideoFile(e.target.files?.[0] ?? null)}
+                    onChange={(e) =>
+                      updateVideoFile(e.target.files?.[0] ?? null)
+                    }
                   />
                 </div>
                 <label
@@ -2359,10 +2691,15 @@ export default function DesignVariantPage() {
                     onChange={() => setListingSelection("video")}
                   />
                   <span
-                    className={[radioStyles.indicator, styles.listingIndicator].join(" ")}
+                    className={[
+                      radioStyles.indicator,
+                      styles.listingIndicator,
+                    ].join(" ")}
                     aria-hidden
                   />
-                  <span className={[radioStyles.text, styles.listingText].join(" ")}>
+                  <span
+                    className={[radioStyles.text, styles.listingText].join(" ")}
+                  >
                     Set as listing
                   </span>
                 </label>
