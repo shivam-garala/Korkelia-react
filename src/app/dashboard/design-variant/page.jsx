@@ -327,11 +327,11 @@ function mapSourceToFormState(source) {
   const weightStr =
     rawWeight === null || rawWeight === undefined
       ? ""
-      : formatDecimalStringForInput(rawWeight);
+      : formatDecimalStringForInput(rawWeight, 2);
   const markUpStr =
     rawMarkUp === null || rawMarkUp === undefined
       ? ""
-      : formatDecimalStringForInput(rawMarkUp);
+      : formatDecimalStringForInput(rawMarkUp, 2);
 
   const detailRows = detailList.map((detail, idx) => {
     const rawIsCenter = pickValue(detail, ["is_center", "isCenter"]);
@@ -552,6 +552,13 @@ function buildDesignVariantFormData({
 }
 
 const PAGE_LIMIT = 50;
+
+// ✅ FIX: Sanitize decimal input — strip leading zeros, allow only one dot, digits only
+const sanitizeDecimalInput = (val) =>
+  val
+    .replace(/[^0-9.]/g, "") // only digits and decimal point
+    .replace(/^0+(?=\d)/, "") // strip leading zeros (e.g. "007" → "7")
+    .replace(/(\..*)\./g, "$1"); // only one decimal point allowed
 
 export default function DesignVariantPage() {
   const pathname = usePathname();
@@ -1124,13 +1131,13 @@ export default function DesignVariantPage() {
         rawWeight === undefined ||
         String(rawWeight).trim() === ""
           ? "-"
-          : formatDecimalStringForInput(rawWeight);
+          : formatDecimalStringForInput(rawWeight, 2);
       const markUpValue =
         rawMarkUp === null ||
         rawMarkUp === undefined ||
         String(rawMarkUp).trim() === ""
           ? "-"
-          : formatDecimalStringForInput(rawMarkUp);
+          : formatDecimalStringForInput(rawMarkUp, 2);
 
       return {
         no: index + 1,
@@ -1515,18 +1522,14 @@ export default function DesignVariantPage() {
     setInlineFieldEdit(null);
   }, []);
 
-  // ✅ FIX 1: Use parseFloat → String instead of formatDecimalStringForInput
-  // Prevents float precision garbage like 454444.559999999998 when editing
   const startInlineFieldEdit = useCallback(
     (tableRow, field) => {
       if (savingVariantId) return;
       const val = field === "weight" ? tableRow.weight : tableRow.mark_up;
-      const raw =
+      const draft =
         val === "-" || val === null || val === undefined || val === ""
           ? ""
-          : val;
-      const parsed = parseFloat(raw);
-      const draft = isNaN(parsed) ? "" : String(parsed);
+          : formatDecimalStringForInput(val, 2);
       setInlineFieldEdit({ rowId: tableRow.id, field, draft });
     },
     [savingVariantId],
@@ -1625,9 +1628,6 @@ export default function DesignVariantPage() {
     ],
   );
 
-  // ✅ FIX 2 helper: Sanitize leading zeros on every keystroke
-  const sanitizeDecimalInput = (val) => val.replace(/^0+(?=\d)/, "");
-
   const columns = [
     {
       key: "select",
@@ -1691,13 +1691,18 @@ export default function DesignVariantPage() {
           return (
             <div className={crudStyles.inlineRateCell}>
               <div className={crudStyles.inlineFieldRow}>
+                {/*
+                  ✅ FIX 2: Use type="text" + inputMode="decimal" instead of type="number"
+                  This prevents browsers from silently truncating/rounding large decimals
+                  like 5000000.55 on blur. We also read from state (inlineFieldEdit.draft)
+                  on blur instead of e.target.value to guarantee the exact typed value.
+                */}
                 <input
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
                   className={crudStyles.inlineRateInput}
                   value={inlineFieldEdit.draft}
-                  // ✅ FIX 2: Strip leading zeros on every keystroke
                   onChange={(e) =>
                     setInlineFieldEdit((prev) =>
                       prev && prev.rowId === row.id && prev.field === "weight"
@@ -1708,8 +1713,13 @@ export default function DesignVariantPage() {
                         : prev,
                     )
                   }
-                  onBlur={(e) =>
-                    void commitInlineFieldEdit(row, "weight", e.target.value)
+                  // ✅ FIX 2: Read from state, not e.target.value on blur
+                  onBlur={() =>
+                    void commitInlineFieldEdit(
+                      row,
+                      "weight",
+                      inlineFieldEdit?.draft ?? "",
+                    )
                   }
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {
@@ -1801,13 +1811,16 @@ export default function DesignVariantPage() {
           return (
             <div className={crudStyles.inlineRateCell}>
               <div className={crudStyles.inlineFieldRow}>
+                {/*
+                  ✅ FIX 2: Same fix as weight — type="text" + inputMode="decimal",
+                  read from state on blur.
+                */}
                 <input
-                  type="number"
-                  step="0.01"
-                  min="0"
+                  type="text"
+                  inputMode="decimal"
+                  pattern="[0-9]*\.?[0-9]*"
                   className={crudStyles.inlineRateInput}
                   value={inlineFieldEdit.draft}
-                  // ✅ FIX 2: Strip leading zeros on every keystroke
                   onChange={(e) =>
                     setInlineFieldEdit((prev) =>
                       prev && prev.rowId === row.id && prev.field === "mark_up"
@@ -1818,8 +1831,13 @@ export default function DesignVariantPage() {
                         : prev,
                     )
                   }
-                  onBlur={(e) =>
-                    void commitInlineFieldEdit(row, "mark_up", e.target.value)
+                  // ✅ FIX 2: Read from state, not e.target.value on blur
+                  onBlur={() =>
+                    void commitInlineFieldEdit(
+                      row,
+                      "mark_up",
+                      inlineFieldEdit?.draft ?? "",
+                    )
                   }
                   onKeyDown={(e) => {
                     if (e.key === "Enter") {

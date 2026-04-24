@@ -376,7 +376,7 @@ export default function DiamondRatePage() {
         (typeof rateValue === "string" && !String(rateValue).trim());
       const rateForRow = isMissing
         ? "-"
-        : formatDecimalStringForInput(rateValue);
+        : formatDecimalStringForInput(rateValue, 2);
 
       return {
         no: index + 1,
@@ -489,7 +489,7 @@ export default function DiamondRatePage() {
     setRate(
       rawRate === null || rawRate === undefined
         ? ""
-        : formatDecimalStringForInput(rawRate),
+        : formatDecimalStringForInput(rawRate, 2),
     );
     setModalOpen(true);
   };
@@ -532,16 +532,15 @@ export default function DiamondRatePage() {
     setInlineRateDraft("");
   }, []);
 
-  // ✅ FIX 1: Use parseFloat → String instead of formatDecimalStringForInput
-  // This prevents float precision garbage like 454444.559999999998
   const startInlineRateEdit = useCallback(
     (row) => {
       if (savingRateId) return;
-      const raw = row.rate === "-" ? "" : row.rate;
-      const parsed = parseFloat(raw);
-      const clean = isNaN(parsed) ? "" : String(parsed);
+      const draft =
+        row.rate === "-" || row.rate === "" || row.rate == null
+          ? ""
+          : formatDecimalStringForInput(row.rate, 2);
       setInlineRateEditId(row.id);
-      setInlineRateDraft(clean);
+      setInlineRateDraft(draft);
     },
     [savingRateId],
   );
@@ -554,7 +553,6 @@ export default function DiamondRatePage() {
         cancelInlineRateEdit();
         return;
       }
-      // ✅ FIX 3: Use parseFloat instead of Number to correctly handle decimals
       const next = parseFloat(trimmed);
       if (Number.isNaN(next)) {
         cancelInlineRateEdit();
@@ -638,10 +636,8 @@ export default function DiamondRatePage() {
                     min="0"
                     className={styles.inlineRateInput}
                     value={inlineRateDraft}
-                    // ✅ FIX 2: Sanitize input on every keystroke to remove leading zeros
                     onChange={(e) => {
                       let val = e.target.value;
-                      // Remove leading zeros before digits, but allow "0.5", "0.", ""
                       val = val.replace(/^0+(?=\d)/, "");
                       setInlineRateDraft(val);
                     }}
@@ -898,7 +894,6 @@ export default function DiamondRatePage() {
               value={rate}
               onChange={(e) => {
                 let val = e.target.value;
-                // ✅ FIX 2 (modal form): Remove leading zeros before digits
                 val = val.replace(/^0+(?=\d)/, "");
                 setRate(val);
               }}
