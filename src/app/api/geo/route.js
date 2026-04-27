@@ -9,6 +9,19 @@ const cache = new Map();
 const CACHE_TTL_MS = 60_000;
 const CACHE_MAX = 300;
 
+function normalizeBaseUrl(value) {
+  if (!value) return null;
+  return String(value).replace(/\/+$/, "");
+}
+
+function getBackendBaseUrl() {
+  return normalizeBaseUrl(
+    process.env.NEXT_BASE_API_URL ??
+      process.env.NEXT_PUBLIC_API_URL ??
+      process.env.NEXT_PUBLIC_BASE_API_URL,
+  );
+}
+
 function cacheGet(ip) {
   const row = cache.get(ip);
   if (!row) return null;
@@ -27,67 +40,103 @@ function cacheSet(ip, payload) {
   cache.set(ip, { at: Date.now(), payload });
 }
 
-
-async function resolveGeoPayload(encoded, ip) {
-  let countryCode = null;
-  let source = "ipapi";
-  let currencyCode = null;
-
-  const geoRes = await fetch(`https://ipapi.co/${encoded}/json/`, {
-    cache: "no-store",
-  });
-
-  if (geoRes.ok) {
-    const geo = await geoRes.json();
-    if (!geo?.error) {
-      const code = geo?.country_code;
-      const currency = geo?.currency ?? geo?.Currency;
-      currencyCode =
-        typeof currency === "string" ? currency.trim().toUpperCase() : null;
-      countryCode = typeof code === "string" ? code.toUpperCase() : null;
-    }
+async function resolveGeoPayload(ip) {
+  const base = getBackendBaseUrl();
+  if (!base) {
+    return {
+      countryCode: null,
+      currencyCode: null,
+      ip,
+      source: "failed",
+    };
   }
 
-  if (!countryCode) {
-    const ipApiRes = await fetch(
-      `http://ip-api.com/json/${encoded}?fields=status,message,countryCode,currency`,
-      { cache: "no-store" },
-    );
-    if (ipApiRes.ok) {
-      const data = await ipApiRes.json();
-      if (data?.status === "success") {
-        const code = data?.countryCode;
-        const cur = data?.currency;
-        if (typeof code === "string" && /^[A-Za-z]{2}$/.test(code)) {
-          countryCode = code.toUpperCase();
-          source = "ip-api";
-        }
-        if (typeof cur === "string" && /^[A-Za-z]{3}$/.test(cur)) {
-          currencyCode = cur.trim().toUpperCase();
-        }
-      }
-    }
-  }
+  const url = `${base}/api/geoIp/lookup`;
 
-  if (!countryCode) {
-    const fbRes = await fetch(
-      `https://get.geojs.io/v1/ip/geo/${encoded}.json`,
-      { cache: "no-store" },
-    );
-    if (fbRes.ok) {
-      const data = await fbRes.json();
-      const code = data?.country_code;
-      countryCode = typeof code === "string" ? code.toUpperCase() : null;
-      source = "geojs";
-    }
-  }
+  try {
+    const res = await fetch(url, {
+      method: "POST",
+      headers: {
+        Accept: "application/json",
+        "Content-Type": "application/json",
+      },
+      body: JSON.stringify({ ip }),
+      cache: "no-store",
+    });
 
-  return {
-    countryCode,
-    currencyCode,
-    ip,
-    source: countryCode ? source : "failed",
-  };
+    if (!res.ok) {
+      return {
+        countryCode: null,
+        currencyCode: null,
+        ip,
+        source: "failed",
+      };
+    }
+
+    const json = await res.json();
+    if (json?.success === false) {
+      return {
+        countryCode: null,
+        currencyCode: null,
+        ip,
+        source: "failed",
+      };
+    }
+
+    const data = json?.data;
+    if (!data) {
+      return {
+        countryCode: null,
+        currencyCode: null,
+        ip,
+        source: "failed",
+      };
+    }
+    if (data.found === false) {
+      return {
+        countryCode: null,
+        currencyCode: null,
+        ip,
+        source: "not-found",
+      };
+    }
+
+    let countryCode =
+      typeof data.countryCode === "string"
+        ? data.countryCode.trim().toUpperCase()
+        : null;
+    if (!countryCode && data.country?.isoCode) {
+      countryCode = String(data.country.isoCode).trim().toUpperCase();
+    }
+    if (countryCode && !/^[A-Z]{2}$/.test(countryCode)) {
+      countryCode = null;
+    }
+
+    let currencyCode =
+      typeof data.currencyCode === "string"
+        ? data.currencyCode.trim().toUpperCase()
+        : null;
+    if (currencyCode && !/^[A-Z]{3}$/.test(currencyCode)) {
+      currencyCode = null;
+    }
+
+    const resolvedIp =
+      typeof data.ip === "string" && data.ip.trim() ? data.ip.trim() : ip;
+
+    return {
+      countryCode,
+      currencyCode,
+      ip: resolvedIp,
+      source: countryCode ? "backend" : "failed",
+    };
+  } catch {
+    return {
+      countryCode: null,
+      currencyCode: null,
+      ip,
+      source: "failed",
+    };
+  }
 }
 
 export async function GET(request) {
@@ -122,8 +171,6 @@ export async function GET(request) {
       });
     }
 
-    const encoded = encodeURIComponent(ip);
-
     const cached = cacheGet(ip);
     if (cached) {
       return NextResponse.json({ ...cached, cached: true });
@@ -131,7 +178,7 @@ export async function GET(request) {
 
     let pending = inflight.get(ip);
     if (!pending) {
-      pending = resolveGeoPayload(encoded, ip)
+      pending = resolveGeoPayload(ip)
         .then((payload) => {
           cacheSet(ip, payload);
           return payload;

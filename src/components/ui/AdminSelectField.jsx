@@ -15,6 +15,8 @@ export default function AdminSelectField({
   name,
   placeholder = "Select",
   options = [],
+  /** option `value`s to omit from the dropdown (e.g. currencies already in the list). Current selection is always kept. */
+  excludeOptionValues = [],
   multiple = false,
   isSearchable = true,
 }) {
@@ -24,13 +26,33 @@ export default function AdminSelectField({
       ? value
       : []
     : value ?? "";
+  const visibleOptions = useMemo(() => {
+    if (!Array.isArray(excludeOptionValues) || excludeOptionValues.length === 0) {
+      return options;
+    }
+    const blocked = new Set(
+      excludeOptionValues.map((v) => String(v).trim().toUpperCase()).filter(Boolean),
+    );
+    return options.filter((opt) => {
+      const v = String(opt.value ?? "").toUpperCase();
+      if (multiple) {
+        if (normalizedValue.some((nv) => String(nv).toUpperCase() === v)) return true;
+      } else if (String(normalizedValue ?? "").toUpperCase() === v) {
+        return true;
+      }
+      return !blocked.has(v);
+    });
+  }, [options, excludeOptionValues, multiple, normalizedValue]);
   const selectedValue = multiple
-    ? options.filter((opt) =>
-        normalizedValue.some((val) => String(opt.value) === String(val))
+    ? visibleOptions.filter((opt) =>
+        normalizedValue.some((val) => String(opt.value) === String(val)),
       )
-    : options.find((opt) => String(opt.value) === String(normalizedValue)) ?? null;
+    : visibleOptions.find((opt) => String(opt.value) === String(normalizedValue)) ?? null;
   const portalTarget = typeof window !== "undefined" ? document.body : null;
-  const hasOptionIcons = useMemo(() => options.some((o) => Boolean(o?.icon)), [options]);
+  const hasOptionIcons = useMemo(
+    () => visibleOptions.some((o) => Boolean(o?.icon)),
+    [visibleOptions],
+  );
   const formatOptionLabel = useMemo(() => {
     if (!hasOptionIcons) return undefined;
     return (option) => (
@@ -99,7 +121,7 @@ export default function AdminSelectField({
         classNamePrefix="adminSelect"
         value={selectedValue}
         onChange={handleChange}
-        options={options}
+        options={visibleOptions}
         {...(formatOptionLabel ? { formatOptionLabel } : {})}
         isDisabled={disabled}
         placeholder={placeholder}

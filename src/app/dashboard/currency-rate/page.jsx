@@ -143,6 +143,18 @@ export default function CurrencyRatePage() {
     });
   }, [filters.currency_code, filters.no, filters.rate, filters.visible, tableRows]);
 
+  const usedCurrencyCodesForSelect = useMemo(
+    () =>
+      tableRows
+        .filter((row) => {
+          if (editingId == null) return true;
+          return String(row.id) !== String(editingId);
+        })
+        .map((row) => String(row.currency_code ?? "").toUpperCase())
+        .filter((c) => c && c !== "-"),
+    [tableRows, editingId],
+  );
+
   const openCreate = () => {
     setEditingId(null);
     setCurrencyCode("");
@@ -368,6 +380,7 @@ export default function CurrencyRatePage() {
               value={currencyCode}
               onChange={(e) => setCurrencyCode(String(e.target.value ?? "").toUpperCase())}
               options={currencySelectOptions}
+              excludeOptionValues={usedCurrencyCodesForSelect}
               required
             />
             <TextField
