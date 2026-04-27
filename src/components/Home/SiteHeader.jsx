@@ -36,7 +36,7 @@ export default function SiteHeader() {
     };
   }, []);
 
-  /** Admin-visible rates; ensure EUR appears when selected but not returned by API (e.g. CN geo fallback). */
+  /** Admin-visible rates; always include EUR in dropdown without forcing EUR selection. */
   const currencyDropdownOptions = useMemo(() => {
     const mapped = publicRates.map(optionFromPublicRateRow).filter(Boolean);
     if (mapped.length === 0) {
@@ -45,11 +45,11 @@ export default function SiteHeader() {
     const hasEur = mapped.some(
       (o) => String(o?.value ?? "").trim().toLowerCase() === "eur",
     );
-    if (currency === "eur" && !hasEur) {
+    if (!hasEur) {
       return [optionEuroForPublicDropdown(), ...mapped];
     }
     return mapped;
-  }, [publicRates, currency]);
+  }, [publicRates]);
 
   const languageLabels =
     language === "fi"
