@@ -48,7 +48,7 @@ export const CURRENCIES_MASTER = [
   {
     code: "ARS",
     name: "Argentine Peso",
-    symbol: "$",
+    symbol: "AR$",
     country: "Argentina",
     countryCode: "AR",
   },
