@@ -13,6 +13,7 @@ import axiosClient from "../lib/axiosClient.js";
 import {
   CURRENCY_BY_VALUE,
   getCountryCodeForCurrency,
+  getCurrencyOption,
 } from "../constants/currencyOptions.js";
 import {
   getDefaultLanguageForGeoCountry,
@@ -430,6 +431,14 @@ export function I18nProvider({ children }) {
     return geoCountryCode;
   }, [currency, geoCountryCode]);
 
+  /** Display symbol (e.g. €, $) for the current storefront currency. */
+  const currencySymbol = useMemo(() => {
+    console.log("currencySymbol", getCurrencyOption(currency));
+    const symbol = getCurrencyOption(currency)?.symbol ?? "€";
+    console.log("currencySymbol", symbol);
+    return symbol;
+  }, [currency]);
+
   const t = useCallback(
     (key) => {
       const value = getByPath(dictionary, key);
@@ -446,6 +455,7 @@ export function I18nProvider({ children }) {
       currency,
       setCurrency,
       currencyCode: toCurrencyParam(currency),
+      currencySymbol,
       geoCountryCode,
       displayCountryCode,
       t,
@@ -455,6 +465,7 @@ export function I18nProvider({ children }) {
       setLanguage,
       currency,
       setCurrency,
+      currencySymbol,
       geoCountryCode,
       displayCountryCode,
       t,

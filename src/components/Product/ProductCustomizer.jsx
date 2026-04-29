@@ -564,7 +564,7 @@ export default function ProductCustomizer({
   defaultCutId = "",
 }) {
   const router = useRouter();
-  const { language, currency, currencyCode } = useI18n();
+  const { language, currency, currencyCode, currencySymbol } = useI18n();
   const qualityId = useId();
   const clarityId = useId();
   const sizeId = useId();
@@ -690,6 +690,7 @@ export default function ProductCustomizer({
           languageId,
           listingCategoryId,
           currencyCode,
+          currencySymbol,
         );
         if (!active || !Array.isArray(list)) return;
         const matchById = (item) => {

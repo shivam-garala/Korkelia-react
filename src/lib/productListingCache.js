@@ -3,10 +3,10 @@ import axiosClient from "./axiosClient.js";
 const requestCache = new Map();
 const dataCache = new Map();
 
-const buildKey = (prefix, languageId, categoryId, currencyCode, preferWhite) =>
+const buildKey = (prefix, languageId, categoryId, currencyCode,currencySymbol, preferWhite) =>
   `${prefix}:${String(languageId || "1")}:${String(categoryId || "")}:${String(
     currencyCode || "EU"
-  )}:${preferWhite ? "1" : "0"}`;
+  )}:${preferWhite ? "1" : "0"}:${currencySymbol || ""}`;
 
 const fetchCached = async (key, url) => {
   if (dataCache.has(key)) return dataCache.get(key);
@@ -33,15 +33,16 @@ export const fetchProductListEcom = async (
   languageId,
   categoryId,
   currencyCode,
+  currencySymbol,
   preferWhite
 ) => {
-  const key = buildKey("products", languageId, categoryId, currencyCode, preferWhite);
+  const key = buildKey("products", languageId, categoryId, currencyCode, currencySymbol, preferWhite );
   const url = `/api/product/listEcom?language_id=${encodeURIComponent(
     languageId || "1"
   )}&category_id=${encodeURIComponent(categoryId || "")}&currency=${encodeURIComponent(
     currencyCode || "EU"
-  )}&prefer_white=${preferWhite ? "1" : "0"}`;
-  return fetchCached(key, url);
+  )}&currency_symbol=${currencySymbol}&prefer_white=${preferWhite ? "1" : "0"}`;
+  return fetchCached(key, url) ;
 };
 
 export const fetchSubCategoryHomePage = async (languageId, categoryId) => {

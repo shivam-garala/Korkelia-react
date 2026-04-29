@@ -56,7 +56,6 @@ import {
 import layout from "../../../styles/workspace.module.css";
 import crudStyles from "../../../styles/crudPage.module.css";
 import styles from "./page.module.css";
-import { formatDecimalStringForInput } from "../../../lib/decimalString.js";
 
 function pickValue(obj, keys) {
   for (const key of keys) {
@@ -215,350 +214,7 @@ function extractVariantTranslations(item) {
   return { nameEn, nameFi, descriptionEn, descriptionFi };
 }
 
-/** Same slot layout as previewSlots useMemo when only persisted images exist (edit / inline save). */
-function computePreviewSlotsFromExisting(existingImages) {
-  const slots = Array(4).fill(null);
-  const list = Array.isArray(existingImages) ? existingImages : [];
-  list.forEach((img, index) => {
-    if (img?.isVideo) return;
-    const orderValue = Number(img?.order);
-    const slotIndex = Number.isFinite(orderValue) ? orderValue - 1 : -1;
-    if (slotIndex >= 0 && slotIndex < 4 && !slots[slotIndex]) {
-      slots[slotIndex] = img;
-    }
-    if (slotIndex < 0 && index < 4 && !slots[index]) {
-      slots[index] = img;
-    }
-  });
-  return slots;
-}
-
-function computePreviewVideoFromExisting(existingImages) {
-  const list = Array.isArray(existingImages) ? existingImages : [];
-  return list.find((img) => img?.isVideo) ?? null;
-}
-
-function unwrapDesignFetchPayload(result) {
-  const response = result?.payload?.data ?? result?.payload ?? null;
-  if (!response || typeof response !== "object") return null;
-  return response?.data ?? response;
-}
-
-/**
- * Maps API design record to form state (mirrors openEdit parsing).
- * @returns {object|null}
- */
-function mapSourceToFormState(source) {
-  if (!source || typeof source !== "object") return null;
-  const rawProductId = pickValue(source, ["product_id", "productId"]);
-  const rawProductName = pickValue(source, ["product_name", "productName"]);
-  const rawMetalRateId = pickValue(source, ["metal_rate_id", "metalRateId"]);
-  const rawMetalRateName = pickValue(source, [
-    "metal_rate_name",
-    "metalRateName",
-  ]);
-  const rawCategoryId = pickValue(source, [
-    "category_id",
-    "categoryId",
-    "category_master_id",
-  ]);
-  const detailList = normalizeDetailList(
-    pickValue(source, [
-      "diamond_design_detail",
-      "diamond_design_details",
-      "diamond_details",
-    ]) ?? source?.diamond_design_detail,
-  );
-  const imageList = normalizeDetailList(
-    pickValue(source, [
-      "images",
-      "design_images",
-      "designImages",
-      "designImagesList",
-    ]) ?? source?.images,
-  );
-  let nextListingSelection = "";
-  if (Array.isArray(imageList)) {
-    const listingItem = imageList.find(
-      (img) =>
-        Number(
-          pickValue(img, ["is_product_listing", "isProductListing"]) ?? 0,
-        ) === 1,
-    );
-    if (listingItem) {
-      const listingSrc =
-        pickValue(listingItem, ["image_url", "url", "src"]) ??
-        pickValue(listingItem, ["image", "file_name", "filename"]);
-      if (isVideoAsset(listingSrc)) {
-        nextListingSelection = "video";
-      } else {
-        const orderValue = Number(
-          pickValue(listingItem, ["order", "sort_order"]),
-        );
-        const slotIndex = Number.isFinite(orderValue) ? orderValue - 1 : -1;
-        if (slotIndex >= 0 && slotIndex < 4) {
-          nextListingSelection = `image-${slotIndex}`;
-        }
-      }
-    }
-  }
-  const { nameEn, nameFi, descriptionEn, descriptionFi } =
-    extractVariantTranslations(source);
-  const rawPriceFlag = pickValue(source, [
-    "price_flag",
-    "priceFlag",
-    "purchase_flag",
-    "purchaseFlag",
-    "is_purchase",
-    "isPurchase",
-  ]);
-  const priceFlagValue =
-    rawPriceFlag === 1 ||
-    rawPriceFlag === "1" ||
-    String(rawPriceFlag).toLowerCase() === "yes"
-      ? "yes"
-      : "no";
-  const rawWeight = pickValue(source, [
-    "weight",
-    "metal_weight",
-    "product_weight",
-  ]);
-  const rawMarkUp = pickValue(source, ["mark_up", "markUp", "markup"]);
-  const weightStr =
-    rawWeight === null || rawWeight === undefined
-      ? ""
-      : formatDecimalStringForInput(rawWeight, 2);
-  const markUpStr =
-    rawMarkUp === null || rawMarkUp === undefined
-      ? ""
-      : formatDecimalStringForInput(rawMarkUp, 2);
-
-  const detailRows = detailList.map((detail, idx) => {
-    const rawIsCenter = pickValue(detail, ["is_center", "isCenter"]);
-    const isCenterValue = rawIsCenter === 1 || rawIsCenter === "1" ? "1" : "0";
-    const rawPositionVisible = pickValue(detail, [
-      "position_visible",
-      "positionVisible",
-    ]);
-    const positionVisibleValue =
-      rawPositionVisible === 0 ||
-      rawPositionVisible === "0" ||
-      String(rawPositionVisible).toLowerCase() === "no"
-        ? "0"
-        : "1";
-    return {
-      key: `persisted-${idx}-${pickValue(detail, ["id"]) ?? idx}`,
-      id:
-        pickValue(detail, ["id", "detail_id", "diamond_design_detail_id"]) ??
-        null,
-      cutId: String(pickValue(detail, ["cut_id", "cutId"]) ?? ""),
-      cutCode: String(pickValue(detail, ["cut_code", "cutCode", "code"]) ?? ""),
-      cutName: String(pickValue(detail, ["cut_name", "cutName", "name"]) ?? ""),
-      diamondRateId: String(
-        pickValue(detail, ["diamond_rate_id", "diamondRateId"]) ?? "",
-      ),
-      diamondRateName: String(
-        pickValue(detail, [
-          "diamond_rate_name",
-          "diamondRateName",
-          "rate_name",
-          "name",
-        ]) ?? "",
-      ),
-      pcs: String(pickValue(detail, ["pcs", "pieces", "diamond_pcs"]) ?? ""),
-      isCenter: isCenterValue,
-      positionVisible: positionVisibleValue,
-    };
-  });
-
-  const existingImages = Array.isArray(imageList)
-    ? imageList.map((img, idx) => {
-        const imageUrl = pickValue(img, ["image_url", "url", "src"]) ?? null;
-        const imageName =
-          pickValue(img, ["image", "file_name", "filename"]) ?? null;
-        return {
-          id: pickValue(img, ["id", "image_id"]) ?? null,
-          image: imageName,
-          image_url: imageUrl,
-          order: pickValue(img, ["order", "sort_order"]) ?? idx + 1,
-          is_product_listing:
-            pickValue(img, ["is_product_listing", "isProductListing"]) ?? 0,
-          isVideo: isVideoAsset(imageUrl ?? imageName),
-        };
-      })
-    : [];
-
-  return {
-    categoryId:
-      rawCategoryId !== null && rawCategoryId !== undefined
-        ? String(rawCategoryId)
-        : "",
-    productId:
-      rawProductId !== null && rawProductId !== undefined
-        ? String(rawProductId)
-        : "",
-    productName: rawProductName ? String(rawProductName) : "",
-    metalRateId:
-      rawMetalRateId !== null && rawMetalRateId !== undefined
-        ? String(rawMetalRateId)
-        : "",
-    metalRateName: rawMetalRateName ? String(rawMetalRateName) : "",
-    weight: weightStr,
-    markUp: markUpStr,
-    priceFlag: priceFlagValue,
-    designNameEn: nameEn,
-    designNameFi: nameFi,
-    descriptionEn,
-    descriptionFi,
-    detailRows,
-    existingImages,
-    listingSelection: nextListingSelection,
-  };
-}
-
-function buildDesignVariantFormData({
-  productId,
-  productName,
-  metalRateId,
-  metalRateName,
-  weight,
-  markUp,
-  priceFlag,
-  designNameEn,
-  designNameFi,
-  descriptionEn,
-  descriptionFi,
-  detailRows,
-  cutOptions,
-  diamondRateOptions,
-  productOptions,
-  metalRateOptions,
-  imageFiles,
-  videoFile,
-  previewSlots,
-  previewVideo,
-  listingSelection,
-  editingId,
-}) {
-  const selectedProduct = productOptions.find((opt) => opt.id === productId);
-  const selectedMetalRate = metalRateOptions.find(
-    (opt) => opt.id === metalRateId,
-  );
-  const detailPayload = detailRows.map((row) => {
-    const cutOption = cutOptions.find((opt) => opt.id === row.cutId);
-    const diamondOption = diamondRateOptions.find(
-      (opt) => opt.id === row.diamondRateId,
-    );
-    const detail = {
-      cut_id: row.cutId,
-      cut_code: row.cutCode || cutOption?.code || cutOption?.label || "",
-      cut_name: row.cutName || cutOption?.label || "",
-      diamond_rate_id: row.diamondRateId,
-      diamond_rate_name: row.diamondRateName || diamondOption?.label || "",
-      pcs: row.pcs,
-      is_center: row.isCenter === "1" ? 1 : 0,
-      position_visible: row.positionVisible === "1" ? 1 : 0,
-    };
-    if (row.id) detail.id = row.id;
-    return detail;
-  });
-
-  const payload = new FormData();
-  payload.append("product_id", productId);
-  payload.append("product_name", productName || selectedProduct?.label || "");
-  payload.append("metal_rate_id", metalRateId);
-  payload.append(
-    "metal_rate_name",
-    metalRateName || selectedMetalRate?.label || "",
-  );
-  if (editingId) {
-    payload.append("weight", String(weight ?? ""));
-    payload.append("mark_up", String(markUp ?? ""));
-  } else {
-    if (weight !== "") payload.append("weight", String(weight));
-    if (markUp !== "") payload.append("mark_up", String(markUp));
-  }
-  payload.append("price_flag", priceFlag === "yes" ? "1" : "0");
-  if (descriptionEn) payload.append("description", descriptionEn);
-  if (designNameEn) {
-    payload.append("design_name_array[0][design_variant_name]", designNameEn);
-    payload.append("design_name_array[0][product_name]", designNameEn);
-    payload.append("design_name_array[0][description]", descriptionEn);
-    payload.append("design_name_array[0][language_id]", "1");
-  }
-  if (designNameFi) {
-    payload.append("design_name_array[1][design_variant_name]", designNameFi);
-    payload.append("design_name_array[1][product_name]", designNameFi);
-    payload.append("design_name_array[1][description]", descriptionFi);
-    payload.append("design_name_array[1][language_id]", "2");
-  }
-  payload.append("diamond_design_detail", JSON.stringify(detailPayload));
-  const designImages = [];
-  imageFiles.forEach((file, index) => {
-    if (!file) return;
-    designImages.push({
-      image: file.name,
-      order: index + 1,
-      is_product_listing: listingSelection === `image-${index}` ? 1 : 0,
-    });
-  });
-
-  previewSlots.forEach((slot, index) => {
-    if (!slot || imageFiles[index]) return;
-    const imageName = slot?.image ?? slot?.image_name ?? "";
-    if (!imageName) return;
-
-    const existingPayload = {
-      image: imageName,
-      image_name: imageName,
-      order: index + 1,
-      is_product_listing: listingSelection === `image-${index}` ? 1 : 0,
-      is_existing: !editingId,
-    };
-
-    if (slot?.id) existingPayload.id = slot.id;
-    designImages.push(existingPayload);
-  });
-  if (videoFile) {
-    designImages.push({
-      image: videoFile.name,
-      order: 5,
-      is_product_listing: listingSelection === "video" ? 1 : 0,
-    });
-  }
-  if (previewVideo && !videoFile) {
-    const videoName = previewVideo?.image ?? previewVideo?.image_name ?? "";
-    if (videoName) {
-      const existingVideoPayload = {
-        image: videoName,
-        image_name: videoName,
-        order: 5,
-        is_product_listing: listingSelection === "video" ? 1 : 0,
-        is_existing: !editingId,
-      };
-      if (previewVideo?.id) existingVideoPayload.id = previewVideo.id;
-      designImages.push(existingVideoPayload);
-    }
-  }
-  if (designImages.length) {
-    payload.append("design_images", JSON.stringify(designImages));
-  }
-  if (videoFile) {
-    payload.append("images", videoFile);
-  }
-  imageFiles.filter(Boolean).forEach((file) => payload.append("images", file));
-
-  return payload;
-}
-
 const PAGE_LIMIT = 50;
-
-// ✅ FIX: Sanitize decimal input — strip leading zeros, allow only one dot, digits only
-const sanitizeDecimalInput = (val) =>
-  val
-    .replace(/[^0-9.]/g, "") // only digits and decimal point
-    .replace(/^0+(?=\d)/, "") // strip leading zeros (e.g. "007" → "7")
-    .replace(/(\..*)\./g, "$1"); // only one decimal point allowed
 
 export default function DesignVariantPage() {
   const pathname = usePathname();
@@ -610,9 +266,6 @@ export default function DesignVariantPage() {
   const [deleteTarget, setDeleteTarget] = useState(null);
   const [bulkDeleteTarget, setBulkDeleteTarget] = useState(false);
   const [selectedIds, setSelectedIds] = useState([]);
-  /** Inline table edit for weight / mark up: `{ rowId, field: 'weight'|'mark_up', draft }` */
-  const [inlineFieldEdit, setInlineFieldEdit] = useState(null);
-  const [savingVariantId, setSavingVariantId] = useState(null);
 
   const [categoryId, setCategoryId] = useState("");
   const [productId, setProductId] = useState("");
@@ -1124,20 +777,6 @@ export default function DesignVariantPage() {
       );
       const { nameEn, nameFi } = extractVariantTranslations(item);
       const variantLabel = nameEn || nameFi || "-";
-      const rawWeight = pickValue(item, ["weight"]);
-      const rawMarkUp = pickValue(item, ["mark_up", "markUp"]);
-      const weightValue =
-        rawWeight === null ||
-        rawWeight === undefined ||
-        String(rawWeight).trim() === ""
-          ? "-"
-          : formatDecimalStringForInput(rawWeight, 2);
-      const markUpValue =
-        rawMarkUp === null ||
-        rawMarkUp === undefined ||
-        String(rawMarkUp).trim() === ""
-          ? "-"
-          : formatDecimalStringForInput(rawMarkUp, 2);
 
       return {
         no: index + 1,
@@ -1145,8 +784,8 @@ export default function DesignVariantPage() {
         variant_name: variantLabel,
         product: productLabel ?? "-",
         metal_rate: metalRateLabel ?? "-",
-        weight: weightValue,
-        mark_up: markUpValue,
+        weight: pickValue(item, ["weight"]) ?? "-",
+        mark_up: pickValue(item, ["mark_up", "markUp"]) ?? "-",
         price: priceValue ?? "-",
         details: formatDetailSummary(detailList),
         image_count: pickValue(item, ["image_count"]) ?? 0,
@@ -1187,36 +826,181 @@ export default function DesignVariantPage() {
     setImageModalOpen(false);
 
     const result = await dispatch(fetchDesignVariant(rawId));
-    const source = unwrapDesignFetchPayload(result) ?? row;
-    const parts = mapSourceToFormState(source);
-    if (!parts) {
-      toast.error("Could not load design variant.");
-      return;
+    const response = result?.payload?.data ?? result?.payload ?? null;
+    const source =
+      response && typeof response === "object"
+        ? (response?.data ?? response)
+        : row;
+
+    const rawProductId = pickValue(source, ["product_id", "productId"]);
+    const rawProductName = pickValue(source, ["product_name", "productName"]);
+    const rawMetalRateId = pickValue(source, ["metal_rate_id", "metalRateId"]);
+    const rawMetalRateName = pickValue(source, [
+      "metal_rate_name",
+      "metalRateName",
+    ]);
+    const rawCategoryId = pickValue(source, [
+      "category_id",
+      "categoryId",
+      "category_master_id",
+    ]);
+    const detailList = normalizeDetailList(
+      pickValue(source, [
+        "diamond_design_detail",
+        "diamond_design_details",
+        "diamond_details",
+      ]) ?? source?.diamond_design_detail,
+    );
+    const imageList = normalizeDetailList(
+      pickValue(source, [
+        "images",
+        "design_images",
+        "designImages",
+        "designImagesList",
+      ]) ?? source?.images,
+    );
+    let nextListingSelection = "";
+    if (Array.isArray(imageList)) {
+      const listingItem = imageList.find(
+        (img) =>
+          Number(
+            pickValue(img, ["is_product_listing", "isProductListing"]) ?? 0,
+          ) === 1,
+      );
+      if (listingItem) {
+        const listingSrc =
+          pickValue(listingItem, ["image_url", "url", "src"]) ??
+          pickValue(listingItem, ["image", "file_name", "filename"]);
+        if (isVideoAsset(listingSrc)) {
+          nextListingSelection = "video";
+        } else {
+          const orderValue = Number(
+            pickValue(listingItem, ["order", "sort_order"]),
+          );
+          const slotIndex = Number.isFinite(orderValue) ? orderValue - 1 : -1;
+          if (slotIndex >= 0 && slotIndex < 4) {
+            nextListingSelection = `image-${slotIndex}`;
+          }
+        }
+      }
     }
+    const {
+      nameEn: nextDesignNameEn,
+      nameFi: nextDesignNameFi,
+      descriptionEn: nextDescriptionEn,
+      descriptionFi: nextDescriptionFi,
+    } = extractVariantTranslations(source);
 
     setEditingId(rawId ?? null);
-    setCategoryId(parts.categoryId);
-    setProductId(parts.productId);
-    setProductName(parts.productName);
-    setMetalRateId(parts.metalRateId);
-    setMetalRateName(parts.metalRateName);
-    setWeight(parts.weight);
-    setMarkUp(parts.markUp);
-    setPriceFlag(parts.priceFlag);
-    setDesignNameEn(parts.designNameEn);
-    setDesignNameFi(parts.designNameFi);
-    setDescriptionEn(parts.descriptionEn);
-    setDescriptionFi(parts.descriptionFi);
+    setCategoryId(
+      rawCategoryId !== null && rawCategoryId !== undefined
+        ? String(rawCategoryId)
+        : "",
+    );
+    setProductId(
+      rawProductId !== null && rawProductId !== undefined
+        ? String(rawProductId)
+        : "",
+    );
+    setProductName(rawProductName ? String(rawProductName) : "");
+    setMetalRateId(
+      rawMetalRateId !== null && rawMetalRateId !== undefined
+        ? String(rawMetalRateId)
+        : "",
+    );
+    setMetalRateName(rawMetalRateName ? String(rawMetalRateName) : "");
+    setWeight(String(pickValue(source, ["weight"]) ?? ""));
+    setMarkUp(String(pickValue(source, ["mark_up", "markUp"]) ?? ""));
+    const rawPriceFlag = pickValue(source, [
+      "price_flag",
+      "priceFlag",
+      "purchase_flag",
+      "purchaseFlag",
+      "is_purchase",
+      "isPurchase",
+    ]);
+    const priceFlagValue =
+      rawPriceFlag === 1 ||
+      rawPriceFlag === "1" ||
+      String(rawPriceFlag).toLowerCase() === "yes"
+        ? "yes"
+        : "no";
+    setPriceFlag(priceFlagValue);
+    setDesignNameEn(nextDesignNameEn);
+    setDesignNameFi(nextDesignNameFi);
+    setDescriptionEn(nextDescriptionEn);
+    setDescriptionFi(nextDescriptionFi);
     setDetailRows(
-      parts.detailRows.map((detail, idx) => ({
-        ...detail,
-        key: `${Date.now()}-${idx}`,
-      })),
+      detailList.map((detail, idx) => {
+        const rawIsCenter = pickValue(detail, ["is_center", "isCenter"]);
+        const isCenterValue =
+          rawIsCenter === 1 || rawIsCenter === "1" ? "1" : "0";
+        const rawPositionVisible = pickValue(detail, [
+          "position_visible",
+          "positionVisible",
+        ]);
+        const positionVisibleValue =
+          rawPositionVisible === 0 ||
+          rawPositionVisible === "0" ||
+          String(rawPositionVisible).toLowerCase() === "no"
+            ? "0"
+            : "1";
+        return {
+          key: `${Date.now()}-${idx}`,
+          id:
+            pickValue(detail, [
+              "id",
+              "detail_id",
+              "diamond_design_detail_id",
+            ]) ?? null,
+          cutId: String(pickValue(detail, ["cut_id", "cutId"]) ?? ""),
+          cutCode: String(
+            pickValue(detail, ["cut_code", "cutCode", "code"]) ?? "",
+          ),
+          cutName: String(
+            pickValue(detail, ["cut_name", "cutName", "name"]) ?? "",
+          ),
+          diamondRateId: String(
+            pickValue(detail, ["diamond_rate_id", "diamondRateId"]) ?? "",
+          ),
+          diamondRateName: String(
+            pickValue(detail, [
+              "diamond_rate_name",
+              "diamondRateName",
+              "rate_name",
+              "name",
+            ]) ?? "",
+          ),
+          pcs: String(
+            pickValue(detail, ["pcs", "pieces", "diamond_pcs"]) ?? "",
+          ),
+          isCenter: isCenterValue,
+          positionVisible: positionVisibleValue,
+        };
+      }),
     );
     setImageFiles(Array(4).fill(null));
     setVideoFile(null);
-    setExistingImages(parts.existingImages);
-    setListingSelection(parts.listingSelection);
+    setExistingImages(
+      Array.isArray(imageList)
+        ? imageList.map((img, idx) => {
+            const imageUrl =
+              pickValue(img, ["image_url", "url", "src"]) ?? null;
+            const imageName =
+              pickValue(img, ["image", "file_name", "filename"]) ?? null;
+            return {
+              id: pickValue(img, ["id", "image_id"]) ?? null,
+              image: imageName,
+              image_url: imageUrl,
+              order: pickValue(img, ["order", "sort_order"]) ?? idx + 1,
+              is_product_listing:
+                pickValue(img, ["is_product_listing", "isProductListing"]) ?? 0,
+              isVideo: isVideoAsset(imageUrl ?? imageName),
+            };
+          })
+        : [],
+    );
+    setListingSelection(nextListingSelection);
     setFileInputKey((prev) => prev + 1);
     setModalOpen(true);
   };
@@ -1442,30 +1226,114 @@ export default function DesignVariantPage() {
       return;
     }
 
-    const payload = buildDesignVariantFormData({
-      productId,
-      productName,
-      metalRateId,
-      metalRateName,
-      weight,
-      markUp,
-      priceFlag,
-      designNameEn,
-      designNameFi,
-      descriptionEn,
-      descriptionFi,
-      detailRows,
-      cutOptions,
-      diamondRateOptions,
-      productOptions,
-      metalRateOptions,
-      imageFiles,
-      videoFile,
-      previewSlots,
-      previewVideo,
-      listingSelection,
-      editingId,
+    const selectedProduct = productOptions.find((opt) => opt.id === productId);
+    const selectedMetalRate = metalRateOptions.find(
+      (opt) => opt.id === metalRateId,
+    );
+    const detailPayload = detailRows.map((row) => {
+      const cutOption = cutOptions.find((opt) => opt.id === row.cutId);
+      const diamondOption = diamondRateOptions.find(
+        (opt) => opt.id === row.diamondRateId,
+      );
+      const detail = {
+        cut_id: row.cutId,
+        cut_code: row.cutCode || cutOption?.code || cutOption?.label || "",
+        cut_name: row.cutName || cutOption?.label || "",
+        diamond_rate_id: row.diamondRateId,
+        diamond_rate_name: row.diamondRateName || diamondOption?.label || "",
+        pcs: row.pcs,
+        is_center: row.isCenter === "1" ? 1 : 0,
+        position_visible: row.positionVisible === "1" ? 1 : 0,
+      };
+      if (row.id) detail.id = row.id;
+      return detail;
     });
+
+    const payload = new FormData();
+    payload.append("product_id", productId);
+    payload.append("product_name", productName || selectedProduct?.label || "");
+    payload.append("metal_rate_id", metalRateId);
+    payload.append(
+      "metal_rate_name",
+      metalRateName || selectedMetalRate?.label || "",
+    );
+    if (weight !== "") payload.append("weight", String(weight));
+    if (markUp !== "") payload.append("mark_up", String(markUp));
+    payload.append("price_flag", priceFlag === "yes" ? "1" : "0");
+    if (descriptionEn) payload.append("description", descriptionEn);
+    if (designNameEn) {
+      payload.append("design_name_array[0][design_variant_name]", designNameEn);
+      payload.append("design_name_array[0][product_name]", designNameEn);
+      payload.append("design_name_array[0][description]", descriptionEn);
+      payload.append("design_name_array[0][language_id]", "1");
+    }
+    if (designNameFi) {
+      payload.append("design_name_array[1][design_variant_name]", designNameFi);
+      payload.append("design_name_array[1][product_name]", designNameFi);
+      payload.append("design_name_array[1][description]", descriptionFi);
+      payload.append("design_name_array[1][language_id]", "2");
+    }
+    payload.append("diamond_design_detail", JSON.stringify(detailPayload));
+    const designImages = [];
+    imageFiles.forEach((file, index) => {
+      if (!file) return;
+      designImages.push({
+        image: file.name,
+        order: index + 1,
+        is_product_listing: listingSelection === `image-${index}` ? 1 : 0,
+      });
+    });
+
+    // In create mode: include related variant images if no new file uploaded for that slot
+    // In edit mode: include existing images if no new file uploaded for that slot
+    previewSlots.forEach((slot, index) => {
+      if (!slot || imageFiles[index]) return; // Skip if slot is empty or new file uploaded
+      const imageName = slot?.image ?? slot?.image_name ?? "";
+      if (!imageName) return;
+
+      const existingPayload = {
+        image: imageName,
+        image_name: imageName, // Include both for backend compatibility
+        order: index + 1,
+        is_product_listing: listingSelection === `image-${index}` ? 1 : 0,
+        is_existing: !editingId, // Mark as existing for create mode (from related variant)
+      };
+
+      if (slot?.id) existingPayload.id = slot.id;
+      designImages.push(existingPayload);
+    });
+    if (videoFile) {
+      designImages.push({
+        image: videoFile.name,
+        order: 5,
+        is_product_listing: listingSelection === "video" ? 1 : 0,
+      });
+    }
+    // Include existing video if no new video file is uploaded
+    // This applies to both edit mode (existing video) and create mode (video from related variant)
+    if (previewVideo && !videoFile) {
+      const videoName = previewVideo?.image ?? previewVideo?.image_name ?? "";
+      if (videoName) {
+        const existingVideoPayload = {
+          image: videoName,
+          image_name: videoName,
+          order: 5,
+          is_product_listing: listingSelection === "video" ? 1 : 0,
+          is_existing: !editingId, // Mark as existing for create mode (from related variant)
+        };
+        if (previewVideo?.id) existingVideoPayload.id = previewVideo.id;
+        designImages.push(existingVideoPayload);
+      }
+    }
+    if (designImages.length) {
+      payload.append("design_images", JSON.stringify(designImages));
+    }
+    if (videoFile) {
+      payload.append("images", videoFile);
+    }
+    imageFiles
+      .filter(Boolean)
+      .forEach((file) => payload.append("images", file));
 
     const action = editingId
       ? updateDesignVariant({ id: editingId, payload })
@@ -1517,116 +1385,6 @@ export default function DesignVariantPage() {
       prev.includes(id) ? prev.filter((item) => item !== id) : [...prev, id],
     );
   }, []);
-
-  const cancelInlineFieldEdit = useCallback(() => {
-    setInlineFieldEdit(null);
-  }, []);
-
-  const startInlineFieldEdit = useCallback(
-    (tableRow, field) => {
-      if (savingVariantId) return;
-      const val = field === "weight" ? tableRow.weight : tableRow.mark_up;
-      const draft =
-        val === "-" || val === null || val === undefined || val === ""
-          ? ""
-          : formatDecimalStringForInput(val, 2);
-      setInlineFieldEdit({ rowId: tableRow.id, field, draft });
-    },
-    [savingVariantId],
-  );
-
-  const commitInlineFieldEdit = useCallback(
-    async (tableRow, field, draftValue) => {
-      if (savingVariantId) return;
-      const id = tableRow.id;
-      const trimmed = String(draftValue ?? "").trim();
-      if (trimmed === "") {
-        cancelInlineFieldEdit();
-        return;
-      }
-      // ✅ FIX 3: Use parseFloat instead of Number for correct decimal handling
-      const nextNum = parseFloat(trimmed);
-      if (Number.isNaN(nextNum)) {
-        toast.error("Enter a valid number.");
-        cancelInlineFieldEdit();
-        return;
-      }
-      const prevW = String(pickValue(tableRow._raw, ["weight"]) ?? "");
-      const prevM = String(
-        pickValue(tableRow._raw, ["mark_up", "markUp"]) ?? "",
-      );
-      const nextWeight = field === "weight" ? trimmed : prevW;
-      const nextMarkUp = field === "mark_up" ? trimmed : prevM;
-      if (nextWeight === prevW && nextMarkUp === prevM) {
-        cancelInlineFieldEdit();
-        return;
-      }
-      setSavingVariantId(id);
-      try {
-        const result = await dispatch(fetchDesignVariant(id));
-        const source = unwrapDesignFetchPayload(result) ?? tableRow._raw;
-        const parts = mapSourceToFormState(source);
-        if (!parts) {
-          toast.error("Could not load design variant.");
-          return;
-        }
-        const merged = {
-          ...parts,
-          weight: nextWeight,
-          markUp: nextMarkUp,
-        };
-        const previewSlotsInline = computePreviewSlotsFromExisting(
-          merged.existingImages,
-        );
-        const previewVideoInline = computePreviewVideoFromExisting(
-          merged.existingImages,
-        );
-        const fd = buildDesignVariantFormData({
-          productId: merged.productId,
-          productName: merged.productName,
-          metalRateId: merged.metalRateId,
-          metalRateName: merged.metalRateName,
-          weight: merged.weight,
-          markUp: merged.markUp,
-          priceFlag: merged.priceFlag,
-          designNameEn: merged.designNameEn,
-          designNameFi: merged.designNameFi,
-          descriptionEn: merged.descriptionEn,
-          descriptionFi: merged.descriptionFi,
-          detailRows: merged.detailRows,
-          cutOptions,
-          diamondRateOptions,
-          productOptions,
-          metalRateOptions,
-          imageFiles: Array(4).fill(null),
-          videoFile: null,
-          previewSlots: previewSlotsInline,
-          previewVideo: previewVideoInline,
-          listingSelection: merged.listingSelection,
-          editingId: id,
-        });
-        const updateResult = await dispatch(
-          updateDesignVariant({ id, payload: fd }),
-        );
-        if (!updateResult?.error) {
-          fetchFirstPage();
-        }
-      } finally {
-        setSavingVariantId(null);
-        setInlineFieldEdit(null);
-      }
-    },
-    [
-      savingVariantId,
-      dispatch,
-      cancelInlineFieldEdit,
-      cutOptions,
-      diamondRateOptions,
-      productOptions,
-      metalRateOptions,
-      fetchFirstPage,
-    ],
-  );
 
   const columns = [
     {
@@ -1682,119 +1440,6 @@ export default function DesignVariantPage() {
       filterable: false,
       filterPlaceholder: "Search Weight",
       filterInputStyle: { width: 120 },
-      render: (row) => {
-        const isEditing =
-          inlineFieldEdit?.rowId === row.id &&
-          inlineFieldEdit?.field === "weight";
-        const isSaving = savingVariantId === row.id && isEditing;
-        if (isEditing) {
-          return (
-            <div className={crudStyles.inlineRateCell}>
-              <div className={crudStyles.inlineFieldRow}>
-                {/*
-                  ✅ FIX 2: Use type="text" + inputMode="decimal" instead of type="number"
-                  This prevents browsers from silently truncating/rounding large decimals
-                  like 5000000.55 on blur. We also read from state (inlineFieldEdit.draft)
-                  on blur instead of e.target.value to guarantee the exact typed value.
-                */}
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  pattern="[0-9]*\.?[0-9]*"
-                  className={crudStyles.inlineRateInput}
-                  value={inlineFieldEdit.draft}
-                  onChange={(e) =>
-                    setInlineFieldEdit((prev) =>
-                      prev && prev.rowId === row.id && prev.field === "weight"
-                        ? {
-                            ...prev,
-                            draft: sanitizeDecimalInput(e.target.value),
-                          }
-                        : prev,
-                    )
-                  }
-                  // ✅ FIX 2: Read from state, not e.target.value on blur
-                  onBlur={() =>
-                    void commitInlineFieldEdit(
-                      row,
-                      "weight",
-                      inlineFieldEdit?.draft ?? "",
-                    )
-                  }
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      void commitInlineFieldEdit(
-                        row,
-                        "weight",
-                        inlineFieldEdit?.draft ?? "",
-                      );
-                    }
-                    if (e.key === "Escape") {
-                      e.preventDefault();
-                      cancelInlineFieldEdit();
-                    }
-                  }}
-                  disabled={isSaving}
-                  autoFocus
-                  aria-label="Weight"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  icon="check"
-                  iconPosition="right"
-                  iconOnly
-                  type="button"
-                  className={crudStyles.inlineRateSaveButton}
-                  disabled={isSaving}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() =>
-                    void commitInlineFieldEdit(
-                      row,
-                      "weight",
-                      inlineFieldEdit?.draft ?? "",
-                    )
-                  }
-                  aria-label="Save weight"
-                  title="Update weight"
-                >
-                  Update weight
-                </Button>
-              </div>
-              {isSaving ? (
-                <span className={crudStyles.inlineRateSaving}>Saving…</span>
-              ) : null}
-            </div>
-          );
-        }
-        return (
-          <div className={crudStyles.inlineRateCell}>
-            <div className={crudStyles.inlineFieldRow}>
-              <span
-                className={crudStyles.inlineFieldValue}
-                title={String(row.weight ?? "")}
-              >
-                {row.weight}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                icon="edit"
-                iconPosition="right"
-                iconOnly
-                type="button"
-                onClick={() => startInlineFieldEdit(row, "weight")}
-                disabled={Boolean(savingVariantId)}
-                aria-label="Edit weight"
-                title="Edit weight"
-              >
-                Edit weight
-              </Button>
-            </div>
-          </div>
-        );
-      },
     },
     {
       key: "mark_up",
@@ -1802,117 +1447,6 @@ export default function DesignVariantPage() {
       filterable: false,
       filterPlaceholder: "Search Mark Up",
       filterInputStyle: { width: 120 },
-      render: (row) => {
-        const isEditing =
-          inlineFieldEdit?.rowId === row.id &&
-          inlineFieldEdit?.field === "mark_up";
-        const isSaving = savingVariantId === row.id && isEditing;
-        if (isEditing) {
-          return (
-            <div className={crudStyles.inlineRateCell}>
-              <div className={crudStyles.inlineFieldRow}>
-                {/*
-                  ✅ FIX 2: Same fix as weight — type="text" + inputMode="decimal",
-                  read from state on blur.
-                */}
-                <input
-                  type="text"
-                  inputMode="decimal"
-                  pattern="[0-9]*\.?[0-9]*"
-                  className={crudStyles.inlineRateInput}
-                  value={inlineFieldEdit.draft}
-                  onChange={(e) =>
-                    setInlineFieldEdit((prev) =>
-                      prev && prev.rowId === row.id && prev.field === "mark_up"
-                        ? {
-                            ...prev,
-                            draft: sanitizeDecimalInput(e.target.value),
-                          }
-                        : prev,
-                    )
-                  }
-                  // ✅ FIX 2: Read from state, not e.target.value on blur
-                  onBlur={() =>
-                    void commitInlineFieldEdit(
-                      row,
-                      "mark_up",
-                      inlineFieldEdit?.draft ?? "",
-                    )
-                  }
-                  onKeyDown={(e) => {
-                    if (e.key === "Enter") {
-                      e.preventDefault();
-                      void commitInlineFieldEdit(
-                        row,
-                        "mark_up",
-                        inlineFieldEdit?.draft ?? "",
-                      );
-                    }
-                    if (e.key === "Escape") {
-                      e.preventDefault();
-                      cancelInlineFieldEdit();
-                    }
-                  }}
-                  disabled={isSaving}
-                  autoFocus
-                  aria-label="Mark up"
-                />
-                <Button
-                  variant="ghost"
-                  size="sm"
-                  icon="check"
-                  iconPosition="right"
-                  iconOnly
-                  type="button"
-                  className={crudStyles.inlineRateSaveButton}
-                  disabled={isSaving}
-                  onMouseDown={(e) => e.preventDefault()}
-                  onClick={() =>
-                    void commitInlineFieldEdit(
-                      row,
-                      "mark_up",
-                      inlineFieldEdit?.draft ?? "",
-                    )
-                  }
-                  aria-label="Save mark up"
-                  title="Update mark up"
-                >
-                  Update mark up
-                </Button>
-              </div>
-              {isSaving ? (
-                <span className={crudStyles.inlineRateSaving}>Saving…</span>
-              ) : null}
-            </div>
-          );
-        }
-        return (
-          <div className={crudStyles.inlineRateCell}>
-            <div className={crudStyles.inlineFieldRow}>
-              <span
-                className={crudStyles.inlineFieldValue}
-                title={String(row.mark_up ?? "")}
-              >
-                {row.mark_up}
-              </span>
-              <Button
-                variant="ghost"
-                size="sm"
-                icon="edit"
-                iconPosition="right"
-                iconOnly
-                type="button"
-                onClick={() => startInlineFieldEdit(row, "mark_up")}
-                disabled={Boolean(savingVariantId)}
-                aria-label="Edit mark up"
-                title="Edit mark up"
-              >
-                Edit mark up
-              </Button>
-            </div>
-          </div>
-        );
-      },
     },
     {
       key: "price",
@@ -2298,10 +1832,8 @@ export default function DesignVariantPage() {
               label="Weight"
               type="number"
               step="0.01"
-              min="0"
               value={weight}
-              // ✅ FIX 2 (modal form): Strip leading zeros on every keystroke
-              onChange={(e) => setWeight(sanitizeDecimalInput(e.target.value))}
+              onChange={(e) => setWeight(e.target.value)}
               required
               preventWheel
             />
@@ -2309,10 +1841,8 @@ export default function DesignVariantPage() {
               label="Mark Up"
               type="number"
               step="0.01"
-              min="0"
               value={markUp}
-              // ✅ FIX 2 (modal form): Strip leading zeros on every keystroke
-              onChange={(e) => setMarkUp(sanitizeDecimalInput(e.target.value))}
+              onChange={(e) => setMarkUp(e.target.value)}
               required
               preventWheel
             />
