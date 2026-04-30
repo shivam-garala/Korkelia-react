@@ -319,10 +319,21 @@ const isPriceForCurrency = (price, currencySymbol) => {
   if (!symbol) return true;
   if (value.includes(symbol)) return true;
 
-  // Avoid showing a previous currency while the current currency request is loading.
-  return !["€", "₹", "$", "£", "¥"].some(
-    (candidate) => candidate !== symbol && value.includes(candidate),
-  );
+  // Formatted ecommerce prices should carry the selected currency symbol.
+  // If they carry another marker, keep them out of the current currency cache.
+  return ![
+    "€",
+    "₹",
+    "$",
+    "£",
+    "¥",
+    "د.إ",
+    "AED",
+    "INR",
+    "EUR",
+    "USD",
+    "GBP",
+  ].some((candidate) => value.includes(candidate));
 };
 
 const hasIdValue = (value) =>
@@ -456,8 +467,6 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
       "";
     const designKey = buildDesignCacheKey(designId);
 
-    // Merge variant details into the product cache
-    // Store variantDetails as design since ProductGallery looks for design.images
     const incomingImages = Array.isArray(variantDetails?.images)
       ? variantDetails.images
       : null;
@@ -494,9 +503,7 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
         existingProduct?.total_price ??
         nextDesign.total_price,
       price:
-        variantDetails?.price ??
-        existingProduct?.price ??
-        nextDesign.price,
+        variantDetails?.price ?? existingProduct?.price ?? nextDesign.price,
       design: nextDesign,
       design_variant: nextDesign,
       designVariant: nextDesign,
@@ -508,7 +515,6 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
 
     window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
 
-    // Dispatch custom event to notify ProductGallery of cache update
     window.dispatchEvent(
       new CustomEvent("productCacheUpdated", {
         detail: {
@@ -636,9 +642,7 @@ export default function ProductCustomizer({
   const [filterData, setFilterData] = useState(null);
   const [productDetails, setProductDetails] = useState(null);
   const [variantDetails, setVariantDetails] = useState(null);
-  const [lastDisplayPrice, setLastDisplayPrice] = useState(() =>
-    readLastDisplayPrice(productId, designId, currencyCode),
-  );
+  const [lastDisplayPrice, setLastDisplayPrice] = useState("");
   const [variantLoading, setVariantLoading] = useState(false);
   const [variantEnabled, setVariantEnabled] = useState(false);
   const [variantAdjustedFilters, setVariantAdjustedFilters] = useState(null);
@@ -663,6 +667,10 @@ export default function ProductCustomizer({
   const skipNextVariantFetchRef = useRef(false);
   const lastListingRefreshRef = useRef("");
   const userVariantInteractionRef = useRef(false);
+
+  // ─── FIX: track previous currency so we can detect actual changes ───
+  const prevCurrencyCodeRef = useRef(currencyCode);
+  const prevLanguageRef = useRef(language);
 
   const labels =
     language === "fi"
@@ -698,6 +706,34 @@ export default function ProductCustomizer({
         };
 
   const languageId = language === "fi" ? "2" : "1";
+
+  // ─── FIX: Clear stale price + force re-fetch when currency OR language changes ───
+  useEffect(() => {
+    const currencyChanged = prevCurrencyCodeRef.current !== currencyCode;
+    const languageChanged = prevLanguageRef.current !== language;
+
+    if (currencyChanged || languageChanged) {
+      prevCurrencyCodeRef.current = currencyCode;
+      prevLanguageRef.current = language;
+
+      // Immediately wipe displayed price so the old-currency/old-language
+      // value never shows as a fallback while new data loads.
+      setLastDisplayPrice("");
+      setVariantDetails(null);
+      setVariantAdjustedFilters(null);
+      setVariantDesignAvailable(null);
+
+      // Reset deduplication refs so variant + listing fetches fire again.
+      lastVariantQueryRef.current = "";
+      lastListingRefreshRef.current = "";
+
+      // Restore from cache only if the cached price matches the NEW currency.
+      const cached = readLastDisplayPrice(productId, designId, currencyCode);
+      if (cached && isPriceForCurrency(cached, currencySymbol)) {
+        setLastDisplayPrice(cached);
+      }
+    }
+  }, [currencyCode, currencySymbol, language, productId, designId]);
 
   useEffect(() => {
     let active = true;
@@ -846,9 +882,15 @@ export default function ProductCustomizer({
     defaultKaratId,
   ]);
 
+  // ─── FIX: write last price to sessionStorage + local state together ───
   useEffect(() => {
-    setLastDisplayPrice(readLastDisplayPrice(productId, designId, currencyCode));
-  }, [productId, designId, currencyCode]);
+    if (productId && designId !== undefined && currencyCode) {
+      const cached = readLastDisplayPrice(productId, designId, currencyCode);
+      if (cached && isPriceForCurrency(cached, currencySymbol)) {
+        setLastDisplayPrice(cached);
+      }
+    }
+  }, [productId, designId, currencyCode, currencySymbol]);
 
   const markVariantInteraction = useCallback(() => {
     userVariantInteractionRef.current = true;
@@ -1476,7 +1518,6 @@ export default function ProductCustomizer({
     normalizeString(productDetails?.design?.design_variant_name) ||
     normalizeString(productDetails?.product_name) ||
     normalizeString(title);
-  // || "PRODUCT NAME";
   const productDescription =
     variantDescription ||
     translatedDescription ||
@@ -1520,7 +1561,6 @@ export default function ProductCustomizer({
       };
     }
 
-    // Skip variant API call when is_filter_available is 4 AND coming from listing page redirect (not user filtering)
     if (
       filterAvailabilityValue === "4" &&
       hasPrefilledVariant &&
@@ -1777,9 +1817,7 @@ export default function ProductCustomizer({
     hideCaratSection,
   ]);
 
-  // Check if current metal is Platinum
   const isPlatinum = useMemo(() => {
-    // First check from variantDetails or productDetails if available
     const metalRate = variantEnabled
       ? variantDetails?.metal_rate
       : (productDetails?.design?.metal_rate ??
@@ -1789,24 +1827,40 @@ export default function ProductCustomizer({
     if (metalNameFromDetails) {
       return normalizeString(metalNameFromDetails).toLowerCase() === "platinum";
     }
-    // Fallback: check from selected metal option
     const selectedMetalOption = metalOptions.find((opt) => opt.value === metal);
     const metalNameFromOption = selectedMetalOption?.label ?? "";
     return normalizeString(metalNameFromOption).toLowerCase() === "platinum";
   }, [variantEnabled, variantDetails, productDetails, metalOptions, metal]);
 
   const variantPriceStr = pickTotalPrice(variantDetails);
-  const displayPrice =
-    variantPriceStr || (productBasePrice ? productBasePrice : null);
+
+  // ─── FIX: Only use productBasePrice if it matches the current currency ───
+  const productBasePriceForCurrency = isPriceForCurrency(
+    productBasePrice,
+    currencySymbol,
+  )
+    ? productBasePrice
+    : "";
+
+  const displayPrice = variantPriceStr || productBasePriceForCurrency || null;
+
+  // ─── FIX: currentDisplayPrice — must match current currency ───
   const currentDisplayPrice = isPriceForCurrency(displayPrice, currencySymbol)
     ? displayPrice
     : "";
-  const previousDisplayPrice = isPriceForCurrency(lastDisplayPrice, currencySymbol)
-    ? lastDisplayPrice
-    : "";
+
+  // ─── FIX: only fall back to lastDisplayPrice if we have no current price
+  //          AND it matches the current currency (prevents stale cross-currency flash) ───
+  const previousDisplayPrice =
+    currentDisplayPrice === "" &&
+    isPriceForCurrency(lastDisplayPrice, currencySymbol)
+      ? lastDisplayPrice
+      : "";
+
   const stableDisplayPrice = currentDisplayPrice || previousDisplayPrice;
   const shouldShowPrice = true;
 
+  // ─── FIX: persist price keyed by currency ───
   useEffect(() => {
     if (currentDisplayPrice) {
       const nextPrice = String(currentDisplayPrice);
@@ -1818,11 +1872,6 @@ export default function ProductCustomizer({
   return (
     <aside className={styles.panel}>
       <h2 className={styles.title}>{productTitle}</h2>
-      {/* {variantLoading ? (
-        <p className={styles.variantStatus}>Updating selection...</p>
-      ) : variantPrice ? (
-        <p className={styles.variantStatus}>Price: {variantPrice}</p>
-      ) : null} */}
       {productDescription ? (
         <p className={styles.copy}>{productDescription}</p>
       ) : null}
@@ -2033,13 +2082,11 @@ export default function ProductCustomizer({
           <>
             <div className={styles.divider} aria-hidden />
             <div className={styles.priceBlock}>
-              {/* <div className={styles.priceLabel}>{labels.price}</div> */}
               {stableDisplayPrice ? (
                 <div className={styles.priceValue}>{stableDisplayPrice}</div>
               ) : variantLoading ? (
                 <div className={styles.variantStatus}>...</div>
               ) : null}
-              {/* <div className={styles.priceValue}>{variantPrice ?? "--"}</div> */}
             </div>
             <div className={styles.divider} aria-hidden />
           </>
