@@ -281,7 +281,13 @@ export default function ProductListingClient() {
     return () => {
       active = false;
     };
-  }, [categoryId, languageId, currencyCode]);
+  }, [
+    categoryId,
+    languageId,
+    currencyCode,
+    currencySymbol,
+    categoryNameFromParams,
+  ]);
 
   const displayedProducts = useMemo(() => {
     let list = products;

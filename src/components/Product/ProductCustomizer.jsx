@@ -384,7 +384,9 @@ const readCachedProduct = (productId, designId = "") => {
 };
 
 const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
-  if (typeof window === "undefined" || !productId || !variantDetails) return;
+  if (typeof window === "undefined" || !productId || !variantDetails) {
+    return null;
+  }
   try {
     const raw = window.sessionStorage.getItem("product_list_cache");
     const cache = raw ? JSON.parse(raw) : {};
@@ -430,10 +432,24 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
       product: variantDetails?.product ?? existingDesign?.product,
       images: incomingImages ?? existingDesign?.images,
       image: variantDetails?.image ?? existingDesign?.image,
+      total_price:
+        variantDetails?.total_price ??
+        variantDetails?.totalPrice ??
+        existingDesign?.total_price,
+      price: variantDetails?.price ?? existingDesign?.price,
     };
     const nextProduct = {
       ...existingProduct,
       image: variantDetails?.image ?? existingProduct?.image,
+      total_price:
+        variantDetails?.total_price ??
+        variantDetails?.totalPrice ??
+        existingProduct?.total_price ??
+        nextDesign.total_price,
+      price:
+        variantDetails?.price ??
+        existingProduct?.price ??
+        nextDesign.price,
       design: nextDesign,
       design_variant: nextDesign,
       designVariant: nextDesign,
@@ -456,8 +472,10 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
         },
       }),
     );
+    return nextProduct;
   } catch (error) {
     console.error("Product cache update failed", error);
+    return null;
   }
 };
 
@@ -593,9 +611,7 @@ export default function ProductCustomizer({
   const lastFilterQueryRef = useRef("");
   const lastVariantQueryRef = useRef("");
   const skipNextVariantFetchRef = useRef(false);
-  const variantFromCacheRef = useRef(false);
   const lastListingRefreshRef = useRef("");
-  const lastVariantLanguageRef = useRef("");
   const userVariantInteractionRef = useRef(false);
 
   const labels =
@@ -737,6 +753,7 @@ export default function ProductCustomizer({
     designId,
     currency,
     currencyCode,
+    currencySymbol,
   ]);
 
   useEffect(() => {
@@ -1347,35 +1364,6 @@ export default function ProductCustomizer({
     "";
   const selectedCarat = carat ? String(carat) : "";
 
-  const shouldSkipVariantFetch = useMemo(() => {
-    if (!hasPrefilledVariant || !listingDesign) return false;
-    if (designId && !matchesDesignId(listingDesign, designId)) return false;
-    const matchesField = (expected, actual) => {
-      const normalizedExpected = normalizeString(expected);
-      if (!normalizedExpected) return true;
-      return normalizedExpected === normalizeString(actual);
-    };
-    return (
-      matchesField(listingDefaults.metal, selectedMetalId) &&
-      matchesField(listingDefaults.karat, selectedKaratId) &&
-      matchesField(listingDefaults.cut, selectedCutId) &&
-      matchesField(listingDefaults.quality, selectedQualityId) &&
-      matchesField(listingDefaults.clarity, selectedClarityId) &&
-      matchesField(listingDefaults.carat, selectedCarat)
-    );
-  }, [
-    hasPrefilledVariant,
-    listingDesign,
-    listingDefaults,
-    selectedMetalId,
-    selectedKaratId,
-    selectedCutId,
-    selectedQualityId,
-    selectedClarityId,
-    selectedCarat,
-    designId,
-  ]);
-
   const variantTranslationSource =
     variantDetails?.design_translation ??
     variantDetails?.design_translations ??
@@ -1459,7 +1447,6 @@ export default function ProductCustomizer({
       setVariantAdjustedFilters(null);
       setVariantDesignAvailable(null);
       setVariantLoading(false);
-      variantFromCacheRef.current = false;
       return () => {
         active = false;
       };
@@ -1470,7 +1457,6 @@ export default function ProductCustomizer({
       setVariantAdjustedFilters(null);
       setVariantDesignAvailable(null);
       setVariantLoading(false);
-      variantFromCacheRef.current = false;
       return () => {
         active = false;
       };
@@ -1487,7 +1473,6 @@ export default function ProductCustomizer({
       setVariantAdjustedFilters(null);
       setVariantDesignAvailable(null);
       setVariantLoading(false);
-      variantFromCacheRef.current = false;
       return () => {
         active = false;
       };
@@ -1501,25 +1486,12 @@ export default function ProductCustomizer({
       };
     }
 
-    const languageToken = normalizeString(languageId);
-    const languageChanged =
-      Boolean(languageToken) &&
-      Boolean(lastVariantLanguageRef.current) &&
-      lastVariantLanguageRef.current !== languageToken;
-    if (languageChanged) {
-      lastVariantLanguageRef.current = languageToken;
-      if (active) setVariantLoading(false);
-      return () => {
-        active = false;
-      };
-    }
-    lastVariantLanguageRef.current = languageToken;
-
     const params = new URLSearchParams({
       product_id: String(productId),
     });
     if (languageId) params.set("language_id", String(languageId));
     if (currencyCode) params.set("currency", String(currencyCode));
+    if (currencySymbol) params.set("currency_symbol", String(currencySymbol));
     if (selectedMetalId) params.set("metal_id", String(selectedMetalId));
     if (selectedQualityId)
       params.set("diamond_type_id", String(selectedQualityId));
@@ -1532,26 +1504,6 @@ export default function ProductCustomizer({
       params.set("karat_id", String(selectedKaratId));
     }
     const queryString = params.toString();
-    if (
-      shouldSkipVariantFetch &&
-      listingDesign &&
-      !languageChanged &&
-      !userVariantInteractionRef.current
-    ) {
-      variantFromCacheRef.current = true;
-      lastVariantQueryRef.current = queryString;
-      if (active) {
-        setVariantDetails((prev) =>
-          prev === listingDesign ? prev : listingDesign,
-        );
-        setVariantAdjustedFilters(null);
-        setVariantDesignAvailable(null);
-        setVariantLoading(false);
-      }
-      return () => {
-        active = false;
-      };
-    }
     if (queryString === lastVariantQueryRef.current) {
       return () => {
         active = false;
@@ -1559,7 +1511,6 @@ export default function ProductCustomizer({
     }
     lastVariantQueryRef.current = queryString;
 
-    variantFromCacheRef.current = false;
     setVariantLoading(true);
     const loadVariant = async () => {
       try {
@@ -1572,6 +1523,12 @@ export default function ProductCustomizer({
             response?.data ?? response ?? null,
           );
           setVariantDetails(payload);
+          const updated = updateCacheWithVariant(productId, payload, {
+            userInitiated: userVariantInteractionRef.current,
+          });
+          if (updated) {
+            setProductDetails(updated);
+          }
           setVariantAdjustedFilters(
             response?.adjusted_filters ??
               payload?.adjusted_filters ??
@@ -1622,11 +1579,11 @@ export default function ProductCustomizer({
     languageId,
     allowCutInQuery,
     allowCaratInQuery,
-    shouldSkipVariantFetch,
     listingDesign,
     filterAvailabilityValue,
     hasPrefilledVariant,
     currencyCode,
+    currencySymbol,
   ]);
 
   useEffect(() => {
@@ -1761,15 +1718,6 @@ export default function ProductCustomizer({
     hideCutSection,
     hideCaratSection,
   ]);
-
-  // Update sessionStorage cache when variantDetails changes
-  useEffect(() => {
-    if (variantDetails && productId && !variantFromCacheRef.current) {
-      updateCacheWithVariant(productId, variantDetails, {
-        userInitiated: userVariantInteractionRef.current,
-      });
-    }
-  }, [variantDetails, productId]);
 
   // Check if current metal is Platinum
   const isPlatinum = useMemo(() => {
