@@ -1072,7 +1072,7 @@ export default function ProductGallery({ items, productId = "", designId = "" })
                       ) : (
                         <Image
                           className={`${styles.image} ${isLoaded ? styles.imageLoaded : styles.imageHidden}`}
-                                  src="{imageSrc}"
+                          src={imageSrc}
                           alt=""
                           fill
                           sizes="(max-width: 980px) 100vw, 50vw"
