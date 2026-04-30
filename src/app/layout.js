@@ -3,7 +3,7 @@ import "./globals.css";
 import StoreProvider from "../providers/StoreProvider.jsx";
 import GoogleAnalytics from "../components/analytics/GoogleAnalytics.jsx";
 
-const siteName = "Korkeila Helsinki";
+const siteName = "KOHIRA";
 const descriptions = {
   fi: "Tutustu Korkeila Helsinki ensiluokkaisiin käsintehtyihin koruihin — elegantteihin koruihin, jotka on suunniteltu ajattomaan kauneuteen ja moderniin elämäntyyliin.",
   en: "Explore premium handcrafted jewellery at Korkeila Helsinki — elegant designs crafted for timeless beauty and modern lifestyles.",

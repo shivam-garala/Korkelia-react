@@ -34,7 +34,7 @@ export default function AdminHeader({
           </button>
           <Image
             className={styles.headerLogo}
-            src="/logo/logo.png"
+            src=""
             alt="Korkeila"
             width={140}
             height={70}

@@ -221,6 +221,9 @@ export default function DiamondRatePage() {
   const [inlineRateDraft, setInlineRateDraft] = useState("");
   const [savingRateId, setSavingRateId] = useState(null);
 
+  const [inlineEditingId, setInlineEditingId] = useState(null);
+  const [inlineEditRate, setInlineEditRate] = useState("");
+
   const [diamondMasterId, setDiamondMasterId] = useState("");
   const [diamondTypeId, setDiamondTypeId] = useState("");
   const [clarityId, setClarityId] = useState("");
@@ -525,6 +528,34 @@ export default function DiamondRatePage() {
     await dispatch(deleteDiamondRate(deleteTarget));
     dispatch(fetchDiamondRates());
     setDeleteTarget(null);
+  };
+
+  const startInlineEdit = (rawId, rawRate) => {
+    setInlineEditingId(rawId);
+    setInlineEditRate(rawRate !== null && rawRate !== undefined ? String(rawRate) : "");
+  };
+
+  const cancelInlineEdit = () => {
+    setInlineEditingId(null);
+    setInlineEditRate("");
+  };
+
+  const saveInlineEdit = async (row) => {
+    if (!inlineEditingId || inlineEditRate === "") return;
+
+    const payload = {
+      diamond_master_id: Number(pickValue(row, ["diamond_master_id", "diamondMasterId"])),
+      diamond_type_id: Number(pickValue(row, ["diamond_type_id", "diamondTypeId"])),
+      clarity_id: Number(pickValue(row, ["clarity_id", "clarityId"])),
+      rate: Number(inlineEditRate),
+    };
+
+    const result = await dispatch(updateDiamondRate({ id: inlineEditingId, payload }));
+    if (!result?.error) {
+      setInlineEditingId(null);
+      setInlineEditRate("");
+      dispatch(fetchDiamondRates());
+    }
   };
 
   const cancelInlineRateEdit = useCallback(() => {
