@@ -312,6 +312,19 @@ const writeLastDisplayPrice = (
   }
 };
 
+const isPriceForCurrency = (price, currencySymbol) => {
+  const value = normalizeString(price);
+  const symbol = normalizeString(currencySymbol);
+  if (!value) return false;
+  if (!symbol) return true;
+  if (value.includes(symbol)) return true;
+
+  // Avoid showing a previous currency while the current currency request is loading.
+  return !["€", "₹", "$", "£", "¥"].some(
+    (candidate) => candidate !== symbol && value.includes(candidate),
+  );
+};
+
 const hasIdValue = (value) =>
   value !== null && value !== undefined && value !== "";
 
@@ -1785,16 +1798,22 @@ export default function ProductCustomizer({
   const variantPriceStr = pickTotalPrice(variantDetails);
   const displayPrice =
     variantPriceStr || (productBasePrice ? productBasePrice : null);
-  const stableDisplayPrice = displayPrice || lastDisplayPrice;
+  const currentDisplayPrice = isPriceForCurrency(displayPrice, currencySymbol)
+    ? displayPrice
+    : "";
+  const previousDisplayPrice = isPriceForCurrency(lastDisplayPrice, currencySymbol)
+    ? lastDisplayPrice
+    : "";
+  const stableDisplayPrice = currentDisplayPrice || previousDisplayPrice;
   const shouldShowPrice = true;
 
   useEffect(() => {
-    if (displayPrice) {
-      const nextPrice = String(displayPrice);
+    if (currentDisplayPrice) {
+      const nextPrice = String(currentDisplayPrice);
       setLastDisplayPrice(nextPrice);
       writeLastDisplayPrice(productId, designId, currencyCode, nextPrice);
     }
-  }, [displayPrice, productId, designId, currencyCode]);
+  }, [currentDisplayPrice, productId, designId, currencyCode]);
 
   return (
     <aside className={styles.panel}>
