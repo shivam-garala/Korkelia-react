@@ -278,6 +278,40 @@ const resolveCategoryId = (details) => {
 const buildDesignCacheKey = (designId) =>
   designId ? `design:${designId}` : "";
 
+const buildLastPriceKey = (productId, designId = "", currencyCode = "") => {
+  if (!productId) return "";
+  return `product_detail_last_price:${String(productId)}:${String(
+    designId || "",
+  )}:${String(currencyCode || "")}`;
+};
+
+const readLastDisplayPrice = (productId, designId = "", currencyCode = "") => {
+  if (typeof window === "undefined") return "";
+  const key = buildLastPriceKey(productId, designId, currencyCode);
+  if (!key) return "";
+  try {
+    return window.sessionStorage.getItem(key) ?? "";
+  } catch {
+    return "";
+  }
+};
+
+const writeLastDisplayPrice = (
+  productId,
+  designId = "",
+  currencyCode = "",
+  price = "",
+) => {
+  if (typeof window === "undefined") return;
+  const key = buildLastPriceKey(productId, designId, currencyCode);
+  if (!key || !price) return;
+  try {
+    window.sessionStorage.setItem(key, String(price));
+  } catch {
+    /* ignore */
+  }
+};
+
 const hasIdValue = (value) =>
   value !== null && value !== undefined && value !== "";
 
@@ -589,6 +623,9 @@ export default function ProductCustomizer({
   const [filterData, setFilterData] = useState(null);
   const [productDetails, setProductDetails] = useState(null);
   const [variantDetails, setVariantDetails] = useState(null);
+  const [lastDisplayPrice, setLastDisplayPrice] = useState(() =>
+    readLastDisplayPrice(productId, designId, currencyCode),
+  );
   const [variantLoading, setVariantLoading] = useState(false);
   const [variantEnabled, setVariantEnabled] = useState(false);
   const [variantAdjustedFilters, setVariantAdjustedFilters] = useState(null);
@@ -795,6 +832,10 @@ export default function ProductCustomizer({
     defaultMetalId,
     defaultKaratId,
   ]);
+
+  useEffect(() => {
+    setLastDisplayPrice(readLastDisplayPrice(productId, designId, currencyCode));
+  }, [productId, designId, currencyCode]);
 
   const markVariantInteraction = useCallback(() => {
     userVariantInteractionRef.current = true;
@@ -1352,16 +1393,20 @@ export default function ProductCustomizer({
     }
   }, [sizeOptions, size]);
 
-  const selectedCutId = cutOptions.find((opt) => opt.id === cut)?.id ?? "";
+  const selectedCutId =
+    cutOptions.find((opt) => opt.id === cut)?.id ?? normalizeString(cut);
   const selectedQualityId =
-    qualityOptions.find((opt) => opt.value === quality)?.value ?? "";
+    qualityOptions.find((opt) => opt.value === quality)?.value ??
+    normalizeString(quality);
   const selectedClarityId =
-    filteredClarityOptions.find((opt) => opt.value === clarity)?.value ?? "";
+    filteredClarityOptions.find((opt) => opt.value === clarity)?.value ??
+    normalizeString(clarity);
   const selectedMetalId =
-    metalOptions.find((opt) => opt.value === metal)?.value ?? "";
+    metalOptions.find((opt) => opt.value === metal)?.value ??
+    normalizeString(metal);
   const selectedKaratId =
     filteredMetalTypeOptions.find((opt) => opt.value === metalType)?.value ??
-    "";
+    normalizeString(metalType);
   const selectedCarat = carat ? String(carat) : "";
 
   const variantTranslationSource =
@@ -1740,7 +1785,16 @@ export default function ProductCustomizer({
   const variantPriceStr = pickTotalPrice(variantDetails);
   const displayPrice =
     variantPriceStr || (productBasePrice ? productBasePrice : null);
+  const stableDisplayPrice = displayPrice || lastDisplayPrice;
   const shouldShowPrice = true;
+
+  useEffect(() => {
+    if (displayPrice) {
+      const nextPrice = String(displayPrice);
+      setLastDisplayPrice(nextPrice);
+      writeLastDisplayPrice(productId, designId, currencyCode, nextPrice);
+    }
+  }, [displayPrice, productId, designId, currencyCode]);
 
   return (
     <aside className={styles.panel}>
@@ -1961,10 +2015,10 @@ export default function ProductCustomizer({
             <div className={styles.divider} aria-hidden />
             <div className={styles.priceBlock}>
               {/* <div className={styles.priceLabel}>{labels.price}</div> */}
-              {variantLoading ? (
+              {stableDisplayPrice ? (
+                <div className={styles.priceValue}>{stableDisplayPrice}</div>
+              ) : variantLoading ? (
                 <div className={styles.variantStatus}>...</div>
-              ) : displayPrice ? (
-                <div className={styles.priceValue}>{displayPrice}</div>
               ) : null}
               {/* <div className={styles.priceValue}>{variantPrice ?? "--"}</div> */}
             </div>
