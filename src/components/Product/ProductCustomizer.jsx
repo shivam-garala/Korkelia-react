@@ -814,6 +814,7 @@ export default function ProductCustomizer({
             list.find((item) => matchById(item)))
           : list.find((item) => matchById(item));
         if (match) {
+          if (variantEnabled && userVariantInteractionRef.current) return;
           const updated = updateCacheWithListing(productId, match, {
             preserveExplicitImages: variantEnabled,
           });
