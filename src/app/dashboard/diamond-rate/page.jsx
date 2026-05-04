@@ -1,6 +1,6 @@
-'use client';
+"use client";
 
-import { useEffect, useMemo, useState } from "react";
+import { useCallback, useEffect, useMemo, useState } from "react";
 import { usePathname, useRouter } from "next/navigation";
 import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
 import AdminHeader from "../../../components/AdminHeader/AdminHeader.jsx";
@@ -34,9 +34,14 @@ import {
   selectDiamondClarities,
 } from "../../../store/slices/diamondClaritySlice.js";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks.js";
-import { clearCredentials, selectEmail, selectUserName } from "../../../store/authSlice.js";
+import {
+  clearCredentials,
+  selectEmail,
+  selectUserName,
+} from "../../../store/authSlice.js";
 import layout from "../../../styles/workspace.module.css";
 import styles from "../../../styles/crudPage.module.css";
+import { formatDecimalStringForInput } from "../../../lib/decimalString.js";
 
 function pickValue(obj, keys) {
   for (const key of keys) {
@@ -72,7 +77,7 @@ function extractTypeNames(item) {
       "diamondTypeTranslations",
       "diamond_type_translation",
       "diamondTypeTranslation",
-    ])
+    ]),
   );
   let nameEn = "";
   let nameFi = "";
@@ -80,11 +85,22 @@ function extractTypeNames(item) {
   list.forEach((entry) => {
     const languageId = String(
       pickValue(entry, ["language_id", "languageId", "lang_id", "langId"]) ??
-        pickValue(entry?.language, ["id", "language_id", "languageId", "lang_id", "langId"]) ??
-        ""
+        pickValue(entry?.language, [
+          "id",
+          "language_id",
+          "languageId",
+          "lang_id",
+          "langId",
+        ]) ??
+        "",
     );
     const languageName = String(
-      pickValue(entry?.language, ["language_name", "languageName", "name", "label"]) ?? ""
+      pickValue(entry?.language, [
+        "language_name",
+        "languageName",
+        "name",
+        "label",
+      ]) ?? "",
     ).toLowerCase();
     const name = pickValue(entry, [
       "type_name",
@@ -125,15 +141,37 @@ function resolveTypeLabel(item) {
         "diamondTypeName",
         "name",
         "label",
-      ]) ?? ""
+      ]) ?? "",
     )
   );
 }
 
 function formatDiamondMasterLabel(item, fallbackId) {
-  if (!item) return fallbackId !== undefined && fallbackId !== null ? String(fallbackId) : "-";
+  if (!item)
+    return fallbackId !== undefined && fallbackId !== null
+      ? String(fallbackId)
+      : "-";
   const carat = pickValue(item, ["carat"]);
   return carat !== null && carat !== undefined ? String(carat) : "-";
+}
+
+function buildDiamondRateUpdatePayload(raw, rate) {
+  return {
+    diamond_master_id: Number(
+      pickValue(raw, [
+        "diamond_master_id",
+        "diamondMasterId",
+        "diamond_master",
+      ]),
+    ),
+    diamond_type_id: Number(
+      pickValue(raw, ["diamond_type_id", "diamondTypeId", "diamond_type"]),
+    ),
+    clarity_id: Number(
+      pickValue(raw, ["clarity_id", "clarityId", "diamond_clarity_id"]),
+    ),
+    rate: Number(rate),
+  };
 }
 
 export default function DiamondRatePage() {
@@ -163,7 +201,13 @@ export default function DiamondRatePage() {
     if (normalizedEmail.length) {
       const firstChar = normalizedEmail[0];
       const domainChar = normalizedEmail.split("@")[1]?.[0];
-      return [firstChar, domainChar].filter(Boolean).join("").slice(0, 2).toUpperCase() || "U";
+      return (
+        [firstChar, domainChar]
+          .filter(Boolean)
+          .join("")
+          .slice(0, 2)
+          .toUpperCase() || "U"
+      );
     }
     return "U";
   }, [userEmail, userName]);
@@ -173,6 +217,9 @@ export default function DiamondRatePage() {
   const [modalOpen, setModalOpen] = useState(false);
   const [editingId, setEditingId] = useState(null);
   const [deleteTarget, setDeleteTarget] = useState(null);
+  const [inlineRateEditId, setInlineRateEditId] = useState(null);
+  const [inlineRateDraft, setInlineRateDraft] = useState("");
+  const [savingRateId, setSavingRateId] = useState(null);
 
   const [inlineEditingId, setInlineEditingId] = useState(null);
   const [inlineEditRate, setInlineEditRate] = useState("");
@@ -211,9 +258,20 @@ export default function DiamondRatePage() {
     const list = Array.isArray(diamondTypes) ? diamondTypes : [];
     return list
       .map((item) => {
-        const id = pickValue(item, ["id", "type_id", "diamond_type_id", "typeId"]);
+        const id = pickValue(item, [
+          "id",
+          "type_id",
+          "diamond_type_id",
+          "typeId",
+        ]);
         const label = resolveTypeLabel(item);
-        if (id === null || id === undefined || label === null || label === undefined) return null;
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
         return { id: String(id), label: String(label) };
       })
       .filter(Boolean);
@@ -223,9 +281,26 @@ export default function DiamondRatePage() {
     const list = Array.isArray(diamondClarities) ? diamondClarities : [];
     return list
       .map((item) => {
-        const id = pickValue(item, ["id", "clarity_id", "diamond_clarity_id", "clarityId"]);
-        const label = pickValue(item, ["clarity", "clarity_name", "clarityName", "name", "label"]);
-        if (id === null || id === undefined || label === null || label === undefined) return null;
+        const id = pickValue(item, [
+          "id",
+          "clarity_id",
+          "diamond_clarity_id",
+          "clarityId",
+        ]);
+        const label = pickValue(item, [
+          "clarity",
+          "clarity_name",
+          "clarityName",
+          "name",
+          "label",
+        ]);
+        if (
+          id === null ||
+          id === undefined ||
+          label === null ||
+          label === undefined
+        )
+          return null;
         return { id: String(id), label: String(label) };
       })
       .filter(Boolean);
@@ -234,23 +309,50 @@ export default function DiamondRatePage() {
   const tableRows = useMemo(() => {
     const rows = Array.isArray(items) ? items : [];
     return rows.map((item, index) => {
-      const id = pickValue(item, ["id", "diamond_rate_id", "diamondRateId"]) ?? index + 1;
-      const rawDiamondMasterId = pickValue(item, ["diamond_master_id", "diamondMasterId", "diamond_master"]);
-      const rawDiamondTypeId = pickValue(item, ["diamond_type_id", "diamondTypeId", "diamond_type"]);
-      const rawClarityId = pickValue(item, ["clarity_id", "clarityId", "diamond_clarity_id"]);
+      const id =
+        pickValue(item, ["id", "diamond_rate_id", "diamondRateId"]) ??
+        index + 1;
+      const rawDiamondMasterId = pickValue(item, [
+        "diamond_master_id",
+        "diamondMasterId",
+        "diamond_master",
+      ]);
+      const rawDiamondTypeId = pickValue(item, [
+        "diamond_type_id",
+        "diamondTypeId",
+        "diamond_type",
+      ]);
+      const rawClarityId = pickValue(item, [
+        "clarity_id",
+        "clarityId",
+        "diamond_clarity_id",
+      ]);
 
-      const diamondMasterFromRelation = item?.diamond_master ?? item?.diamondMaster ?? null;
+      const diamondMasterFromRelation =
+        item?.diamond_master ?? item?.diamondMaster ?? null;
       const diamondMasterLabel = diamondMasterFromRelation
-        ? formatDiamondMasterLabel(diamondMasterFromRelation, rawDiamondMasterId)
-        : diamondMasterOptions.find((opt) => String(opt.id) === String(rawDiamondMasterId))
-            ?.label ??
-          (rawDiamondMasterId !== null && rawDiamondMasterId !== undefined ? String(rawDiamondMasterId) : "-");
+        ? formatDiamondMasterLabel(
+            diamondMasterFromRelation,
+            rawDiamondMasterId,
+          )
+        : (diamondMasterOptions.find(
+            (opt) => String(opt.id) === String(rawDiamondMasterId),
+          )?.label ??
+          (rawDiamondMasterId !== null && rawDiamondMasterId !== undefined
+            ? String(rawDiamondMasterId)
+            : "-"));
 
-      const diamondTypeFromRelation = resolveTypeLabel(item?.diamond_type ?? item?.diamondType ?? null) || null;
+      const diamondTypeFromRelation =
+        resolveTypeLabel(item?.diamond_type ?? item?.diamondType ?? null) ||
+        null;
       const diamondTypeLabel =
         diamondTypeFromRelation ??
-        diamondTypeOptions.find((opt) => String(opt.id) === String(rawDiamondTypeId))?.label ??
-        (rawDiamondTypeId !== null && rawDiamondTypeId !== undefined ? String(rawDiamondTypeId) : "-");
+        diamondTypeOptions.find(
+          (opt) => String(opt.id) === String(rawDiamondTypeId),
+        )?.label ??
+        (rawDiamondTypeId !== null && rawDiamondTypeId !== undefined
+          ? String(rawDiamondTypeId)
+          : "-");
 
       const clarityFromRelation =
         item?.clarity?.clarity ??
@@ -259,10 +361,25 @@ export default function DiamondRatePage() {
         null;
       const clarityLabel =
         clarityFromRelation ??
-        clarityOptions.find((opt) => String(opt.id) === String(rawClarityId))?.label ??
-        (rawClarityId !== null && rawClarityId !== undefined ? String(rawClarityId) : "-");
+        clarityOptions.find((opt) => String(opt.id) === String(rawClarityId))
+          ?.label ??
+        (rawClarityId !== null && rawClarityId !== undefined
+          ? String(rawClarityId)
+          : "-");
 
-      const rateValue = pickValue(item, ["rate", "diamond_rate", "diamondRate", "value"]);
+      const rateValue = pickValue(item, [
+        "rate",
+        "diamond_rate",
+        "diamondRate",
+        "value",
+      ]);
+      const isMissing =
+        rateValue === null ||
+        rateValue === undefined ||
+        (typeof rateValue === "string" && !String(rateValue).trim());
+      const rateForRow = isMissing
+        ? "-"
+        : formatDecimalStringForInput(rateValue, 2);
 
       return {
         no: index + 1,
@@ -270,32 +387,58 @@ export default function DiamondRatePage() {
         diamond_master: diamondMasterLabel ?? "-",
         diamond_type: diamondTypeLabel ?? "-",
         clarity: clarityLabel ?? "-",
-        rate: rateValue ?? "-",
+        rate: rateForRow,
         _raw: item,
       };
     });
   }, [clarityOptions, diamondMasterOptions, diamondTypeOptions, items]);
 
   const filteredRows = useMemo(() => {
-    const normalize = (value) => String(value ?? "").trim().toLowerCase();
+    const normalize = (value) =>
+      String(value ?? "")
+        .trim()
+        .toLowerCase();
     const noQuery = normalize(filters.no);
     const masterQuery = normalize(filters.diamond_master);
     const typeQuery = normalize(filters.diamond_type);
     const clarityQuery = normalize(filters.clarity);
     const rateQuery = normalize(filters.rate);
-    if (!noQuery && !masterQuery && !typeQuery && !clarityQuery && !rateQuery) return tableRows;
+    if (!noQuery && !masterQuery && !typeQuery && !clarityQuery && !rateQuery)
+      return tableRows;
 
     return tableRows.filter((row) => {
       const noMatches = noQuery
-        ? normalize(row.no).includes(noQuery) || normalize(row.id).includes(noQuery)
+        ? normalize(row.no).includes(noQuery) ||
+          normalize(row.id).includes(noQuery)
         : true;
-      const masterMatches = masterQuery ? normalize(row.diamond_master).includes(masterQuery) : true;
-      const typeMatches = typeQuery ? normalize(row.diamond_type).includes(typeQuery) : true;
-      const clarityMatches = clarityQuery ? normalize(row.clarity).includes(clarityQuery) : true;
-      const rateMatches = rateQuery ? normalize(row.rate).includes(rateQuery) : true;
-      return noMatches && masterMatches && typeMatches && clarityMatches && rateMatches;
+      const masterMatches = masterQuery
+        ? normalize(row.diamond_master).includes(masterQuery)
+        : true;
+      const typeMatches = typeQuery
+        ? normalize(row.diamond_type).includes(typeQuery)
+        : true;
+      const clarityMatches = clarityQuery
+        ? normalize(row.clarity).includes(clarityQuery)
+        : true;
+      const rateMatches = rateQuery
+        ? normalize(row.rate).includes(rateQuery)
+        : true;
+      return (
+        noMatches &&
+        masterMatches &&
+        typeMatches &&
+        clarityMatches &&
+        rateMatches
+      );
     });
-  }, [filters.clarity, filters.diamond_master, filters.diamond_type, filters.no, filters.rate, tableRows]);
+  }, [
+    filters.clarity,
+    filters.diamond_master,
+    filters.diamond_type,
+    filters.no,
+    filters.rate,
+    tableRows,
+  ]);
 
   const openCreate = () => {
     setEditingId(null);
@@ -308,16 +451,49 @@ export default function DiamondRatePage() {
 
   const openEdit = (row) => {
     const rawId = pickValue(row, ["id", "diamond_rate_id", "diamondRateId"]);
-    const rawDiamondMasterId = pickValue(row, ["diamond_master_id", "diamondMasterId", "diamond_master"]);
-    const rawDiamondTypeId = pickValue(row, ["diamond_type_id", "diamondTypeId", "diamond_type"]);
-    const rawClarityId = pickValue(row, ["clarity_id", "clarityId", "diamond_clarity_id"]);
-    const rawRate = pickValue(row, ["rate", "diamond_rate", "diamondRate", "value"]);
+    const rawDiamondMasterId = pickValue(row, [
+      "diamond_master_id",
+      "diamondMasterId",
+      "diamond_master",
+    ]);
+    const rawDiamondTypeId = pickValue(row, [
+      "diamond_type_id",
+      "diamondTypeId",
+      "diamond_type",
+    ]);
+    const rawClarityId = pickValue(row, [
+      "clarity_id",
+      "clarityId",
+      "diamond_clarity_id",
+    ]);
+    const rawRate = pickValue(row, [
+      "rate",
+      "diamond_rate",
+      "diamondRate",
+      "value",
+    ]);
 
     setEditingId(rawId ?? null);
-    setDiamondMasterId(rawDiamondMasterId !== null && rawDiamondMasterId !== undefined ? String(rawDiamondMasterId) : "");
-    setDiamondTypeId(rawDiamondTypeId !== null && rawDiamondTypeId !== undefined ? String(rawDiamondTypeId) : "");
-    setClarityId(rawClarityId !== null && rawClarityId !== undefined ? String(rawClarityId) : "");
-    setRate(rawRate !== null && rawRate !== undefined ? String(rawRate) : "");
+    setDiamondMasterId(
+      rawDiamondMasterId !== null && rawDiamondMasterId !== undefined
+        ? String(rawDiamondMasterId)
+        : "",
+    );
+    setDiamondTypeId(
+      rawDiamondTypeId !== null && rawDiamondTypeId !== undefined
+        ? String(rawDiamondTypeId)
+        : "",
+    );
+    setClarityId(
+      rawClarityId !== null && rawClarityId !== undefined
+        ? String(rawClarityId)
+        : "",
+    );
+    setRate(
+      rawRate === null || rawRate === undefined
+        ? ""
+        : formatDecimalStringForInput(rawRate, 2),
+    );
     setModalOpen(true);
   };
 
@@ -382,128 +558,228 @@ export default function DiamondRatePage() {
     }
   };
 
-  const columns = [
-    { key: "no", header: "No.", filterable: false, filterPlaceholder: "Search No." },
-    { key: "diamond_master", header: "Carat", filterable: true, filterPlaceholder: "Search Carat" },
-    { key: "diamond_type", header: "Diamond Type", filterable: true, filterPlaceholder: "Search Type" },
-    { key: "clarity", header: "Clarity", filterable: true, filterPlaceholder: "Search Clarity" },
-    {
-      key: "rate",
-      header: "Rate Per Carat",
-      filterable: true,
-      filterPlaceholder: "Search Rate Per Carat",
-      render: (row) => {
-        const isEditing = inlineEditingId === row.id;
-        return (
-          <div style={{ display: "flex", gap: 8, alignItems: "center" }}>
-            {isEditing ? (
-              <>
-                <input
-                  type="number"
-                  step="0.01"
-                  value={inlineEditRate}
-                  onChange={(e) => setInlineEditRate(e.target.value)}
-                  style={{
-                    padding: "8px 12px",
-                    border: "2px solid #007bff",
-                    borderRadius: "6px",
-                    width: "110px",
-                    fontSize: "14px",
-                    fontWeight: "500",
-                    boxShadow: "0 2px 4px rgba(0, 123, 255, 0.1)",
-                    transition: "all 0.2s",
-                  }}
-                  autoFocus
-                />
-              <Button
-  variant="primarySoft"
-  size="sm"
-  icon="check"
-  onClick={() => saveInlineEdit(row._raw)}
-  title="Save"
-  style={{
-    backgroundColor: "#28a745",
-    color: "#fff",
-    padding: "6px 12px",
-    borderRadius: "6px",
-    border: "none",
-    cursor: "pointer",
-    transition: "background-color 0.2s",
-    display: "flex",
-    alignItems: "center",
-    gap: "6px" // space between icon and text
-  }}
->
-  Save
-</Button>
-                <Button
-  variant="danger"
-  size="sm"
-  icon="close"
-  onClick={cancelInlineEdit}
-  title="Cancel"
-  style={{
-    backgroundColor: "#dc3545",
-    color: "#fff",
-    padding: "6px 12px",
-    borderRadius: "6px",
-    border: "none",
-    cursor: "pointer",
-    transition: "background-color 0.2s",
-    display: "flex",
-    alignItems: "center",
-    gap: "6px" // space between icon and text
-  }}
->
-  Cancel
-</Button>
-              </>
-            ) : (
-              <>
-                <span
-                  onClick={() => startInlineEdit(row.id, row.rate)}
-                  style={{
-                    cursor: "pointer",
-                    padding: "6px 12px",
-                    borderRadius: "6px",
-                    backgroundColor: "transparent",
-                    transition: "all 0.2s ease",
-                    fontWeight: "500",
-                    fontSize: "14px",
-                  }}
-                  onMouseEnter={(e) => {
-                    e.target.style.backgroundColor = "#e7f3ff";
-                    e.target.style.color = "#007bff";
-                  }}
-                  onMouseLeave={(e) => {
-                    e.target.style.backgroundColor = "transparent";
-                    e.target.style.color = "inherit";
-                  }}
+  const cancelInlineRateEdit = useCallback(() => {
+    setInlineRateEditId(null);
+    setInlineRateDraft("");
+  }, []);
+
+  const startInlineRateEdit = useCallback(
+    (row) => {
+      if (savingRateId) return;
+      const draft =
+        row.rate === "-" || row.rate === "" || row.rate == null
+          ? ""
+          : formatDecimalStringForInput(row.rate, 2);
+      setInlineRateEditId(row.id);
+      setInlineRateDraft(draft);
+    },
+    [savingRateId],
+  );
+
+  const commitInlineRateEdit = useCallback(
+    async (row, draftValue) => {
+      if (savingRateId) return;
+      const trimmed = String(draftValue ?? "").trim();
+      if (trimmed === "") {
+        cancelInlineRateEdit();
+        return;
+      }
+      const next = parseFloat(trimmed);
+      if (Number.isNaN(next)) {
+        cancelInlineRateEdit();
+        return;
+      }
+      const prevRaw = pickValue(row._raw, [
+        "rate",
+        "diamond_rate",
+        "diamondRate",
+        "value",
+      ]);
+      const prevNum = parseFloat(prevRaw);
+      if (!Number.isNaN(prevNum) && prevNum === next) {
+        cancelInlineRateEdit();
+        return;
+      }
+      const raw = row._raw;
+      const payload = buildDiamondRateUpdatePayload(raw, next);
+      if (
+        [
+          payload.diamond_master_id,
+          payload.diamond_type_id,
+          payload.clarity_id,
+        ].some((n) => Number.isNaN(n))
+      ) {
+        cancelInlineRateEdit();
+        return;
+      }
+      setSavingRateId(row.id);
+      const result = await dispatch(updateDiamondRate({ id: row.id, payload }));
+      setSavingRateId(null);
+      if (!result?.error) {
+        await dispatch(fetchDiamondRates());
+        cancelInlineRateEdit();
+      }
+    },
+    [savingRateId, dispatch, cancelInlineRateEdit],
+  );
+
+  const columns = useMemo(
+    () => [
+      {
+        key: "no",
+        header: "No.",
+        filterable: false,
+        filterPlaceholder: "Search No.",
+      },
+      {
+        key: "diamond_master",
+        header: "Carat",
+        filterable: true,
+        filterPlaceholder: "Search Carat",
+      },
+      {
+        key: "diamond_type",
+        header: "Diamond Type",
+        filterable: true,
+        filterPlaceholder: "Search Type",
+      },
+      {
+        key: "clarity",
+        header: "Clarity",
+        filterable: true,
+        filterPlaceholder: "Search Clarity",
+      },
+      {
+        key: "rate",
+        header: "Rate Per Carat",
+        filterable: true,
+        filterPlaceholder: "Search Rate Per Carat",
+        render: (row) => {
+          const isEditing = inlineRateEditId === row.id;
+          const isSaving = savingRateId === row.id && isEditing;
+          if (isEditing) {
+            return (
+              <div className={styles.inlineRateCell}>
+                <div className={styles.inlineFieldRow}>
+                  <input
+                    type="number"
+                    step="0.01"
+                    min="0"
+                    className={styles.inlineRateInput}
+                    value={inlineRateDraft}
+                    onChange={(e) => {
+                      let val = e.target.value;
+                      val = val.replace(/^0+(?=\d)/, "");
+                      setInlineRateDraft(val);
+                    }}
+                    onBlur={(e) =>
+                      void commitInlineRateEdit(row, e.target.value)
+                    }
+                    onKeyDown={(e) => {
+                      if (e.key === "Enter") {
+                        e.preventDefault();
+                        void commitInlineRateEdit(row, inlineRateDraft);
+                      }
+                      if (e.key === "Escape") {
+                        e.preventDefault();
+                        cancelInlineRateEdit();
+                      }
+                    }}
+                    disabled={isSaving}
+                    autoFocus
+                    aria-label="Rate per carat"
+                  />
+                  <Button
+                    variant="ghost"
+                    size="sm"
+                    icon="check"
+                    iconPosition="right"
+                    iconOnly
+                    type="button"
+                    className={styles.inlineRateSaveButton}
+                    disabled={isSaving}
+                    onMouseDown={(e) => e.preventDefault()}
+                    onClick={() =>
+                      void commitInlineRateEdit(row, inlineRateDraft)
+                    }
+                    aria-label="Save rate per carat"
+                    title="Update rate"
+                  >
+                    Update rate
+                  </Button>
+                </div>
+                {isSaving ? (
+                  <span className={styles.inlineRateSaving}>Saving…</span>
+                ) : null}
+              </div>
+            );
+          }
+          return (
+            <div className={styles.inlineRateCell}>
+              <div className={styles.inlineRateView}>
+                <button
+                  type="button"
+                  className={styles.inlineRateTrigger}
+                  onClick={() => startInlineRateEdit(row)}
+                  disabled={Boolean(savingRateId)}
+                  title="Click to edit rate"
                 >
                   {row.rate}
-                </span>
-              </>
-            )}
-          </div>
-        );
+                </button>
+                <Button
+                  variant="ghost"
+                  size="sm"
+                  icon="edit"
+                  iconOnly
+                  onClick={() => startInlineRateEdit(row)}
+                  disabled={Boolean(savingRateId)}
+                  aria-label="Edit rate per carat"
+                  title="Edit rate"
+                >
+                  Edit rate
+                </Button>
+              </div>
+            </div>
+          );
+        },
       },
-    },
-    {
-      key: "actions",
-      header: "Action",
-      filterable: false,
-      render: (row) => (
-        <div className={styles.actions}>
-          <Button variant="ghost" size="sm" icon="edit" iconOnly onClick={() => openEdit(row._raw)}>
-            Edit
-          </Button>
-          <Button variant="danger" size="sm" icon="delete" iconOnly onClick={() => handleDelete(row.id)}>
-            Delete
-          </Button>
-        </div>
-      ),
-    },
-  ];
+      {
+        key: "actions",
+        header: "Action",
+        filterable: false,
+        render: (row) => (
+          <div className={styles.actions}>
+            <Button
+              variant="ghost"
+              size="sm"
+              icon="edit"
+              iconOnly
+              onClick={() => openEdit(row._raw)}
+            >
+              Edit
+            </Button>
+            <Button
+              variant="danger"
+              size="sm"
+              icon="delete"
+              iconOnly
+              onClick={() => handleDelete(row.id)}
+            >
+              Delete
+            </Button>
+          </div>
+        ),
+      },
+    ],
+    [
+      inlineRateEditId,
+      inlineRateDraft,
+      savingRateId,
+      cancelInlineRateEdit,
+      commitInlineRateEdit,
+      startInlineRateEdit,
+    ],
+  );
 
   return (
     <div className={layout.page}>
@@ -534,7 +810,6 @@ export default function DiamondRatePage() {
                 </Button>
               </div>
             </div>
-
 
             <DataTable
               columns={columns}
@@ -574,7 +849,12 @@ export default function DiamondRatePage() {
         }}
         footer={
           <div className={styles.formActions}>
-            <Button variant="primarySoft" type="submit" form="diamond-rate-form" disabled={loading}>
+            <Button
+              variant="primarySoft"
+              type="submit"
+              form="diamond-rate-form"
+              disabled={loading}
+            >
               {editingId ? "Update" : "Create"}
             </Button>
             <Button
@@ -597,8 +877,15 @@ export default function DiamondRatePage() {
               onChange={(e) => setDiamondMasterId(e.target.value)}
               required
               disabled={!diamondMasterOptions.length}
-              placeholder={diamondMasterOptions.length ? "Select carat" : "Loading carats..."}
-              options={diamondMasterOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+              placeholder={
+                diamondMasterOptions.length
+                  ? "Select carat"
+                  : "Loading carats..."
+              }
+              options={diamondMasterOptions.map((opt) => ({
+                value: opt.id,
+                label: opt.label,
+              }))}
             />
             <AdminSelectField
               label="Diamond Type"
@@ -606,8 +893,13 @@ export default function DiamondRatePage() {
               onChange={(e) => setDiamondTypeId(e.target.value)}
               required
               disabled={!diamondTypeOptions.length}
-              placeholder={diamondTypeOptions.length ? "Select type" : "Loading types..."}
-              options={diamondTypeOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+              placeholder={
+                diamondTypeOptions.length ? "Select type" : "Loading types..."
+              }
+              options={diamondTypeOptions.map((opt) => ({
+                value: opt.id,
+                label: opt.label,
+              }))}
             />
             <AdminSelectField
               label="Clarity"
@@ -615,15 +907,27 @@ export default function DiamondRatePage() {
               onChange={(e) => setClarityId(e.target.value)}
               required
               disabled={!clarityOptions.length}
-              placeholder={clarityOptions.length ? "Select clarity" : "Loading clarities..."}
-              options={clarityOptions.map((opt) => ({ value: opt.id, label: opt.label }))}
+              placeholder={
+                clarityOptions.length
+                  ? "Select clarity"
+                  : "Loading clarities..."
+              }
+              options={clarityOptions.map((opt) => ({
+                value: opt.id,
+                label: opt.label,
+              }))}
             />
             <TextField
               label="Rate"
               type="number"
               step="0.01"
+              min="0"
               value={rate}
-              onChange={(e) => setRate(e.target.value)}
+              onChange={(e) => {
+                let val = e.target.value;
+                val = val.replace(/^0+(?=\d)/, "");
+                setRate(val);
+              }}
               required
               preventWheel
             />

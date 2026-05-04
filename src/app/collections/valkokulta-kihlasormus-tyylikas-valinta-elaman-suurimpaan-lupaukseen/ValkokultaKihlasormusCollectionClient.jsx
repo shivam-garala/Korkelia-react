@@ -122,7 +122,7 @@ const faqs = [
 ];
 
 export default function ValkokultaKihlasormusCollectionClient() {
-  const { language, currencyCode } = useI18n();
+  const { language, currencyCode, currencySymbol } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -214,7 +214,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
     const loadProducts = async () => {
       try {
         clearProductListingCache();
-        const list = await fetchProductListEcom(languageId, CATEGORY_ID, currencyCode, true);
+        const list = await fetchProductListEcom(languageId, CATEGORY_ID, currencyCode, currencySymbol, true);
         const mapped = list
           .map((item) => {
             const id = item?.id ?? item?.product_id ?? null;

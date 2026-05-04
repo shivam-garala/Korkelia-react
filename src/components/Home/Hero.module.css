@@ -32,6 +32,10 @@
   filter: brightness(1.06) contrast(1.04);
 }
 
+.mobileVideo {
+  display: none;
+}
+
 .overlay {
   position: absolute;
   inset: 0;
@@ -126,7 +130,16 @@
 
 @media (max-width: 720px) {
   .hero {
-    height: 70vh;
+    height: 80vh;
+    min-height: 620px;
+  }
+
+  .desktopVideo {
+    display: none;
+  }
+
+  .mobileVideo {
+    display: block;
   }
 
   .video {
@@ -134,5 +147,20 @@
   }
   .content {
     padding: 0 18px 40px;
+  }
+}
+
+@media (max-width: 720px) and (orientation: landscape) {
+  .hero {
+    height: 70vh;
+    min-height: 0;
+  }
+
+  .desktopVideo {
+    display: block;
+  }
+
+  .mobileVideo {
+    display: none;
   }
 }

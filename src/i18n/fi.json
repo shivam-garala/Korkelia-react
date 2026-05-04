@@ -5,6 +5,7 @@
   },
   "header": {
     "currency": "Euro",
+    "detectedRegion": "Alue",
     "share": "JAA",
     "appointment": "VARAA AIKA",
     "ambassador": "OTA YHTEYTTÄ"

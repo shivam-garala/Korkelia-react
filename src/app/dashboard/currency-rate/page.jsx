@@ -1,5 +1,6 @@
 'use client';
 
+import Image from "next/image";
 import { useEffect, useMemo, useState } from "react";
 import { usePathname } from "next/navigation";
 import SidebarNav from "../../../components/Sidebar/SidebarNav.jsx";
@@ -8,6 +9,7 @@ import ProfileDrawer from "../../../components/ProfileDrawer/ProfileDrawer.jsx";
 import SearchOverlay from "../../../components/SearchOverlay/SearchOverlay.jsx";
 import DataTable from "../../../components/ui/DataTableSuspense.jsx";
 import Modal from "../../../components/ui/Modal.jsx";
+import AdminSelectField from "../../../components/ui/AdminSelectField.jsx";
 import TextField from "../../../components/ui/TextField.jsx";
 import Button from "../../../components/ui/Button.jsx";
 import styles from "./page.module.css";
@@ -23,6 +25,10 @@ import {
 } from "../../../store/slices/currencyRateSlice.js";
 import { useAppDispatch, useAppSelector } from "../../../store/hooks.js";
 import { clearCredentials, selectEmail, selectUserName } from "../../../store/authSlice.js";
+import {
+  CURRENCY_OPTIONS,
+  getCurrencyOption,
+} from "../../../constants/currencyOptions.js";
 
 function pickValue(obj, keys) {
   for (const key of keys) {
@@ -95,6 +101,23 @@ export default function CurrencyRatePage() {
     });
   }, [rates]);
 
+  const currencySelectOptions = useMemo(() => {
+    const availableOptions = CURRENCY_OPTIONS.filter(
+      (option) => String(option?.value ?? "").toUpperCase() !== "EUR"
+    );
+    const code = String(currencyCode || "").toUpperCase();
+    const isListed = availableOptions.some(
+      (option) => String(option?.value ?? "").toUpperCase() === code
+    );
+    if (code && !isListed) {
+      return [
+        { value: code, label: `${code} — (saved code; pick a listed currency to replace)` },
+        ...availableOptions,
+      ];
+    }
+    return availableOptions;
+  }, [currencyCode]);
+
   const filteredRows = useMemo(() => {
     const normalize = (value) => String(value ?? "").trim().toLowerCase();
     const noQuery = normalize(filters.no);
@@ -119,6 +142,18 @@ export default function CurrencyRatePage() {
       return noMatches && codeMatches && rateMatches && visibleMatches;
     });
   }, [filters.currency_code, filters.no, filters.rate, filters.visible, tableRows]);
+
+  const usedCurrencyCodesForSelect = useMemo(
+    () =>
+      tableRows
+        .filter((row) => {
+          if (editingId == null) return true;
+          return String(row.id) !== String(editingId);
+        })
+        .map((row) => String(row.currency_code ?? "").toUpperCase())
+        .filter((c) => c && c !== "-"),
+    [tableRows, editingId],
+  );
 
   const openCreate = () => {
     setEditingId(null);
@@ -192,6 +227,34 @@ export default function CurrencyRatePage() {
       header: "Currency",
       filterable: true,
       filterPlaceholder: "Search Currency",
+      render: (row) => {
+        const raw = row.currency_code;
+        if (raw == null || raw === "" || raw === "-") return "-";
+        const code = String(raw).toUpperCase();
+        const meta = getCurrencyOption(code);
+        if (!meta) {
+          return code;
+        }
+        return (
+          <span className={styles.currencyCell}>
+            {meta.icon ? (
+              <Image
+                className={styles.currencyTableIcon}
+                src={meta.icon}
+                alt={meta.iconAlt ?? ""}
+                width={22}
+                height={16}
+                unoptimized
+              />
+            ) : meta.symbol ? (
+              <span className={styles.currencyTableSymbol} aria-hidden>
+                {meta.symbol}
+              </span>
+            ) : null}
+            <span>{meta.label}</span>
+          </span>
+        );
+      },
     },
     { key: "rate", header: "Rate", filterable: true, filterPlaceholder: "Search Rate" },
     {
@@ -311,11 +374,13 @@ export default function CurrencyRatePage() {
       >
         <form id="currency-rate-form" className={styles.form} onSubmit={submit}>
           <div className={styles.formRow}>
-            <TextField
-              label="Currency Code"
-              placeholder="e.g. SGD"
+            <AdminSelectField
+              label="Currency"
+              placeholder="Select currency"
               value={currencyCode}
-              onChange={(e) => setCurrencyCode(e.target.value.toUpperCase())}
+              onChange={(e) => setCurrencyCode(String(e.target.value ?? "").toUpperCase())}
+              options={currencySelectOptions}
+              excludeOptionValues={usedCurrencyCodesForSelect}
               required
             />
             <TextField

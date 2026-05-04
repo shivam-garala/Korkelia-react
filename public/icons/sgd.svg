@@ -1,0 +1,7 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 60 40" role="img" aria-label="Singapore flag">
+  <rect width="60" height="40" fill="#fff"/>
+  <rect width="30" height="20" fill="#ed2939"/>
+  <circle cx="15" cy="10" r="6" fill="#fff"/>
+  <path fill="#ed2939" d="M15 6.5l1 3h3.2l-2.6 2 1 3L15 13l-2.6 2 1-3-2.6-2h3.2z"/>
+  <rect y="20" width="60" height="20" fill="#ed2939"/>
+</svg>

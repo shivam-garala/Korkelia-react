@@ -5,6 +5,7 @@
   },
   "header": {
     "currency": "Euro",
+    "detectedRegion": "Region",
     "share": "SHARE",
     "appointment": "BOOK AN APPOINTMENT",
     "ambassador": "CONTACT AN AMBASSADOR"

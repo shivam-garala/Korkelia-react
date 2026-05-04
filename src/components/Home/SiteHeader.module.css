@@ -83,10 +83,28 @@
   height: 14px;
 }
 
+.currencyRow {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  flex-wrap: wrap;
+}
+
+.geoCountryCode {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.12em;
+  color: #606062;
+  line-height: 1;
+ 
+}
+
 .currencyTrigger {
-  border-color: transparent;
-  padding: 4px 8px;
-  text-transform: capitalize;
+  padding: 6px 14px;
+  text-transform: none;
+  letter-spacing: 0.02em;
+  font-size: 15px;
+  border: none !important;
 }
 
 .left,

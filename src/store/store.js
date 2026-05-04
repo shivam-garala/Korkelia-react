@@ -20,7 +20,6 @@ import goldColorReducer from "./slices/goldColorSlice";
 import uiReducer from "./slices/uiSlice";
 import currencyRateReducer from "./slices/currencyRateSlice";
 import inquiryReducer from "./slices/inquirySlice";
-
 export const store = configureStore({
   reducer: {
     auth: loginReducer,
