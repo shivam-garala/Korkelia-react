@@ -1,4 +1,5 @@
 import { NextResponse } from "next/server";
+import { getIpAddress } from "../../../lib/ipAddress.js";
 export const dynamic = "force-dynamic";
 
 /** Dedupe parallel `/api/geo` hits for the same IP (e.g. Strict Mode, double fetch). */
@@ -51,7 +52,6 @@ async function resolveGeoPayload(ip) {
   }
 
   const url = `${base}/api/geoIp/lookup`;
-  const requestBody = ip ? { ip } : {};
 
   try {
     const res = await fetch(url, {
@@ -60,7 +60,7 @@ async function resolveGeoPayload(ip) {
         Accept: "application/json",
         "Content-Type": "application/json",
       },
-      body: JSON.stringify(requestBody),
+      body: JSON.stringify({ ip }),
       cache: "no-store",
     });
 
@@ -161,11 +161,14 @@ export async function GET(request) {
       request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
       request.headers.get("x-real-ip");
 
-    const ip = testIp || headerIp || "";
+    const ip = testIp || headerIp || (await getIpAddress());
 
     if (!ip || ip === "::1" || ip === "127.0.0.1") {
-      const payload = await resolveGeoPayload(null);
-      return NextResponse.json(payload);
+      return NextResponse.json({
+        countryCode: null,
+        ip: null,
+        source: "local",
+      });
     }
 
     const cached = cacheGet(ip);
