@@ -52,6 +52,12 @@ export const fetchSubCategoryHomePage = async (languageId, categoryId) => {
   return fetchCached(key, url);
 };
 
+export const fetchAllCategories = async (languageId) => {
+  const key = `categories:${String(languageId || "1")}`;
+  const url = `/api/categoryMaster/home-page?language_id=${encodeURIComponent(languageId || "1")}`;
+  return fetchCached(key, url);
+};
+
 export const clearProductListingCache = () => {
   requestCache.clear();
   dataCache.clear();

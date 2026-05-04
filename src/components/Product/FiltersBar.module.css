@@ -6,8 +6,20 @@
   margin: 16px 0 0;
 }
 
+.barThree {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  align-items: center;
+  gap: 14px;
+  margin: 16px 0 0;
+}
+
 .slot {
   justify-self: start;
+}
+
+.slotCenter {
+  justify-self: center;
 }
 
 .slotRight {
