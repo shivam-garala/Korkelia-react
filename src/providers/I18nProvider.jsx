@@ -23,6 +23,7 @@ import {
 } from "../lib/geoPreferences.js";
 import en from "../i18n/en.json";
 import fi from "../i18n/fi.json";
+import { getIpAddress } from "../lib/ipAddress.js";
 
 const dictionaries = { en, fi };
 const DEFAULT_LANGUAGE = "en";
@@ -64,7 +65,9 @@ function readStoredCountryCode() {
 function persistCountryCodeToStorage(countryCode) {
   if (typeof window === "undefined") return;
   try {
-    const cc = String(countryCode ?? "").trim().toUpperCase();
+    const cc = String(countryCode ?? "")
+      .trim()
+      .toUpperCase();
     if (cc && /^[A-Z]{2}$/.test(cc)) {
       window.localStorage.setItem(COUNTRY_CODE_STORAGE_KEY, cc);
     }
@@ -106,13 +109,16 @@ const GEO_JSON_CACHE_MS = 20_000;
 
 async function fetchGeoJsonCached() {
   if (typeof window === "undefined") return null;
-  if (
-    geoJsonHttpCache &&
-    Date.now() - geoJsonHttpCacheAt < GEO_JSON_CACHE_MS
-  ) {
+  if (geoJsonHttpCache && Date.now() - geoJsonHttpCacheAt < GEO_JSON_CACHE_MS) {
     return geoJsonHttpCache;
   }
+  const testIp = await getIpAddress();
+
+  console.log("testIp", testIp);
   const geoUrl = new URL("/api/geo", window.location.origin);
+  if (testIp) {
+    geoUrl.searchParams.set("ip", testIp);
+  }
   const res = await fetch(geoUrl.href, {
     cache: "no-store",
     credentials: "same-origin",
@@ -231,10 +237,7 @@ export function I18nProvider({ children }) {
         if (timezone?.includes("Helsinki") || timezone === "Europe/Helsinki")
           countryCode = "FI";
         else if (timezone === "Asia/Singapore") countryCode = "SG";
-        else if (
-          timezone === "Asia/Kolkata" ||
-          timezone === "Asia/Calcutta"
-        ) {
+        else if (timezone === "Asia/Kolkata" || timezone === "Asia/Calcutta") {
           countryCode = "IN";
         }
       }
@@ -263,17 +266,21 @@ export function I18nProvider({ children }) {
         visible = [];
       }
 
-      const geoCur = resolveGeoTargetCurrency(geoCurrencyCode, countryCode, visible);
+      const geoCur = resolveGeoTargetCurrency(
+        geoCurrencyCode,
+        countryCode,
+        visible,
+      );
       const nextLang = getDefaultLanguageForGeoCountry(countryCode);
-      const nextLangResolved = nextLang in dictionaries ? nextLang : DEFAULT_LANGUAGE;
+      const nextLangResolved =
+        nextLang in dictionaries ? nextLang : DEFAULT_LANGUAGE;
       const nextCur = normalizeCurrency(geoCur);
       const savedCurNormalized = savedCurNow
         ? normalizeCurrency(String(savedCurNow))
         : "";
 
       /** Finland + Euro (geo target): use Finnish even when a previous session saved English. */
-      const isFinlandEuroGeo =
-        countryCode === "FI" && nextCur === "eur";
+      const isFinlandEuroGeo = countryCode === "FI" && nextCur === "eur";
 
       /** First visit: no saved language. Otherwise: Finnish when geo is FI and storefront currency resolves to EUR. */
       const shouldApplyGeoLanguage =
