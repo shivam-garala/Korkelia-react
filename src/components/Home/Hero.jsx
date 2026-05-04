@@ -5,6 +5,7 @@ import styles from "./Hero.module.css";
 export default function Hero({
   imageSrc,
   videoSrc,
+  mobileVideoSrc,
   posterSrc,
   eyebrow,
   title,
@@ -16,17 +17,34 @@ export default function Hero({
     <section className={styles.hero}>
       <div className={styles.media} aria-hidden>
         {videoSrc ? (
-          <video
-            className={styles.video}
-            autoPlay
-            muted
-            loop
-            playsInline
-            preload="metadata"
-            poster={posterSrc}
-          >
-            <source src={videoSrc} />
-          </video>
+          <>
+            <video
+              className={[
+                styles.video,
+                mobileVideoSrc ? styles.desktopVideo : "",
+              ].join(" ")}
+              autoPlay
+              muted
+              loop
+              playsInline
+              preload="metadata"
+              poster={posterSrc}
+            >
+              <source src={videoSrc} />
+            </video>
+            {mobileVideoSrc ? (
+              <video
+                className={[styles.video, styles.mobileVideo].join(" ")}
+                autoPlay
+                muted
+                loop
+                playsInline
+                preload="metadata"
+              >
+                <source src={mobileVideoSrc} type="video/mp4" />
+              </video>
+            ) : null}
+          </>
         ) : (
           <Image className={styles.image} src={imageSrc} alt="" fill priority />
         )}

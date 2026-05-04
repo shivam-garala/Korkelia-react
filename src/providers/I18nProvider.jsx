@@ -23,7 +23,6 @@ import {
 } from "../lib/geoPreferences.js";
 import en from "../i18n/en.json";
 import fi from "../i18n/fi.json";
-import { getIpAddress } from "../lib/ipAddress.js";
 
 const dictionaries = { en, fi };
 const DEFAULT_LANGUAGE = "en";
@@ -113,11 +112,7 @@ async function fetchGeoJsonCached() {
   ) {
     return geoJsonHttpCache;
   }
-  const testIp = await getIpAddress();
   const geoUrl = new URL("/api/geo", window.location.origin);
-  if (testIp) {
-    geoUrl.searchParams.set("ip", testIp);
-  }
   const res = await fetch(geoUrl.href, {
     cache: "no-store",
     credentials: "same-origin",

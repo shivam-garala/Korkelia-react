@@ -120,6 +120,7 @@ export default function HomeClient() {
       <main className={styles.main}>
         <Hero
           videoSrc="/homepage/Rings_in_Motion.mp4"
+          mobileVideoSrc="/homepage/Ring_in_motion_mobile.mp4"
           posterSrc="/homepage/poster_default.png"
           eyebrow={t("home.hero.eyebrow")}
           title={t("home.hero.title")}
@@ -188,8 +189,16 @@ export default function HomeClient() {
 
         <FullMediaSection
           mediaType="image"
-          mediaSrc={isDesktop ? "/homepage/banner_desktop_3.jpg" : "/homepage/banner_mobile_3.jpeg"}
-          posterSrc={isDesktop ? "/homepage/banner_desktop_3.jpg" : "/homepage/banner_mobile_3.jpeg"}
+          mediaSrc={
+            isDesktop
+              ? "/homepage/banner_desktop_3.jpg"
+              : "/homepage/banner_mobile_3.jpeg"
+          }
+          posterSrc={
+            isDesktop
+              ? "/homepage/banner_desktop_3.jpg"
+              : "/homepage/banner_mobile_3.jpeg"
+          }
           eyebrow={t("home.about.eyebrow")}
           title={t("home.about.title")}
           subtitle={t("home.about.subtitle")}
