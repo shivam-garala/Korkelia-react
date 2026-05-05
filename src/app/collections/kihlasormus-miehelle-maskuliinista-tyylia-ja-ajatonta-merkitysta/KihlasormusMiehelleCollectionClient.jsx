@@ -255,7 +255,7 @@ export default function KihlasormusMiehelleCollectionClient() {
     return () => {
       active = false;
     };
-  }, [languageId, currencyCode]);
+  }, [languageId, currencyCode, currencySymbol]);
 
   const displayedProducts = useMemo(() => {
     let list = products;

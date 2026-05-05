@@ -25,103 +25,13 @@ const buildSortOptions = (labels) => [
 
 const introText = (
   <>
-    Valkokultainen kihlasormus on ajaton valinta, joka symboloi rakkautta ja
-    sitoutumista. Meiltä{" "}
-    <a href={`${SITE_URL}/collections/sormukset`} rel="noopener noreferrer">
-      Korkeila Helsingiltä
-    </a>{" "}
-    löydät kauniit{" "}
-    <a
-      href={`${SITE_URL}/collections/sileat-kivettomat-sormukset`}
-      rel="noopener noreferrer"
-    >
-      valkokultaiset sormukset
-    </a>{" "}
-    valmistettu aina laadukkaasta{" "}
-    <a
-      href={`${SITE_URL}/products/kopio-kihlasormus-3mm-bombe-court-premium`}
-      rel="noopener noreferrer"
-    >
-      valkokulta 14k -materiaalista
-    </a>
-    . Saatavilla on eri leveyksiä, värejä ja kokoja, joihin voit halutessasi lisätä
-    timantteja, jolloin syntyy upea{" "}
-    <a
-      href={`${SITE_URL}/products/kopio-kihlasormus-3mm-bombe-court-premium`}
-      rel="noopener noreferrer"
-    >
-      vihkisormus
-    </a>{" "}
-    <br />
-    <br />
-    Tutustu monipuoliseen{" "}
-    <a href={`${SITE_URL}/collections/sormukset`} rel="noopener noreferrer">
-      valikoimaamme
-    </a>
-    ,{" "}
-    jossa on sekä sileitä kihlasormuksia että näyttäviä{" "}
-    <a
-      href={`${SITE_URL}/products/kopio-kopio-puoliallianssi-sormus-0-33ct`}
-      rel="noopener noreferrer"
-    >
-      timanttisormuksia
-    </a>
-    . Tilauksen tekeminen onnistuu helposti – lue ohjeet{" "}
-    <a href={`${SITE_URL}/pages/nain-tilaat-verkkokaupasta`} rel="noopener noreferrer">
-      näin tilaat verkkokaupasta
-    </a>{" "}
-    tai pyydä tarjous juuri omasta unelmasormuksestasi. Löydä oma kaunis{" "}
-    <a
-      href={`${SITE_URL}/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct`}
-      rel="noopener noreferrer"
-    >
-      valkokultainen kihlasormus
-    </a>
-    , joka kestää aikaa ja säilyttää arvonsa aina.
+   At Korkeila Helsinki, we believe an engagement ring is the most personal symbol of your commitment. For those searching for a custom engagement ring Singapore, we offer a refined design experience rooted in Scandinavian elegance and uncompromising craftsmanship.
   </>
 );
 
-const faqs = [
-  {
-    question: "Kumpi on arvokkaampaa, valkokulta vai kulta?",
-    answer: [
-      "Valkokulta ja keltakulta ovat molemmat arvokkaita jalometalleja, ja niiden arvo määräytyy ensisijaisesti kullan pitoisuuden mukaan. Itse kulta on aina samanarvoista riippumatta siitä, onko se valkokullasta, keltaisesta vai ruusukullasta valmistettu.",
-      "Valkokultainen sormus syntyy, kun puhdasta kultaa sekoitetaan esimerkiksi palladiumiin tai hopeaan, mikä antaa sille vaalean värin. Valkokullan valmistusprosessi on usein työläämpi ja siihen lisätään rodinointi, mikä voi nostaa sormuksen hintaa.",
-    ],
-  },
-  {
-    question: "Voiko kihlasormus olla hopeaa?",
-    answer: [
-      "Kihlasormus voi olla myös hopeaa, mutta materiaali on pehmeämpää kuin esimerkiksi valkokulta 14k. Hopea naarmuuntuu ja muotoutuu helpommin, kun taas 14 karaatin valkokulta säilyttää muotonsa ja arvonsa paremmin ajan mittaan.",
-      "Jos haluat kestävän ja kauniin sormuksen, kannattaa valita esimerkiksi valkokultainen kihlasormus, johon voit lisätä timantit – näin siitä syntyy upea vihkisormus.",
-    ],
-  },
-  {
-    question: "Onko kihla ja kihlasormus sama asia?",
-    answer: [
-      "Arkikielessä kyllä. “Kihla” tarkoittaa usein juuri kihlasormusta, joka on aina ollut merkki lupauksesta avioliittoon. Alun perin “kihla” viittasi sopimukseen, mutta nykyään se yhdistetään kiinteästi itse sormukseen.",
-      "Meiltä Korkeila Helsingiltä löydät yksilölliset ja käsityönä valmistetut kihlasormukset, joista voit valita juuri teille sopivan mallin. Valikoimastamme löytyy eri leveyksiä, kokoja ja timanttien määrää vaihtelevia vaihtoehtoja – aina klassisista puolipyöreistä malleista näyttäviin timanttisormuksiin.",
-    ],
-  },
-  {
-    question: "Onko valkokulta arvokasta?",
-    answer: [
-      "Ehdottomasti. Valkokultainen kihlasormus on arvostettu valinta, koska se yhdistää kullan arvon ja vaaleiden metallien kestävyyden. Esimerkiksi valkokulta 14k sisältää 58,5 % puhdasta kultaa, ja loput seosaineet vaikuttavat sormuksen väriin ja kestävyyteen.",
-      "Lisäksi valkokultaiset sormukset eivät tummu kuten hopea, ja ne säilyttävät kiiltonsa pitkään.",
-      "Timanttien koko, leveys ja istutus vaikuttaa aina tuotteen hintaan, mutta lopputulos on kaunis sormus, joka kertoo omasta tarinastasi.",
-      <>
-        Löydät meiltä helposti{" "}
-        <a href={`${SITE_URL}/collections/sormukset`} rel="noopener noreferrer">
-          valkokultaiset sormukset
-        </a>
-        , joihin voit lisätä timantteja tai tilata klassisen sileän mallin. Näin
-        varmistat, että kihlasormuksen arvo ja kauneus säilyvät sukupolvien ajan.
-      </>,
-    ],
-  },
-];
 
-export default function ValkokultaKihlasormusCollectionClient() {
+
+export default function KihlasormusMiehelleCollectionClient() {
   const { language, currencyCode, currencySymbol } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
@@ -157,10 +67,17 @@ export default function ValkokultaKihlasormusCollectionClient() {
         .trim()
         .toLowerCase();
 
-    const matchesAllowed = (label) => {
-      const normalized = normalizeLabel(label);
-      return normalized.includes("solitaire") || normalized.includes("halo");
-    };
+    const isMensRings = (label) => {
+  const normalized = normalizeLabel(label).toLowerCase();
+
+  return (
+   
+    normalized.includes("halo") ||
+    normalized.includes("solitaire") ||
+    normalized.includes("3 stones") ||
+    normalized.includes("alliance")
+  );
+};
 
     const loadSubCategories = async () => {
       try {
@@ -174,7 +91,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
           })
           .filter(Boolean);
 
-        const filtered = mapped.filter((option) => matchesAllowed(option.label));
+        const filtered = mapped.filter((option) => isMensRings(option.label));
         const finalOptions = filtered.length ? filtered : mapped;
 
         if (active) {
@@ -214,7 +131,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
     const loadProducts = async () => {
       try {
         clearProductListingCache();
-        const list = await fetchProductListEcom(languageId, CATEGORY_ID, currencyCode, currencySymbol, true);
+        const list = await fetchProductListEcom(languageId, CATEGORY_ID, currencyCode, currencySymbol);
         const mapped = list
           .map((item) => {
             const id = item?.id ?? item?.product_id ?? null;
@@ -297,7 +214,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
     return () => {
       active = false;
     };
-  }, [languageId, currencyCode,currencySymbol]);
+  }, [languageId, currencyCode, currencySymbol]);
 
   const displayedProducts = useMemo(() => {
     let list = products;
@@ -334,8 +251,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
             <div className={styles.topLine} aria-hidden />
             <header className={styles.pageHeader}>
               <h1 className={styles.pageTitle}>
-                Valkokulta kihlasormus – tyylikäs valinta elämän suurimpaan
-                lupaukseen
+                Custom engagement ring Singapore
               </h1>
             </header>
             <article className={styles.story}>
@@ -351,7 +267,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
                   aria-expanded={showAllContent}
                   aria-controls="story-content"
                 >
-                  {showAllContent ? "Näytä vähemmän" : "Lue lisää"}
+                  {showAllContent ? "Show less" : "READ MORE"}
                 </button>
 
                 </div>
@@ -359,10 +275,12 @@ export default function ValkokultaKihlasormusCollectionClient() {
               ) : null}
               {showAllContent ? (
                 <div className={styles.storyBody} id="story-content">
+                  <p className={styles.intro}>A custom engagement ring is not simply a product. It is the creation of a piece that reflects the depth of your love story, the individuality of your relationship, and the promise of a lifetime together. We are honoured to guide you through this meaningful journey.</p>
+                  
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
-                      src="/link4/5177722b-507c-4291-9443-07c947615d5b.jpeg"
-                      alt="myös, kihlasormukset, löydät, leveys, kulta, materiaali, kohinoor, timantti, myymälästä, helposti, koruja, verkkokaupasta, tilaa"
+                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/custom_ring_sing_1.jpeg"
+                      alt="Custom Engagement Ring Singapore image"
                       fill
                       sizes="(max-width: 720px) 80vw, 360px"
                     />
@@ -370,44 +288,81 @@ export default function ValkokultaKihlasormusCollectionClient() {
 
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                      Mikä tekee valkokultaisesta kihlasormuksesta erityisen?
+                     Why Choose A Custom Engagement Ring?
                     </h2>
+                    
+
+
+
+
+
+
+
+
+
+
                     <p className={styles.sectionCopy}>
-                      Valkokulta on elegantti ja moderni vaihtoehto perinteiselle keltakullalle.
-                      Sen hillitty kiilto ja viileä sävy sopivat erityisesti niille, jotka
-                      arvostavat klassista mutta huomaamatonta tyylikkyyttä. Lisäksi valkokulta
-                      sopii yhteen monien muiden korumateriaalien kanssa – esimerkiksi timantit
-                      pääsevät siinä erityisen hyvin oikeuksiinsa.
+                     An engagement ring is the symbol of your love and commitment. While our curated collection of engagement rings offers timeless designs, many of our clients seek something more personal.
                     </p>
                     <p className={styles.sectionCopy}>
-                      <a href={`${SITE_URL}/pages/meidan-liike`} rel="noopener noreferrer">
-                        Valkokultaiset kihlasormukset
-                      </a>{" "}
-                      sopivat myös täydellisesti yhdistettäväksi vihkisormukseen, olipa kyseessä
-                      yksinkertainen sormus tai timanttisormus. Siksi valkokultainen kihlasormus on
-                      usein valinta, johon palataan myös vuosien päästä.
+                     A custom engagement ring allows you to shape every detail, from diamond selection to gold tone, from proportions to textures. With a custom engagement approach, you are involved in the design process from the very beginning.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                    For many couples, this engagement ring journey becomes as meaningful as the proposal itself.
                     </p>
                     <h2 className={styles.storyHeading}>
-                      Kihlasormus, joka valmistetaan juuri sinulle
+                     The Engagement Ring Journey With Our Designers
                     </h2>
                     <p className={styles.sectionCopy}>
-                      Kaikki kihlasormukset suunnitellaan Suomessa, pääosin kierrätetystä kullasta
-                      tai eettisesti tuotetuista raaka-aineista. Valikoimastamme löydät esimerkiksi
-                      puolipyöreä muotoilun, erilaisia leveyksiä ja timanteilla koristeltuja
-                      vaihtoehtoja. Käytämme valkokultaa, jonka laatu ja sävy kestävät aikaa.
+                                  
+                     Our custom engagement process begins with a consultation via our website. During this session, we discuss your vision, preferences, and questions about diamonds, style, and setting.
+                    </p>
+                     <p className={styles.sectionCopy}>
+                                  
+                      With our designers and experts, you can explore diamond shapes, carat weight, and design inspirations. Whether you are drawn to classic diamond engagement rings or modern minimalist diamond rings, we help translate your vision into a tangible concept.
+                    </p>
+                    <p className={styles.sectionCopy}>This engagement ring journey is carefully structured to ensure clarity, transparency, and confidence at every stage.</p>
+                 
+                   
+                    <h2 className={styles.storyHeading}>
+                         Selecting The Perfect Diamond
+                    </h2>
+                      <p className={styles.sectionCopy}>The diamond is the heart of every engagement ring. Our diamond specialists guide you through cut, clarity, colour, and carat weight, ensuring the diamond you choose reflects brilliance and quality.</p>
+                    <p className={styles.sectionCopy}>
+                     We source diamonds that meet strict standards, including certifications from the Gemological Institute of America. This ensures your diamond ring meets international quality benchmarks.
                     </p>
                     <p className={styles.sectionCopy}>
-                      Valitse omasta valikoimastamme 14k valkokultainen kihlasormus tai suunnittele
-                      täysin uniikki sormus yhdessä kanssamme. Meillä voit yhdistää timantteja,
-                      valita sopivan väri- ja pintavaihtoehdon sekä vaikuttaa sormuksen istuvuuteen
-                      ja muotoiluun.
+                    If you are considering something extraordinary, we can also source rare diamonds from trusted partners in Australia and across the world. Our commitment to quality ensures that your engagement ring performs beautifully for a lifetime.
                     </p>
+                    
                   </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                     Designing With Intention And Craftsmanship
+                    </h2>
+                    <p className={styles.sectionCopy}>A custom engagement ring is crafted with care and precision. Our designers refine proportions, balance, and structural integrity to ensure the ring is both elegant and durable.</p>
+                    <p className={styles.sectionCopy}>
+                  We offer refined options in gold and carefully selected metals, ensuring harmony between the diamond and the setting. Every detail, from subtle textures to prong placement, is considered in the creation of your ring.
+                    </p>
+                     <p className={styles.sectionCopy}>
+                    Our Finnish approach to jewellery emphasizes grace, minimalism, and quiet brilliance. This design philosophy ensures your engagement ring remains timeless.
+
+
+                    </p>
+                                       
+                  
+                  </section>
+
+
+
+
+
 
                   <figure className={styles.storyImage}>
                     <Image
-                      src="/link4/060a7952-53f1-48f1-9c6d-6de4e44fa1bc.jpeg"
-                      alt="valkokultainen kihlasormus, kihlasormukset, kulta, timantti, timantit, lisää,"
+                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/custom_ring_sing_2.jpeg"
+                      alt="Engagement-Ring-Singapore image 1"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -415,121 +370,143 @@ export default function ValkokultaKihlasormusCollectionClient() {
 
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                      Laaja valikoima valkokultaisia kihlasormuksia
+                    From Vision To Creation
                     </h2>
+                    <p className={styles.sectionCopy}>During your appointment, we translate your vision into detailed sketches and digital renderings. This allows you to visualize the piece before production begins.</p>
                     <p className={styles.sectionCopy}>
-                      Verkkokaupasta ja myymälästä löydät runsaasti valkokultaisia kihlasormuksia
-                      eri tyyleissä ja hintaluokissa. Esimerkiksi klassinen valkokultainen
-                      kihlasormus ilman kiveä on saatavilla hintaan 990€, mutta valikoimastamme
-                      löytyy myös ylellisempiä vaihtoehtoja, joihin on lisätty timantteja. Jokainen
-                      sormus on yksilöllinen ja kaunis valinta – löydät varmasti juuri sen oikean.
+                  You can refine the design, adjust diamond proportions, and confirm ring sizes before the final creation. Everything is reviewed carefully to your satisfaction.
                     </p>
-                    <p className={styles.sectionCopy}>
-                      Niitä on saatavilla eri leveyksillä ja malleilla, jotta voit valita juuri
-                      sinulle sopivan. Myymälästämme löytyy useita mallikappaleita, joita voit
-                      kokeilla paikan päällä – ja tilata heti, kun täydellinen 14k kihlasormus
-                      löytyy.
+                     <p className={styles.sectionCopy}>
+                     We are dedicated to ensuring that the final engagement ring reflects your expectations. This is not simply manufacturing; it is the creation of something deeply personal.
+
+
                     </p>
+                   
+
+
+
+
+
+
+
                     <h2 className={styles.storyHeading}>
-                      Sopivatko valkokultaiset sormukset jokaiselle?
+                   Diamond Engagement Rings Crafted To Last
                     </h2>
-                    <p className={styles.sectionCopy}>
-                      Valkokulta sopii lähes kaikille ihonsävyille ja tyyleille, joten valkokultainen
-                      kihlasormus on usein varma valinta. Se sopii myös niille, jotka haluavat pitää
-                      sormuksensa mahdollisimman huomaamattomana mutta arvokkaana. Valkokultaiset
-                      sormukset sopivat myös hyvin yhteen muiden metallien, kuten platina- tai
-                      ruusukultasormusten, kanssa.
+                     <p className={styles.sectionCopy}>
+                     Our custom engagement ring process is built on craftsmanship and enduring quality. Each diamond engagement ring is created in the highest standards of jewellery making.
                     </p>
-                    <h2 className={styles.storyHeading}>
-                      Miten kihlasormuksen hinta muodostuu?
-                    </h2>
                     <p className={styles.sectionCopy}>
-                      Kihlasormuksen hinta vaihtelee materiaalin, timanttien, työn ja muotoilun
-                      mukaan. Esimerkiksi 14k valkokultaa käytettäessä sormuksen kestävyys ja väri
-                      säilyvät erinomaisesti ajan saatossa. Myös timanttien määrä, koko ja laatu
-                      vaikuttavat lopulliseen hintaan. Meillä voit vaikuttaa sormuksen hintaan
-                      valitsemalla yksityiskohdat itse – aina omaan budjettiisi sopivasti.
+                     The performance of the setting, the precision of the diamond cut, and the structural security of the ring are carefully evaluated. This ensures your engagement ring can be worn every day without compromise.
                     </p>
+                    <p className={styles.sectionCopy}>In Singapore, where lifestyle and climate require durability, our engagement rings are crafted to withstand daily wear while maintaining brilliance.</p>
+                  
                   </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Custom Engagement Rings And Wedding Bands</h2>
+                    <p className={styles.sectionCopy}>
+                     Many clients choose to design both their engagement ring and wedding band together. This ensures visual harmony between the two rings.
+                    </p>
+                     <p className={styles.sectionCopy}>
+                     Our wedding bands and wedding rings can be created to complement your custom engagement ring seamlessly. Whether you prefer minimalist wedding bands or diamond wedding rings with subtle detailing, we design them to align with your engagement ring.
+                    </p>
+                   <p className={styles.sectionCopy}> This unified approach ensures your jewellery reflects both elegance and continuity.</p>
+                  </section>
+
+                   <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Can I Design My Own Engagement Ring?</h2>
+                    <p className={styles.sectionCopy}>
+                     Yes, you can. Many clients ask, “Can I fully design my own engagement ring?” With our guidance, you can customize every element, from diamond selection to band width and setting style.
+                    </p>
+                     <p className={styles.sectionCopy}>
+                    If you have specific questions about diamond quality, ring sizes, or timelines, our experts provide detailed guidance. We believe informed decisions create confident outcomes.                    </p>
+                   <p className={styles.sectionCopy}> The process is collaborative. You are never alone in the journey.</p>
+                  </section>
+                  
+
+
+
 
                   <figure className={styles.storyImage}>
                     <Image
-                      src="/link4/81926cfa-75e2-484c-982a-6cac0c974b4f.jpeg"
-                      alt="valkokultainen kihlasormus, kihlasormus"
+                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/custom_ring_sing_3.jpeg"
+                      alt="Singapore"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
                   </figure>
 
+
+
+
+
+                  
                   <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                      Tilaa valkokultainen kihlasormus helposti
-                    </h2>
+                    <h2 className={styles.storyHeading}>Quality, Care, And Commitment</h2>
                     <p className={styles.sectionCopy}>
-                      Voit tilata valkokultaisen kihlasormuksen helposti verkkokaupastamme tai
-                      vierailla myymälässämme Helsingin Ullanlinnassa. Meiltä löytyy asiantunteva
-                      henkilökunta, joka auttaa sinua valitsemaan juuri teille sopivat
-                      kihlasormukset. Meillä voit myös muokata olemassa olevia sormuksia tai
-                      teettää täysin uuden, juuri sinulle suunnitellun sormuksen.
+                  Every engagement ring we create reflects our commitment to quality and care. We adhere to strict standards in sourcing, design, and finishing.
                     </p>
                     <p className={styles.sectionCopy}>
-                      Lisäksi tarjoamme kattavan valikoiman myös muita valkokultaisia koruja – kuten
-                      timanttisormuksia, korvakoruja ja riipuksia – jotka sopivat täydellisesti
-                      kihlasormuksen rinnalle.{" "}
-                      <a href={`${SITE_URL}/pages/ota-yhteytta`} rel="noopener noreferrer">
-                        Tutustu valikoimaan ja löydä omat suosikkisi
-                      </a>
-                      !
+                  Our jewellery is crafted to accompany you through life’s most meaningful moments. From proposal to wedding, and through the years that follow, your engagement ring becomes part of your daily life.
                     </p>
+                    <p className={styles.sectionCopy}>
+                     We offer guidance on care, maintenance, and long-term support to ensure your ring retains its brilliance.
+                    </p>
+                      
+                  
+                    
                   </section>
 
                   <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                      Usein kysytyt kysymykset - Valkokultainen kihlasormus
-                    </h2>
-                    <div className={styles.faqList}>
-                      {faqs.map((faq) => (
-                        <details key={faq.question} className={styles.faqItem}>
-                          <summary className={styles.faqSummary}>{faq.question}</summary>
-                          <div className={styles.faqBody}>
-                            {faq.answer.map((line, index) => (
-                              <p key={`${faq.question}-${index}`} className={styles.sectionCopy}>
-                                {line}
-                              </p>
-                            ))}
-                          </div>
-                        </details>
-                      ))}
-                    </div>
-                  </section>
-
-                  <figure className={styles.storyImage}>
-                    <Image
-                      src="/link4/6a32fd56-b9ca-4427-bbca-708b6775a484.jpeg"
-                      alt="valkokulta kihlasormus, kihlasormus, myös, kihlasormukset, valkokultaiset,"
-                      fill
-                      sizes="(max-width: 960px) 100vw, 720px"
-                    />
-                  </figure>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                      Miksi valita valkokultainen kihlasormus juuri meiltä?
-                    </h2>
+                    <h2 className={styles.storyHeading}>Book An Appointment In Singapore</h2>
                     <p className={styles.sectionCopy}>
-                      Meillä Korkeila Helsingillä yhdistyvät käsityö, vastuullisuus ja kauneus.
-                      Tarjoamme sinulle mahdollisuuden vaikuttaa sormuksen materiaaliin, väriin,
-                      timanttien kokoon ja tyyliin – lopputuloksena ainutlaatuinen sormus, joka
-                      kestää aikaa.
+                  The first step in your custom engagement ring journey is a private appointment. In our online store, you can view diamonds, explore design references, and discuss your vision in detail.
                     </p>
                     <p className={styles.sectionCopy}>
-                      Voit tutustua valikoimaan ja tilata valkokultaisen kihlasormuksen jo tänään
-                      verkkokaupastamme:{" "}
-                      <a href={SITE_URL} rel="noopener noreferrer">
-                        Korkeila Helsinki - Valkokultaiset kihlasormukset
-                      </a>
+                  If you are located outside Singapore, we offer remote consultations through our website. Our team ensures security and discretion throughout the process.
                     </p>
+                    <p className={styles.sectionCopy}>
+                    Booking an appointment allows us to dedicate time exclusively to your project.
+                    </p>
+                      
+                  
+                    
                   </section>
+
+                    <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Creating Something Truly Personal</h2>
+                    <p className={styles.sectionCopy}>
+                  A custom engagement ring is the ultimate expression of individuality. It is designed to your proportions, your aesthetic, and your story.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                 With our designers and diamond experts, you can transform inspiration into reality. From diamond ring proportions to the subtle curve of the band, every decision shapes the final piece.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                   We believe that the perfect engagement ring is the one that resonates deeply with you and your loved one.
+                    </p>
+                      
+                  
+                    
+                  </section>
+
+                   <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Begin Your Custom Engagement Ring Journey</h2>
+                    <p className={styles.sectionCopy}>
+                  In Singapore and around the world, we are honoured to guide clients through this significant journey.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                 Whether you are seeking classic diamond engagement rings or a modern reinterpretation with a unique centre diamond, we are here to help you create something meaningful.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                  Your engagement ring is the symbol of your love, your commitment, and your shared future. With our expertise, craftsmanship, and dedication to quality, we help you design a piece that will last a lifetime.
+                    </p>
+                       <p className={styles.sectionCopy}>
+                 Book your appointment today and begin the creation of your custom engagement ring, a reflection of your vision, your love story, and the brilliance of your commitment.
+                    </p>
+                  
+                    
+                  </section>
+                  
                 </div>
               ) : null}
 
@@ -544,7 +521,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
                   aria-expanded={showAllContent}
                   aria-controls="story-content"
                 >
-                  {showAllContent ? "Näytä vähemmän" : "Lue lisää"}
+                  {showAllContent ? "Show less" : "Read more"}
                 </button>
 
                 </div>
@@ -578,11 +555,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
                     />
                   </div>
                   <div className={styles.gridWrap}>
-                    <ProductGrid
-                      products={displayedProducts}
-                      columns={3}
-                      loading={productsLoading}
-                    />
+                    <ProductGrid products={displayedProducts} columns={3} loading={productsLoading} />
                   </div>
                 </Container>
               </section>
@@ -594,5 +567,3 @@ export default function ValkokultaKihlasormusCollectionClient() {
     </div>
   );
 }
-
-

@@ -25,103 +25,13 @@ const buildSortOptions = (labels) => [
 
 const introText = (
   <>
-    Valkokultainen kihlasormus on ajaton valinta, joka symboloi rakkautta ja
-    sitoutumista. Meiltä{" "}
-    <a href={`${SITE_URL}/collections/sormukset`} rel="noopener noreferrer">
-      Korkeila Helsingiltä
-    </a>{" "}
-    löydät kauniit{" "}
-    <a
-      href={`${SITE_URL}/collections/sileat-kivettomat-sormukset`}
-      rel="noopener noreferrer"
-    >
-      valkokultaiset sormukset
-    </a>{" "}
-    valmistettu aina laadukkaasta{" "}
-    <a
-      href={`${SITE_URL}/products/kopio-kihlasormus-3mm-bombe-court-premium`}
-      rel="noopener noreferrer"
-    >
-      valkokulta 14k -materiaalista
-    </a>
-    . Saatavilla on eri leveyksiä, värejä ja kokoja, joihin voit halutessasi lisätä
-    timantteja, jolloin syntyy upea{" "}
-    <a
-      href={`${SITE_URL}/products/kopio-kihlasormus-3mm-bombe-court-premium`}
-      rel="noopener noreferrer"
-    >
-      vihkisormus
-    </a>{" "}
-    <br />
-    <br />
-    Tutustu monipuoliseen{" "}
-    <a href={`${SITE_URL}/collections/sormukset`} rel="noopener noreferrer">
-      valikoimaamme
-    </a>
-    ,{" "}
-    jossa on sekä sileitä kihlasormuksia että näyttäviä{" "}
-    <a
-      href={`${SITE_URL}/products/kopio-kopio-puoliallianssi-sormus-0-33ct`}
-      rel="noopener noreferrer"
-    >
-      timanttisormuksia
-    </a>
-    . Tilauksen tekeminen onnistuu helposti – lue ohjeet{" "}
-    <a href={`${SITE_URL}/pages/nain-tilaat-verkkokaupasta`} rel="noopener noreferrer">
-      näin tilaat verkkokaupasta
-    </a>{" "}
-    tai pyydä tarjous juuri omasta unelmasormuksestasi. Löydä oma kaunis{" "}
-    <a
-      href={`${SITE_URL}/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct`}
-      rel="noopener noreferrer"
-    >
-      valkokultainen kihlasormus
-    </a>
-    , joka kestää aikaa ja säilyttää arvonsa aina.
+   At Korkeila Helsinki, we present a refined approach to the lab-grown diamond ring Singapore clients seek for timeless elegance and responsible luxury. A lab-grown diamond ring is more than a trend. It is a considered choice that combines beauty, innovation, and enduring craftsmanship.
   </>
 );
 
-const faqs = [
-  {
-    question: "Kumpi on arvokkaampaa, valkokulta vai kulta?",
-    answer: [
-      "Valkokulta ja keltakulta ovat molemmat arvokkaita jalometalleja, ja niiden arvo määräytyy ensisijaisesti kullan pitoisuuden mukaan. Itse kulta on aina samanarvoista riippumatta siitä, onko se valkokullasta, keltaisesta vai ruusukullasta valmistettu.",
-      "Valkokultainen sormus syntyy, kun puhdasta kultaa sekoitetaan esimerkiksi palladiumiin tai hopeaan, mikä antaa sille vaalean värin. Valkokullan valmistusprosessi on usein työläämpi ja siihen lisätään rodinointi, mikä voi nostaa sormuksen hintaa.",
-    ],
-  },
-  {
-    question: "Voiko kihlasormus olla hopeaa?",
-    answer: [
-      "Kihlasormus voi olla myös hopeaa, mutta materiaali on pehmeämpää kuin esimerkiksi valkokulta 14k. Hopea naarmuuntuu ja muotoutuu helpommin, kun taas 14 karaatin valkokulta säilyttää muotonsa ja arvonsa paremmin ajan mittaan.",
-      "Jos haluat kestävän ja kauniin sormuksen, kannattaa valita esimerkiksi valkokultainen kihlasormus, johon voit lisätä timantit – näin siitä syntyy upea vihkisormus.",
-    ],
-  },
-  {
-    question: "Onko kihla ja kihlasormus sama asia?",
-    answer: [
-      "Arkikielessä kyllä. “Kihla” tarkoittaa usein juuri kihlasormusta, joka on aina ollut merkki lupauksesta avioliittoon. Alun perin “kihla” viittasi sopimukseen, mutta nykyään se yhdistetään kiinteästi itse sormukseen.",
-      "Meiltä Korkeila Helsingiltä löydät yksilölliset ja käsityönä valmistetut kihlasormukset, joista voit valita juuri teille sopivan mallin. Valikoimastamme löytyy eri leveyksiä, kokoja ja timanttien määrää vaihtelevia vaihtoehtoja – aina klassisista puolipyöreistä malleista näyttäviin timanttisormuksiin.",
-    ],
-  },
-  {
-    question: "Onko valkokulta arvokasta?",
-    answer: [
-      "Ehdottomasti. Valkokultainen kihlasormus on arvostettu valinta, koska se yhdistää kullan arvon ja vaaleiden metallien kestävyyden. Esimerkiksi valkokulta 14k sisältää 58,5 % puhdasta kultaa, ja loput seosaineet vaikuttavat sormuksen väriin ja kestävyyteen.",
-      "Lisäksi valkokultaiset sormukset eivät tummu kuten hopea, ja ne säilyttävät kiiltonsa pitkään.",
-      "Timanttien koko, leveys ja istutus vaikuttaa aina tuotteen hintaan, mutta lopputulos on kaunis sormus, joka kertoo omasta tarinastasi.",
-      <>
-        Löydät meiltä helposti{" "}
-        <a href={`${SITE_URL}/collections/sormukset`} rel="noopener noreferrer">
-          valkokultaiset sormukset
-        </a>
-        , joihin voit lisätä timantteja tai tilata klassisen sileän mallin. Näin
-        varmistat, että kihlasormuksen arvo ja kauneus säilyvät sukupolvien ajan.
-      </>,
-    ],
-  },
-];
 
-export default function ValkokultaKihlasormusCollectionClient() {
+
+export default function KihlasormusMiehelleCollectionClient() {
   const { language, currencyCode, currencySymbol } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
@@ -157,10 +67,17 @@ export default function ValkokultaKihlasormusCollectionClient() {
         .trim()
         .toLowerCase();
 
-    const matchesAllowed = (label) => {
-      const normalized = normalizeLabel(label);
-      return normalized.includes("solitaire") || normalized.includes("halo");
-    };
+    const isMensRings = (label) => {
+  const normalized = normalizeLabel(label).toLowerCase();
+
+  return (
+   
+    normalized.includes("halo") ||
+    normalized.includes("solitaire") ||
+    normalized.includes("3 stones") ||
+    normalized.includes("alliance")
+  );
+};
 
     const loadSubCategories = async () => {
       try {
@@ -174,7 +91,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
           })
           .filter(Boolean);
 
-        const filtered = mapped.filter((option) => matchesAllowed(option.label));
+        const filtered = mapped.filter((option) => isMensRings(option.label));
         const finalOptions = filtered.length ? filtered : mapped;
 
         if (active) {
@@ -214,7 +131,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
     const loadProducts = async () => {
       try {
         clearProductListingCache();
-        const list = await fetchProductListEcom(languageId, CATEGORY_ID, currencyCode, currencySymbol, true);
+        const list = await fetchProductListEcom(languageId, CATEGORY_ID, currencyCode, currencySymbol);
         const mapped = list
           .map((item) => {
             const id = item?.id ?? item?.product_id ?? null;
@@ -297,7 +214,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
     return () => {
       active = false;
     };
-  }, [languageId, currencyCode,currencySymbol]);
+  }, [languageId, currencyCode, currencySymbol]);
 
   const displayedProducts = useMemo(() => {
     let list = products;
@@ -334,8 +251,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
             <div className={styles.topLine} aria-hidden />
             <header className={styles.pageHeader}>
               <h1 className={styles.pageTitle}>
-                Valkokulta kihlasormus – tyylikäs valinta elämän suurimpaan
-                lupaukseen
+               Lab grown diamond ring Singapore
               </h1>
             </header>
             <article className={styles.story}>
@@ -351,7 +267,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
                   aria-expanded={showAllContent}
                   aria-controls="story-content"
                 >
-                  {showAllContent ? "Näytä vähemmän" : "Lue lisää"}
+                  {showAllContent ? "Show less" : "READ MORE"}
                 </button>
 
                 </div>
@@ -359,10 +275,12 @@ export default function ValkokultaKihlasormusCollectionClient() {
               ) : null}
               {showAllContent ? (
                 <div className={styles.storyBody} id="story-content">
+                  <p className={styles.intro}>In Singapore, couples are increasingly choosing lab-grown diamonds for engagement rings and meaningful jewellery pieces. With advances in lab technology, lab-grown diamonds are now indistinguishable from mined diamonds in brilliance, clarity, and durability.</p>
+                  
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
-                      src="/link4/5177722b-507c-4291-9443-07c947615d5b.jpeg"
-                      alt="myös, kihlasormukset, löydät, leveys, kulta, materiaali, kohinoor, timantti, myymälästä, helposti, koruja, verkkokaupasta, tilaa"
+                      src="/link2/e08c09ef-e4a9-4737-a4d6-23b987398285.jpeg"
+                      alt="lab grodiamond Ring Singapore image 1"
                       fill
                       sizes="(max-width: 720px) 80vw, 360px"
                     />
@@ -370,44 +288,66 @@ export default function ValkokultaKihlasormusCollectionClient() {
 
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                      Mikä tekee valkokultaisesta kihlasormuksesta erityisen?
+                     What Is A Lab Grown Diamond?
                     </h2>
                     <p className={styles.sectionCopy}>
-                      Valkokulta on elegantti ja moderni vaihtoehto perinteiselle keltakullalle.
-                      Sen hillitty kiilto ja viileä sävy sopivat erityisesti niille, jotka
-                      arvostavat klassista mutta huomaamatonta tyylikkyyttä. Lisäksi valkokulta
-                      sopii yhteen monien muiden korumateriaalien kanssa – esimerkiksi timantit
-                      pääsevät siinä erityisen hyvin oikeuksiinsa.
+                    A lab-grown diamond is a real diamond created in a controlled laboratory environment. Through advanced lab processes, scientists replicate the natural conditions under which diamonds form beneath the earth.
                     </p>
                     <p className={styles.sectionCopy}>
-                      <a href={`${SITE_URL}/pages/meidan-liike`} rel="noopener noreferrer">
-                        Valkokultaiset kihlasormukset
-                      </a>{" "}
-                      sopivat myös täydellisesti yhdistettäväksi vihkisormukseen, olipa kyseessä
-                      yksinkertainen sormus tai timanttisormus. Siksi valkokultainen kihlasormus on
-                      usein valinta, johon palataan myös vuosien päästä.
+                     The result is a grown diamond that shares the same chemical composition and optical properties as natural diamonds. Lab-grown diamonds are graded for cut, clarity, colour, and carat weight, just like mined stones.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                    Lab-grown diamonds are not imitations. They are genuine diamonds, created with precision and care.
                     </p>
                     <h2 className={styles.storyHeading}>
-                      Kihlasormus, joka valmistetaan juuri sinulle
+                     The Difference Between Lab-Grown and Mined Diamonds
                     </h2>
                     <p className={styles.sectionCopy}>
-                      Kaikki kihlasormukset suunnitellaan Suomessa, pääosin kierrätetystä kullasta
-                      tai eettisesti tuotetuista raaka-aineista. Valikoimastamme löydät esimerkiksi
-                      puolipyöreä muotoilun, erilaisia leveyksiä ja timanteilla koristeltuja
-                      vaihtoehtoja. Käytämme valkokultaa, jonka laatu ja sävy kestävät aikaa.
+                                  
+                      The key difference lies in origin. While mined diamonds are formed naturally, lab-grown diamonds are produced in a laboratory.
+                    </p>
+                     <p className={styles.sectionCopy}>
+                                  
+                      Visually and structurally, there is no difference. Lab-grown diamonds in Singapore offer the same brilliance and beauty as mined stones. However, the price point is often more accessible.
+                    </p>
+                    <p className={styles.sectionCopy}>For many couples, this makes a lab-grown diamond engagement ring a thoughtful decision that balances value and symbolism.</p>
+                 
+                   
+                    <h2 className={styles.storyHeading}>
+                    Lab Grown Diamond Engagement Rings
+                    </h2>
+                      <p className={styles.sectionCopy}>A lab-grown diamond engagement ring carries the same meaning as any traditional diamond engagement ring. It symbolises love, commitment, and the beginning of a shared future.</p>
+                    <p className={styles.sectionCopy}>
+                     Our lab-grown diamond engagement collection includes refined engagement ring designs crafted to highlight the heart of the stone. Whether you prefer classic solitaires or contemporary settings, our diamond engagement rings showcase the brilliance of lab-grown diamonds.
                     </p>
                     <p className={styles.sectionCopy}>
-                      Valitse omasta valikoimastamme 14k valkokultainen kihlasormus tai suunnittele
-                      täysin uniikki sormus yhdessä kanssamme. Meillä voit yhdistää timantteja,
-                      valita sopivan väri- ja pintavaihtoehdon sekä vaikuttaa sormuksen istuvuuteen
-                      ja muotoiluun.
+                    In Singapore, grown diamond engagement rings are increasingly recognised for their quality and ethical appeal.
                     </p>
+                    
+                  </section>
+
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                    Finding The Perfect Lab-Grown Diamond
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                   Choosing the perfect lab-grown diamond begins with understanding cut and clarity. The precision of the cut determines brilliance, while clarity influences visual purity.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                     Our diamond specialists guide you through the selection process. We present a curated range of lab-grown diamonds in various shapes and carat sizes.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                    With our expertise, you can find the perfect lab-grown diamond that reflects your style and commitment.
+                    </p>
+                   
+                    
                   </section>
 
                   <figure className={styles.storyImage}>
                     <Image
-                      src="/link4/060a7952-53f1-48f1-9c6d-6de4e44fa1bc.jpeg"
-                      alt="valkokultainen kihlasormus, kihlasormukset, kulta, timantti, timantit, lisää,"
+                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/lab_grown_ring_2.jpeg"
+                      alt="lab grown diamond ring Singapore image 2"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -415,121 +355,131 @@ export default function ValkokultaKihlasormusCollectionClient() {
 
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                      Laaja valikoima valkokultaisia kihlasormuksia
+                     The Beauty Of Lab Grown Diamonds
                     </h2>
+                    <p className={styles.sectionCopy}>Lab-grown diamonds are celebrated for their beauty and consistency. Because they are created in a lab environment, quality standards are carefully controlled.</p>
                     <p className={styles.sectionCopy}>
-                      Verkkokaupasta ja myymälästä löydät runsaasti valkokultaisia kihlasormuksia
-                      eri tyyleissä ja hintaluokissa. Esimerkiksi klassinen valkokultainen
-                      kihlasormus ilman kiveä on saatavilla hintaan 990€, mutta valikoimastamme
-                      löytyy myös ylellisempiä vaihtoehtoja, joihin on lisätty timantteja. Jokainen
-                      sormus on yksilöllinen ja kaunis valinta – löydät varmasti juuri sen oikean.
+                   Lab-grown diamonds in Singapore offer excellent brilliance and symmetry. Each grown diamond is examined meticulously before being set into a ring.
                     </p>
-                    <p className={styles.sectionCopy}>
-                      Niitä on saatavilla eri leveyksillä ja malleilla, jotta voit valita juuri
-                      sinulle sopivan. Myymälästämme löytyy useita mallikappaleita, joita voit
-                      kokeilla paikan päällä – ja tilata heti, kun täydellinen 14k kihlasormus
-                      löytyy.
+                     <p className={styles.sectionCopy}>
+                    The beauty of lab-grown diamonds lies in their clarity, fire, and precise formation.
+
+
                     </p>
+                   
+
+
+
+
+
+
+
                     <h2 className={styles.storyHeading}>
-                      Sopivatko valkokultaiset sormukset jokaiselle?
+                   Engagement Rings Crafted With Care
                     </h2>
-                    <p className={styles.sectionCopy}>
-                      Valkokulta sopii lähes kaikille ihonsävyille ja tyyleille, joten valkokultainen
-                      kihlasormus on usein varma valinta. Se sopii myös niille, jotka haluavat pitää
-                      sormuksensa mahdollisimman huomaamattomana mutta arvokkaana. Valkokultaiset
-                      sormukset sopivat myös hyvin yhteen muiden metallien, kuten platina- tai
-                      ruusukultasormusten, kanssa.
+                     <p className={styles.sectionCopy}>
+                      An engagement ring is worn daily, making craftsmanship essential. Our lab-grown diamond rings are created with attention to structure and durability.
                     </p>
-                    <h2 className={styles.storyHeading}>
-                      Miten kihlasormuksen hinta muodostuu?
-                    </h2>
                     <p className={styles.sectionCopy}>
-                      Kihlasormuksen hinta vaihtelee materiaalin, timanttien, työn ja muotoilun
-                      mukaan. Esimerkiksi 14k valkokultaa käytettäessä sormuksen kestävyys ja väri
-                      säilyvät erinomaisesti ajan saatossa. Myös timanttien määrä, koko ja laatu
-                      vaikuttavat lopulliseen hintaan. Meillä voit vaikuttaa sormuksen hintaan
-                      valitsemalla yksityiskohdat itse – aina omaan budjettiisi sopivasti.
+                   We offer engagement rings in gold settings that complement the diamond. The harmony between gold and lab-grown diamond enhances overall elegance.
                     </p>
+                    <p className={styles.sectionCopy}>Each engagement ring is crafted to ensure lasting performance, allowing the ring to accompany you through life’s meaningful moments.</p>
+                  
                   </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Beyond Rings: A Complete Jewellery Collection</h2>
+                    <p className={styles.sectionCopy}>
+                      Our collection extends beyond engagement rings. We offer diamond rings, earrings, necklaces, pendants, bracelets, and even tennis bracelets featuring lab-grown diamonds.
+                    </p>
+                     <p className={styles.sectionCopy}>
+                     These jewellery pieces are crafted with the same commitment to quality. Whether you seek a subtle pair of earrings or a statement pendant, our lab-grown diamonds deliver brilliance.
+                    </p>
+                   <p className={styles.sectionCopy}> Lab-grown diamonds in Singapore are suitable for anniversary gifts, personal milestones, and everyday elegance.</p>
+                  </section>
+
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Lab-Grown Diamonds In Singapore: Price And Value</h2>
+                    <p className={styles.sectionCopy}>
+                   One of the advantages of lab-grown diamonds is cost efficiency. Compared to mined diamonds, lab-grown diamonds typically offer greater size or higher clarity within a defined price range.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                   The price of a lab-grown diamond ring depends on carat weight, cut precision, and overall design. We provide transparent pricing during consultation.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                     This allows you to make an informed purchase decision that aligns with your expectations and budget.
+                    </p>
+                      
+                  
+                    
+                  </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Why Choose Lab-Grown Diamonds?</h2>
+                    <p className={styles.sectionCopy}>
+                  Lab-grown diamonds are an increasingly popular choice for clients who value innovation and sustainability. They provide the same durability and brilliance as mined stones.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                   Our lab-grown diamonds are selected to meet strict quality standards. With our lab-grown diamond engagement designs, couples can celebrate love while embracing modern technology.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                     For many in Singapore, the difference lies not in appearance but in philosophy.
+                    </p>
+                      
+                  
+                    
+                  </section>
+
 
                   <figure className={styles.storyImage}>
                     <Image
-                      src="/link4/81926cfa-75e2-484c-982a-6cac0c974b4f.jpeg"
-                      alt="valkokultainen kihlasormus, kihlasormus"
+                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/lab_grown_ring_1.jpeg"
+                      alt="lab grown diamond ring Singapore image 3"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
                   </figure>
 
+
+
+
+
+                  
                   <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                      Tilaa valkokultainen kihlasormus helposti
-                    </h2>
+                    <h2 className={styles.storyHeading}>Our Commitment To Quality And Craftsmanship</h2>
                     <p className={styles.sectionCopy}>
-                      Voit tilata valkokultaisen kihlasormuksen helposti verkkokaupastamme tai
-                      vierailla myymälässämme Helsingin Ullanlinnassa. Meiltä löytyy asiantunteva
-                      henkilökunta, joka auttaa sinua valitsemaan juuri teille sopivat
-                      kihlasormukset. Meillä voit myös muokata olemassa olevia sormuksia tai
-                      teettää täysin uuden, juuri sinulle suunnitellun sormuksen.
+                   At Korkeila Helsinki, customer satisfaction remains central to our philosophy. Every lab-grown diamond ring is crafted with precision and care.
                     </p>
                     <p className={styles.sectionCopy}>
-                      Lisäksi tarjoamme kattavan valikoiman myös muita valkokultaisia koruja – kuten
-                      timanttisormuksia, korvakoruja ja riipuksia – jotka sopivat täydellisesti
-                      kihlasormuksen rinnalle.{" "}
-                      <a href={`${SITE_URL}/pages/ota-yhteytta`} rel="noopener noreferrer">
-                        Tutustu valikoimaan ja löydä omat suosikkisi
-                      </a>
-                      !
+                   We ensure that each piece meets structural and aesthetic standards before it leaves our atelier. From diamond selection to final polish, quality defines every stage.
                     </p>
+                    <p className={styles.sectionCopy}>
+                    Our lab-grown diamonds are chosen for brilliance, value, and enduring elegance.
+                    </p>
+                      
+                  
+                    
                   </section>
 
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                      Usein kysytyt kysymykset - Valkokultainen kihlasormus
-                    </h2>
-                    <div className={styles.faqList}>
-                      {faqs.map((faq) => (
-                        <details key={faq.question} className={styles.faqItem}>
-                          <summary className={styles.faqSummary}>{faq.question}</summary>
-                          <div className={styles.faqBody}>
-                            {faq.answer.map((line, index) => (
-                              <p key={`${faq.question}-${index}`} className={styles.sectionCopy}>
-                                {line}
-                              </p>
-                            ))}
-                          </div>
-                        </details>
-                      ))}
-                    </div>
-                  </section>
-
-                  <figure className={styles.storyImage}>
-                    <Image
-                      src="/link4/6a32fd56-b9ca-4427-bbca-708b6775a484.jpeg"
-                      alt="valkokulta kihlasormus, kihlasormus, myös, kihlasormukset, valkokultaiset,"
-                      fill
-                      sizes="(max-width: 960px) 100vw, 720px"
-                    />
-                  </figure>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                      Miksi valita valkokultainen kihlasormus juuri meiltä?
-                    </h2>
+                   <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Begin Your Lab-Grown Diamond Journey</h2>
                     <p className={styles.sectionCopy}>
-                      Meillä Korkeila Helsingillä yhdistyvät käsityö, vastuullisuus ja kauneus.
-                      Tarjoamme sinulle mahdollisuuden vaikuttaa sormuksen materiaaliin, väriin,
-                      timanttien kokoon ja tyyliin – lopputuloksena ainutlaatuinen sormus, joka
-                      kestää aikaa.
+                   If you are searching for the perfect lab-grown diamond ring that Singapore can offer, we invite you to explore our collection.
                     </p>
                     <p className={styles.sectionCopy}>
-                      Voit tutustua valikoimaan ja tilata valkokultaisen kihlasormuksen jo tänään
-                      verkkokaupastamme:{" "}
-                      <a href={SITE_URL} rel="noopener noreferrer">
-                        Korkeila Helsinki - Valkokultaiset kihlasormukset
-                      </a>
+                   Whether you are selecting an engagement ring, diamond engagement ring, or refined jewellery piece for your loved one, our lab-grown diamonds provide a balance of beauty and responsibility.
                     </p>
+                    <p className={styles.sectionCopy}>
+                    Discover the perfect lab-grown diamond for your story on our online shop. With expertise, craftsmanship, and dedication, we help you choose something meaningful, a ring that symbolises love, commitment, and the brilliance of your shared future.
+                    </p>
+                      
+                  
+                    
                   </section>
+
+
+
                 </div>
               ) : null}
 
@@ -544,7 +494,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
                   aria-expanded={showAllContent}
                   aria-controls="story-content"
                 >
-                  {showAllContent ? "Näytä vähemmän" : "Lue lisää"}
+                  {showAllContent ? "Show less" : "Read more"}
                 </button>
 
                 </div>
@@ -578,11 +528,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
                     />
                   </div>
                   <div className={styles.gridWrap}>
-                    <ProductGrid
-                      products={displayedProducts}
-                      columns={3}
-                      loading={productsLoading}
-                    />
+                    <ProductGrid products={displayedProducts} columns={3} loading={productsLoading} />
                   </div>
                 </Container>
               </section>
@@ -594,5 +540,3 @@ export default function ValkokultaKihlasormusCollectionClient() {
     </div>
   );
 }
-
-

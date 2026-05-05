@@ -165,37 +165,6 @@
   margin-top: 18px;
 }
 
-.filtersBarWrap {
-  width: 100%;
-}
-.customFilterWidth :global(.select) {
-  min-width: 260px;
-}
-/* Make the category (first) filter column wider than the other two
-.filtersBarWrap > div {
-  grid-template-columns: 1fr 1fr 1fr !important;
-} */
-
-@media (max-width: 640px) {
-  /* Stack the 3-column filter bar to a single column on mobile */
-  .filtersBarWrap > div {
-    grid-template-columns: 1fr !important;
-    gap: 10px !important;
-  }
-
-  /* Each slot stretches full width */
-  .filtersBarWrap > div > div {
-    justify-self: stretch !important;
-    width: 100% !important;
-  }
-
-  /* The react-select wrapper fills the slot */
-  .filtersBarWrap > div > div > div {
-    min-width: 0 !important;
-    width: 100% !important;
-  }
-}
-
 .gridWrap {
   margin-top: 44px;
 }
@@ -266,28 +235,6 @@
 
   .toggleButton {
     width: 100%;
-  }
-
-  .filtersRow {
-    margin-top: 12px;
-  }
-
-  .gridWrap {
-    margin-top: 28px;
-  }
-}
-
-@media (max-width: 480px) {
-  .filtersRow {
-    margin-top: 10px;
-  }
-
-  .gridWrap {
-    margin-top: 22px;
-  }
-
-  .productSection {
-    padding: 14px 0 60px;
   }
 }
 

@@ -32,7 +32,7 @@ const introText = (
 
 
 export default function KihlasormusMiehelleCollectionClient() {
-  const { language, currencyCode } = useI18n();
+  const { language, currencyCode, currencySymbol } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -131,7 +131,7 @@ export default function KihlasormusMiehelleCollectionClient() {
     const loadProducts = async () => {
       try {
         clearProductListingCache();
-        const list = await fetchProductListEcom(languageId, CATEGORY_ID, currencyCode);
+        const list = await fetchProductListEcom(languageId, CATEGORY_ID, currencyCode, currencySymbol);
         const mapped = list
           .map((item) => {
             const id = item?.id ?? item?.product_id ?? null;
