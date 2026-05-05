@@ -139,10 +139,9 @@ export default function HomeClient() {
           mediaType="video"
           mediaSrc={
             isDesktop
-              // ? "/homepage/diamond_guid_desktop.mp4"
-              // : "/homepage/diamond_guid_mobile.mp4"
-              ? "https://imagesweb2026.s3.eu-north-1.amazonaws.com/Rings_in_Motion.mp4"
-              : "https://imagesweb2026.s3.eu-north-1.amazonaws.com/Ring_in_motion_mobile.mp4"
+              ? "/homepage/diamond_guid_desktop.mp4"
+              : "/homepage/diamond_guid_mobile.mp4"
+            
           }
           mediaPosition={isDesktop ? "right center" : "right bottom"}
           sectionClassName={styles.diamondGuideSection}
