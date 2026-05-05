@@ -92,7 +92,7 @@ const mapProduct = (item, languageId, apiBase) => {
 
 const introText = (
   <>
-   At Korkeila Helsinki, we present a refined collection of lab-grown diamonds Singapore clients can trust for exceptional quality and enduring beauty. For those seeking an engagement ring, diamond ring, or fine jewellery in Singapore, our lab-grown diamonds combine Scandinavian elegance with modern innovation.
+  At Korkeila Helsinki, bespoke jewelry represents more than an accessory. It is a thoughtful creation shaped around your story, your vision, and the moments that define your life. In a world of mass production, bespoke jewellery is a return to intention.
   </>
 );
 
@@ -292,7 +292,7 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
           <Container>
             <div className={styles.topLine} aria-hidden />
             <header className={styles.pageHeader}>
-              <h1 className={styles.pageTitle}>Lab Grown Diamonds Singapore</h1>
+              <h1 className={styles.pageTitle}>Bespoke Jewelry Singapore</h1>
             </header>
             <article className={styles.story}>
               <p className={styles.intro}>{introText}</p>
@@ -312,15 +312,13 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
               {showAllContent ? (
                 <div className={styles.storyBody} id="story-content">
                   <p className={styles.intro}>
-                    Lab-grown diamonds are transforming the jewellery world. These diamonds are created in a controlled laboratory environment using advanced lab technology that replicates the natural formation process. The result is a lab-grown diamond with the same brilliance, clarity, and durability as mined diamonds.
+                    We believe jewellery can be refined, meaningful, and deeply personal. Each piece is a reflection of identity and emotion, brought to life through craftsmanship and design.
                   </p>
-                  <p className={styles.intro}>
-                   For couples, choosing lab-grown is not only a design decision but a thoughtful commitment to value and responsibility.
-                  </p>
+                
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
-                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/lab_grown_1.jpeg"
-                      alt="Lab groen diamond rings Singapore 1"
+                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/bespoke_Design_1.jpeg"
+                      alt="bespoke jewelry Singapore image 0"
                       fill
                       sizes="(max-width: 720px) 80vw, 360px"
                     />
@@ -328,7 +326,7 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
 
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                     What Are Lab-Grown Diamonds?
+                     What Does “Bespoke” Mean In Jewellery?
                     </h2>
                  
 
@@ -340,126 +338,51 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
 
 
                     <p className={styles.sectionCopy}>
-                       Lab-grown diamonds are real diamonds. A lab-grown diamond has the same chemical, physical, and optical properties as natural diamonds. The only difference is origin: instead of forming deep within the earth, grown diamonds are produced in a laboratory using advanced lab processes.
+                       The word bespoke originates from tailoring. In jewellery, it means a piece created entirely from the ground up for one individual.
                     </p>
                     <p className={styles.sectionCopy}>
-                    Because lab-grown diamonds are created under controlled conditions, they meet strict quality standards. Each lab-grown diamond is graded for cut, clarity, colour, and carat weight, just like mined diamonds.
+                        Bespoke jewellery is not selected from ready-to-wear collections. It is conceived specifically for you, based on your story, your ideas, and your vision.
                     </p>
                     <p className={styles.sectionCopy}>
-                      Lab-grown diamonds are carefully monitored for precision and consistency, offering outstanding brilliance and beauty.
+                      A bespoke jewellery piece is one of a kind. It does not exist before your consultation, and it will not be replicated.
 
                     </p>
                     <h2 className={styles.storyHeading}>
-                    The Difference Between Lab-Grown and Mined Diamonds
+                      Custom And Bespoke: What Is The Difference?
                     </h2>
                     <p className={styles.sectionCopy}>
-                    Many clients ask about the difference between lab-grown and mined diamonds. In appearance and performance, there is no visible difference. Lab-grown diamonds are chemically identical to natural diamonds.
+                      Many customers ask about the difference between custom and bespoke jewelry. While both involve personalization, bespoke jewellery begins with a blank canvas.
                     </p>
                     <p className={styles.sectionCopy}>
-                      The key distinction lies in origin and cost. Lab-grown diamonds typically offer a more accessible price point compared to mined diamonds of similar quality. This makes a lab-grown diamond an appealing choice for those who value both beauty and financial prudence.
+                      A custom design may adapt existing designs or collections. The bespoke approach, however, is a full design process tailored to your vision from the first sketch to final polish.
                     </p>
                     <p className={styles.sectionCopy}>
-                      Our diamond specialists guide you through the process, ensuring full transparency before your purchase.
+                      With your bespoke creation, every design element is intentional. From the choice of gemstone to the proportion of the jewel, the piece is unique to you.
                     </p>
 
                     <h2 className={styles.storyHeading}>
-                     Lab Grown Diamond Engagement Rings
+                        The Meaning Of A Bespoke Jeweller
                     </h2>
                     <p className={styles.sectionCopy}>
-                      For many couples, the most meaningful purchase is a diamond engagement ring. Our lab-grown diamond engagement collection includes timeless engagement ring designs crafted to celebrate love and commitment.
-                    </p>
-                    <p className={styles.sectionCopy}>
-                      A lab-grown diamond engagement ring offers the same brilliance and symbolism as traditional diamond engagement rings, while providing greater flexibility in size and price range.
-                    </p>
-                    <p className={styles.sectionCopy}>
-               Whether you envision a minimalist engagement ring in gold or a statement diamond ring with refined detailing, our lab-grown diamonds allow you to create your dream ring without compromise.
-                    </p>
-                  </section>
-
-                  <figure className={styles.storyImage}>
-                    <Image
-                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/lab_grown_2.jpeg"
-                      alt="singapore"
-                      fill
-                      sizes="(max-width: 960px) 100vw, 720px"
-                    />
-                  </figure>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                      Engagement Rings Crafted With Precision
-                    </h2>
-                    <p className={styles.sectionCopy}>
-                     Each engagement ring is designed to honour the heart of your commitment. Our lab-grown diamond engagement rings are available in a range of styles, from classic solitaires to contemporary engagement ring designs.
-                    </p>
-                    <p className={styles.sectionCopy}>
-                     We offer carefully curated options in gold, ensuring that each ring complements the natural beauty of the diamond. The cut of a lab-grown diamond is essential to its brilliance, and we focus on precision proportions to maximise light performance.
-                    </p>
-                    <p className={styles.sectionCopy}>
-                     Our lab-grown diamonds in engagement rings represent a modern expression of love.
-                    </p>
-
-                    <h2 className={styles.storyHeading}>
-                      Beyond Engagement Rings: A Complete Jewellery Collection
-                    </h2>
-                    <p className={styles.sectionCopy}>
-                      Our lab-grown diamonds are not limited to engagement ring pieces. We present a refined collection of diamond rings, earrings, necklaces, pendants, bracelets, and tennis bracelets.
-                    </p>
-                    <p className={styles.sectionCopy}>
-                      From elegant diamond earrings to delicate pendants and statement necklaces, each piece showcases the brilliance of lab-grown diamonds. Our showroom displays a curated selection of products crafted with care and precision.
-                    </p>
-                    <p className={styles.sectionCopy}>
-                    Lab-grown diamonds in Singapore are increasingly chosen for anniversary jewellery, milestone gifts, and personal pieces that celebrate life’s joy.
-                    </p>
-                  </section>
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                    Is It Worth Buying A Lab-Grown Diamond?
-                    </h2>
-                    <p className={styles.sectionCopy}>
-                     Absolutely. Lab-grown diamonds are worth buying for clients who prioritise value, transparency, and modern craftsmanship. Lab-grown diamonds are identical in composition to mined diamonds, offering the same beauty and durability.
-                    </p>
-                    <p className={styles.sectionCopy}>
-                    Because lab-grown diamonds typically have a lower cost per carat, you can select a larger diamond or higher clarity within your preferred price range. For many couples, this makes a lab-grown diamond the right decision for both emotional and practical reasons.
-
-
-                    </p>
-                   
-                  </section>
-
-                 
-
-                  <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>
-                     How Much Is A 1 Carat Lab Diamond Worth?
-                    </h2>
-                    <p className={styles.sectionCopy}>
-                      In Singapore, the price of a 1-carat lab-grown diamond varies depending on cut, clarity, and colour. Generally, a 1-carat lab-grown diamond may range from a few thousand Singapore dollars, significantly below the cost of comparable mined diamonds.
-                    </p>
-                    <p className={styles.sectionCopy}>
-                     The final price depends on quality standards and market conditions. Our lab-grown diamonds are carefully selected to ensure exceptional value without sacrificing brilliance.
+                     A bespoke jeweller is an artisan who guides you through the entire process of creating fine jewellery. This includes consultation, concept development, gemstone selection, and the crafting process.
                     </p>
                     
-                  </section>
-                  <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                    How Much Is A 4 Carat Lab-Grown Diamond In Singapore?
+                        Jewellery In Singapore – A New Standard Of Craft
                     </h2>
                     <p className={styles.sectionCopy}>
-                     A 4-carat lab-grown diamond in Singapore can vary widely in price depending on cut precision, clarity, and colour grading. Compared to mined diamonds, lab-grown diamonds at this size offer remarkable savings.
+                     Jewellery has evolved significantly. Discerning clients now seek authenticity and individuality.
                     </p>
                     <p className={styles.sectionCopy}>
-                      At Korkeila Helsinki, our lab-grown diamonds are evaluated individually. Larger grown diamonds allow clients to achieve impressive visual impact while remaining within a defined price point.
+                     Rather than selecting ready-to-wear pieces, more people are choosing bespoke jewellery services. This shift reflects a desire for deeper meaning in the jewellery they wear.
                     </p>
-                    <p className={styles.sectionCopy}>
-                      We encourage booking an appointment in our showroom to explore the available stock and understand the full price range.
-                    </p>
+                      <p className={styles.sectionCopy}>In Singapore, fine jewellery is no longer just about adornment. It is about creating something meaningful for life.</p>
                   </section>
+
                   <figure className={styles.storyImage}>
                     <Image
-                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/lab_grown_1.jpeg"
-                      alt="diamond ring Singapore"
+                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/bespoke_Design_2.jpeg"
+                      alt="Bespoke Jewelry Singapore image 2"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -467,27 +390,109 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
 
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                       Is It A Good Time To Buy Lab-Grown Diamonds?
+                     From Engagement Ring To Heirloom Pieces
                     </h2>
                     <p className={styles.sectionCopy}>
-                    Lab-grown diamonds continue to evolve in technology and accessibility. For many, it is a favourable time to purchase because quality has increased while cost remains competitive.                    </p>
-                    <p className={styles.sectionCopy}>
-                      The stability of lab production ensures a consistent supply and transparent pricing. This makes lab-grown diamonds an attractive option for engagement rings and fine jewellery.
+                     While many clients begin with an engagement ring or proposal ring, bespoke jewellery extends far beyond engagement rings.
                     </p>
-                  
+                    <p className={styles.sectionCopy}>
+                     We create wedding bands, rings, necklaces, bracelets, and statement pieces that mark important moments. Whether it is a jewel to celebrate a milestone or a si dian jin gift, the bespoke process ensures every detail aligns with your story.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                     Each jewellery piece is crafted with intention, reflecting your life and your journey.
+                    </p>
+
+                    <h2 className={styles.storyHeading}>
+                      The Calla Lily Inspiration
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                      One of our signature inspirations is the calla lily. The calla lily symbolizes purity, elegance, and grace.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      In our jewellery design, the calla lily appears in sculptural forms and subtle design elements. This motif is woven into selected pieces, echoing natural beauty.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                        The calla lily has become part of our brand identity, reflecting our refined approach to bespoke jewellery in Singapore.
+                    </p>
+                  </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                    The Bespoke Design Process
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                     The design process begins with a private consultation. During this experience, we explore your story, expectations, and style preferences.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                    We discuss gemstones, pearls, diamonds, and carat weight considerations. We examine how the jewellery piece will be worn and what it represents in your life.
+
+
+                    </p>
+                    <p className={styles.sectionCopy}>
+                     From the initial vision to the final creation, the process is collaborative.
+                    </p>
+                  </section>
+
+                 
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                    From Vision To Life
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                    Your vision guides the design. With the help of our jewellers, your custom ideas are translated into sketches and renderings.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                     We refine proportions, explore gemstone combinations, and select the right gold tone. Each element of the design is considered carefully.
+                    </p>
+                    <p className={styles.sectionCopy}>Through the crafting process, the piece evolves from concept to tangible jewel, ready to accompany you through life’s moments.</p>
                   </section>
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                   The Purchase Process And Personal Guidance
+                       Gemstones And Meaning
                     </h2>
                     <p className={styles.sectionCopy}>
-                     Choosing a lab-grown diamond is a meaningful process. We guide you from selection to final purchase, ensuring clarity and confidence at every step.
+                     Gemstones carry symbolism. From vibrant sapphires to luminous pearls, each gemstone tells a story.
                     </p>
                     <p className={styles.sectionCopy}>
-                      During your showroom appointment, our diamond specialists explain the difference between various lab-grown options, helping you select the ideal diamond shape and design.
+                     The selection of gemstones is deeply personal. Some clients choose birthstones; others seek colours that represent significant memories.
                     </p>
                     <p className={styles.sectionCopy}>
-                     Customer satisfaction is central to our philosophy. Whether you seek a lab-grown diamond engagement ring or a refined piece of jewellery for a loved one, we ensure the experience reflects the joy of your commitment.
+                      In bespoke jewellery, gemstones are not decorative afterthoughts. They are central to the story of the piece.
+                    </p>
+                  </section>
+                  <figure className={styles.storyImage}>
+                    <Image
+                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/bespoke_Design_3.jpeg"
+                      alt="Bespoke Jewelry Singapore image 3"
+                      fill
+                      sizes="(max-width: 960px) 100vw, 720px"
+                    />
+                  </figure>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                       Fine Jewellery Beyond Trends
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                    Fine jewellery should endure beyond seasons. Bespoke jewellery focuses on longevity and timeless design.</p>
+                    <p className={styles.sectionCopy}>
+                     Rather than following trends, we design pieces that hold meaning. The right jewellery piece becomes part of your identity.
+                    </p>
+                    <p className={styles.sectionCopy}>This philosophy defines our collections and bespoke services alike.</p>
+                  </section>
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                   The Crafting Process And Master Craftsmen
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                     Our master craftsmen shape each jewellery piece with precision and care. From stone setting to polishing, every step reflects dedication to quality.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      The crafting process is meticulous. Each jewel is examined to ensure it meets our standards before delivery.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                     This commitment ensures that your bespoke jewellery will last a lifetime.
                     </p>
                   </section>
 
@@ -495,16 +500,126 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
 
                    <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                        Discover Our Lab-Grown Diamonds
+                        How Much Does Custom-Made Jewelry Cost?
                     </h2>
                     <p className={styles.sectionCopy}>
-                     Our lab-grown diamonds collection is available for viewing by appointment in our Singapore showroom. On our website, you can explore products and request guidance before visiting.
+                    Cost varies depending on design complexity, gemstone selection, and carat weight. A bespoke jewellery piece can range from a modest to a significant investment.
                     </p>
                     <p className={styles.sectionCopy}>
-                     From engagement ring pieces to earrings, necklaces, pendants, bracelets and diamond rings, our lab-grown diamonds are crafted to meet exceptional quality standards.
+                      During consultation, we provide transparent guidance. A deposit confirms the order, and the final price reflects materials and craftsmanship.
                     </p>
                     <p className={styles.sectionCopy}>
-                     If you are searching for something meaningful, our lab-grown diamonds offer beauty, brilliance, and enduring value. Browse our online store or book an appointment, and discover how a lab-grown diamond can become the centrepiece of your love story.
+                     Custom jewellery in Singapore is an investment in something meaningful, not merely a transaction.
+                    </p>
+                  </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                        Jewellery For Significant Moments
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                   Jewellery often marks defining moments in life. An engagement ring symbolizes commitment. Wedding bands represent unity.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      Beyond rings, bespoke jewellery commemorates anniversaries, milestones, and personal achievements.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                     Each piece carries a story. Each jewel becomes part of your life narrative.
+                    </p>
+                  </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                        Experience The Bespoke Journey
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                    The bespoke journey is intimate and rewarding. From first consultation to final delivery, we offer attentive care.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      Our customers value discretion, clarity, and craftsmanship. The experience is as meaningful as the final piece.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                     In Singapore and beyond, we are honoured to serve clients who seek authenticity.
+                    </p>
+                  </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                      Brand Philosophy And Inspiration
+                    </h2>
+                   
+                    <p className={styles.sectionCopy}>
+                       Our brand draws inspiration from heritage and modernity. These inspirations inform our jewellery design without overwhelming it. The result is a refined aesthetic grounded in elegance.
+                    </p>
+                  </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                     Jewellery Services In Singapore
+                    </h2>
+                   
+                    <p className={styles.sectionCopy}>
+                       We offer a full range of bespoke jewellery services. From engagement rings to heirloom redesign, our services are tailored.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                       Jewellery in Singapore deserves precision and creativity. We ensure each piece reflects your expectations.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      Whether you seek a single jewel or multiple pieces, we guide you through the process with transparency.
+                    </p>
+                  </section>
+                  <figure className={styles.storyImage}>
+                    <Image
+                      src="https://imagesweb2026.s3.eu-north-1.amazonaws.com/bespoke_Design_4.jpeg"
+                      alt="Bespoke Jewelry Singapore image 1"
+                      fill
+                      sizes="(max-width: 960px) 100vw, 720px"
+                    />
+                  </figure>
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                        Bringing Your Story To Life
+                    </h2>
+                    <p className={styles.sectionCopy}>
+                    Your story is central to the design. We listen carefully to understand your journey, your values, and your vision.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                     Every bespoke jewellery piece begins with a narrative. It may symbolize love, growth, or transformation.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                     Through thoughtful design, we bring your story to life.
+                    </p>
+                  </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                      The Right Choice For A Lifetime
+                    </h2>
+                   
+                    <p className={styles.sectionCopy}>
+                       Choosing the right jeweller matters. A bespoke jeweller should understand both craft and emotion.
+                    </p>
+                       <p className={styles.sectionCopy}>
+                       We combine artistry with responsibility, ensuring that each jewellery piece meets high standards of quality.
+                    </p>
+                       <p className={styles.sectionCopy}>
+                       For clients in Singapore seeking meaningful fine jewellery, bespoke is the right choice.
+                    </p>
+                  </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                     Begin Your Bespoke Jewellery Journey
+                    </h2>
+                   
+                    <p className={styles.sectionCopy}>
+                       If you are ready to create something personal, we invite you to book an online consultation.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                        Whether it is an engagement ring, wedding bands, or a commemorative jewel, we are here to guide your journey.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                      Bespoke jewellery is more than design. It is a reflection of your life, your moments, and your story, crafted with care, intention, and timeless elegance.
                     </p>
                   </section>
 

@@ -267,7 +267,7 @@ export default function VihkisormusCollectionClient() {
     return () => {
       active = false;
     };
-  }, [languageId, currencyCode]);
+  }, [languageId, currencyCode,currencySymbol]);
 
   const displayedProducts = useMemo(() => {
     let list = products;

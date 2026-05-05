@@ -25,14 +25,14 @@ const buildSortOptions = (labels) => [
 
 const introText = (
   <>
-    At Korkeila Helsinki, we believe that a wedding ring is more than jewellery. It is a symbol of commitment, a reflection of your love story, and a daily reminder of the bond you share. For couples searching for a refined wedding band Singapore, we offer wedding bands and wedding rings crafted with Scandinavian elegance and exceptional craftsmanship.
+   At Korkeila Helsinki, a bespoke engagement ring Singapore experience is defined by intention, artistry, and devotion to detail. An engagement ring is not simply jewellery. It is a testament to your love, a reflection of your relationship, and the beginning of a lifelong journey.
   </>
 );
 
 
 
 export default function KihlasormusMiehelleCollectionClient() {
-  const { language, currencyCode, currencySymbol} = useI18n();
+  const { language, currencyCode, currencySymbol } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -68,11 +68,15 @@ export default function KihlasormusMiehelleCollectionClient() {
         .toLowerCase();
 
     const isMensRings = (label) => {
-  const normalized = normalizeLabel(label)
-   
-    .toLowerCase();
+  const normalized = normalizeLabel(label).toLowerCase();
 
-  return normalized.includes("wedding band");
+  return (
+   
+    normalized.includes("halo") ||
+    normalized.includes("solitaire") ||
+    normalized.includes("3 stones") ||
+    normalized.includes("alliance")
+  );
 };
 
     const loadSubCategories = async () => {
@@ -210,7 +214,7 @@ export default function KihlasormusMiehelleCollectionClient() {
     return () => {
       active = false;
     };
-  }, [languageId, currencyCode,currencySymbol]);
+  }, [languageId, currencyCode, currencySymbol]);
 
   const displayedProducts = useMemo(() => {
     let list = products;
@@ -247,7 +251,7 @@ export default function KihlasormusMiehelleCollectionClient() {
             <div className={styles.topLine} aria-hidden />
             <header className={styles.pageHeader}>
               <h1 className={styles.pageTitle}>
-                Wedding Band Singapore 
+                Bespoke Engagement Ring Singapore
               </h1>
             </header>
             <article className={styles.story}>
@@ -271,12 +275,12 @@ export default function KihlasormusMiehelleCollectionClient() {
               ) : null}
               {showAllContent ? (
                 <div className={styles.storyBody} id="story-content">
-                  <p className={styles.intro}>Whether you are choosing your wedding rings in Singapore or selecting them from abroad, our collection is designed to honour the depth of your promise and the grace of your journey together.</p>
+                  <p className={styles.intro}>For clients in Singapore who seek something extraordinary, a bespoke engagement ring offers the freedom to create a one-of-a-kind piece that embodies the essence of your story. Your proposal deserves more than a ready-made ring. It deserves craftsmanship, thought, and a design shaped entirely around you.</p>
                   
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
-                      src="/link6/img1.jpeg"
-                      alt="Weding-Bands-Singapore image - 1"
+                      src="/link6/image_6.jpeg"
+                      alt="Bespoke Engagement Ring Singapore image 1"
                       fill
                       sizes="(max-width: 720px) 80vw, 360px"
                     />
@@ -284,59 +288,96 @@ export default function KihlasormusMiehelleCollectionClient() {
 
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                      The Meaning Of A Wedding Band
+                     The Meaning Of A Bespoke Engagement Ring
                     </h2>
+                    
+
+
+
+
+
+
+
+
+
+
                     <p className={styles.sectionCopy}>
-                      A wedding band is the symbol of your love and fidelity. Worn every day, the ring becomes part of your life, resting close to the heart as a quiet reminder of your relationship.
+                     An engagement ring is a symbol of commitment. It is the promise you make to your partner during one of the most meaningful moments of your life.
                     </p>
                     <p className={styles.sectionCopy}>
-                      Your wedding band represents both your commitment and your story. Unlike an engagement ring, which marks the beginning of a promise, a wedding ring celebrates the continuation of that promise through every moment you share.
+                     A bespoke engagement ring takes that meaning further. It allows you to create a piece that exists nowhere else in the world. The ring is a reflection of your vision, your style, and the depth of your love story.
                     </p>
                     <p className={styles.sectionCopy}>
-                     For many couples, wedding bands are chosen together. This shared decision reflects the unity of two people becoming one, a powerful symbol of love and partnership.
+                    Unlike standard engagement rings in a collection, a custom engagement ring is built from the ground up. Every diamond, every curve, every proportion is intentional.
                     </p>
                     <h2 className={styles.storyHeading}>
-                     A Collection Of Wedding Rings Crafted With Care
+                     Why Choose a Bespoke Engagement Ring?
                     </h2>
                     <p className={styles.sectionCopy}>
                                   
-                      Our collection of wedding rings is designed with balance, elegance and purpose. Each band is crafted by skilled artisans who understand that these pieces will accompany you for a lifetime.
+                     Discerning clients increasingly choose bespoke engagement over mass-produced engagement rings. The decision to commission a custom engagement ring is the decision to prioritize individuality.
                     </p>
                      <p className={styles.sectionCopy}>
                                   
-                      We offer a refined range of wedding bands in gold, white gold and carefully selected metals. From minimalist styles to designs featuring subtle diamond accents, every wedding ring is created to honour your love story with understated sophistication.
+                      A bespoke engagement process allows you to participate fully in the creation of your proposal ring. You are not selecting from stock; you are shaping the final piece with our designers.
                     </p>
-                    <p className={styles.sectionCopy}>Our jewellery reflects Scandinavian luxury and simplicity. This harmonious influence ensures that your wedding band remains timeless, never defined by fleeting trends.</p>
+                    <p className={styles.sectionCopy}>This approach ensures that your engagement ring is a unique reflection of your love and your partner’s personality.</p>
                  
                    
                     <h2 className={styles.storyHeading}>
-                      Diamond Wedding Rings And Refined Details
+                         The Engagement Ring Journey
                     </h2>
-                      <p className={styles.sectionCopy}>For those who desire additional brilliance, our diamond wedding rings offer refined beauty. A diamond wedding ring can feature delicate diamond accents or a continuous line of diamonds for added elegance.</p>
+                      <p className={styles.sectionCopy}>Your engagement ring journey begins with an online consultation through our website. During this first meeting, we explore your vision for the proposal and discuss diamond ring designs that resonate with you.</p>
                     <p className={styles.sectionCopy}>
-                     Diamond wedding rings are crafted to complement your engagement ring while standing beautifully on their own. Many couples in Singapore choose matching wedding bands that echo the design of their engagement rings, creating harmony between both rings.
-                    </p>
-                    <p className={styles.sectionCopy}>
-                    Each diamond is selected for its quality and brilliance, ensuring your ring reflects the depth of your love and commitment.
-                    </p>
-                    <h2 className={styles.storyHeading}>
-                      Designs For Men And Women
-                    </h2>
-                     <p className={styles.sectionCopy}>
-                    Our wedding bands are thoughtfully designed for both men and women. While some prefer classic gold bands, others seek something with a subtle diamond touch.
+                     This engagement ring journey is carefully structured. We guide you through diamond selection, ring design considerations, and practical elements such as ring sizes and daily wear.
                     </p>
                     <p className={styles.sectionCopy}>
-                   For men, we offer wedding rings with clean lines and strong proportions. For women, options range from delicate bands with diamond accents to elegant white gold designs that sit gracefully beside an engagement ring.
+                    The journey is personal and collaborative. From first sketch to final polish, you are part of the creation process.
                     </p>
-                    <p className={styles.sectionCopy}>
-                      Every design is created to ensure comfort and a perfect fit. Your wedding band should feel natural, becoming part of your daily life without compromise.
-                    </p>
+                    
                   </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                     From Vision To Ring Design
+                    </h2>
+                    <p className={styles.sectionCopy}>A bespoke engagement ring is built around your vision. Whether you are drawn to a classic solitaire or contemporary diamond ring designs, our designers translate inspiration into form.</p>
+                    <p className={styles.sectionCopy}>
+                 We begin by understanding your partner’s style. Is the aesthetic minimal or intricate? Modern or timeless? Does your partner prefer understated beauty or bold brilliance?
+                    </p>
+                     <p className={styles.sectionCopy}>
+                   The ring design process involves sketches, refined proportions, and 3D visualization. With a custom engagement approach, you can adjust details before production begins.
+
+
+                    </p>
+                                       
+                  
+                  </section>
+
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>
+                     Selecting The Perfect Diamond
+                    </h2>
+                    <p className={styles.sectionCopy}>The diamond is the heart of the engagement ring. Choosing the right diamond is the foundation of your proposal ring.</p>
+                    <p className={styles.sectionCopy}>
+                We guide you through cut, clarity, and carat weight to ensure the diamond ring achieves optimal brilliance. The centre diamond determines the presence of the ring and the balance of the design.
+                    </p>
+                     <p className={styles.sectionCopy}>
+                   Whether you select a solitaire diamond engagement ring or a setting with a halo of diamonds, the choice of the diamond is essential to the overall beauty of the piece.
+
+
+                    </p>
+                                       
+                  
+                  </section>
+
+
 
                   <figure className={styles.storyImage}>
                     <Image
-                      src="/link2/e08c09ef-e4a9-4737-a4d6-23b987398285.jpeg"
-                      alt="Weding-Bands-Singapore image - 2"
+                      src="/link2/fcf7f846-0cd8-42fc-90e7-da8f80dffbd6.jpeg"
+                      alt="diamond ring Singapore"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -344,14 +385,16 @@ export default function KihlasormusMiehelleCollectionClient() {
 
                   <section className={styles.storySection}>
                     <h2 className={styles.storyHeading}>
-                     Choosing The Perfect Wedding Ring In Singapore
+                    Solitaire And Timeless Designs
                     </h2>
-                    <p className={styles.sectionCopy}>Selecting wedding rings in Singapore is a meaningful step in your journey. There are several options to consider, including metal choice, diamond details, width, and finish.</p>
+                    <p className={styles.sectionCopy}>The solitaire remains one of the most iconic engagement rings. A solitaire engagement ring design highlights a single diamond with pure elegance.</p>
                     <p className={styles.sectionCopy}>
-                     White gold remains a popular choice in Singapore for its luminous elegance, while traditional gold offers warmth and timeless appeal. Some couples prefer contemporary styles, while others look for classic bands that reflect the purity of their bond.
+                  For many clients in Singapore, a solitaire proposal ring is the perfect expression of devotion. The simplicity of the setting allows the diamond to shine without distraction.
                     </p>
                      <p className={styles.sectionCopy}>
-                      We guide you through ring size, fit, and design preference, ensuring your wedding band reflects both your individual style and shared commitment. Finding the right wedding ring is not simply about appearance, but about meaning.
+                     Yet bespoke engagement does not mean limited style. We create diamond engagement rings in a variety of designs, ensuring that each ring is a unique interpretation of your vision.
+
+
                     </p>
                    
 
@@ -362,71 +405,154 @@ export default function KihlasormusMiehelleCollectionClient() {
 
 
                     <h2 className={styles.storyHeading}>
-                      Craftsmanship And Quality
+                   Custom Engagement Ring Versus Ready-Made
                     </h2>
                      <p className={styles.sectionCopy}>
-                      Every wedding band in our collection is crafted with exceptional craftsmanship. Our artisans pay attention to the smallest details, from polished edges to precise diamond settings.
+                     Can I simply choose from a collection instead of commissioning a custom engagement ring? Of course you can. However, a bespoke engagement ring offers a deeper level of personalization.
                     </p>
                     <p className={styles.sectionCopy}>
-                     Quality is at the core of our jewellery. Wedding rings are meant to last through a lifetime of moments, and our materials and techniques are selected to ensure durability and beauty.
+                     A custom engagement ring ensures that no two rings are identical. The ring is tailored specifically for your partner and your proposal.
                     </p>
-                    
+                    <p className={styles.sectionCopy}>When you choose bespoke engagement, you choose intentionality over convenience.</p>
                   
                   </section>
 
                   <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Personal Touch And Engraving</h2>
+                    <h2 className={styles.storyHeading}>Craftsmanship And Precision</h2>
                     <p className={styles.sectionCopy}>
-                      Many couples choose to personalize their wedding rings with engraving. A meaningful date, a promise, or a word that symbolizes your relationship adds a unique touch to your band.
+                     Each bespoke engagement ring is created with meticulous craftsmanship. Our collections are inspirated by Scandinavian minimalism and precision.
                     </p>
                      <p className={styles.sectionCopy}>
-                      This subtle detail transforms a wedding ring into something deeply personal. It becomes a reflection of your shared story and the journey you continue together.
+                    Every diamond ring is crafted with attention to structure and durability. The ring is not only beautiful but also engineered for a lifetime of wear.
                     </p>
+                   <p className={styles.sectionCopy}> This dedication to craftsmanship ensures that your proposal ring maintains its beauty and integrity through the years.</p>
+                  </section>
+
+                   <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Creating A Unique Proposal Ring</h2>
+                    <p className={styles.sectionCopy}>
+                     The proposal is one of the most meaningful milestones in a relationship. A proposal ring should honour that significance.
+                    </p>
+                     <p className={styles.sectionCopy}>
+                   To create a one-of-a-kind proposal ring, we combine your vision with our expertise. The result is a diamond ring that feels deeply personal. </p>
+                   <p className={styles.sectionCopy}> Your proposal becomes not only a moment but the beginning of a lifetime commitment symbolized by the ring.</p>
+                  </section>
+                  
+                    <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>The Process Of Bespoke Engagement</h2>
+                    <p className={styles.sectionCopy}>
+                     The bespoke engagement process is structured yet flexible. First, we discuss your ideas and gather inspiration. Then we develop initial ring design concepts.
+                    </p>
+                     <p className={styles.sectionCopy}>
+                 You can refine details with our designers until the design aligns perfectly with your expectations. Once approved, the piece enters production. </p>
+                   <p className={styles.sectionCopy}> Throughout the process, we ensure transparency and clarity. From diamond sourcing to final finishing, you are informed at every stage.</p>
+                  </section>
+
+                    <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Diamond Engagement Rings Crafted To Last</h2>
+                    <p className={styles.sectionCopy}>
+                     Our diamond engagement rings are created to balance beauty and durability. An engagement ring is worn daily, and the structure of the ring must support the diamond securely.
+                    </p>
+                     <p className={styles.sectionCopy}>
+                  We evaluate the proportions of the setting, the thickness of the band, and the stability of the centre stone. The result is a diamond ring that combines elegance with performance.</p>
+                   <p className={styles.sectionCopy}> For the proposal and beyond, the ring becomes a testament to your commitment.</p>
                   </section>
 
 
                   <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Harmonizing With Your Engagement Ring</h2>
+                    <h2 className={styles.storyHeading}>Can I Personalize Every Detail?</h2>
                     <p className={styles.sectionCopy}>
-                     Your wedding band should complement your engagement ring. The balance between both rings is essential for a harmonious look.
+                  Can I choose the diamond shape? Can I adjust the bandwidth? Can I incorporate hidden details into the ring design?
                     </p>
-                     <p className={styles.sectionCopy}>
-                      Whether you pair a diamond wedding ring with a classic solitaire engagement ring or choose minimalist bands for a modern aesthetic, we help you achieve unity in design. The harmony of both rings symbolizes the strength of your relationship and the bond you share.
+                    <p className={styles.sectionCopy}>
+                  Yes, you can. A bespoke engagement ring allows you to personalize every element. From subtle engravings to refined settings, the ring is crafted to reflect your partner’s style.
                     </p>
-                     <p className={styles.sectionCopy}>
-                     Many couples look for wedding bands that align with their engagement rings, creating a cohesive expression of love and fidelity.
+                    <p className={styles.sectionCopy}>
+                    This level of custom engagement ensures that your ring is truly a unique creation.
                     </p>
+                      
+                  
+                    
                   </section>
 
-
-
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Harmonizing With Wedding Bands</h2>
+                    <p className={styles.sectionCopy}>
+                 When planning for the future, many clients consider how the engagement ring will pair with a wedding band.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                       We design wedding bands and wedding rings to complement your bespoke engagement ring seamlessly. Whether you prefer minimalist wedding bands or diamond-accented styles, we ensure visual harmony.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                        The combination of an engagement ring and a wedding band symbolizes the continuity of your commitment.
+                    </p>
+                  
+                    
+                  </section>
 
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link6/img0.jpeg"
-                      alt="Weding-Bands-Singapore image - 3"
+                      alt="bespoke engagement ring Singapore image 2"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
                   </figure>
 
+
+
+
+
+                  
                   <section className={styles.storySection}>
-                    <h2 className={styles.storyHeading}>Explore Our Wedding Bands In Singapore</h2>
+                    <h2 className={styles.storyHeading}>A Testament To Your Love Story</h2>
                     <p className={styles.sectionCopy}>
-                    Our collection of wedding bands is available for clients in Singapore and internationally. Each wedding ring is crafted with dedication, reflecting the elegance and sophistication that define Korkeila Helsinki.
+                 A bespoke engagement ring is more than a piece of jewellery. It is a testament to your love story and the journey you share.
                     </p>
                     <p className={styles.sectionCopy}>
-                     Whether you prefer a simple gold band, a white gold ring with diamond accents, or diamond wedding rings with refined brilliance, we offer options to suit every couple.
+                From the first idea to the final proposal, every detail reflects the essence of your relationship. The ring is a symbol of your love, your promise, and your shared future.
+                    </p>
+                    
+                      
+                  
+                    
+                  </section>
+
+                  <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>For Clients In Singapore And Beyond</h2>
+                    <p className={styles.sectionCopy}>
+                  We welcome clients in Singapore and internationally who seek a refined, bespoke engagement experience.
                     </p>
                     <p className={styles.sectionCopy}>
-                     Your wedding band is the symbol of your love, your promise, and your shared future. It represents one heart joining another, one story becoming two lives intertwined.
+                Through private online consultations and secure communication, we ensure discretion and personalized care. Our website provides initial inspiration, but the true experience unfolds during your consultation.
                     </p>
-                      <p className={styles.sectionCopy}>
-                    Discover wedding rings designed to celebrate your love story with grace and craftsmanship. We are honoured to help you find the perfect band to mark your lifelong commitment.
+                    <p className={styles.sectionCopy}>
+                   Whether you are planning an intimate proposal in Singapore or abroad, we are honoured to guide you.
+                    </p>
+                      
+                  
+                    
+                  </section>
+
+                    <section className={styles.storySection}>
+                    <h2 className={styles.storyHeading}>Begin Your Engagement Ring Journey</h2>
+                    <p className={styles.sectionCopy}>
+                        Your engagement ring journey is one of intention, creativity, and devotion. The decision to commission a bespoke engagement ring is the decision to create something extraordinary.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                        With our designers, you can shape a custom engagement ring that reflects your vision, honours your partner, and marks the beginning of a lifetime together.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                        The proposal is a defining moment. Let the ring be worthy of that moment.
+                    </p>
+                    <p className={styles.sectionCopy}>
+                       Book your private consultation and begin the creation of a bespoke engagement ring that captures the beauty, commitment, and uniqueness of your love.
                     </p>
                   
                     
                   </section>
+
+                   
                 </div>
               ) : null}
 
