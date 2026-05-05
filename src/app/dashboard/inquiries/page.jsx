@@ -58,6 +58,7 @@ export default function InquiriesPage() {
     email: "",
     phone_number: "",
     date: "",
+    appointment_type: "",
     time_slot: "",
   });
 
@@ -77,6 +78,7 @@ export default function InquiriesPage() {
       country: item.country ?? "-",
       date: item.date ?? "-",
       time_slot: item.time_slot ?? "-",
+      appointment_type: item.appointment_type ?? "-",
       description: item.description ?? "-",
     }));
   }, [items]);
@@ -90,8 +92,9 @@ export default function InquiriesPage() {
     const phoneQuery = normalize(filters.phone_number);
     const dateQuery = normalize(filters.date);
     const timeSlotQuery = normalize(filters.time_slot);
+    const appointmentTypeQuery = normalize(filters.appointment_type);
 
-    if (!noQuery && !firstNameQuery && !lastNameQuery && !emailQuery && !phoneQuery && !dateQuery && !timeSlotQuery) {
+    if (!noQuery && !firstNameQuery && !lastNameQuery && !emailQuery && !phoneQuery && !dateQuery && !timeSlotQuery && !appointmentTypeQuery) {
       return tableRows;
     }
 
@@ -103,7 +106,8 @@ export default function InquiriesPage() {
       const phoneMatches = phoneQuery ? normalize(row.phone_number).includes(phoneQuery) : true;
       const dateMatches = dateQuery ? normalize(row.date).includes(dateQuery) : true;
       const timeSlotMatches = timeSlotQuery ? normalize(row.time_slot).includes(timeSlotQuery) : true;
-      return noMatches && firstNameMatches && lastNameMatches && emailMatches && phoneMatches && dateMatches && timeSlotMatches;
+      const appointmentTypeMatches = appointmentTypeQuery ? normalize(row.appointment_type).includes(appointmentTypeQuery) : true;
+      return noMatches && firstNameMatches && lastNameMatches && emailMatches && phoneMatches && dateMatches && timeSlotMatches && appointmentTypeMatches;
     });
   }, [filters, tableRows]);
 
@@ -127,6 +131,7 @@ export default function InquiriesPage() {
     { key: "phone_number", header: "Phone", filterable: true, filterPlaceholder: "Search Phone" },
     { key: "date", header: "Date", filterable: true, filterPlaceholder: "Search Date" },
     { key: "time_slot", header: "Time Slot", filterable: true, filterPlaceholder: "Search Time Slot" },
+    { key: "appointment_type", header: "Appointment Type", filterable: true, filterPlaceholder: "Search Appointment Type" },
     {
       key: "actions",
       header: "Action",

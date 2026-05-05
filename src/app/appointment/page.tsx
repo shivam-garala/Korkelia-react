@@ -99,10 +99,10 @@ export default function AppointmentPage() {
           captchaMissingKey: "Captcha ei ole asetettu.",
           details: "Kuvaile koru, josta olet kiinnostunut",
           submit: "Laheta",
-          // appointmentType: "Tapaamisen tyyppi",
-          // appointmentTypePlaceholder: "Valitse tyyppi",
-          // storeAppointment: "Myymäläkäynti",
-          // virtualAppointment: "Virtuaalinen tapaaminen",
+          appointmentType: "Tapaamisen tyyppi",
+          appointmentTypePlaceholder: "Valitse tyyppi",
+          storeAppointment: "Myymäläkäynti",
+          virtualAppointment: "Virtuaalinen tapaaminen",
         }
       : {
           heading: "MAKE AN APPOINTMENT",
@@ -124,10 +124,10 @@ export default function AppointmentPage() {
           captchaMissingKey: "Captcha is not configured.",
           details: "Please describe the jewelry item you are interested in",
           submit: "Submit",
-          // appointmentType: "Appointment Type",
-          // appointmentTypePlaceholder: "Select type",
-          // storeAppointment: "Store Appointment",
-          // virtualAppointment: "Virtual Appointment",
+          appointmentType: "Appointment Type",
+          appointmentTypePlaceholder: "Select type",
+          storeAppointment: "Store Appointment",
+          virtualAppointment: "Virtual Appointment",
         };
   const weekendMessage =
     languageKey === "fi"
@@ -156,10 +156,10 @@ export default function AppointmentPage() {
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
   const recaptchaWidgetId = useRef<number | null>(null);
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
-// const appointmentTypeOptions = [
-//   { value: "store", label: labels.storeAppointment },
-//   { value: "virtual", label: labels.virtualAppointment },
-// ];
+const appointmentTypeOptions = [
+  { value: "store", label: labels.storeAppointment },
+  { value: "virtual", label: labels.virtualAppointment },
+];
   const resetRecaptcha = () => {
     if (typeof window === "undefined") return;
     if (window.grecaptcha && typeof window.grecaptcha.reset === "function") {
@@ -626,7 +626,7 @@ export default function AppointmentPage() {
         date: form.appointmentDate,
         time_slot: form.appointmentSlot,
         description: form.details.trim(),
-        //  appointment_type: form.appointmentType,
+        appointment_type: form.appointmentType,
         recaptcha_token: recaptchaToken,
       };
       const { data } = await axiosClient.post(
@@ -750,7 +750,7 @@ export default function AppointmentPage() {
                 onChange={handleChange}
                 options={slotOptionsForDate}
               />
-              {/* <SelectField
+              <SelectField
                label={labels.appointmentType}
               name="appointmentType"
               placeholder={labels.appointmentTypePlaceholder}
@@ -759,7 +759,7 @@ export default function AppointmentPage() {
                 value={form.appointmentType}
                 onChange={handleChange}
                 options={appointmentTypeOptions}
-              /> */}
+              />
 
 
 
