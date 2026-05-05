@@ -114,7 +114,6 @@ async function fetchGeoJsonCached() {
   }
   const testIp = await getIpAddress();
 
-  console.log("testIp", testIp);
   const geoUrl = new URL("/api/geo", window.location.origin);
   if (testIp) {
     geoUrl.searchParams.set("ip", testIp);

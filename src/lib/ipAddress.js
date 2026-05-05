@@ -1,17 +1,38 @@
 /**
- * Public IP from ipify.org. Works in the browser and in Node (Route Handlers).
+ * Public IP from ipify.org with backend fallback.
  * Note: on the server this is the deployment egress IP unless the caller is forwarding the real client IP.
  * @returns {Promise<string>}
  */
 export async function getIpAddress() {
-  try {
-    const response = await fetch("https://api.ipify.org?format=json", {
-      cache: "no-store",
-    });
-    const data = await response.json();
-    return typeof data?.ip === "string" ? data.ip : "";
-  } catch (error) {
-    console.error("Error fetching IP:", error);
-    return "";
+  const endpoints = [
+    "https://api.ipify.org?format=json",
+    "https://ipapi.co/json/",
+    "https://api.my-ip.io/ip.json",
+    "https://api.ip.sb/jsonip",
+    'https://checkip.amazonaws.com',
+  ];
+  const errors = [];
+
+  for (const endpoint of endpoints) {
+    try {
+      const response = await fetch(endpoint, {
+        cache: "no-store",
+      });
+
+      if (!response.ok) {
+        errors.push(new Error(`Failed to fetch IP from ${endpoint}: ${response.status}`));
+        continue;
+      }
+
+      const data = await response.json();
+      if (typeof data?.ip === "string") {
+        return data.ip;
+      }
+    } catch (error) {
+      errors.push(error);
+    }
   }
+
+  console.error("Error fetching IP:", errors);
+  return "";
 }
