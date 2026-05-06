@@ -22,6 +22,33 @@ function getBackendBaseUrl() {
   );
 }
 
+function isPrivateOrLoopback(ip) {
+  if (!ip) return true;
+
+  const value = ip.replace(/^::ffff:/, "");
+  if (value === "::1" || value === "127.0.0.1") return true;
+  if (value.startsWith("10.") || value.startsWith("192.168.")) return true;
+
+  const match = value.match(/^172\.(\d+)\./);
+  if (match) {
+    const octet = parseInt(match[1], 10);
+    if (octet >= 16 && octet <= 31) return true;
+  }
+
+  return false;
+}
+
+function getPublicIpFromHeaders(headers) {
+  const candidates = [
+    headers.get("x-forwarded-for")?.split(",")[0]?.trim(),
+    headers.get("x-real-ip"),
+    headers.get("cf-connecting-ip"),
+    headers.get("true-client-ip"),
+  ].filter(Boolean);
+
+  return candidates.find((ip) => !isPrivateOrLoopback(ip)) ?? null;
+}
+
 function cacheGet(ip) {
   const row = cache.get(ip);
   if (!row) return null;
@@ -157,13 +184,11 @@ export async function GET(request) {
       });
     }
 
-    const headerIp =
-      request.headers.get("x-forwarded-for")?.split(",")[0]?.trim() ||
-      request.headers.get("x-real-ip");
+    const headerIp = getPublicIpFromHeaders(request.headers);
 
     const ip = testIp || headerIp || (await getIpAddress());
 
-    if (!ip || ip === "::1" || ip === "127.0.0.1") {
+    if (isPrivateOrLoopback(ip)) {
       return NextResponse.json({
         countryCode: null,
         ip: null,
