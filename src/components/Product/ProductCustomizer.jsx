@@ -1454,9 +1454,16 @@ export default function ProductCustomizer({
   const selectedQualityId =
     qualityOptions.find((opt) => opt.value === quality)?.value ??
     normalizeString(quality);
+
+  // this is added for crical fix nirmit adde on 05/05/2026
   const selectedClarityId =
     filteredClarityOptions.find((opt) => opt.value === clarity)?.value ??
-    normalizeString(clarity);
+    (filteredClarityOptions.length > 0
+      ? filteredClarityOptions[0].value
+      : "");
+
+
+
   const selectedMetalId =
     metalOptions.find((opt) => opt.value === metal)?.value ??
     normalizeString(metal);
@@ -1556,6 +1563,15 @@ export default function ProductCustomizer({
       setVariantDetails(null);
       setVariantAdjustedFilters(null);
       setVariantDesignAvailable(null);
+      setVariantLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+    // this is added by nirmit added on 05/05/2026
+    // ─── CRITICAL: Skip fetch if clarity is invalid ───
+    // This prevents sending invalid clarity_id to API which causes wrong pricing
+    if (showClaritySelect && clarity && !filteredClarityOptions.some((opt) => opt.value === clarity)) {
       setVariantLoading(false);
       return () => {
         active = false;
@@ -1683,6 +1699,10 @@ export default function ProductCustomizer({
     hasPrefilledVariant,
     currencyCode,
     currencySymbol,
+    // this is added for critical fix nirmit added on 05/05/2026
+    showClaritySelect,
+    clarity,
+    filteredClarityOptions,
   ]);
 
   useEffect(() => {
