@@ -1458,9 +1458,11 @@ export default function ProductCustomizer({
   // this is added for crical fix nirmit adde on 05/05/2026
   const selectedClarityId =
     filteredClarityOptions.find((opt) => opt.value === clarity)?.value ??
-    (filteredClarityOptions.length > 0
-      ? filteredClarityOptions[0].value
-      : "");
+      normalizeString(clarity);
+      // auto code removed
+    // (filteredClarityOptions.length > 0
+    //   ? filteredClarityOptions[0].value
+    //   : "");
 
 
 
@@ -1568,16 +1570,16 @@ export default function ProductCustomizer({
         active = false;
       };
     }
-    // this is added by nirmit added on 05/05/2026
-    // ─── CRITICAL: Skip fetch if clarity is invalid ───
-    // This prevents sending invalid clarity_id to API which causes wrong pricing
-    if (showClaritySelect && clarity && !filteredClarityOptions.some((opt) => opt.value === clarity)) {
-      setVariantLoading(false);
-      return () => {
-        active = false;
-      };
-    }
-
+    // // this is added by nirmit added on 05/05/2026
+    // // ─── CRITICAL: Skip fetch if clarity is invalid ───
+    // // This prevents sending invalid clarity_id to API which causes wrong pricing
+    // if (showClaritySelect && clarity && !filteredClarityOptions.some((opt) => opt.value === clarity)) {
+    //   setVariantLoading(false);
+    //   return () => {
+    //     active = false;
+    //   };
+    // }
+    //remove auto code
     if (
       filterAvailabilityValue === "4" &&
       hasPrefilledVariant &&
@@ -1700,9 +1702,10 @@ export default function ProductCustomizer({
     currencyCode,
     currencySymbol,
     // this is added for critical fix nirmit added on 05/05/2026
-    showClaritySelect,
-    clarity,
-    filteredClarityOptions,
+    // showClaritySelect,
+    // clarity,
+    // filteredClarityOptions,
+    // remove auto code 
   ]);
 
   useEffect(() => {
