@@ -1,17 +1,14 @@
 /**
- * Public IP from ipify.org with backend fallback.
+ * Public IP from server-side providers.
  * Note: on the server this is the deployment egress IP unless the caller is forwarding the real client IP.
  * @returns {Promise<string>}
  */
 export async function getIpAddress() {
-  const endpoints = [
-    "https://api.ipify.org?format=json",
-    "https://ipapi.co/json/",
-    "https://api.my-ip.io/ip.json",
-    "https://api.ip.sb/jsonip",
-    'https://checkip.amazonaws.com',
-  ];
-  const errors = [];
+  if (typeof window !== "undefined") {
+    return "";
+  }
+
+  const endpoints = ["https://api.ipify.org?format=json", "https://api64.ipify.org?format=json", "https://ipapi.co/json/"];
 
   for (const endpoint of endpoints) {
     try {
@@ -20,7 +17,6 @@ export async function getIpAddress() {
       });
 
       if (!response.ok) {
-        errors.push(new Error(`Failed to fetch IP from ${endpoint}: ${response.status}`));
         continue;
       }
 
@@ -29,10 +25,11 @@ export async function getIpAddress() {
         return data.ip;
       }
     } catch (error) {
-      errors.push(error);
+      if (endpoint === endpoints.at(-1)) {
+        console.error("Error fetching IP:", error);
+      }
     }
   }
 
-  console.error("Error fetching IP:", errors);
   return "";
 }
