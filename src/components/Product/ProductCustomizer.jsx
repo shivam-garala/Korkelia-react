@@ -2010,10 +2010,11 @@ export default function ProductCustomizer({
         {diamondDetailGroups.length ? (
           <>
             <div className={styles.diamondDetailGroups}>
-              {diamondDetailGroups.map((group) => (
+              {diamondDetailGroups.map((group) => {
+                return (
                 <div className={styles.diamondDetailGroup} key={group.cutName}>
                   <div className={styles.fieldTitle}>
-                    {group.cutName} {diamondCaratLabel}
+                    {group.cutName} {diamondCaratLabel} 
                   </div>
                   <div className={styles.pills}>
                     {group.carats.map((value) => (
@@ -2028,7 +2029,7 @@ export default function ProductCustomizer({
                     ))}
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
             <div className={styles.divider} aria-hidden />
           </>
