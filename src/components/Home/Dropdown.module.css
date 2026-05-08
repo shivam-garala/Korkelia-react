@@ -32,7 +32,7 @@
 .currencySymbol {
   flex-shrink: 0;
   min-width: 1.25em;
-  font-size: 18px;
+  font-size: 15px;
   font-weight: 500;
   line-height: 1;
   color: #2f6b62;
@@ -117,7 +117,7 @@
   flex: 1;
   min-width: 0;
   text-align: left;
-  line-height: 1.35;
+  line-height: 1.05;
   font-weight: 400;
 }
 
