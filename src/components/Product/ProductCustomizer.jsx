@@ -647,6 +647,8 @@ export default function ProductCustomizer({
   const [variantEnabled, setVariantEnabled] = useState(false);
   const [variantAdjustedFilters, setVariantAdjustedFilters] = useState(null);
   const [variantDesignAvailable, setVariantDesignAvailable] = useState(null);
+  // added on 07/05/2026 by NIRMIT - tracks if current user-selected combination exists in DB
+  const [designAvailable, setDesignAvailable] = useState(true);
   const [defaultsApplied, setDefaultsApplied] = useState(false);
   const [cut, setCut] = useState(() => normalizeString(defaultCutId));
   const [quality, setQuality] = useState(() =>
@@ -667,6 +669,8 @@ export default function ProductCustomizer({
   const skipNextVariantFetchRef = useRef(false);
   const lastListingRefreshRef = useRef("");
   const userVariantInteractionRef = useRef(false);
+  // added on 07/05/2026 by NIRMIT - prevents auto-reset of cut when user has explicitly selected one
+  const userSelectedCutRef = useRef(false);
 
   // ─── FIX: track previous currency so we can detect actual changes ───
   const prevCurrencyCodeRef = useRef(currencyCode);
@@ -860,6 +864,7 @@ export default function ProductCustomizer({
     setSize("");
     setEngraving("");
     userVariantInteractionRef.current = false;
+    userSelectedCutRef.current = false; // edited on 07/05/2026 by NIRMIT - reset on product change
     setVariantEnabled(
       Boolean(
         nextCut ||
@@ -1387,10 +1392,13 @@ export default function ProductCustomizer({
     [dropdownStyles],
   );
 
+  // edited on 07/05/2026 by NIRMIT - guard added so user-selected cut is not auto-reset when filter options reload
   useEffect(() => {
     if (hideCutSection) return;
     if (cutOptions.length && !cutOptions.some((opt) => opt.id === cut)) {
-      setCut(cutOptions[0].id);
+      if (!userSelectedCutRef.current) {
+        setCut(cutOptions[0].id);
+      }
     }
   }, [cutOptions, cut, hideCutSection]);
 
@@ -1555,6 +1563,7 @@ export default function ProductCustomizer({
       setVariantDetails(null);
       setVariantAdjustedFilters(null);
       setVariantDesignAvailable(null);
+      setDesignAvailable(true); // added on 07/05/2026 by NIRMIT - reset when variant disabled
       setVariantLoading(false);
       return () => {
         active = false;
@@ -1565,6 +1574,7 @@ export default function ProductCustomizer({
       setVariantDetails(null);
       setVariantAdjustedFilters(null);
       setVariantDesignAvailable(null);
+      setDesignAvailable(true); // added on 07/05/2026 by NIRMIT - reset when required params missing
       setVariantLoading(false);
       return () => {
         active = false;
@@ -1639,27 +1649,42 @@ export default function ProductCustomizer({
           const payload = unwrapVariantPayload(
             response?.data ?? response ?? null,
           );
-          setVariantDetails(payload);
-          const updated = updateCacheWithVariant(productId, payload, {
-            userInitiated: userVariantInteractionRef.current,
-          });
-          if (updated) {
-            setProductDetails(updated);
-          }
-          setVariantAdjustedFilters(
-            response?.adjusted_filters ??
-              payload?.adjusted_filters ??
-              response?.adjustedFilters ??
-              payload?.adjustedFilters ??
-              null,
-          );
-          setVariantDesignAvailable(
+          // added on 07/05/2026 by NIRMIT - check design availability before updating state
+          const rawAvailability =
             response?.is_design_avl ??
-              payload?.is_design_avl ??
-              response?.isDesignAvailable ??
-              payload?.isDesignAvailable ??
-              null,
-          );
+            payload?.is_design_avl ??
+            response?.isDesignAvailable ??
+            payload?.isDesignAvailable ??
+            null;
+          const availStr = normalizeString(rawAvailability).toLowerCase();
+          const unavailable = availStr === "0" || availStr === "false";
+
+          if (unavailable && userVariantInteractionRef.current) {
+            // added on 07/05/2026 by NIRMIT - design not available for user's chosen combination:
+            // skip payload update so wrong cut images/price do not overwrite correct ones,
+            // set designAvailable=false so stableDisplayPrice is suppressed and enquire shows
+            setDesignAvailable(false);
+            setVariantDetails(null);
+            setVariantAdjustedFilters(null);
+            setVariantDesignAvailable(rawAvailability);
+          } else {
+            setDesignAvailable(true); // added on 07/05/2026 by NIRMIT
+            setVariantDetails(payload);
+            const updated = updateCacheWithVariant(productId, payload, {
+              userInitiated: userVariantInteractionRef.current,
+            });
+            if (updated) {
+              setProductDetails(updated);
+            }
+            setVariantAdjustedFilters(
+              response?.adjusted_filters ??
+                payload?.adjusted_filters ??
+                response?.adjustedFilters ??
+                payload?.adjustedFilters ??
+                null,
+            );
+            setVariantDesignAvailable(rawAvailability);
+          }
         }
       } catch (error) {
         if (active) {
@@ -1723,6 +1748,9 @@ export default function ProductCustomizer({
       return;
     }
 
+    // added on 07/05/2026 by NIRMIT - if user has interacted, skip auto-adjustment so enquire shows for unavailable combos
+    if (userVariantInteractionRef.current) return;
+
     const adjusted = variantAdjustedFilters ?? {};
     const nextCut = normalizeString(adjusted.cut_id ?? adjusted.cutId ?? "");
     const nextQuality = normalizeString(
@@ -1751,14 +1779,20 @@ export default function ProductCustomizer({
       return options.some((opt) => matcher(opt, value));
     };
 
+    // added on 07/05/2026 by NIRMIT - track only actual state changes so skipNextVariantFetchRef
+    // is not set when the cut change was blocked by userSelectedCutRef
+    let anyFilterActuallyChanged = false;
+
     if (!hideCutSection) {
       const canUseCut = canUseOption(
         nextCut,
         cutOptions,
         (opt, value) => opt.id === value,
       );
-      if (nextCut && nextCut !== cut && canUseCut) {
+      // edited on 07/05/2026 by NIRMIT - skip cut override if user explicitly selected this cut
+      if (nextCut && nextCut !== cut && canUseCut && !userSelectedCutRef.current) {
         setCut(nextCut);
+        anyFilterActuallyChanged = true;
       }
     }
 
@@ -1769,6 +1803,7 @@ export default function ProductCustomizer({
     );
     if (nextQuality && nextQuality !== quality && canUseQuality) {
       setQuality(nextQuality);
+      anyFilterActuallyChanged = true;
     }
 
     const canUseClarity = canUseOption(
@@ -1778,6 +1813,7 @@ export default function ProductCustomizer({
     );
     if (nextClarity && nextClarity !== clarity && canUseClarity) {
       setClarity(nextClarity);
+      anyFilterActuallyChanged = true;
     }
 
     if (!hideCaratSection) {
@@ -1785,6 +1821,7 @@ export default function ProductCustomizer({
         nextCarat && (!caratOptions.length || caratOptions.includes(nextCarat));
       if (nextCarat && nextCarat !== carat && canUseCarat) {
         setCarat(nextCarat);
+        anyFilterActuallyChanged = true;
       }
     }
 
@@ -1795,6 +1832,7 @@ export default function ProductCustomizer({
     );
     if (nextMetal && nextMetal !== metal && canUseMetal) {
       setMetal(nextMetal);
+      anyFilterActuallyChanged = true;
     }
 
     const metalTypeList = filteredMetalTypeOptions.length
@@ -1807,16 +1845,11 @@ export default function ProductCustomizer({
     );
     if (nextKarat && nextKarat !== metalType && canUseKarat) {
       setMetalType(nextKarat);
+      anyFilterActuallyChanged = true;
     }
 
-    if (
-      (!hideCutSection && nextCut && nextCut !== cut) ||
-      (nextQuality && nextQuality !== quality) ||
-      (nextClarity && nextClarity !== clarity) ||
-      (!hideCaratSection && nextCarat && nextCarat !== carat) ||
-      (nextMetal && nextMetal !== metal) ||
-      (nextKarat && nextKarat !== metalType)
-    ) {
+    // edited on 07/05/2026 by NIRMIT - only skip next fetch if a filter was actually changed
+    if (anyFilterActuallyChanged) {
       skipNextVariantFetchRef.current = true;
     }
   }, [
@@ -1881,7 +1914,10 @@ export default function ProductCustomizer({
       ? lastDisplayPrice
       : "";
 
-  const stableDisplayPrice = currentDisplayPrice || previousDisplayPrice;
+  // edited on 07/05/2026 by NIRMIT - suppress price when user's chosen combination is unavailable
+  const stableDisplayPrice = designAvailable
+    ? currentDisplayPrice || previousDisplayPrice
+    : "";
   const shouldShowPrice = true;
 
   // ─── FIX: persist price keyed by currency ───
@@ -1913,6 +1949,7 @@ export default function ProductCustomizer({
                   className={`${styles.cut} ${cut === item.id ? styles.cutActive : ""}`}
                   onClick={() => {
                     markVariantInteraction();
+                    userSelectedCutRef.current = true; // added on 07/05/2026 by NIRMIT
                     setCut(item.id);
                   }}
                 >
