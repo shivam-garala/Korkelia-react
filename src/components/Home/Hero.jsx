@@ -19,6 +19,23 @@ export default function Hero({
   const mobileVideoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
 
+  const MOBILE_START = 4;
+  const MOBILE_END = 31;
+
+  const handleMobileLoaded = () => {
+    const video = mobileVideoRef.current;
+    if (!video) return;
+    video.currentTime = MOBILE_START;
+  };
+
+  const handleMobileTimeUpdate = () => {
+    const video = mobileVideoRef.current;
+    if (!video) return;
+    if (video.currentTime >= MOBILE_END) {
+      video.currentTime = MOBILE_START;
+    }
+  };
+
   const toggleMute = () => {
     const video = mobileVideoRef.current;
     if (!video) return;
@@ -51,9 +68,10 @@ export default function Hero({
                 className={[styles.video, styles.mobileVideo].join(" ")}
                 autoPlay
                 muted
-                loop
                 playsInline
                 preload="metadata"
+                onLoadedMetadata={handleMobileLoaded}
+                onTimeUpdate={handleMobileTimeUpdate}
               >
                 <source src={mobileVideoSrc} type="video/mp4" />
               </video>
