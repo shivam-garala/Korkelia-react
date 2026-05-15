@@ -60,6 +60,7 @@ export default function InquiriesPage() {
     date: "",
     appointment_type: "",
     time_slot: "",
+    display_time_slot: "",
   });
 
   useEffect(() => {
@@ -77,7 +78,17 @@ export default function InquiriesPage() {
       phone_number: item.phone_number ?? "-",
       country: item.country ?? "-",
       date: item.date ?? "-",
-      time_slot: item.time_slot ?? "-",
+      time_slot: item.time_slot ? (
+  <>
+    {item.time_slot}{" "}
+    <small style={{ color: "#888", fontSize: "0.78em" }}>
+      <br />
+      (EET, UTC + 2:00)
+    </small>
+  </>
+) : "-",
+      display_time_slot: item.display_time_slot ?? "-",
+      display_timezone: item.display_timezone ?? "",
       appointment_type: item.appointment_type ?? "-",
       description: item.description ?? "-",
     }));
@@ -92,9 +103,10 @@ export default function InquiriesPage() {
     const phoneQuery = normalize(filters.phone_number);
     const dateQuery = normalize(filters.date);
     const timeSlotQuery = normalize(filters.time_slot);
+    const displayTimeSlotQuery = normalize(filters.display_time_slot);
     const appointmentTypeQuery = normalize(filters.appointment_type);
 
-    if (!noQuery && !firstNameQuery && !lastNameQuery && !emailQuery && !phoneQuery && !dateQuery && !timeSlotQuery && !appointmentTypeQuery) {
+    if (!noQuery && !firstNameQuery && !lastNameQuery && !emailQuery && !phoneQuery && !dateQuery && !timeSlotQuery && !displayTimeSlotQuery && !appointmentTypeQuery) {
       return tableRows;
     }
 
@@ -106,8 +118,9 @@ export default function InquiriesPage() {
       const phoneMatches = phoneQuery ? normalize(row.phone_number).includes(phoneQuery) : true;
       const dateMatches = dateQuery ? normalize(row.date).includes(dateQuery) : true;
       const timeSlotMatches = timeSlotQuery ? normalize(row.time_slot).includes(timeSlotQuery) : true;
+      const displayTimeSlotMatches = displayTimeSlotQuery ? normalize(row.display_time_slot).includes(displayTimeSlotQuery) : true;
       const appointmentTypeMatches = appointmentTypeQuery ? normalize(row.appointment_type).includes(appointmentTypeQuery) : true;
-      return noMatches && firstNameMatches && lastNameMatches && emailMatches && phoneMatches && dateMatches && timeSlotMatches && appointmentTypeMatches;
+      return noMatches && firstNameMatches && lastNameMatches && emailMatches && phoneMatches && dateMatches && timeSlotMatches && displayTimeSlotMatches && appointmentTypeMatches;
     });
   }, [filters, tableRows]);
 
@@ -130,7 +143,29 @@ export default function InquiriesPage() {
     { key: "email", header: "Email", filterable: true, filterPlaceholder: "Search Email" },
     { key: "phone_number", header: "Phone", filterable: true, filterPlaceholder: "Search Phone" },
     { key: "date", header: "Date", filterable: true, filterPlaceholder: "Search Date" },
-    { key: "time_slot", header: "Time Slot", filterable: true, filterPlaceholder: "Search Time Slot" },
+    { key: "time_slot", header: "Time Slot (Helsinki)", filterable: false, filterPlaceholder: "Search Time Slot" },
+    {
+      key: "display_time_slot",
+      header: "Time Slot By Client (Selected Timezone)",
+      filterable: false,
+      filterPlaceholder: "Search Local Time Slot",
+      render: (row) => {
+        const time = row.display_time_slot;
+        const tz = row.display_timezone;
+        if (!time || time === "-") return "-";
+        return (
+          <span>
+            {time}
+            {tz && (
+              <>
+                <br />
+                <small style={{ color: "#888", fontSize: "0.78em" }}>({tz})</small>
+              </>
+            )}
+          </span>
+        );
+      },
+    },
     { key: "appointment_type", header: "Appointment Type", filterable: true, filterPlaceholder: "Search Appointment Type" },
     {
       key: "actions",
