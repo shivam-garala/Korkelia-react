@@ -59,6 +59,10 @@ const nextConfig = {
         protocol: "https",
         hostname: "d3s5kl2h1nwckf.cloudfront.net",
       },
+      {
+      protocol: "https",
+      hostname: "imagesweb2026.s3.eu-north-1.amazonaws.com",
+      },
     ],
   },
   turbopack: {

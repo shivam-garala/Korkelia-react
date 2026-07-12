@@ -47,15 +47,18 @@ export default function Dropdown({
   }, [ref]);
 
   const iconSrc =
-    active?.icon ??
-    (leadingIcon === "globe"
-      ? "/icons/world.png"
-      : leadingIcon === "currency"
-      ? "/icons/euro.svg"
-      : leadingIcon === "menu"
-      ? "/icons/menu.png"
-      : null);
+    active?.flagEmoji || active?.symbol
+      ? null
+      : active?.icon ??
+        (leadingIcon === "globe"
+          ? "/icons/world.png"
+          : leadingIcon === "currency"
+          ? "/icons/euro.svg"
+          : leadingIcon === "menu"
+          ? "/icons/menu.png"
+          : null);
   const iconAlt = active?.iconAlt ?? "";
+  const triggerLabel = active?.name ?? active?.label ?? "";
 
   return (
     <div className={styles.wrap} ref={ref}>
@@ -69,7 +72,16 @@ export default function Dropdown({
         aria-controls={open && mounted ? menuId : undefined}
         onClick={() => options.length > 1 && setOpen((prev) => !prev)}
       >
-        {iconSrc ? (
+        {active?.flagEmoji ? (
+          <span className={styles.flagEmoji} aria-hidden>
+            {active.flagEmoji}
+          </span>
+        ) : null}
+        {active?.symbol ? (
+          <span className={styles.currencySymbol} aria-hidden>
+            {active.symbol}
+          </span>
+        ) : iconSrc ? (
           <Image
             className={styles.icon}
             src={iconSrc}
@@ -79,7 +91,7 @@ export default function Dropdown({
             unoptimized
           />
         ) : null}
-        <span className={styles.label}>{active?.label}</span>
+        <span className={styles.label}>{triggerLabel}</span>
         {options.length > 1 ? (
           <Image
             className={styles.caret}
@@ -112,7 +124,16 @@ export default function Dropdown({
               }}
             >
               <span className={styles.itemInner}>
-                {option.icon ? (
+                {option.flagEmoji ? (
+                  <span className={styles.flagEmoji} aria-hidden>
+                    {option.flagEmoji}
+                  </span>
+                ) : null}
+                {option.symbol ? (
+                  <span className={styles.currencySymbol} aria-hidden>
+                    {option.symbol}
+                  </span>
+                ) : option.icon ? (
                   <Image
                     className={styles.optionIcon}
                     src={option.icon}
@@ -122,7 +143,9 @@ export default function Dropdown({
                     unoptimized
                   />
                 ) : null}
-                <span className={styles.optionLabel}>{option.label}</span>
+                <span className={styles.optionLabel}>
+                  {option.name ?? option.label}
+                </span>
               </span>
             </button>
           ))}

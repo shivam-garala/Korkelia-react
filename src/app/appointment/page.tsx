@@ -34,6 +34,7 @@ const initialForm = {
   appointmentDate: "",
   appointmentSlot: "",
   details: "",
+  appointmentType: "",
 };
 
 const isWeekendDay = (date) => {
@@ -72,10 +73,164 @@ const normalizeSlotSelection = (value, options) => {
   return validValues.includes(String(value)) ? String(value) : "";
 };
 
+const STORE_TIMEZONE = "Europe/Helsinki";
+
+const COUNTRY_TIMEZONE_MAP: Record<string, string> = {
+  AF: "Asia/Kabul",          AG: "America/Antigua",     AL: "Europe/Tirane",
+  AM: "Asia/Yerevan",        AO: "Africa/Luanda",       AR: "America/Argentina/Buenos_Aires",
+  AT: "Europe/Vienna",       AU: "Australia/Sydney",    AZ: "Asia/Baku",
+  BA: "Europe/Sarajevo",     BB: "America/Barbados",    BD: "Asia/Dhaka",
+  BE: "Europe/Brussels",     BF: "Africa/Ouagadougou",  BG: "Europe/Sofia",
+  BH: "Asia/Bahrain",        BI: "Africa/Bujumbura",    BJ: "Africa/Porto-Novo",
+  BN: "Asia/Brunei",         BO: "America/La_Paz",      BR: "America/Sao_Paulo",
+  BS: "America/Nassau",      BT: "Asia/Thimphu",        BW: "Africa/Gaborone",
+  BY: "Europe/Minsk",        BZ: "America/Belize",      CA: "America/Toronto",
+  CD: "Africa/Kinshasa",     CF: "Africa/Bangui",       CG: "Africa/Brazzaville",
+  CH: "Europe/Zurich",       CI: "Africa/Abidjan",      CL: "America/Santiago",
+  CM: "Africa/Douala",       CN: "Asia/Shanghai",       CO: "America/Bogota",
+  CR: "America/Costa_Rica",  CU: "America/Havana",      CV: "Atlantic/Cape_Verde",
+  CY: "Asia/Nicosia",        CZ: "Europe/Prague",       DE: "Europe/Berlin",
+  DJ: "Africa/Djibouti",     DK: "Europe/Copenhagen",   DO: "America/Santo_Domingo",
+  DZ: "Africa/Algiers",      EC: "America/Guayaquil",   EE: "Europe/Tallinn",
+  EG: "Africa/Cairo",        ER: "Africa/Asmara",       ES: "Europe/Madrid",
+  ET: "Africa/Addis_Ababa",  FI: "Europe/Helsinki",     FJ: "Pacific/Fiji",
+  FR: "Europe/Paris",        GA: "Africa/Libreville",   GB: "Europe/London",
+  GD: "America/Grenada",     GE: "Asia/Tbilisi",        GH: "Africa/Accra",
+  GM: "Africa/Banjul",       GN: "Africa/Conakry",      GQ: "Africa/Malabo",
+  GR: "Europe/Athens",       GT: "America/Guatemala",   GW: "Africa/Bissau",
+  GY: "America/Guyana",      HN: "America/Tegucigalpa", HR: "Europe/Zagreb",
+  HT: "America/Port-au-Prince", HU: "Europe/Budapest",  ID: "Asia/Jakarta",
+  IE: "Europe/Dublin",       IL: "Asia/Jerusalem",      IN: "Asia/Kolkata",
+  IQ: "Asia/Baghdad",        IR: "Asia/Tehran",         IS: "Atlantic/Reykjavik",
+  IT: "Europe/Rome",         JM: "America/Jamaica",     JO: "Asia/Amman",
+  JP: "Asia/Tokyo",          KE: "Africa/Nairobi",      KG: "Asia/Bishkek",
+  KH: "Asia/Phnom_Penh",    KI: "Pacific/Tarawa",      KM: "Indian/Comoro",
+  KN: "America/St_Kitts",   KP: "Asia/Pyongyang",      KR: "Asia/Seoul",
+  KW: "Asia/Kuwait",         KZ: "Asia/Almaty",         LA: "Asia/Vientiane",
+  LB: "Asia/Beirut",         LC: "America/St_Lucia",    LI: "Europe/Vaduz",
+  LK: "Asia/Colombo",        LR: "Africa/Monrovia",     LS: "Africa/Maseru",
+  LT: "Europe/Vilnius",      LU: "Europe/Luxembourg",   LV: "Europe/Riga",
+  LY: "Africa/Tripoli",      MA: "Africa/Casablanca",   MC: "Europe/Monaco",
+  MD: "Europe/Chisinau",     ME: "Europe/Podgorica",    MG: "Indian/Antananarivo",
+  MK: "Europe/Skopje",       ML: "Africa/Bamako",       MM: "Asia/Rangoon",
+  MN: "Asia/Ulaanbaatar",    MR: "Africa/Nouakchott",   MT: "Europe/Malta",
+  MU: "Indian/Mauritius",    MV: "Indian/Maldives",     MW: "Africa/Blantyre",
+  MX: "America/Mexico_City", MY: "Asia/Kuala_Lumpur",   MZ: "Africa/Maputo",
+  NA: "Africa/Windhoek",     NE: "Africa/Niamey",       NG: "Africa/Lagos",
+  NI: "America/Managua",     NL: "Europe/Amsterdam",    NO: "Europe/Oslo",
+  NP: "Asia/Kathmandu",      NR: "Pacific/Nauru",       NZ: "Pacific/Auckland",
+  OM: "Asia/Muscat",         PA: "America/Panama",      PE: "America/Lima",
+  PG: "Pacific/Port_Moresby",PH: "Asia/Manila",         PK: "Asia/Karachi",
+  PL: "Europe/Warsaw",       PT: "Europe/Lisbon",       PW: "Pacific/Palau",
+  PY: "America/Asuncion",    QA: "Asia/Qatar",          RO: "Europe/Bucharest",
+  RS: "Europe/Belgrade",     RU: "Europe/Moscow",       RW: "Africa/Kigali",
+  SA: "Asia/Riyadh",         SB: "Pacific/Guadalcanal", SC: "Indian/Mahe",
+  SD: "Africa/Khartoum",     SE: "Europe/Stockholm",    SG: "Asia/Singapore",
+  SI: "Europe/Ljubljana",    SK: "Europe/Bratislava",   SL: "Africa/Freetown",
+  SM: "Europe/San_Marino",   SN: "Africa/Dakar",        SO: "Africa/Mogadishu",
+  SR: "America/Paramaribo",  SS: "Africa/Juba",         ST: "Africa/Sao_Tome",
+  SV: "America/El_Salvador", SY: "Asia/Damascus",       SZ: "Africa/Mbabane",
+  TD: "Africa/Ndjamena",     TG: "Africa/Lome",         TH: "Asia/Bangkok",
+  TJ: "Asia/Dushanbe",       TL: "Asia/Dili",           TM: "Asia/Ashgabat",
+  TN: "Africa/Tunis",        TO: "Pacific/Tongatapu",   TR: "Europe/Istanbul",
+  TT: "America/Port_of_Spain", TV: "Pacific/Funafuti",  TZ: "Africa/Dar_es_Salaam",
+  UA: "Europe/Kiev",         UG: "Africa/Kampala",      US: "America/New_York",
+  UY: "America/Montevideo",  UZ: "Asia/Tashkent",       VA: "Europe/Vatican",
+  VC: "America/St_Vincent",  VE: "America/Caracas",     VN: "Asia/Ho_Chi_Minh",
+  VU: "Pacific/Efate",       WS: "Pacific/Apia",        YE: "Asia/Aden",
+  ZA: "Africa/Johannesburg", ZM: "Africa/Lusaka",       ZW: "Africa/Harare",
+  AE: "Asia/Dubai",          UK: "Europe/London",
+};
+
+function convertSlotTime(timeStr: string, targetTz: string): string {
+  const match = timeStr.trim().match(/^(\d{1,2}):(\d{2})\s*(AM|PM)$/i);
+  if (!match) return timeStr;
+  let h = parseInt(match[1]);
+  const m = parseInt(match[2]);
+  const meridiem = match[3].toUpperCase();
+  if (meridiem === "PM" && h !== 12) h += 12;
+  if (meridiem === "AM" && h === 12) h = 0;
+
+  const now = new Date();
+  const y = now.getUTCFullYear();
+  const mo = String(now.getUTCMonth() + 1).padStart(2, "0");
+  const d = String(now.getUTCDate()).padStart(2, "0");
+  const ref = new Date(
+    `${y}-${mo}-${d}T${String(h).padStart(2, "0")}:${String(m).padStart(2, "0")}:00Z`
+  );
+
+  const hkParts = new Intl.DateTimeFormat("en-US", {
+    timeZone: STORE_TIMEZONE,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: false,
+  }).formatToParts(ref);
+  const hkH = parseInt(hkParts.find((p) => p.type === "hour")!.value);
+  const hkM = parseInt(hkParts.find((p) => p.type === "minute")!.value);
+  const diffMs = (h * 60 + m - (hkH * 60 + hkM)) * 60000;
+  const corrected = new Date(ref.getTime() + diffMs);
+
+  return new Intl.DateTimeFormat("en-US", {
+    timeZone: targetTz,
+    hour: "2-digit",
+    minute: "2-digit",
+    hour12: true,
+  }).format(corrected);
+}
+
+function convertSlotLabel(slotStr: string, targetTz: string): string {
+  if (!targetTz || targetTz === STORE_TIMEZONE) return slotStr;
+  const parts = slotStr.split(" to ");
+  if (parts.length !== 2) return slotStr;
+  try {
+    const localStart = convertSlotTime(parts[0], targetTz);
+    const localEnd = convertSlotTime(parts[1], targetTz);
+    return `${localStart} to ${localEnd}`;
+  } catch {
+    return slotStr;
+  }
+}
+
+function getTimezoneLabel(tz: string): string {
+  try {
+    const now = new Date();
+    // Short abbreviation e.g. "EET", "IST", "GMT+3"
+    const abbrParts = new Intl.DateTimeFormat("en-US", {
+      timeZone: tz,
+      timeZoneName: "short",
+    }).formatToParts(now);
+    const abbr = abbrParts.find((p) => p.type === "timeZoneName")?.value ?? tz;
+
+    // Compute UTC offset in minutes by comparing formatted local time to UTC
+    const utcStr = now.toLocaleString("en-US", { timeZone: "UTC" });
+    const tzStr = now.toLocaleString("en-US", { timeZone: tz });
+    const offsetMinutes = (new Date(tzStr).getTime() - new Date(utcStr).getTime()) / 60000;
+    const sign = offsetMinutes >= 0 ? "+" : "-";
+    const absMin = Math.abs(offsetMinutes);
+    const hours = Math.floor(absMin / 60);
+    const minutes = absMin % 60;
+    const offset = `UTC ${sign} ${hours}:${minutes.toString().padStart(2, "0")}`;
+
+    return `${abbr}, ${offset}`;
+  } catch {
+    return "EET, UTC + 2:00";
+  }
+}
+
 export default function AppointmentPage() {
   const { language } = useI18n();
   const languageKey = language === "fi" ? "fi" : "en";
   const languageId = language === "fi" ? "2" : "1";
+
+  const [selectedCountryTz, setSelectedCountryTz] = useState<string>("");
+  const [countryIsoMap, setCountryIsoMap] = useState<Record<string, string>>({});
+  const [selectedSlotDisplayLabel, setSelectedSlotDisplayLabel] = useState<string>("");
+
+  const timezoneLabel = useMemo(() => {
+    if (!selectedCountryTz || selectedCountryTz === STORE_TIMEZONE) return "EET, UTC + 2:00";
+    return getTimezoneLabel(selectedCountryTz);
+  }, [selectedCountryTz]);
+
   const labels =
     languageKey === "fi"
       ? {
@@ -89,7 +244,7 @@ export default function AppointmentPage() {
           phone: "Puhelinnumero",
           appointmentDate: "Valitse paiva",
           appointmentDatePlaceholder: "Valitse paiva",
-          appointmentSlot: "Valitse aikavali",
+          appointmentSlot: `Valitse aikavali (Aikavyöhyke: ${timezoneLabel})`,
           appointmentSlotPlaceholder: "Valitse aikavali",
           captchaLabel: "Captcha",
           captchaRequired: "Captcha on pakollinen.",
@@ -98,6 +253,10 @@ export default function AppointmentPage() {
           captchaMissingKey: "Captcha ei ole asetettu.",
           details: "Kuvaile koru, josta olet kiinnostunut",
           submit: "Laheta",
+          appointmentType: "Tapaamisen tyyppi",
+          appointmentTypePlaceholder: "Valitse tyyppi",
+          storeAppointment: "Myymäläkäynti",
+          virtualAppointment: "Virtuaalinen tapaaminen",
         }
       : {
           heading: "MAKE AN APPOINTMENT",
@@ -110,7 +269,7 @@ export default function AppointmentPage() {
           phone: "Phone Number",
           appointmentDate: "Select Date",
           appointmentDatePlaceholder: "Select a date",
-          appointmentSlot: "Select Time Slot",
+          appointmentSlot: `Select Time Slot (Timezone: ${timezoneLabel})`,
           appointmentSlotPlaceholder: "Select a time slot",
           captchaLabel: "Captcha",
           captchaRequired: "Captcha is required.",
@@ -119,6 +278,10 @@ export default function AppointmentPage() {
           captchaMissingKey: "Captcha is not configured.",
           details: "Please describe the jewelry item you are interested in",
           submit: "Submit",
+          appointmentType: "Appointment Type",
+          appointmentTypePlaceholder: "Select type",
+          storeAppointment: "Store Appointment",
+          virtualAppointment: "Virtual Appointment",
         };
   const weekendMessage =
     languageKey === "fi"
@@ -147,7 +310,10 @@ export default function AppointmentPage() {
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
   const recaptchaWidgetId = useRef<number | null>(null);
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
-
+const appointmentTypeOptions = [
+  { value: "store", label: labels.storeAppointment },
+  { value: "virtual", label: labels.virtualAppointment },
+];
   const resetRecaptcha = () => {
     if (typeof window === "undefined") return;
     if (window.grecaptcha && typeof window.grecaptcha.reset === "function") {
@@ -247,11 +413,12 @@ export default function AppointmentPage() {
                 value: labelText,
                 label: labelText,
                 phoneCode: String(phoneCode ?? "").trim(),
+                isoCode: String(country.iso_code ?? country.isoCode ?? "").trim().toUpperCase(),
               };
             }
             const labelText = String(country).trim();
             if (!labelText) return null;
-            return { value: labelText, label: labelText, phoneCode: "" };
+            return { value: labelText, label: labelText, phoneCode: "", isoCode: "" };
           })
           .filter(Boolean);
         const nextPhoneMap = normalized.reduce<Record<string, string>>((acc, option) => {
@@ -261,9 +428,15 @@ export default function AppointmentPage() {
           }
           return acc;
         }, {});
+        const nextIsoMap = normalized.reduce<Record<string, string>>((acc, option) => {
+          const key = String(option.value ?? "").trim();
+          if (key && option.isoCode) acc[key] = option.isoCode;
+          return acc;
+        }, {});
         if (active) {
           setCountryOptions(normalized);
           setCountryPhoneMap(nextPhoneMap);
+          setCountryIsoMap(nextIsoMap);
           setForm((prev) => {
             const hasCountry = normalized.some(
               (opt) => String(opt.value) === String(prev.country)
@@ -462,13 +635,21 @@ export default function AppointmentPage() {
     [disabledDateSet]
   );
   const selectedDate = parseDateValue(form.appointmentDate);
+  const convertedSlotOptions = useMemo(
+    () =>
+      slotOptions.map((opt) => ({
+        ...opt,
+        label: convertSlotLabel(opt.value, selectedCountryTz),
+      })),
+    [slotOptions, selectedCountryTz]
+  );
   const slotOptionsForDate = useMemo(() => {
-    if (!form.appointmentDate) return slotOptions;
+    if (!form.appointmentDate) return convertedSlotOptions;
     const disabledSlots = disabledSlotsByDate[form.appointmentDate] ?? [];
-    if (!disabledSlots.length) return slotOptions;
+    if (!disabledSlots.length) return convertedSlotOptions;
     const disabledSet = new Set(disabledSlots.map((slot) => String(slot)));
-    return slotOptions.filter((opt) => !disabledSet.has(String(opt.value)));
-  }, [disabledSlotsByDate, form.appointmentDate, slotOptions]);
+    return convertedSlotOptions.filter((opt) => !disabledSet.has(String(opt.value)));
+  }, [disabledSlotsByDate, form.appointmentDate, convertedSlotOptions]);
   useEffect(() => {
     if (!form.appointmentDate) return;
     if (disabledDateSet.has(form.appointmentDate)) {
@@ -493,6 +674,10 @@ export default function AppointmentPage() {
         prevCode && phoneDigits.startsWith(prevCode)
           ? phoneDigits.slice(prevCode.length)
           : phoneDigits;
+      const isoCode = nextCountry ? countryIsoMap[nextCountry] ?? "" : "";
+      const tz = isoCode ? COUNTRY_TIMEZONE_MAP[isoCode] ?? "" : "";
+      setSelectedCountryTz(tz);
+      setSelectedSlotDisplayLabel("");
       setForm((prev) => ({
         ...prev,
         country: nextCountry,
@@ -502,6 +687,7 @@ export default function AppointmentPage() {
             ? `+${mappedCode} ${trimmedPhone}`
             : `+${mappedCode} `
           : trimmedPhone,
+        appointmentSlot: "",
       }));
       return;
     }
@@ -520,6 +706,12 @@ export default function AppointmentPage() {
       const digitsOnly = cleaned.replace(/[^\d]/g, "");
       const nextValue = digitsOnly ? `+${digitsOnly}` : "";
       setForm((prev) => ({ ...prev, phone: nextValue }));
+      return;
+    }
+    if (name === "appointmentSlot") {
+      const matchedOpt = slotOptionsForDate.find((o) => String(o.value) === String(value));
+      setSelectedSlotDisplayLabel(matchedOpt?.label ?? value);
+      setForm((prev) => ({ ...prev, appointmentSlot: value }));
       return;
     }
     setForm((prev) => ({ ...prev, [name]: value }));
@@ -613,7 +805,10 @@ export default function AppointmentPage() {
         phone_number: form.phone.replace(/\s+/g, "").trim(),
         date: form.appointmentDate,
         time_slot: form.appointmentSlot,
+        display_time_slot: selectedSlotDisplayLabel || form.appointmentSlot,
+        display_timezone: timezoneLabel,
         description: form.details.trim(),
+        appointment_type: form.appointmentType,
         recaptcha_token: recaptchaToken,
       };
       const { data } = await axiosClient.post(
@@ -737,6 +932,20 @@ export default function AppointmentPage() {
                 onChange={handleChange}
                 options={slotOptionsForDate}
               />
+              <SelectField
+               label={labels.appointmentType}
+              name="appointmentType"
+              placeholder={labels.appointmentTypePlaceholder}
+                required
+                disabled={false}
+                value={form.appointmentType}
+                onChange={handleChange}
+                options={appointmentTypeOptions}
+              />
+
+
+
+
               <label className={`${fieldStyles.field} ${styles.fullRow}`}>
                 <span className={fieldStyles.label}>{labels.details}</span>
                 <textarea

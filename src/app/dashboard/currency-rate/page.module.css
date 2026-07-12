@@ -65,3 +65,25 @@
   font-weight: 500;
 }
 
+.currencyCell {
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  white-space: nowrap;
+}
+
+.currencyTableIcon {
+  flex-shrink: 0;
+  object-fit: contain;
+  border-radius: 2px;
+}
+
+.currencyTableSymbol {
+  flex-shrink: 0;
+  min-width: 1.5em;
+  font-size: 16px;
+  font-weight: 600;
+  line-height: 1;
+  color: #2f6b62;
+}
+
