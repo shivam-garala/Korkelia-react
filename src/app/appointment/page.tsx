@@ -218,7 +218,7 @@ function getTimezoneLabel(tz: string): string {
 }
 
 export default function AppointmentPage() {
-  const { language } = useI18n();
+  const { language, t } = useI18n();
   const languageKey = language === "fi" ? "fi" : "en";
   const languageId = language === "fi" ? "2" : "1";
 
@@ -988,7 +988,7 @@ const appointmentTypeOptions = [
           onError={() => setRecaptchaLoadError(true)}
         />
       ) : null}
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }

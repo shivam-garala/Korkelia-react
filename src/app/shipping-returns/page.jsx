@@ -3,6 +3,7 @@
 import SiteFooter from "../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../components/Home/SiteHeader.jsx";
 import Container from "../../components/ui/Container.jsx";
+import { useI18n } from "../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
 const contactEmail = "korkeila@korkeilahelsinki.fi";
@@ -289,6 +290,7 @@ const renderList = (items) => (
 );
 
 export default function ShippingReturnsPage() {
+  const { t } = useI18n();
   return (
     <div className={styles.page}>
       <SiteHeader />
@@ -344,7 +346,7 @@ export default function ShippingReturnsPage() {
           </div>
         </Container>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }

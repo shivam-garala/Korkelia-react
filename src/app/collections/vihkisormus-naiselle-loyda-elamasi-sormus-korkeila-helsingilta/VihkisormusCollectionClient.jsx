@@ -73,7 +73,7 @@ const faqs = [
 ];
 
 export default function VihkisormusCollectionClient() {
-  const { language, currencyCode, currencySymbol } = useI18n();
+  const { language, currencyCode, currencySymbol, t } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -535,7 +535,7 @@ export default function VihkisormusCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.ringBrandDescription")} />
     </div>
   );
 }

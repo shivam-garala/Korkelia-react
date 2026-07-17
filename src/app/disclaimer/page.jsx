@@ -3,6 +3,7 @@
 import SiteFooter from "../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../components/Home/SiteHeader.jsx";
 import Container from "../../components/ui/Container.jsx";
+import { useI18n } from "../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
 const policyContent = {
@@ -26,6 +27,7 @@ const renderParagraphs = (paragraphs, className) =>
   ));
 
 export default function DisclaimerPage() {
+  const { t } = useI18n();
   return (
     <div className={styles.page}>
       <SiteHeader />
@@ -44,7 +46,7 @@ export default function DisclaimerPage() {
           </div>
         </Container>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }

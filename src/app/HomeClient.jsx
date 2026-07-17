@@ -208,7 +208,7 @@ export default function HomeClient() {
           href="/about"
         />
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }

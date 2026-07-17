@@ -118,7 +118,7 @@ const tabs = [
 ];
 
 export default function DiamondDifferencePage() {
-  const { language } = useI18n();
+  const { language, t } = useI18n();
   const languageKey = language === "fi" ? "fi" : "en";
   const [activeKey, setActiveKey] = useState("global");
   const activeTab = useMemo(
@@ -199,7 +199,7 @@ export default function DiamondDifferencePage() {
           </div>
         </Container>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }

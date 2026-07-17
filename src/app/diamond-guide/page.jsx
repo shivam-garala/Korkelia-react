@@ -56,7 +56,7 @@ const tabs = [
 ];
 
 export default function DiamondGuidePage() {
-  const { language } = useI18n();
+  const { language, t } = useI18n();
   const languageKey = language === "fi" ? "fi" : "en";
   const [activeKey, setActiveKey] = useState("carat");
   const activeTab = useMemo(
@@ -145,7 +145,7 @@ export default function DiamondGuidePage() {
           </div>
         </Container>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }

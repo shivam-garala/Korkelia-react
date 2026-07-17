@@ -13,6 +13,7 @@ import {
   makeRejectPayload,
   subscribeConsent,
 } from "../../lib/cookieConsent.js";
+import { useI18n } from "../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
 
 // Stable server snapshot fallback for useSyncExternalStore
@@ -61,6 +62,7 @@ const renderList = (items) => (
 );
 
 export default function CookiePolicyPage() {
+  const { t } = useI18n();
   const consent = useSyncExternalStore(subscribeConsent, getConsentSnapshot, getServerConsent);
   const [cookiePreferences, setCookiePreferences] = useState(consent.state);
   const [statusMessage, setStatusMessage] = useState("");
@@ -379,7 +381,7 @@ export default function CookiePolicyPage() {
           </div>
         </Container>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }

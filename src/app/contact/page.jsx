@@ -11,8 +11,15 @@ import styles from "./page.module.css";
 const contentByLanguage = {
   en: {
     heading: "CONTACT US",
-    lead:
-      "Whether you have a question about our jewellery, need help choosing the perfect piece or want to design something custom — we’d love to hear from you.",
+    lead: [
+      {
+        bold: "Visit Korkeila Helsinki: Your Jewelry Advisor",
+        text: " We invite you to visit our Helsinki boutique to explore our extensive, immediately available collection of engagement rings, wedding bands, and fine jewelry. For those with short-notice requirements, our doors are open and our display is ready.",
+      },
+      {
+        text: "If you are looking to design a bespoke custom piece, compare natural and lab-grown diamonds, or view our specialty Hamilton and Champagne yellow gold, we recommend booking a complimentary Advisor Consultation. We will sit down with you in a pressure-free environment to understand your style and ensure we maximize your budget.",
+      },
+    ],
     sections: {
       appointments: {
         title: "Personal Appointments",
@@ -41,8 +48,15 @@ const contentByLanguage = {
   },
   fi: {
     heading: "OTA YHTEYTTÄ",
-    lead:
-      "Jos sinulla on kysyttävää koruistamme, tarvitset apua täydellisen korun valinnassa tai haluat suunnitella jotain täysin omaa — autamme mielellämme.",
+    lead: [
+      {
+        bold: "Vieraile Korkeila Helsingissä: Henkilökohtainen koruasiantuntijasi",
+        text: " Tervetuloa tutustumaan Helsingin myymäläämme ja poikkeuksellisen laajaan, heti saatavilla olevaan kihla- ja vihkisormusten sekä hienokorujen valikoimaamme. Palvelemme joustavasti myös lyhyellä varoitusajalla – ovet ovat avoinna ja valikoimamme on valmiina sinua varten.",
+      },
+      {
+        text: "Mikäli toiveenasi on teettää uniikki tilaustyö, vertailla luonnon- ja laboratoriotimantteja tai tutustua erikoissävyisiin Hamilton- ja samppanjakultiimme, suosittelemme varaamaan maksuttoman asiantuntijakonsultaation. Kartoitamme rauhallisessa ja kiireettömässä ympäristössä tyylisi ja toiveesi, jotta voimme taata sinulle parhaan mahdollisen hinta-laatusuhteen.",
+      },
+    ],
     sections: {
       appointments: {
         title: "HENKILÖKOHTAISET AJANVARAUKSET",
@@ -72,7 +86,7 @@ const contentByLanguage = {
 };
 
 export default function ContactPage() {
-  const { language } = useI18n();
+  const { language, t } = useI18n();
   const languageKey = language === "fi" ? "fi" : "en";
   const content = contentByLanguage[languageKey] ?? contentByLanguage.en;
 
@@ -88,7 +102,12 @@ export default function ContactPage() {
           <div className={styles.topLine} aria-hidden />
           <div className={styles.header}>
             <h2 className={styles.heading}>{content.heading}</h2>
-            <p className={styles.lead}>{content.lead}</p>
+            {content.lead.map((paragraph, index) => (
+              <p key={index} className={styles.lead}>
+                {paragraph.bold && <strong>{paragraph.bold}</strong>}
+                {paragraph.text}
+              </p>
+            ))}
           </div>
 
           <div className={styles.content}>
@@ -188,7 +207,7 @@ export default function ContactPage() {
           </div>
         </Container>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }

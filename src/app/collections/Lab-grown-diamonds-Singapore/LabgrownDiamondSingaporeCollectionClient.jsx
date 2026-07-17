@@ -97,7 +97,7 @@ const introText = (
 );
 
 export default function LabgrownDiamondSingaporeCollectionClient() {
-  const { language, currencyCode,currencySymbol } = useI18n();
+  const { language, currencyCode, currencySymbol, t } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [categories, setCategories] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState([]);
@@ -561,7 +561,7 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }
