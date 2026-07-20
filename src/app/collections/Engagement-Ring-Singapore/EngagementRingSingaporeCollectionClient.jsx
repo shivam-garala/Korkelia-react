@@ -273,8 +273,10 @@ export default function KihlasormusMiehelleCollectionClient() {
                 </div>
 
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <p className={styles.intro}>Our atelier creates engagement rings that unite modern design with timeless beauty. Whether you are in Singapore or selecting your ring internationally, our collection of diamond engagement rings is crafted to honour the depth of your commitment.</p>
                   
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
@@ -418,7 +420,6 @@ export default function KihlasormusMiehelleCollectionClient() {
                     
                   </section>
                 </div>
-              ) : null}
 
               {showAllContent ? (
 

@@ -1,4 +1,6 @@
+import { cache } from "react";
 import { cookies, headers } from "next/headers";
+import { permanentRedirect } from "next/navigation";
 import SiteFooter from "../../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../../components/Home/SiteHeader.jsx";
 import Container from "../../../components/ui/Container.jsx";
@@ -7,6 +9,11 @@ import ProductGallery from "../../../components/Product/ProductGallery.jsx";
 import ShareProductModal from "../../../components/Product/ShareProductModal.jsx";
 import RelatedProducts from "./RelatedProducts.jsx";
 import styles from "./page.module.css";
+import {
+  buildVariantQuery,
+  pickCheapestPerProduct,
+  resolveApiBaseUrl,
+} from "../../../lib/productDefaultVariant.js";
 
 const RING_CATEGORY_ID = 1;
 
@@ -38,12 +45,7 @@ const resolveLanguage = async () => {
 const resolveIsRingProduct = async (id) => {
   if (!id) return true;
   try {
-    const baseUrl = (
-      process.env.NEXT_BASE_API_URL ??
-      process.env.NEXT_PUBLIC_API_URL ??
-      process.env.NEXT_PUBLIC_BASE_API_URL ??
-      ""
-    ).replace(/\/+$/, "");
+    const baseUrl = resolveApiBaseUrl();
     if (!baseUrl) return true;
 
     const response = await fetch(`${baseUrl}/api/product/category/${encodeURIComponent(id)}`, {
@@ -60,6 +62,65 @@ const resolveIsRingProduct = async (id) => {
     return true;
   }
 };
+
+// Resolves the cheapest variant's query string for a product, so both the
+// canonical tag and the no-variant-specified redirect always point at the
+// same URL. Wrapped in React's cache() so generateMetadata and the page
+// component share one lookup per request instead of fetching twice.
+const resolveCheapestVariantPath = cache(async (id) => {
+  if (!id) return null;
+  try {
+    const baseUrl = resolveApiBaseUrl();
+    if (!baseUrl) return null;
+
+    const categoryResponse = await fetch(
+      `${baseUrl}/api/product/category/${encodeURIComponent(id)}`,
+      { cache: "no-store" }
+    );
+    if (!categoryResponse.ok) return null;
+    const categoryJson = await categoryResponse.json();
+    const categoryId = categoryJson?.data?.category_id;
+    if (categoryId == null) return null;
+
+    const params = new URLSearchParams({
+      language_id: "1",
+      category_id: String(categoryId),
+      currency: "EU",
+      currency_symbol: "€",
+      prefer_white: "0",
+    });
+    const listResponse = await fetch(
+      `${baseUrl}/api/product/listEcom?${params.toString()}`,
+      { cache: "no-store" }
+    );
+    if (!listResponse.ok) return null;
+    const listJson = await listResponse.json();
+    const list = Array.isArray(listJson) ? listJson : listJson?.data ?? [];
+    const matching = list.filter((item) => String(item?.id ?? item?.product_id) === String(id));
+    if (!matching.length) return null;
+
+    const cheapest = pickCheapestPerProduct(matching).get(String(id));
+    if (!cheapest) return null;
+
+    const queryString = buildVariantQuery(cheapest).toString();
+    return queryString ? `/product/${encodeURIComponent(id)}?${queryString}` : null;
+  } catch {
+    return null;
+  }
+});
+
+export async function generateMetadata({ params }) {
+  const resolvedParams = await Promise.resolve(params);
+  const { id } = resolvedParams ?? {};
+  // Points at the plain product URL, which permanently redirects to the
+  // cheapest variant (see the redirect below) — this stays stable even if
+  // the cheapest variant changes later, unlike pointing at a specific one.
+  return {
+    alternates: {
+      canonical: `/product/${encodeURIComponent(id ?? "")}`,
+    },
+  };
+}
 
 export default async function ProductDetailsPage({ params, searchParams }) {
   const resolvedParams = await Promise.resolve(params);
@@ -83,6 +144,13 @@ export default async function ProductDetailsPage({ params, searchParams }) {
   const defaultCarat = readSearchParam(resolvedSearchParams, "carat");
   const defaultCutId = readSearchParam(resolvedSearchParams, "cut_id");
   const designId = readSearchParam(resolvedSearchParams, "design_id");
+
+  if (!designId) {
+    const cheapestPath = await resolveCheapestVariantPath(id);
+    if (cheapestPath) {
+      permanentRedirect(cheapestPath);
+    }
+  }
 
   const [language, isRingProduct] = await Promise.all([
     resolveLanguage(),

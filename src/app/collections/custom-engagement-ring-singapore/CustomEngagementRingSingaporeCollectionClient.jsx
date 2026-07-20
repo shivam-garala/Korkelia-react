@@ -273,8 +273,10 @@ export default function KihlasormusMiehelleCollectionClient() {
                 </div>
 
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <p className={styles.intro}>A custom engagement ring is not simply a product. It is the creation of a piece that reflects the depth of your love story, the individuality of your relationship, and the promise of a lifetime together. We are honoured to guide you through this meaningful journey.</p>
                   
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
@@ -508,7 +510,6 @@ export default function KihlasormusMiehelleCollectionClient() {
                   </section>
                   
                 </div>
-              ) : null}
 
               {showAllContent ? (
 

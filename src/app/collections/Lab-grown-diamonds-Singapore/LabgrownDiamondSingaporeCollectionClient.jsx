@@ -309,8 +309,10 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
                   </button>
                 </div>
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <p className={styles.intro}>
                     Lab-grown diamonds are transforming the jewellery world. These diamonds are created in a controlled laboratory environment using advanced lab technology that replicates the natural formation process. The result is a lab-grown diamond with the same brilliance, clarity, and durability as mined diamonds.
                   </p>
@@ -509,7 +511,6 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
                   </section>
 
                 </div>
-              ) : null}
 
               {showAllContent ? (
                 <div className={styles.toggleRow}>

@@ -273,8 +273,10 @@ export default function KihlasormusMiehelleCollectionClient() {
                 </div>
 
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <p className={styles.intro}>For clients in Singapore who seek something extraordinary, a bespoke engagement ring offers the freedom to create a one-of-a-kind piece that embodies the essence of your story. Your proposal deserves more than a ready-made ring. It deserves craftsmanship, thought, and a design shaped entirely around you.</p>
                   
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
@@ -554,7 +556,6 @@ export default function KihlasormusMiehelleCollectionClient() {
 
                    
                 </div>
-              ) : null}
 
               {showAllContent ? (
 

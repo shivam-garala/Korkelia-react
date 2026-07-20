@@ -63,6 +63,27 @@ const faqs = [
   },
 ];
 
+const extractPlainText = (node) => {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractPlainText).join(" ");
+  if (node?.props?.children != null) return extractPlainText(node.props.children);
+  return "";
+};
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: [extractPlainText(faq.answer), ...(faq.bullet ?? [])].filter(Boolean).join(" "),
+    },
+  })),
+};
+
 export default function KihlasormusCollectionClient() {
   const { language, currencyCode, currencySymbol, t } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
@@ -267,6 +288,10 @@ export default function KihlasormusCollectionClient() {
 
   return (
     <div className={styles.page}>
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
       <SiteHeader />
       <main className={styles.main}>
         <section className={styles.storyWrap}>
@@ -296,8 +321,10 @@ export default function KihlasormusCollectionClient() {
                 </div>
 
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
                       src="/link2/b90a221c-8867-4c75-89fd-3e546236ea6c.jpeg"
@@ -433,7 +460,7 @@ export default function KihlasormusCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link2/10904625-52fe-409d-a55d-7680e207556b.jpeg"
-                      alt="naisten kihlasormukset, kihlasormukset, sormuksen, 695,00"
+                      alt="Halo-mallinen timanttinen kihlasormus sormien välissä"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -498,7 +525,7 @@ export default function KihlasormusCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link2/fcf7f846-0cd8-42fc-90e7-da8f80dffbd6.jpeg"
-                      alt="kihlasormus, kihlasormukset, myös, timanttisormus, oikean koon"
+                      alt="Pyöreä timanttinen kihlasormus sormessa lähikuvassa"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -568,7 +595,7 @@ export default function KihlasormusCollectionClient() {
                     <figure className={styles.storyImage}>
                     <Image
                       src="/link2/0daebbc8-a774-4654-a8ad-4f384945aff5.jpeg"
-                      alt="kihlasormus, kihlasormukset, valikoimasta löydät, myös, timanttisormus,"
+                      alt="Ovaali timanttinen kihlasormus kädessä leuan alla"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -595,7 +622,6 @@ export default function KihlasormusCollectionClient() {
                     </section>
                   </section>
                 </div>
-              ) : null}
 
               {showAllContent ? (
 
