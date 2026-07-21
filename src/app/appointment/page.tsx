@@ -1,3 +1,5 @@
+"use client";
+
 import { useCallback, useEffect, useMemo, useRef, useState } from "react";
 import Script from "next/script";
 import SiteFooter from "../../components/Home/SiteFooter.jsx";
@@ -74,70 +76,70 @@ const normalizeSlotSelection = (value, options) => {
 const STORE_TIMEZONE = "Europe/Helsinki";
 
 const COUNTRY_TIMEZONE_MAP: Record<string, string> = {
-  AF: "Asia/Kabul",          AG: "America/Antigua",     AL: "Europe/Tirane",
-  AM: "Asia/Yerevan",        AO: "Africa/Luanda",       AR: "America/Argentina/Buenos_Aires",
-  AT: "Europe/Vienna",       AU: "Australia/Sydney",    AZ: "Asia/Baku",
-  BA: "Europe/Sarajevo",     BB: "America/Barbados",    BD: "Asia/Dhaka",
-  BE: "Europe/Brussels",     BF: "Africa/Ouagadougou",  BG: "Europe/Sofia",
-  BH: "Asia/Bahrain",        BI: "Africa/Bujumbura",    BJ: "Africa/Porto-Novo",
-  BN: "Asia/Brunei",         BO: "America/La_Paz",      BR: "America/Sao_Paulo",
-  BS: "America/Nassau",      BT: "Asia/Thimphu",        BW: "Africa/Gaborone",
-  BY: "Europe/Minsk",        BZ: "America/Belize",      CA: "America/Toronto",
-  CD: "Africa/Kinshasa",     CF: "Africa/Bangui",       CG: "Africa/Brazzaville",
-  CH: "Europe/Zurich",       CI: "Africa/Abidjan",      CL: "America/Santiago",
-  CM: "Africa/Douala",       CN: "Asia/Shanghai",       CO: "America/Bogota",
-  CR: "America/Costa_Rica",  CU: "America/Havana",      CV: "Atlantic/Cape_Verde",
-  CY: "Asia/Nicosia",        CZ: "Europe/Prague",       DE: "Europe/Berlin",
-  DJ: "Africa/Djibouti",     DK: "Europe/Copenhagen",   DO: "America/Santo_Domingo",
-  DZ: "Africa/Algiers",      EC: "America/Guayaquil",   EE: "Europe/Tallinn",
-  EG: "Africa/Cairo",        ER: "Africa/Asmara",       ES: "Europe/Madrid",
-  ET: "Africa/Addis_Ababa",  FI: "Europe/Helsinki",     FJ: "Pacific/Fiji",
-  FR: "Europe/Paris",        GA: "Africa/Libreville",   GB: "Europe/London",
-  GD: "America/Grenada",     GE: "Asia/Tbilisi",        GH: "Africa/Accra",
-  GM: "Africa/Banjul",       GN: "Africa/Conakry",      GQ: "Africa/Malabo",
-  GR: "Europe/Athens",       GT: "America/Guatemala",   GW: "Africa/Bissau",
-  GY: "America/Guyana",      HN: "America/Tegucigalpa", HR: "Europe/Zagreb",
-  HT: "America/Port-au-Prince", HU: "Europe/Budapest",  ID: "Asia/Jakarta",
-  IE: "Europe/Dublin",       IL: "Asia/Jerusalem",      IN: "Asia/Kolkata",
-  IQ: "Asia/Baghdad",        IR: "Asia/Tehran",         IS: "Atlantic/Reykjavik",
-  IT: "Europe/Rome",         JM: "America/Jamaica",     JO: "Asia/Amman",
-  JP: "Asia/Tokyo",          KE: "Africa/Nairobi",      KG: "Asia/Bishkek",
-  KH: "Asia/Phnom_Penh",    KI: "Pacific/Tarawa",      KM: "Indian/Comoro",
-  KN: "America/St_Kitts",   KP: "Asia/Pyongyang",      KR: "Asia/Seoul",
-  KW: "Asia/Kuwait",         KZ: "Asia/Almaty",         LA: "Asia/Vientiane",
-  LB: "Asia/Beirut",         LC: "America/St_Lucia",    LI: "Europe/Vaduz",
-  LK: "Asia/Colombo",        LR: "Africa/Monrovia",     LS: "Africa/Maseru",
-  LT: "Europe/Vilnius",      LU: "Europe/Luxembourg",   LV: "Europe/Riga",
-  LY: "Africa/Tripoli",      MA: "Africa/Casablanca",   MC: "Europe/Monaco",
-  MD: "Europe/Chisinau",     ME: "Europe/Podgorica",    MG: "Indian/Antananarivo",
-  MK: "Europe/Skopje",       ML: "Africa/Bamako",       MM: "Asia/Rangoon",
-  MN: "Asia/Ulaanbaatar",    MR: "Africa/Nouakchott",   MT: "Europe/Malta",
-  MU: "Indian/Mauritius",    MV: "Indian/Maldives",     MW: "Africa/Blantyre",
-  MX: "America/Mexico_City", MY: "Asia/Kuala_Lumpur",   MZ: "Africa/Maputo",
-  NA: "Africa/Windhoek",     NE: "Africa/Niamey",       NG: "Africa/Lagos",
-  NI: "America/Managua",     NL: "Europe/Amsterdam",    NO: "Europe/Oslo",
-  NP: "Asia/Kathmandu",      NR: "Pacific/Nauru",       NZ: "Pacific/Auckland",
-  OM: "Asia/Muscat",         PA: "America/Panama",      PE: "America/Lima",
-  PG: "Pacific/Port_Moresby",PH: "Asia/Manila",         PK: "Asia/Karachi",
-  PL: "Europe/Warsaw",       PT: "Europe/Lisbon",       PW: "Pacific/Palau",
-  PY: "America/Asuncion",    QA: "Asia/Qatar",          RO: "Europe/Bucharest",
-  RS: "Europe/Belgrade",     RU: "Europe/Moscow",       RW: "Africa/Kigali",
-  SA: "Asia/Riyadh",         SB: "Pacific/Guadalcanal", SC: "Indian/Mahe",
-  SD: "Africa/Khartoum",     SE: "Europe/Stockholm",    SG: "Asia/Singapore",
-  SI: "Europe/Ljubljana",    SK: "Europe/Bratislava",   SL: "Africa/Freetown",
-  SM: "Europe/San_Marino",   SN: "Africa/Dakar",        SO: "Africa/Mogadishu",
-  SR: "America/Paramaribo",  SS: "Africa/Juba",         ST: "Africa/Sao_Tome",
-  SV: "America/El_Salvador", SY: "Asia/Damascus",       SZ: "Africa/Mbabane",
-  TD: "Africa/Ndjamena",     TG: "Africa/Lome",         TH: "Asia/Bangkok",
-  TJ: "Asia/Dushanbe",       TL: "Asia/Dili",           TM: "Asia/Ashgabat",
-  TN: "Africa/Tunis",        TO: "Pacific/Tongatapu",   TR: "Europe/Istanbul",
-  TT: "America/Port_of_Spain", TV: "Pacific/Funafuti",  TZ: "Africa/Dar_es_Salaam",
-  UA: "Europe/Kiev",         UG: "Africa/Kampala",      US: "America/New_York",
-  UY: "America/Montevideo",  UZ: "Asia/Tashkent",       VA: "Europe/Vatican",
-  VC: "America/St_Vincent",  VE: "America/Caracas",     VN: "Asia/Ho_Chi_Minh",
-  VU: "Pacific/Efate",       WS: "Pacific/Apia",        YE: "Asia/Aden",
-  ZA: "Africa/Johannesburg", ZM: "Africa/Lusaka",       ZW: "Africa/Harare",
-  AE: "Asia/Dubai",          UK: "Europe/London",
+  AF: "Asia/Kabul", AG: "America/Antigua", AL: "Europe/Tirane",
+  AM: "Asia/Yerevan", AO: "Africa/Luanda", AR: "America/Argentina/Buenos_Aires",
+  AT: "Europe/Vienna", AU: "Australia/Sydney", AZ: "Asia/Baku",
+  BA: "Europe/Sarajevo", BB: "America/Barbados", BD: "Asia/Dhaka",
+  BE: "Europe/Brussels", BF: "Africa/Ouagadougou", BG: "Europe/Sofia",
+  BH: "Asia/Bahrain", BI: "Africa/Bujumbura", BJ: "Africa/Porto-Novo",
+  BN: "Asia/Brunei", BO: "America/La_Paz", BR: "America/Sao_Paulo",
+  BS: "America/Nassau", BT: "Asia/Thimphu", BW: "Africa/Gaborone",
+  BY: "Europe/Minsk", BZ: "America/Belize", CA: "America/Toronto",
+  CD: "Africa/Kinshasa", CF: "Africa/Bangui", CG: "Africa/Brazzaville",
+  CH: "Europe/Zurich", CI: "Africa/Abidjan", CL: "America/Santiago",
+  CM: "Africa/Douala", CN: "Asia/Shanghai", CO: "America/Bogota",
+  CR: "America/Costa_Rica", CU: "America/Havana", CV: "Atlantic/Cape_Verde",
+  CY: "Asia/Nicosia", CZ: "Europe/Prague", DE: "Europe/Berlin",
+  DJ: "Africa/Djibouti", DK: "Europe/Copenhagen", DO: "America/Santo_Domingo",
+  DZ: "Africa/Algiers", EC: "America/Guayaquil", EE: "Europe/Tallinn",
+  EG: "Africa/Cairo", ER: "Africa/Asmara", ES: "Europe/Madrid",
+  ET: "Africa/Addis_Ababa", FI: "Europe/Helsinki", FJ: "Pacific/Fiji",
+  FR: "Europe/Paris", GA: "Africa/Libreville", GB: "Europe/London",
+  GD: "America/Grenada", GE: "Asia/Tbilisi", GH: "Africa/Accra",
+  GM: "Africa/Banjul", GN: "Africa/Conakry", GQ: "Africa/Malabo",
+  GR: "Europe/Athens", GT: "America/Guatemala", GW: "Africa/Bissau",
+  GY: "America/Guyana", HN: "America/Tegucigalpa", HR: "Europe/Zagreb",
+  HT: "America/Port-au-Prince", HU: "Europe/Budapest", ID: "Asia/Jakarta",
+  IE: "Europe/Dublin", IL: "Asia/Jerusalem", IN: "Asia/Kolkata",
+  IQ: "Asia/Baghdad", IR: "Asia/Tehran", IS: "Atlantic/Reykjavik",
+  IT: "Europe/Rome", JM: "America/Jamaica", JO: "Asia/Amman",
+  JP: "Asia/Tokyo", KE: "Africa/Nairobi", KG: "Asia/Bishkek",
+  KH: "Asia/Phnom_Penh", KI: "Pacific/Tarawa", KM: "Indian/Comoro",
+  KN: "America/St_Kitts", KP: "Asia/Pyongyang", KR: "Asia/Seoul",
+  KW: "Asia/Kuwait", KZ: "Asia/Almaty", LA: "Asia/Vientiane",
+  LB: "Asia/Beirut", LC: "America/St_Lucia", LI: "Europe/Vaduz",
+  LK: "Asia/Colombo", LR: "Africa/Monrovia", LS: "Africa/Maseru",
+  LT: "Europe/Vilnius", LU: "Europe/Luxembourg", LV: "Europe/Riga",
+  LY: "Africa/Tripoli", MA: "Africa/Casablanca", MC: "Europe/Monaco",
+  MD: "Europe/Chisinau", ME: "Europe/Podgorica", MG: "Indian/Antananarivo",
+  MK: "Europe/Skopje", ML: "Africa/Bamako", MM: "Asia/Rangoon",
+  MN: "Asia/Ulaanbaatar", MR: "Africa/Nouakchott", MT: "Europe/Malta",
+  MU: "Indian/Mauritius", MV: "Indian/Maldives", MW: "Africa/Blantyre",
+  MX: "America/Mexico_City", MY: "Asia/Kuala_Lumpur", MZ: "Africa/Maputo",
+  NA: "Africa/Windhoek", NE: "Africa/Niamey", NG: "Africa/Lagos",
+  NI: "America/Managua", NL: "Europe/Amsterdam", NO: "Europe/Oslo",
+  NP: "Asia/Kathmandu", NR: "Pacific/Nauru", NZ: "Pacific/Auckland",
+  OM: "Asia/Muscat", PA: "America/Panama", PE: "America/Lima",
+  PG: "Pacific/Port_Moresby", PH: "Asia/Manila", PK: "Asia/Karachi",
+  PL: "Europe/Warsaw", PT: "Europe/Lisbon", PW: "Pacific/Palau",
+  PY: "America/Asuncion", QA: "Asia/Qatar", RO: "Europe/Bucharest",
+  RS: "Europe/Belgrade", RU: "Europe/Moscow", RW: "Africa/Kigali",
+  SA: "Asia/Riyadh", SB: "Pacific/Guadalcanal", SC: "Indian/Mahe",
+  SD: "Africa/Khartoum", SE: "Europe/Stockholm", SG: "Asia/Singapore",
+  SI: "Europe/Ljubljana", SK: "Europe/Bratislava", SL: "Africa/Freetown",
+  SM: "Europe/San_Marino", SN: "Africa/Dakar", SO: "Africa/Mogadishu",
+  SR: "America/Paramaribo", SS: "Africa/Juba", ST: "Africa/Sao_Tome",
+  SV: "America/El_Salvador", SY: "Asia/Damascus", SZ: "Africa/Mbabane",
+  TD: "Africa/Ndjamena", TG: "Africa/Lome", TH: "Asia/Bangkok",
+  TJ: "Asia/Dushanbe", TL: "Asia/Dili", TM: "Asia/Ashgabat",
+  TN: "Africa/Tunis", TO: "Pacific/Tongatapu", TR: "Europe/Istanbul",
+  TT: "America/Port_of_Spain", TV: "Pacific/Funafuti", TZ: "Africa/Dar_es_Salaam",
+  UA: "Europe/Kiev", UG: "Africa/Kampala", US: "America/New_York",
+  UY: "America/Montevideo", UZ: "Asia/Tashkent", VA: "Europe/Vatican",
+  VC: "America/St_Vincent", VE: "America/Caracas", VN: "Asia/Ho_Chi_Minh",
+  VU: "Pacific/Efate", WS: "Pacific/Apia", YE: "Asia/Aden",
+  ZA: "Africa/Johannesburg", ZM: "Africa/Lusaka", ZW: "Africa/Harare",
+  AE: "Asia/Dubai", UK: "Europe/London",
 };
 
 function convertSlotTime(timeStr: string, targetTz: string): string {
@@ -232,55 +234,55 @@ export default function AppointmentPage() {
   const labels =
     languageKey === "fi"
       ? {
-          heading: "VARAA AIKA",
-          subtitle: null,
-          firstName: "Etunimi",
-          lastName: "Sukunimi",
-          country: "Maa",
-          countryLoadFailed: "Maiden lataus epaonnistui.",
-          email: "Sähköposti",
-          phone: "Puhelinnumero",
-          appointmentDate: "Valitse paiva",
-          appointmentDatePlaceholder: "Valitse paiva",
-          appointmentSlot: `Valitse aikavali (Aikavyöhyke: ${timezoneLabel})`,
-          appointmentSlotPlaceholder: "Valitse aikavali",
-          captchaLabel: "Captcha",
-          captchaRequired: "Captcha on pakollinen.",
-          captchaFailed: "Captcha tarkistus epaonnistui.",
-          captchaLoadFailed: "Captcha lataus epaonnistui.",
-          captchaMissingKey: "Captcha ei ole asetettu.",
-          details: "Kuvaile koru, josta olet kiinnostunut",
-          submit: "Laheta",
-          appointmentType: "Tapaamisen tyyppi",
-          appointmentTypePlaceholder: "Valitse tyyppi",
-          storeAppointment: "Myymäläkäynti",
-          virtualAppointment: "Virtuaalinen tapaaminen",
-        }
+        heading: "VARAA AIKA",
+        subtitle: null,
+        firstName: "Etunimi",
+        lastName: "Sukunimi",
+        country: "Maa",
+        countryLoadFailed: "Maiden lataus epaonnistui.",
+        email: "Sähköposti",
+        phone: "Puhelinnumero",
+        appointmentDate: "Valitse paiva",
+        appointmentDatePlaceholder: "Valitse paiva",
+        appointmentSlot: `Valitse aikavali (Aikavyöhyke: ${timezoneLabel})`,
+        appointmentSlotPlaceholder: "Valitse aikavali",
+        captchaLabel: "Captcha",
+        captchaRequired: "Captcha on pakollinen.",
+        captchaFailed: "Captcha tarkistus epaonnistui.",
+        captchaLoadFailed: "Captcha lataus epaonnistui.",
+        captchaMissingKey: "Captcha ei ole asetettu.",
+        details: "Kuvaile koru, josta olet kiinnostunut",
+        submit: "Laheta",
+        appointmentType: "Tapaamisen tyyppi",
+        appointmentTypePlaceholder: "Valitse tyyppi",
+        storeAppointment: "Myymäläkäynti",
+        virtualAppointment: "Virtuaalinen tapaaminen",
+      }
       : {
-          heading: "MAKE AN APPOINTMENT",
-          subtitle: null,
-          firstName: "First Name",
-          lastName: "Last Name",
-          country: "Country",
-          countryLoadFailed: "Failed to load countries.",
-          email: "Email",
-          phone: "Phone Number",
-          appointmentDate: "Select Date",
-          appointmentDatePlaceholder: "Select a date",
-          appointmentSlot: `Select Time Slot (Timezone: ${timezoneLabel})`,
-          appointmentSlotPlaceholder: "Select a time slot",
-          captchaLabel: "Captcha",
-          captchaRequired: "Captcha is required.",
-          captchaFailed: "Captcha verification failed.",
-          captchaLoadFailed: "Captcha failed to load. Please refresh.",
-          captchaMissingKey: "Captcha is not configured.",
-          details: "Please describe the jewelry item you are interested in",
-          submit: "Submit",
-          appointmentType: "Appointment Type",
-          appointmentTypePlaceholder: "Select type",
-          storeAppointment: "Store Appointment",
-          virtualAppointment: "Virtual Appointment",
-        };
+        heading: "MAKE AN APPOINTMENT",
+        subtitle: null,
+        firstName: "First Name",
+        lastName: "Last Name",
+        country: "Country",
+        countryLoadFailed: "Failed to load countries.",
+        email: "Email",
+        phone: "Phone Number",
+        appointmentDate: "Select Date",
+        appointmentDatePlaceholder: "Select a date",
+        appointmentSlot: `Select Time Slot (Timezone: ${timezoneLabel})`,
+        appointmentSlotPlaceholder: "Select a time slot",
+        captchaLabel: "Captcha",
+        captchaRequired: "Captcha is required.",
+        captchaFailed: "Captcha verification failed.",
+        captchaLoadFailed: "Captcha failed to load. Please refresh.",
+        captchaMissingKey: "Captcha is not configured.",
+        details: "Please describe the jewelry item you are interested in",
+        submit: "Submit",
+        appointmentType: "Appointment Type",
+        appointmentTypePlaceholder: "Select type",
+        storeAppointment: "Store Appointment",
+        virtualAppointment: "Virtual Appointment",
+      };
   const weekendMessage =
     languageKey === "fi"
       ? "Sunnuntai ei ole varattavissa."
@@ -308,10 +310,10 @@ export default function AppointmentPage() {
   const recaptchaRef = useRef<HTMLDivElement | null>(null);
   const recaptchaWidgetId = useRef<number | null>(null);
   const siteKey = process.env.NEXT_PUBLIC_RECAPTCHA_SITE_KEY ?? "";
-const appointmentTypeOptions = [
-  { value: "store", label: labels.storeAppointment },
-  { value: "virtual", label: labels.virtualAppointment },
-];
+  const appointmentTypeOptions = [
+    { value: "store", label: labels.storeAppointment },
+    { value: "virtual", label: labels.virtualAppointment },
+  ];
   const resetRecaptcha = () => {
     if (typeof window === "undefined") return;
     if (window.grecaptcha && typeof window.grecaptcha.reset === "function") {
@@ -509,9 +511,9 @@ const appointmentTypeOptions = [
         );
         const selectedSlots = hasSelectedFlag
           ? slots.filter((slot) => {
-              const value = slot?.is_selected;
-              return value === true || value === 1 || value === "1" || value === "true";
-            })
+            const value = slot?.is_selected;
+            return value === true || value === 1 || value === "1" || value === "true";
+          })
           : slots;
         const normalized = selectedSlots
           .map((slot) => {
@@ -584,8 +586,8 @@ const appointmentTypeOptions = [
           const disabledList = Array.isArray(item?.disabled_timeSlots)
             ? item.disabled_timeSlots
             : Array.isArray(item?.disabled_time_slots)
-            ? item.disabled_time_slots
-            : [];
+              ? item.disabled_time_slots
+              : [];
           if (!disabledList.length) {
             dateList.push(dateKey);
             return;
@@ -931,9 +933,9 @@ const appointmentTypeOptions = [
                 options={slotOptionsForDate}
               />
               <SelectField
-               label={labels.appointmentType}
-              name="appointmentType"
-              placeholder={labels.appointmentTypePlaceholder}
+                label={labels.appointmentType}
+                name="appointmentType"
+                placeholder={labels.appointmentTypePlaceholder}
                 required
                 disabled={false}
                 value={form.appointmentType}
