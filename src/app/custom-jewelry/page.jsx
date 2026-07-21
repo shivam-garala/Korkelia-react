@@ -1,11 +1,7 @@
-import CustomJewelryClient from "./CustomJewelryClient.jsx";
+import { permanentRedirect } from "next/navigation";
+import { resolveStaticPageLocale } from "../../lib/resolveStaticPageLocale.js";
 
-export const metadata = {
-  alternates: {
-    canonical: "/custom-jewelry",
-  },
-};
-
-export default function CustomJewelryPage() {
-  return <CustomJewelryClient />;
+export default async function CustomJewelryRedirect() {
+  const locale = await resolveStaticPageLocale();
+  permanentRedirect(`/${locale}/custom-jewelry`);
 }

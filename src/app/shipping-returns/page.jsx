@@ -1,11 +1,5 @@
-import ShippingReturnsClient from "./ShippingReturnsClient.jsx";
+import { permanentRedirect } from "next/navigation";
 
-export const metadata = {
-  alternates: {
-    canonical: "/shipping-returns",
-  },
-};
-
-export default function ShippingReturnsPage() {
-  return <ShippingReturnsClient />;
+export default function ShippingReturnsRedirect() {
+  permanentRedirect("/en/shipping-returns");
 }

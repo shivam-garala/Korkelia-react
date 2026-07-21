@@ -1,11 +1,7 @@
-import AboutClient from "./AboutClient.jsx";
+import { permanentRedirect } from "next/navigation";
+import { resolveStaticPageLocale } from "../../lib/resolveStaticPageLocale.js";
 
-export const metadata = {
-  alternates: {
-    canonical: "/about",
-  },
-};
-
-export default function AboutPage() {
-  return <AboutClient />;
+export default async function AboutRedirect() {
+  const locale = await resolveStaticPageLocale();
+  permanentRedirect(`/${locale}/about`);
 }

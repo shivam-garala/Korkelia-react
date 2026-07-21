@@ -1,11 +1,7 @@
-import AppointmentClient from "./AppointmentClient.tsx";
+import { permanentRedirect } from "next/navigation";
+import { resolveStaticPageLocale } from "../../lib/resolveStaticPageLocale.js";
 
-export const metadata = {
-  alternates: {
-    canonical: "/appointment",
-  },
-};
-
-export default function AppointmentPage() {
-  return <AppointmentClient />;
+export default async function AppointmentRedirect() {
+  const locale = await resolveStaticPageLocale();
+  permanentRedirect(`/${locale}/appointment`);
 }

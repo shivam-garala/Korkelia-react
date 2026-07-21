@@ -293,7 +293,7 @@ export default function ShippingReturnsPage() {
   const { t } = useI18n();
   return (
     <div className={styles.page}>
-      <SiteHeader />
+      <SiteHeader availableLanguages={["en"]} />
       <main className={styles.main}>
         <Container>
           <div className={styles.topLine} aria-hidden />

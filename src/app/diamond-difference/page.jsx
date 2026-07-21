@@ -1,11 +1,7 @@
-import DiamondDifferenceClient from "./DiamondDifferenceClient.jsx";
+import { permanentRedirect } from "next/navigation";
+import { resolveStaticPageLocale } from "../../lib/resolveStaticPageLocale.js";
 
-export const metadata = {
-  alternates: {
-    canonical: "/diamond-difference",
-  },
-};
-
-export default function DiamondDifferencePage() {
-  return <DiamondDifferenceClient />;
+export default async function DiamondDifferenceRedirect() {
+  const locale = await resolveStaticPageLocale();
+  permanentRedirect(`/${locale}/diamond-difference`);
 }

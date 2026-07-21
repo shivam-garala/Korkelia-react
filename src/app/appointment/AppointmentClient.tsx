@@ -217,10 +217,13 @@ function getTimezoneLabel(tz: string): string {
   }
 }
 
-export default function AppointmentPage() {
+export default function AppointmentPage({
+  locale,
+  brandDescription,
+}: { locale?: "en" | "fi"; brandDescription?: string } = {}) {
   const { language, t } = useI18n();
-  const languageKey = language === "fi" ? "fi" : "en";
-  const languageId = language === "fi" ? "2" : "1";
+  const languageKey = locale ?? (language === "fi" ? "fi" : "en");
+  const languageId = languageKey === "fi" ? "2" : "1";
 
   const [selectedCountryTz, setSelectedCountryTz] = useState<string>("");
   const [countryIsoMap, setCountryIsoMap] = useState<Record<string, string>>({});
@@ -988,7 +991,7 @@ const appointmentTypeOptions = [
           onError={() => setRecaptchaLoadError(true)}
         />
       ) : null}
-      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
+      <SiteFooter brandDescription={brandDescription ?? t("footer.homeBrandDescription")} />
     </div>
   );
 }

@@ -1,11 +1,7 @@
-import DiamondGuideClient from "./DiamondGuideClient.jsx";
+import { permanentRedirect } from "next/navigation";
+import { resolveStaticPageLocale } from "../../lib/resolveStaticPageLocale.js";
 
-export const metadata = {
-  alternates: {
-    canonical: "/diamond-guide",
-  },
-};
-
-export default function DiamondGuidePage() {
-  return <DiamondGuideClient />;
+export default async function DiamondGuideRedirect() {
+  const locale = await resolveStaticPageLocale();
+  permanentRedirect(`/${locale}/diamond-guide`);
 }

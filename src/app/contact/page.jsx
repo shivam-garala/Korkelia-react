@@ -1,11 +1,7 @@
-import ContactClient from "./ContactClient.jsx";
+import { permanentRedirect } from "next/navigation";
+import { resolveStaticPageLocale } from "../../lib/resolveStaticPageLocale.js";
 
-export const metadata = {
-  alternates: {
-    canonical: "/contact",
-  },
-};
-
-export default function ContactPage() {
-  return <ContactClient />;
+export default async function ContactRedirect() {
+  const locale = await resolveStaticPageLocale();
+  permanentRedirect(`/${locale}/contact`);
 }

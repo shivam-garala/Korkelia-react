@@ -14,6 +14,7 @@ import {
   fetchSubCategoryHomePage,
 } from "../../../lib/productListingCache.js";
 import { useI18n } from "../../../providers/I18nProvider.jsx";
+import en from "../../../i18n/en.json";
 import styles from "./page.module.css";
 
 const buildSortOptions = (labels) => [
@@ -286,7 +287,7 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
 
   return (
     <div className={styles.page}>
-      <SiteHeader />
+      <SiteHeader availableLanguages={["en"]} fixedLanguage="en" />
       <main className={styles.main}>
         <section className={styles.storyWrap}>
           <Container>
@@ -562,7 +563,7 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
+      <SiteFooter brandDescription={en.footer.homeBrandDescription} fixedLanguage="en" />
     </div>
   );
 }

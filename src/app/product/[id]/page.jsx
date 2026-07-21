@@ -11,9 +11,34 @@ import RelatedProducts from "./RelatedProducts.jsx";
 import styles from "./page.module.css";
 import {
   buildVariantQuery,
+  parsePriceValue,
   pickCheapestPerProduct,
   resolveApiBaseUrl,
 } from "../../../lib/productDefaultVariant.js";
+
+const DEFAULT_SITE_URL = "https://korkeilahelsinki.fi";
+
+const resolveBaseUrl = async () => {
+  const headerStore = await headers();
+  const forwardedHost = headerStore.get("x-forwarded-host") || headerStore.get("host");
+  const forwardedProto = headerStore.get("x-forwarded-proto") || "https";
+  if (forwardedHost) {
+    return `${forwardedProto}://${forwardedHost}`;
+  }
+  return process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL;
+};
+
+// Mirrors the collection pages' own image-URL normalization (see e.g.
+// KihlasormusCollectionClient.jsx), but always returns an absolute URL since
+// schema.org markup (unlike a browser <img src>) requires one. A "/"-prefixed
+// path is a site-local asset (public folder); anything else is API-hosted.
+const normalizeImage = (image, apiBaseUrl, siteBaseUrl) => {
+  if (!image) return null;
+  if (/^https?:\/\//i.test(image)) return image;
+  if (image.startsWith("/")) return `${siteBaseUrl.replace(/\/$/, "")}${image}`;
+  if (!apiBaseUrl) return image;
+  return `${apiBaseUrl.replace(/\/$/, "")}/${String(image).replace(/^\//, "")}`;
+};
 
 const RING_CATEGORY_ID = 1;
 
@@ -63,15 +88,18 @@ const resolveIsRingProduct = async (id) => {
   }
 };
 
-// Resolves the cheapest variant's query string for a product, so both the
-// canonical tag and the no-variant-specified redirect always point at the
-// same URL. Wrapped in React's cache() so generateMetadata and the page
-// component share one lookup per request instead of fetching twice.
-const resolveCheapestVariantPath = cache(async (id) => {
+// Resolves the cheapest variant for a product — its redirect path, plus the
+// name/image/price used for the schema.org Product markup below, so both the
+// canonical tag, the no-variant-specified redirect, and the structured data
+// all describe the same representative variant. Wrapped in React's cache()
+// so generateMetadata and the page component share one lookup per request
+// instead of fetching twice.
+const resolveCheapestVariant = cache(async (id) => {
   if (!id) return null;
   try {
     const baseUrl = resolveApiBaseUrl();
     if (!baseUrl) return null;
+    const siteBaseUrl = await resolveBaseUrl();
 
     const categoryResponse = await fetch(
       `${baseUrl}/api/product/category/${encodeURIComponent(id)}`,
@@ -103,7 +131,21 @@ const resolveCheapestVariantPath = cache(async (id) => {
     if (!cheapest) return null;
 
     const queryString = buildVariantQuery(cheapest).toString();
-    return queryString ? `/product/${encodeURIComponent(id)}?${queryString}` : null;
+    const path = queryString ? `/product/${encodeURIComponent(id)}?${queryString}` : null;
+    const name =
+      cheapest?.design?.design_translation?.design_variant_name ??
+      cheapest?.design?.design_variant_name ??
+      cheapest?.product_name ??
+      cheapest?.name ??
+      null;
+    const price = parsePriceValue(cheapest?.total_price);
+
+    return {
+      path,
+      name,
+      image: normalizeImage(cheapest?.image, baseUrl, siteBaseUrl),
+      price: Number.isFinite(price) ? price : null,
+    };
   } catch {
     return null;
   }
@@ -146,21 +188,49 @@ export default async function ProductDetailsPage({ params, searchParams }) {
   const designId = readSearchParam(resolvedSearchParams, "design_id");
 
   if (!designId) {
-    const cheapestPath = await resolveCheapestVariantPath(id);
-    if (cheapestPath) {
-      permanentRedirect(cheapestPath);
+    const cheapestVariant = await resolveCheapestVariant(id);
+    if (cheapestVariant?.path) {
+      permanentRedirect(cheapestVariant.path);
     }
   }
 
-  const [language, isRingProduct] = await Promise.all([
+  const [language, isRingProduct, variant, siteBaseUrl] = await Promise.all([
     resolveLanguage(),
     resolveIsRingProduct(id),
+    resolveCheapestVariant(id),
+    resolveBaseUrl(),
   ]);
   const footerBrandDescription = isRingProduct
     ? RING_FOOTER_BRAND_DESCRIPTION[language]
     : FOOTER_BRAND_DESCRIPTION[language];
+
+  const canonicalUrl = `${siteBaseUrl.replace(/\/$/, "")}/product/${encodeURIComponent(id ?? "")}`;
+  const productJsonLd =
+    variant?.name && variant?.price != null
+      ? {
+          "@context": "https://schema.org",
+          "@type": "Product",
+          name: variant.name,
+          image: variant.image ? [variant.image] : undefined,
+          url: canonicalUrl,
+          offers: {
+            "@type": "Offer",
+            url: canonicalUrl,
+            priceCurrency: "EUR",
+            price: variant.price,
+            availability: "https://schema.org/InStock",
+          },
+        }
+      : null;
+
   return (
     <div className={styles.page}>
+      {productJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(productJsonLd) }}
+        />
+      ) : null}
       <SiteHeader />
       <main className={styles.main}>
         <Container>

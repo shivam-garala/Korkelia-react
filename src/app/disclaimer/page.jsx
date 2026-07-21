@@ -1,11 +1,5 @@
-import DisclaimerClient from "./DisclaimerClient.jsx";
+import { permanentRedirect } from "next/navigation";
 
-export const metadata = {
-  alternates: {
-    canonical: "/disclaimer",
-  },
-};
-
-export default function DisclaimerPage() {
-  return <DisclaimerClient />;
+export default function DisclaimerRedirect() {
+  permanentRedirect("/en/disclaimer");
 }

@@ -23,18 +23,28 @@ const escapeXmlUrl = (url) => url.replace(/&/g, "&amp;");
 
 const STATIC_ROUTES = [
   { path: "/", changeFrequency: "daily", priority: 1.0 },
-  { path: "/about", changeFrequency: "monthly", priority: 0.6 },
-  { path: "/contact", changeFrequency: "monthly", priority: 0.6 },
-  { path: "/appointment", changeFrequency: "monthly", priority: 0.6 },
-  { path: "/faq", changeFrequency: "monthly", priority: 0.5 },
-  { path: "/diamond-guide", changeFrequency: "monthly", priority: 0.6 },
-  { path: "/diamond-difference", changeFrequency: "monthly", priority: 0.6 },
-  { path: "/custom-jewelry", changeFrequency: "monthly", priority: 0.6 },
   { path: "/product", changeFrequency: "daily", priority: 0.7 },
-  { path: "/shipping-returns", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/privacy-policy", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/cookie-policy", changeFrequency: "yearly", priority: 0.3 },
-  { path: "/disclaimer", changeFrequency: "yearly", priority: 0.3 },
+];
+
+// Static pages migrated to locale-prefixed URLs (/en/{page}, /fi/{page})
+// for hreflang. Extend this list as more static pages are migrated.
+const LOCALIZED_STATIC_PAGES = [
+  "about",
+  "contact",
+  "faq",
+  "diamond-guide",
+  "diamond-difference",
+  "custom-jewelry",
+  "appointment",
+];
+
+// English-only static pages (no Finnish translation exists yet). These live
+// at /en/{page} only — no hreflang alternates, since there's a single language.
+const EN_ONLY_STATIC_PAGES = [
+  "privacy-policy",
+  "cookie-policy",
+  "disclaimer",
+  "shipping-returns",
 ];
 
 const COLLECTION_SLUGS = [
@@ -133,7 +143,29 @@ export default async function sitemap() {
     priority: 0.8,
   }));
 
+  const localizedStaticEntries = LOCALIZED_STATIC_PAGES.flatMap((page) =>
+    ["en", "fi"].map((locale) => ({
+      url: `${baseUrl}/${locale}/${page}`,
+      lastModified,
+      changeFrequency: "monthly",
+      priority: 0.6,
+    }))
+  );
+
+  const enOnlyStaticEntries = EN_ONLY_STATIC_PAGES.map((page) => ({
+    url: `${baseUrl}/en/${page}`,
+    lastModified,
+    changeFrequency: "yearly",
+    priority: 0.3,
+  }));
+
   const productEntries = await fetchProductEntries(baseUrl);
 
-  return [...staticEntries, ...collectionEntries, ...productEntries];
+  return [
+    ...staticEntries,
+    ...collectionEntries,
+    ...localizedStaticEntries,
+    ...enOnlyStaticEntries,
+    ...productEntries,
+  ];
 }

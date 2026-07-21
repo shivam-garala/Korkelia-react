@@ -1,11 +1,5 @@
-import CookiePolicyClient from "./CookiePolicyClient.jsx";
+import { permanentRedirect } from "next/navigation";
 
-export const metadata = {
-  alternates: {
-    canonical: "/cookie-policy",
-  },
-};
-
-export default function CookiePolicyPage() {
-  return <CookiePolicyClient />;
+export default function CookiePolicyRedirect() {
+  permanentRedirect("/en/cookie-policy");
 }

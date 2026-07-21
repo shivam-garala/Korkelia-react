@@ -13,6 +13,7 @@ import {
   fetchSubCategoryHomePage,
 } from "../../../lib/productListingCache.js";
 import { useI18n } from "../../../providers/I18nProvider.jsx";
+import en from "../../../i18n/en.json";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
@@ -244,7 +245,7 @@ export default function KihlasormusMiehelleCollectionClient() {
 
   return (
     <div className={styles.page}>
-      <SiteHeader />
+      <SiteHeader availableLanguages={["en"]} fixedLanguage="en" />
       <main className={styles.main}>
         <section className={styles.storyWrap}>
           <Container>
@@ -537,7 +538,7 @@ export default function KihlasormusMiehelleCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter brandDescription={t("footer.ringBrandDescription")} />
+      <SiteFooter brandDescription={en.footer.ringBrandDescription} fixedLanguage="en" />
     </div>
   );
 }

@@ -1,11 +1,7 @@
-import FaqClient from "./FaqClient.jsx";
+import { permanentRedirect } from "next/navigation";
+import { resolveStaticPageLocale } from "../../lib/resolveStaticPageLocale.js";
 
-export const metadata = {
-  alternates: {
-    canonical: "/faq",
-  },
-};
-
-export default function FaqPage() {
-  return <FaqClient />;
+export default async function FaqRedirect() {
+  const locale = await resolveStaticPageLocale();
+  permanentRedirect(`/${locale}/faq`);
 }

@@ -13,6 +13,7 @@ import {
   fetchSubCategoryHomePage,
 } from "../../../lib/productListingCache.js";
 import { useI18n } from "../../../providers/I18nProvider.jsx";
+import fi from "../../../i18n/fi.json";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
@@ -299,7 +300,7 @@ export default function TimanttisormusCollectionClient() {
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
       />
-      <SiteHeader />
+      <SiteHeader availableLanguages={["fi"]} fixedLanguage="fi" />
       <main className={styles.main}>
         <section className={styles.storyWrap}>
           <Container>
@@ -691,7 +692,7 @@ export default function TimanttisormusCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter brandDescription={t("footer.ringBrandDescription")} />
+      <SiteFooter brandDescription={fi.footer.ringBrandDescription} fixedLanguage="fi" />
     </div>
   );
 }

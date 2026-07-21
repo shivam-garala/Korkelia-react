@@ -1,11 +1,5 @@
-import PrivacyPolicyClient from "./PrivacyPolicyClient.jsx";
+import { permanentRedirect } from "next/navigation";
 
-export const metadata = {
-  alternates: {
-    canonical: "/privacy-policy",
-  },
-};
-
-export default function PrivacyPolicyPage() {
-  return <PrivacyPolicyClient />;
+export default function PrivacyPolicyRedirect() {
+  permanentRedirect("/en/privacy-policy");
 }

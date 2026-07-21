@@ -94,7 +94,7 @@ export default function CookiePolicyPage() {
 
   return (
     <div className={styles.page}>
-      <SiteHeader />
+      <SiteHeader availableLanguages={["en"]} />
       <main className={styles.main}>
         <Container>
           <div className={styles.topLine} aria-hidden />
@@ -104,7 +104,7 @@ export default function CookiePolicyPage() {
               This Cookie Policy explains how Greenbridge Oy (brand: Korkeila Helsinki) (&quot;we&quot;, &quot;us&quot;)
               uses cookies and similar technologies on our website, and how you can manage your choices.
               This Cookie Policy should be read together with our{" "}
-              <a className={styles.inlineLink} href="/privacy-policy">
+              <a className={styles.inlineLink} href="/en/privacy-policy">
                 Privacy Policy
               </a>
               , which explains how we process personal data more generally.
