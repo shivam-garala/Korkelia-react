@@ -22,6 +22,12 @@ export const sidebarSections = [
     ],
   },
   {
+    title: "Currency Management",
+    items: [
+      { label: "Currency Rate", href: "/dashboard/currency-rate", icon: "chart" },
+    ],
+  },
+  {
     title: "Diamond Management",
     items: [
       { label: "Diamond Type", href: "/dashboard/diamond-type", icon: "grid" },
@@ -45,6 +51,13 @@ export const sidebarSections = [
       { label: "Products", href: "/dashboard/product", icon: "cart" },
       // { label: "Design", href: "/dashboard/design", icon: "briefcase" },
       { label: "Design Variant", href: "/dashboard/design-variant", icon: "briefcase" },
+    ],
+  },
+  {
+    title: "Appointment Management",
+    items: [
+      { label: "Appointments", href: "/dashboard/appointment", icon: "receipt" },
+      { label: "Inquiries", href: "/dashboard/inquiries", icon: "bag" },
     ],
   },
 ];

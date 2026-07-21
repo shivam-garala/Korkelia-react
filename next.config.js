@@ -1,4 +1,5 @@
-﻿const path = require("path");
+const path = require("path");
+const redirectHomePaths = require("./src/lib/legacyRedirectPaths.js");
 
 /** @type {import('next').NextConfig} */
 const nextConfig = {
@@ -25,6 +26,10 @@ const nextConfig = {
       {
         protocol: "https",
         hostname: "d3s5kl2h1nwckf.cloudfront.net",
+      },
+      {
+      protocol: "https",
+      hostname: "imagesweb2026.s3.eu-north-1.amazonaws.com",
       },
     ],
   },
@@ -56,6 +61,16 @@ const nextConfig = {
   reactStrictMode: false,
   productionBrowserSourceMaps: false,
   poweredByHeader: false,
+  async redirects() {
+    const isProduction = process.env.NODE_ENV === "production";
+    return [
+      ...redirectHomePaths.map((source) => ({
+        source,
+        destination: "/",
+        permanent: isProduction,
+      })),
+    ];
+  },
 };
 
 module.exports = nextConfig;

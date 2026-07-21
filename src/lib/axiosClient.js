@@ -4,7 +4,18 @@ import axios from "axios";
 import Cookies from "js-cookie";
 import { toast } from "react-toastify";
 
-console.log(process.env.NEXT_PUBLIC_API_URL);
+const normalizeBaseUrl = (value) => {
+  if (!value) return null;
+  const normalized = String(value).trim();
+  if (!normalized) return null;
+  return normalized.replace(/\/+$/, "");
+};
+
+const DEFAULT_API_BASE = "https://uat.korkeilahelsinki.fi";
+
+export const API_BASE_URL =
+  normalizeBaseUrl(process.env.NEXT_PUBLIC_API_URL) ??
+  DEFAULT_API_BASE;
 
 const isAdminRoute = () => {
   if (typeof window === "undefined") return false;
@@ -18,10 +29,7 @@ const isMutationMethod = (method) => {
 };
 
 const axiosClient = axios.create({
-  baseURL:
-    process.env.NEXT_PUBLIC_API_URL ??
-    process.env.NEXT_PUBLIC_BASE_API_URL ??
-    process.env.NEXT_BASE_API_URL,
+  baseURL: API_BASE_URL,
   headers: {
     Accept: "application/json",
   },

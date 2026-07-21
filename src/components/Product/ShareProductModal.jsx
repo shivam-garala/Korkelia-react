@@ -25,10 +25,12 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
           shareButton: "Jaa",
           facebook: "Facebook",
           whatsapp: "WhatsApp",
-          twitter: "Twitter",
+          instagram: "Instagram",
+          threads: "Threads",
           facebookAria: "Jaa Facebookissa",
           whatsappAria: "Jaa WhatsAppissa",
-          twitterAria: "Jaa Twitterissa",
+          instagramAria: "Avaa Instagramissa",
+          threadsAria: "Avaa Threadsissa",
         }
       : {
           title: "Share This Product",
@@ -40,10 +42,12 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
           shareButton: "Share",
           facebook: "Facebook",
           whatsapp: "WhatsApp",
-          twitter: "Twitter",
+          instagram: "Instagram",
+          threads: "Threads",
           facebookAria: "Share on Facebook",
           whatsappAria: "Share on WhatsApp",
-          twitterAria: "Share on Twitter",
+          instagramAria: "Open on Instagram",
+          threadsAria: "Open on Threads",
         };
 
   const currentUrl = useMemo(() => {
@@ -73,7 +77,8 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
     return {
       facebook: `https://www.facebook.com/sharer/sharer.php?u=${encodedUrl}`,
       whatsapp: `https://wa.me/?text=${encodedUrl}`,
-      twitter: `https://twitter.com/intent/tweet?url=${encodedUrl}`,
+      instagram: "https://www.instagram.com/korkeilahelsinki/",
+      threads: "https://www.threads.com/@korkeilahelsinki",
     };
   }, [shareUrl]);
 
@@ -160,20 +165,42 @@ export default function ShareProductModal({ buttonClassName = "", buttonContent 
           </a>
           <a
             className={styles.shareItem}
-            href={shareLinks.twitter}
+            href={shareLinks.instagram}
             target="_blank"
             rel="noreferrer"
-            aria-label={labels.twitterAria}
+            aria-label={labels.instagramAria}
           >
-            <span className={`${styles.shareIcon} ${styles.twitter}`}>
+            <span className={`${styles.shareIcon} ${styles.instagram}`}>
               <svg viewBox="0 0 24 24" aria-hidden="true">
                 <path
                   fill="currentColor"
-                  d="M21.75 6.01c-.74.33-1.53.55-2.36.65a4.12 4.12 0 0 0 1.8-2.27 8.3 8.3 0 0 1-2.6.99A4.14 4.14 0 0 0 11.34 9.2a11.76 11.76 0 0 1-8.54-4.33 4.13 4.13 0 0 0 1.28 5.52c-.63-.02-1.22-.2-1.74-.47v.05a4.14 4.14 0 0 0 3.32 4.06 4.15 4.15 0 0 1-1.87.07 4.14 4.14 0 0 0 3.87 2.87 8.3 8.3 0 0 1-5.13 1.77A8.47 8.47 0 0 1 2 18.7a11.72 11.72 0 0 0 6.34 1.86c7.6 0 11.76-6.3 11.76-11.76 0-.18 0-.36-.01-.54a8.4 8.4 0 0 0 2.06-2.13z"
+                  d="M12 7.3A4.7 4.7 0 1 0 16.7 12 4.71 4.71 0 0 0 12 7.3zm0 7.7A3 3 0 1 1 15 12a3 3 0 0 1-3 3z"
+                />
+                <circle cx="17.3" cy="6.7" r="1.1" fill="currentColor" />
+                <path
+                  fill="currentColor"
+                  d="M17.5 3h-11A3.5 3.5 0 0 0 3 6.5v11A3.5 3.5 0 0 0 6.5 21h11a3.5 3.5 0 0 0 3.5-3.5v-11A3.5 3.5 0 0 0 17.5 3zm2 14.5a2 2 0 0 1-2 2h-11a2 2 0 0 1-2-2v-11a2 2 0 0 1 2-2h11a2 2 0 0 1 2 2z"
                 />
               </svg>
             </span>
-            <span>{labels.twitter}</span>
+            <span>{labels.instagram}</span>
+          </a>
+          <a
+            className={styles.shareItem}
+            href={shareLinks.threads}
+            target="_blank"
+            rel="noreferrer"
+            aria-label={labels.threadsAria}
+          >
+            <span className={`${styles.shareIcon} ${styles.threads}`}>
+              <svg viewBox="0 0 24 24" aria-hidden="true">
+                <path
+                  fill="currentColor"
+                  d="M12 2C6.48 2 2 6.15 2 12s4.48 10 10 10 10-4.15 10-10S17.52 2 12 2zm4.46 11.07c-.23 1.63-.93 2.77-2.12 3.51-.9.57-2.02.84-3.25.76-1.22-.08-2.19-.49-2.91-1.21-.7-.71-1.08-1.68-1.12-2.89l1.89-.07c.03.74.22 1.28.57 1.63.39.39.94.61 1.67.66.71.05 1.32-.09 1.82-.41.61-.38.98-.98 1.11-1.8a4.03 4.03 0 0 1-1.9.47c-1.12 0-2.06-.35-2.82-1.04-.78-.69-1.17-1.61-1.17-2.76 0-1.16.37-2.08 1.1-2.77.73-.7 1.67-1.05 2.81-1.05 1.22 0 2.22.36 2.98 1.09.75.71 1.2 1.68 1.35 2.9.52.2.93.52 1.23.94.35.49.53 1.08.53 1.75 0 .73-.2 1.35-.61 1.87a3.22 3.22 0 0 1-1.38 1.02zm-3.02-4.94c-.44-.4-.96-.6-1.58-.6-.62 0-1.14.2-1.57.6-.42.4-.63.95-.63 1.63 0 .65.22 1.18.66 1.6.44.42.98.63 1.62.63.64 0 1.17-.21 1.6-.63.43-.42.64-.96.64-1.6 0-.68-.22-1.23-.64-1.63z"
+                />
+              </svg>
+            </span>
+            <span>{labels.threads}</span>
           </a>
         </div>
 

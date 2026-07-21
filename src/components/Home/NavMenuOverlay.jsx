@@ -31,7 +31,7 @@ export default function NavMenuOverlay({ open, onClose }) {
   const [productsOpen, setProductsOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
-  const { t, language, setLanguage } = useI18n();
+  const { t, language } = useI18n();
   const pathname = usePathname();
   const languageId = language === "fi" ? "2" : "1";
   const categoriesLoadedRef = useRef({});
@@ -240,6 +240,17 @@ export default function NavMenuOverlay({ open, onClose }) {
                 {t("menu.diamondDifference")}
               </Link>
             </li>
+           
+            <li className={styles.item}>
+              <Link
+                className={`${styles.link} ${isActive("/custom-jewelry") ? styles.activeLink : ""}`}
+                href="/custom-jewelry"
+                onClick={onClose}
+              >
+                {t("menu.customJewelry")}
+              </Link>
+            </li>
+       
             <li className={styles.item}>
               <Link
                 className={`${styles.link} ${isActive("/shipping-returns") ? styles.activeLink : ""}`}
@@ -247,6 +258,15 @@ export default function NavMenuOverlay({ open, onClose }) {
                 onClick={onClose}
               >
                 {t("menu.shippingReturns")}
+              </Link>
+            </li>
+            <li className={styles.item}>
+              <Link
+                className={`${styles.link} ${isActive("/faq") ? styles.activeLink : ""}`}
+                href="/faq"
+                onClick={onClose}
+              >
+                {t("menu.faq")}
               </Link>
             </li>
             <li className={styles.item}>

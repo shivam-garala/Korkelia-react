@@ -2,16 +2,59 @@
 
 import Link from "next/link";
 import Image from "next/image";
-import { useState } from "react";
+import { useEffect, useMemo, useState } from "react";
 import Dropdown from "./Dropdown";
 import NavMenuOverlay from "./NavMenuOverlay";
 import styles from "./SiteHeader.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import ShareProductModal from "../Product/ShareProductModal.jsx";
+import axiosClient from "../../lib/axiosClient.js";
+import {
+  optionEuroForPublicDropdown,
+  optionFromPublicRateRow,
+} from "../../constants/currencyOptions.js";
 
 export default function SiteHeader() {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { language, setLanguage, t } = useI18n();
+  const { language, setLanguage, currency, setCurrency, t } = useI18n();
+  const [publicRates, setPublicRates] = useState([]);
+
+  useEffect(() => {
+    let cancelled = false;
+    axiosClient
+      .get("/api/currencyRate/public-visible")
+      .then(({ data }) => {
+        if (cancelled) return;
+        const list = Array.isArray(data?.data) ? data.data : [];
+        setPublicRates(list);
+      })
+      .catch(() => {
+        if (!cancelled) setPublicRates([]);
+      });
+    return () => {
+      cancelled = true;
+    };
+  }, []);
+
+  /** Admin-visible rates; always include EUR in dropdown without forcing EUR selection. */
+  const currencyDropdownOptions = useMemo(() => {
+    const mapped = publicRates.map(optionFromPublicRateRow).filter(Boolean);
+    if (mapped.length === 0) {
+      return [optionEuroForPublicDropdown()];
+    }
+    const hasEur = mapped.some(
+      (o) => String(o?.value ?? "").trim().toLowerCase() === "eur",
+    );
+    if (!hasEur) {
+      return [optionEuroForPublicDropdown(), ...mapped];
+    }
+    return mapped;
+  }, [publicRates]);
+
+  const languageLabels =
+    language === "fi"
+      ? { en: "Englanti", fi: "Suomi" }
+      : { en: "English", fi: "Finnish" };
 
   const topBarContent = (
     <>
@@ -22,13 +65,29 @@ export default function SiteHeader() {
           value={language}
           onChange={setLanguage}
           options={[
-            { value: "en", label: "English" },
-            { value: "fi", label: "Finnish" },
+            {
+              value: "en",
+              label: languageLabels.en,
+              icon: "/icons/uk.svg",
+              iconAlt: "United Kingdom flag",
+            },
+            {
+              value: "fi",
+              label: languageLabels.fi,
+              icon: "/icons/finland.svg",
+              iconAlt: "Finland flag",
+            },
           ]}
         />
-        <div className={styles.currency} aria-label="Currency">
-          <Image className={styles.currencyIcon} src="/icons/euro.png" alt="" width={14} height={14} />
-          <span>{t("header.currency")}</span>
+        <div className={styles.currencyRow}>
+          <Dropdown
+            ariaLabel={t("header.currency")}
+            leadingIcon="currency"
+            value={currency}
+            onChange={setCurrency}
+            options={currencyDropdownOptions}
+            triggerClassName={styles.currencyTrigger}
+          />
         </div>
       </div>
 

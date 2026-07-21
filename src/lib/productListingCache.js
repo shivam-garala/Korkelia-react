@@ -3,8 +3,17 @@ import axiosClient from "./axiosClient.js";
 const requestCache = new Map();
 const dataCache = new Map();
 
-const buildKey = (prefix, languageId, categoryId) =>
-  `${prefix}:${String(languageId || "1")}:${String(categoryId || "")}`;
+const buildKey = (
+  prefix,
+  languageId,
+  categoryId,
+  currencyCode,
+  currencySymbol,
+  preferWhite,
+) =>
+  `${prefix}:${String(languageId || "1")}:${String(categoryId || "")}:${String(
+    currencyCode || "EU"
+  )}:${preferWhite ? "1" : "0"}:${currencySymbol || ""}`;
 
 const fetchCached = async (key, url) => {
   if (dataCache.has(key)) return dataCache.get(key);
@@ -27,12 +36,29 @@ const fetchCached = async (key, url) => {
   return request;
 };
 
-export const fetchProductListEcom = async (languageId, categoryId) => {
-  const key = buildKey("products", languageId, categoryId);
-  const url = `/api/product/listEcom?language_id=${encodeURIComponent(
-    languageId || "1"
-  )}&category_id=${encodeURIComponent(categoryId || "")}`;
-  return fetchCached(key, url);
+export const fetchProductListEcom = async (
+  languageId,
+  categoryId,
+  currencyCode,
+  currencySymbol,
+  preferWhite
+) => {
+  const key = buildKey(
+    "products",
+    languageId,
+    categoryId,
+    currencyCode,
+    currencySymbol,
+    preferWhite,
+  );
+  const params = new URLSearchParams({
+    language_id: String(languageId || "1"),
+    category_id: String(categoryId || ""),
+    currency: String(currencyCode || "EU"),
+    currency_symbol: String(currencySymbol || ""),
+    prefer_white: preferWhite ? "1" : "0",
+  });
+  return fetchCached(key, `/api/product/listEcom?${params.toString()}`);
 };
 
 export const fetchSubCategoryHomePage = async (languageId, categoryId) => {
@@ -40,6 +66,12 @@ export const fetchSubCategoryHomePage = async (languageId, categoryId) => {
   const url = `/api/subCategory/home-page?language_id=${encodeURIComponent(
     languageId || "1"
   )}&category_id=${encodeURIComponent(categoryId || "")}`;
+  return fetchCached(key, url);
+};
+
+export const fetchAllCategories = async (languageId) => {
+  const key = `categories:${String(languageId || "1")}`;
+  const url = `/api/categoryMaster/home-page?language_id=${encodeURIComponent(languageId || "1")}`;
   return fetchCached(key, url);
 };
 

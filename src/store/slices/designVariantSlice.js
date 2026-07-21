@@ -112,6 +112,18 @@ export const deleteDesignVariant = createAsyncThunk(
   }
 );
 
+export const bulkDeleteDesignVariants = createAsyncThunk(
+  "designVariant/bulkDelete",
+  async (ids, { rejectWithValue }) => {
+    try {
+      const { data } = await axiosClient.post("/api/design/bulk-delete", { ids });
+      return { ids, data };
+    } catch (error) {
+      return rejectWithValue(axiosErrorMessage(error, normalizeError(error)));
+    }
+  }
+);
+
 export const fetchProductDropdown = createAsyncThunk(
   "designVariant/fetchProductDropdown",
   async (_, { rejectWithValue }) => {

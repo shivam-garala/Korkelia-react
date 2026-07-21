@@ -119,7 +119,8 @@ export default function HomeClient() {
       <SiteHeader />
       <main className={styles.main}>
         <Hero
-          videoSrc="/homepage/Rings_in_Motion.mp4"
+          videoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Rings_in_Motion.mp4"
+          mobileVideoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Ring_in_motion_mobile.mp4"
           posterSrc="/homepage/poster_default.png"
           eyebrow={t("home.hero.eyebrow")}
           title={t("home.hero.title")}
@@ -130,7 +131,7 @@ export default function HomeClient() {
 
         <CategoryGrid
           title={t("home.categories.title")}
-          categories={categories.length ? categories : fallbackCategories}
+          categories={categories.length ? categories : []}
           loading={categoriesLoading}
         />
 
@@ -140,6 +141,7 @@ export default function HomeClient() {
             isDesktop
               ? "/homepage/diamond_guid_desktop.mp4"
               : "/homepage/diamond_guid_mobile.mp4"
+            
           }
           mediaPosition={isDesktop ? "right center" : "right bottom"}
           sectionClassName={styles.diamondGuideSection}
@@ -159,9 +161,9 @@ export default function HomeClient() {
           mediaSrc={
             isDesktop
               ? "/homepage/diamond_deference_desktop.mp4"
-              : "/homepage/diamond_deference_desktop.mp4"
+              : "/homepage/diamond_deference_mobile.mp4"
           }
-          mediaPosition={isDesktop ? "top right" : "top right"}
+          mediaPosition={isDesktop ? "top right" : "right bottom"}
           sectionClassName={styles.diamondDifferenceSection}
           mediaClassName={styles.diamondDifferenceMedia}
           contentClassName={styles.diamondDifferenceContent}
@@ -188,8 +190,16 @@ export default function HomeClient() {
 
         <FullMediaSection
           mediaType="image"
-          mediaSrc={isDesktop ? "/homepage/banner_desktop_3.jpg" : "/homepage/banner_mobile_3.jpeg"}
-          posterSrc={isDesktop ? "/homepage/banner_desktop_3.jpg" : "/homepage/banner_mobile_3.jpeg"}
+          mediaSrc={
+            isDesktop
+              ? "/homepage/banner_desktop_3.jpg"
+              : "/homepage/banner_mobile_3.jpeg"
+          }
+          posterSrc={
+            isDesktop
+              ? "/homepage/banner_desktop_3.jpg"
+              : "/homepage/banner_mobile_3.jpeg"
+          }
           eyebrow={t("home.about.eyebrow")}
           title={t("home.about.title")}
           subtitle={t("home.about.subtitle")}
@@ -198,7 +208,7 @@ export default function HomeClient() {
           href="/about"
         />
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }

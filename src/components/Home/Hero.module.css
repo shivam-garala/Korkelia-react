@@ -32,6 +32,10 @@
   filter: brightness(1.06) contrast(1.04);
 }
 
+.mobileVideo {
+  display: none;
+}
+
 .overlay {
   position: absolute;
   inset: 0;
@@ -124,9 +128,46 @@
   background: color-mix(in srgb, rgba(124, 94, 79, 0.92), #ffffff 8%);
 }
 
+.muteBtn {
+  display: none;
+  position: absolute;
+  bottom: 20px;
+  right: 16px;
+  z-index: 10;
+  width: 40px;
+  height: 40px;
+  border-radius: 50%;
+  border: none;
+  background: rgba(255, 255, 255, 0.22);
+  backdrop-filter: blur(6px);
+  -webkit-backdrop-filter: blur(6px);
+  color: #ffffff;
+  cursor: pointer;
+  align-items: center;
+  justify-content: center;
+  transition: background 0.2s;
+}
+
+.muteBtn:hover {
+  background: rgba(255, 255, 255, 0.35);
+}
+
 @media (max-width: 720px) {
   .hero {
-    height: 70vh;
+    height: 80vh;
+    min-height: 620px;
+  }
+
+  .muteBtn {
+    display: flex;
+  }
+
+  .desktopVideo {
+    display: none;
+  }
+
+  .mobileVideo {
+    display: block;
   }
 
   .video {
@@ -134,5 +175,20 @@
   }
   .content {
     padding: 0 18px 40px;
+  }
+}
+
+@media (max-width: 720px) and (orientation: landscape) {
+  .hero {
+    height: 70vh;
+    min-height: 0;
+  }
+
+  .desktopVideo {
+    display: block;
+  }
+
+  .mobileVideo {
+    display: none;
   }
 }

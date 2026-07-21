@@ -1,0 +1,58 @@
+.page {
+  background: var(--background);
+  color: var(--foreground);
+  font-family: var(--font-body);
+}
+
+.main {
+  padding: 80px 0 120px;
+  display: grid;
+  justify-items: center;
+  text-align: center;
+}
+
+.topLine {
+  height: 1px;
+  background: color-mix(in srgb, var(--color-primary), transparent 55%);
+  margin: 0 0 48px;
+  width: 100%;
+}
+
+.code {
+  margin: 0;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  font-size: 96px;
+  letter-spacing: 4px;
+  color: var(--color-primary);
+}
+
+.heading {
+  margin: 20px 0 0;
+  font-family: var(--font-heading);
+  font-weight: 400;
+  letter-spacing: 2.4px;
+  color: #606062;
+  text-transform: uppercase;
+}
+
+.message {
+  margin: 28px auto 0;
+  max-width: 520px;
+  color: var(--color-muted);
+  font-size: 15px;
+  line-height: 1.6;
+}
+
+.cta {
+  display: inline-block;
+  margin: 32px auto 0;
+  width: max-content;
+  padding: 10px 24px;
+  background: var(--color-primary);
+  color: #ffffff;
+  font-size: 15px;
+  letter-spacing: 1.4px;
+  text-transform: uppercase;
+  text-align: center;
+}

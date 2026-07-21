@@ -131,7 +131,12 @@ const subCategorySlice = createSlice({
       .addCase(fetchSubCategory.fulfilled, (state, action) => {
         state.selected = action.payload?.data ?? null;
       })
+      .addCase(fetchSubCategoriesByCategory.pending, (state) => {
+        state.loading = true;
+        state.error = null;
+      })
       .addCase(fetchSubCategoriesByCategory.fulfilled, (state, action) => {
+        state.loading = false;
         const items = Array.isArray(action.payload?.data)
           ? action.payload.data
           : action.payload?.data?.data ?? [];

@@ -1,6 +1,13 @@
 "use client";
 
-import { useCallback, useEffect, useId, useMemo, useRef, useState } from "react";
+import {
+  useCallback,
+  useEffect,
+  useId,
+  useMemo,
+  useRef,
+  useState,
+} from "react";
 import { useRouter } from "next/navigation";
 import Select from "react-select";
 import { toast } from "react-toastify";
@@ -39,6 +46,43 @@ const metalColorByCode = {
 const normalizeString = (value) => {
   if (value === null || value === undefined) return "";
   return String(value).trim();
+};
+
+/** Unwrap common API envelopes so design fields (e.g. total_price) sit on one object. */
+const unwrapVariantPayload = (raw) => {
+  if (raw == null) return null;
+  if (Array.isArray(raw)) return raw[0] ?? null;
+  if (typeof raw !== "object") return raw;
+  const inner =
+    raw?.data?.data ??
+    raw?.data?.design ??
+    (raw.data && typeof raw.data === "object" && !Array.isArray(raw.data)
+      ? raw.data
+      : null) ??
+    raw?.result ??
+    raw?.payload;
+  return inner && typeof inner === "object" ? inner : raw;
+};
+
+/** Prefer formatted total_price string, then numeric price, from design or product. */
+const pickTotalPrice = (source) => {
+  if (!source || typeof source !== "object") return "";
+  const candidates = [
+    source.total_price,
+    source.totalPrice,
+    source.price,
+    source.design?.total_price,
+    source.design?.totalPrice,
+  ];
+  for (const c of candidates) {
+    if (c === null || c === undefined) continue;
+    if (typeof c === "number" && Number.isFinite(c)) {
+      return String(c);
+    }
+    const s = normalizeString(c);
+    if (s) return s;
+  }
+  return "";
 };
 
 const normalizeLanguageToken = (value) => normalizeString(value).toLowerCase();
@@ -199,21 +243,17 @@ const resolveListingDefaults = (details) => {
   const diamondRate = diamondDetail?.diamond_rate ?? null;
   return {
     cut: normalizeString(
-      diamondDetail?.cut_master_id ?? diamondDetail?.cut_master?.id ?? ""
+      diamondDetail?.cut_master_id ?? diamondDetail?.cut_master?.id ?? "",
     ),
     quality: normalizeString(diamondRate?.diamond_type_id ?? ""),
     clarity: normalizeString(diamondRate?.clarity_id ?? ""),
     carat: normalizeString(
       diamondRate?.diamond_master?.carat ??
         diamondRate?.diamond_master_id?.carat ??
-        ""
+        "",
     ),
-    metal: normalizeString(
-      metalRate?.metal_id ?? metalRate?.metal?.id ?? ""
-    ),
-    karat: normalizeString(
-      metalRate?.karat_id ?? metalRate?.karat?.id ?? ""
-    ),
+    metal: normalizeString(metalRate?.metal_id ?? metalRate?.metal?.id ?? ""),
+    karat: normalizeString(metalRate?.karat_id ?? metalRate?.karat?.id ?? ""),
   };
 };
 
@@ -231,14 +271,73 @@ const resolveCategoryId = (details) => {
       design?.categoryId ??
       design?.product?.category_id ??
       design?.product?.categoryId ??
-      ""
+      "",
   );
 };
 
 const buildDesignCacheKey = (designId) =>
   designId ? `design:${designId}` : "";
 
-const hasIdValue = (value) => value !== null && value !== undefined && value !== "";
+const buildLastPriceKey = (productId, designId = "", currencyCode = "") => {
+  if (!productId) return "";
+  return `product_detail_last_price:${String(productId)}:${String(
+    designId || "",
+  )}:${String(currencyCode || "")}`;
+};
+
+const readLastDisplayPrice = (productId, designId = "", currencyCode = "") => {
+  if (typeof window === "undefined") return "";
+  const key = buildLastPriceKey(productId, designId, currencyCode);
+  if (!key) return "";
+  try {
+    return window.sessionStorage.getItem(key) ?? "";
+  } catch {
+    return "";
+  }
+};
+
+const writeLastDisplayPrice = (
+  productId,
+  designId = "",
+  currencyCode = "",
+  price = "",
+) => {
+  if (typeof window === "undefined") return;
+  const key = buildLastPriceKey(productId, designId, currencyCode);
+  if (!key || !price) return;
+  try {
+    window.sessionStorage.setItem(key, String(price));
+  } catch {
+    /* ignore */
+  }
+};
+
+const isPriceForCurrency = (price, currencySymbol) => {
+  const value = normalizeString(price);
+  const symbol = normalizeString(currencySymbol);
+  if (!value) return false;
+  if (!symbol) return true;
+  if (value.includes(symbol)) return true;
+
+  // Formatted ecommerce prices should carry the selected currency symbol.
+  // If they carry another marker, keep them out of the current currency cache.
+  return ![
+    "€",
+    "₹",
+    "$",
+    "£",
+    "¥",
+    "د.إ",
+    "AED",
+    "INR",
+    "EUR",
+    "USD",
+    "GBP",
+  ].some((candidate) => value.includes(candidate));
+};
+
+const hasIdValue = (value) =>
+  value !== null && value !== undefined && value !== "";
 
 const getDesignIdCandidates = (entry) => {
   if (!entry) return [];
@@ -274,14 +373,20 @@ const matchesProductId = (entry, expectedId) => {
     entry?.design_variant?.product_id,
     entry?.designVariant?.product_id,
   ];
-  return candidates.some((value) => value !== null && value !== undefined && String(value) === expected);
+  return candidates.some(
+    (value) =>
+      value !== null && value !== undefined && String(value) === expected,
+  );
 };
 
 const matchesDesignId = (entry, expectedId) => {
   if (!entry || expectedId === null || expectedId === undefined) return false;
   const expected = String(expectedId);
   const candidates = getDesignIdCandidates(entry);
-  return candidates.some((value) => value !== null && value !== undefined && String(value) === expected);
+  return candidates.some(
+    (value) =>
+      value !== null && value !== undefined && String(value) === expected,
+  );
 };
 
 const readCachedProduct = (productId, designId = "") => {
@@ -308,20 +413,24 @@ const readCachedProduct = (productId, designId = "") => {
     }
     if (productId || designId) {
       const entries = Object.values(parsed).filter(
-        (entry) => entry && typeof entry === "object"
+        (entry) => entry && typeof entry === "object",
       );
       const strictMatch = entries.find(
         (entry) =>
           (!productId || matchesProductId(entry, productId)) &&
-          (!designId || matchesDesignId(entry, designId))
+          (!designId || matchesDesignId(entry, designId)),
       );
       if (strictMatch) return strictMatch;
       if (designId) {
-        const designMatch = entries.find((entry) => matchesDesignId(entry, designId));
+        const designMatch = entries.find((entry) =>
+          matchesDesignId(entry, designId),
+        );
         if (designMatch) return designMatch;
       }
       if (productId) {
-        const productMatch = entries.find((entry) => matchesProductId(entry, productId));
+        const productMatch = entries.find((entry) =>
+          matchesProductId(entry, productId),
+        );
         if (productMatch) return productMatch;
       }
     }
@@ -333,12 +442,14 @@ const readCachedProduct = (productId, designId = "") => {
 };
 
 const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
-  if (typeof window === "undefined" || !productId || !variantDetails) return;
+  if (typeof window === "undefined" || !productId || !variantDetails) {
+    return null;
+  }
   try {
     const raw = window.sessionStorage.getItem("product_list_cache");
     const cache = raw ? JSON.parse(raw) : {};
     if (typeof cache !== "object") return;
-    
+
     const productKey = String(productId);
     const existingProduct = cache[productKey] || {};
     const existingDesign =
@@ -355,9 +466,7 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
       variantDetails?.designVariantId ??
       "";
     const designKey = buildDesignCacheKey(designId);
-    
-    // Merge variant details into the product cache
-    // Store variantDetails as design since ProductGallery looks for design.images
+
     const incomingImages = Array.isArray(variantDetails?.images)
       ? variantDetails.images
       : null;
@@ -365,20 +474,36 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
       ...existingDesign,
       ...variantDetails,
       design_translation:
-        variantDetails?.design_translation ?? existingDesign?.design_translation,
+        variantDetails?.design_translation ??
+        existingDesign?.design_translation,
       design_translations:
-        variantDetails?.design_translations ?? existingDesign?.design_translations,
-      translations: variantDetails?.translations ?? existingDesign?.translations,
+        variantDetails?.design_translations ??
+        existingDesign?.design_translations,
+      translations:
+        variantDetails?.translations ?? existingDesign?.translations,
       design_variant_name:
-        variantDetails?.design_variant_name ?? existingDesign?.design_variant_name,
+        variantDetails?.design_variant_name ??
+        existingDesign?.design_variant_name,
       description: variantDetails?.description ?? existingDesign?.description,
       product: variantDetails?.product ?? existingDesign?.product,
       images: incomingImages ?? existingDesign?.images,
       image: variantDetails?.image ?? existingDesign?.image,
+      total_price:
+        variantDetails?.total_price ??
+        variantDetails?.totalPrice ??
+        existingDesign?.total_price,
+      price: variantDetails?.price ?? existingDesign?.price,
     };
     const nextProduct = {
       ...existingProduct,
       image: variantDetails?.image ?? existingProduct?.image,
+      total_price:
+        variantDetails?.total_price ??
+        variantDetails?.totalPrice ??
+        existingProduct?.total_price ??
+        nextDesign.total_price,
+      price:
+        variantDetails?.price ?? existingProduct?.price ?? nextDesign.price,
       design: nextDesign,
       design_variant: nextDesign,
       designVariant: nextDesign,
@@ -387,10 +512,9 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
     if (designKey) {
       cache[designKey] = nextProduct;
     }
-    
+
     window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
-    
-    // Dispatch custom event to notify ProductGallery of cache update
+
     window.dispatchEvent(
       new CustomEvent("productCacheUpdated", {
         detail: {
@@ -399,10 +523,12 @@ const updateCacheWithVariant = (productId, variantDetails, options = {}) => {
           userInitiated: options?.userInitiated === true,
           forceDesign: options?.forceDesign === true,
         },
-      })
+      }),
     );
+    return nextProduct;
   } catch (error) {
     console.error("Product cache update failed", error);
+    return null;
   }
 };
 
@@ -436,10 +562,10 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
       "";
     const designKey = buildDesignCacheKey(designId);
     const existingDesignFromKey = designKey
-      ? cache[designKey]?.design ??
+      ? (cache[designKey]?.design ??
         cache[designKey]?.design_variant ??
         cache[designKey]?.designVariant ??
-        null
+        null)
       : null;
     const existingDesign = existingDesignFromKey ?? existingProductDesign;
     const existingImages = existingDesign?.images;
@@ -450,17 +576,21 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
       (!designId || matchesDesignId(existingDesign, designId));
     const nextImages = canPreserveImages
       ? existingImages
-      : incomingDesign?.images ?? existingDesign?.images;
+      : (incomingDesign?.images ?? existingDesign?.images);
     const nextDesign = {
       ...existingDesign,
       ...incomingDesign,
       design_translation:
-        incomingDesign?.design_translation ?? existingDesign?.design_translation,
+        incomingDesign?.design_translation ??
+        existingDesign?.design_translation,
       design_translations:
-        incomingDesign?.design_translations ?? existingDesign?.design_translations,
-      translations: incomingDesign?.translations ?? existingDesign?.translations,
+        incomingDesign?.design_translations ??
+        existingDesign?.design_translations,
+      translations:
+        incomingDesign?.translations ?? existingDesign?.translations,
       design_variant_name:
-        incomingDesign?.design_variant_name ?? existingDesign?.design_variant_name,
+        incomingDesign?.design_variant_name ??
+        existingDesign?.design_variant_name,
       description: incomingDesign?.description ?? existingDesign?.description,
       product: incomingDesign?.product ?? existingDesign?.product,
       images: nextImages,
@@ -482,7 +612,9 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
     }
     window.sessionStorage.setItem("product_list_cache", JSON.stringify(cache));
     window.dispatchEvent(
-      new CustomEvent("productCacheUpdated", { detail: { productId: productKey, designId } })
+      new CustomEvent("productCacheUpdated", {
+        detail: { productId: productKey, designId },
+      }),
     );
     return nextProduct;
   } catch (error) {
@@ -492,7 +624,7 @@ const updateCacheWithListing = (productId, listingItem, options = {}) => {
 };
 
 export default function ProductCustomizer({
-  title = "PRODUCT NAME",
+  title = "...",
   productId = "",
   designId = "",
   defaultMetalId = "",
@@ -503,33 +635,46 @@ export default function ProductCustomizer({
   defaultCutId = "",
 }) {
   const router = useRouter();
-  const { language } = useI18n();
+  const { language, currency, currencyCode, currencySymbol } = useI18n();
   const qualityId = useId();
   const clarityId = useId();
   const sizeId = useId();
   const [filterData, setFilterData] = useState(null);
   const [productDetails, setProductDetails] = useState(null);
   const [variantDetails, setVariantDetails] = useState(null);
+  const [lastDisplayPrice, setLastDisplayPrice] = useState("");
   const [variantLoading, setVariantLoading] = useState(false);
   const [variantEnabled, setVariantEnabled] = useState(false);
   const [variantAdjustedFilters, setVariantAdjustedFilters] = useState(null);
   const [variantDesignAvailable, setVariantDesignAvailable] = useState(null);
+  // added on 07/05/2026 by NIRMIT - tracks if current user-selected combination exists in DB
+  const [designAvailable, setDesignAvailable] = useState(true);
   const [defaultsApplied, setDefaultsApplied] = useState(false);
   const [cut, setCut] = useState(() => normalizeString(defaultCutId));
-  const [quality, setQuality] = useState(() => normalizeString(defaultDiamondTypeId));
-  const [clarity, setClarity] = useState(() => normalizeString(defaultClarityId));
+  const [quality, setQuality] = useState(() =>
+    normalizeString(defaultDiamondTypeId),
+  );
+  const [clarity, setClarity] = useState(() =>
+    normalizeString(defaultClarityId),
+  );
   const [carat, setCarat] = useState(() => normalizeString(defaultCarat));
   const [metal, setMetal] = useState(() => normalizeString(defaultMetalId));
-  const [metalType, setMetalType] = useState(() => normalizeString(defaultKaratId));
+  const [metalType, setMetalType] = useState(() =>
+    normalizeString(defaultKaratId),
+  );
   const [size, setSize] = useState("");
   const [engraving, setEngraving] = useState("");
   const lastFilterQueryRef = useRef("");
   const lastVariantQueryRef = useRef("");
   const skipNextVariantFetchRef = useRef(false);
-  const variantFromCacheRef = useRef(false);
   const lastListingRefreshRef = useRef("");
-  const lastVariantLanguageRef = useRef("");
   const userVariantInteractionRef = useRef(false);
+  // added on 07/05/2026 by NIRMIT - prevents auto-reset of cut when user has explicitly selected one
+  const userSelectedCutRef = useRef(false);
+
+  // ─── FIX: track previous currency so we can detect actual changes ───
+  const prevCurrencyCodeRef = useRef(currencyCode);
+  const prevLanguageRef = useRef(language);
 
   const labels =
     language === "fi"
@@ -537,7 +682,8 @@ export default function ProductCustomizer({
           customizedForYou: "Räätälöity sinulle",
           selectDiamondCut: "Valitse timantin hionta",
           diamondQuality: "Timanttityyppi",
-          diamondCaratWeight: "TIMANTTI KARAATTI",
+          diamondCaratWeight: "timantin koko",
+          centerPrefix: "keskitimantinkoko",
           selectMetalColor: "Valitse metallin väri",
           metalType: "Metallin tyyppi",
           ringSize: "Sormuksen halkaisija (mm)",
@@ -545,13 +691,14 @@ export default function ProductCustomizer({
           engraving: "Kaiverrus (valinnainen)",
           engravingPlaceholder: "Ole hyvä ja rajoita sanamäärä 10 merkkiin",
           submit: "Lähetä",
-          enquireNow: "Kysy nyt",
+          enquireNow: "kysy lisää",
         }
       : {
           customizedForYou: "CUSTOMIZED FOR YOU",
           selectDiamondCut: "SELECT DIAMOND CUT",
           diamondQuality: "DIAMOND TYPE",
           diamondCaratWeight: "DIAMOND CARAT",
+          centerPrefix: "CENTER DIAMOND CARAT",
           selectMetalColor: "SELECT METAL COLOR",
           metalType: "METAL TYPE",
           ringSize: "RING SIZE DIAMETER (mm)",
@@ -563,6 +710,34 @@ export default function ProductCustomizer({
         };
 
   const languageId = language === "fi" ? "2" : "1";
+
+  // ─── FIX: Clear stale price + force re-fetch when currency OR language changes ───
+  useEffect(() => {
+    const currencyChanged = prevCurrencyCodeRef.current !== currencyCode;
+    const languageChanged = prevLanguageRef.current !== language;
+
+    if (currencyChanged || languageChanged) {
+      prevCurrencyCodeRef.current = currencyCode;
+      prevLanguageRef.current = language;
+
+      // Immediately wipe displayed price so the old-currency/old-language
+      // value never shows as a fallback while new data loads.
+      setLastDisplayPrice("");
+      setVariantDetails(null);
+      setVariantAdjustedFilters(null);
+      setVariantDesignAvailable(null);
+
+      // Reset deduplication refs so variant + listing fetches fire again.
+      lastVariantQueryRef.current = "";
+      lastListingRefreshRef.current = "";
+
+      // Restore from cache only if the cached price matches the NEW currency.
+      const cached = readLastDisplayPrice(productId, designId, currencyCode);
+      if (cached && isPriceForCurrency(cached, currencySymbol)) {
+        setLastDisplayPrice(cached);
+      }
+    }
+  }, [currencyCode, currencySymbol, language, productId, designId]);
 
   useEffect(() => {
     let active = true;
@@ -597,7 +772,7 @@ export default function ProductCustomizer({
 
   const listingCategoryId = useMemo(
     () => resolveCategoryId(productDetails),
-    [productDetails]
+    [productDetails],
   );
 
   useEffect(() => {
@@ -607,7 +782,7 @@ export default function ProductCustomizer({
         active = false;
       };
     }
-    const refreshKey = `${languageId}:${productId}:${listingCategoryId}`;
+    const refreshKey = `${languageId}:${productId}:${listingCategoryId}:${currency}`;
     if (lastListingRefreshRef.current === refreshKey) {
       return () => {
         active = false;
@@ -617,7 +792,12 @@ export default function ProductCustomizer({
 
     const refreshListingDetails = async () => {
       try {
-        const list = await fetchProductListEcom(languageId, listingCategoryId);
+        const list = await fetchProductListEcom(
+          languageId,
+          listingCategoryId,
+          currencyCode,
+          currencySymbol,
+        );
         if (!active || !Array.isArray(list)) return;
         const matchById = (item) => {
           const id = item?.id ?? item?.product_id ?? item?.productId ?? null;
@@ -634,10 +814,11 @@ export default function ProductCustomizer({
           return String(itemDesignId) === String(designId);
         };
         const match = designId
-          ? list.find((item) => matchById(item) && matchByDesign(item)) ??
-            list.find((item) => matchById(item))
+          ? (list.find((item) => matchById(item) && matchByDesign(item)) ??
+            list.find((item) => matchById(item)))
           : list.find((item) => matchById(item));
         if (match) {
+          if (variantEnabled && userVariantInteractionRef.current) return;
           const updated = updateCacheWithListing(productId, match, {
             preserveExplicitImages: variantEnabled,
           });
@@ -655,7 +836,16 @@ export default function ProductCustomizer({
     return () => {
       active = false;
     };
-  }, [productId, languageId, listingCategoryId, variantEnabled, designId]);
+  }, [
+    productId,
+    languageId,
+    listingCategoryId,
+    variantEnabled,
+    designId,
+    currency,
+    currencyCode,
+    currencySymbol,
+  ]);
 
   useEffect(() => {
     const nextCut = normalizeString(defaultCutId);
@@ -674,15 +864,16 @@ export default function ProductCustomizer({
     setSize("");
     setEngraving("");
     userVariantInteractionRef.current = false;
+    userSelectedCutRef.current = false; // edited on 07/05/2026 by NIRMIT - reset on product change
     setVariantEnabled(
       Boolean(
         nextCut ||
-          nextQuality ||
-          nextClarity ||
-          nextCarat ||
-          nextMetal ||
-          nextKarat
-      )
+        nextQuality ||
+        nextClarity ||
+        nextCarat ||
+        nextMetal ||
+        nextKarat,
+      ),
     );
     setDefaultsApplied(false);
     skipNextVariantFetchRef.current = false;
@@ -697,6 +888,16 @@ export default function ProductCustomizer({
     defaultKaratId,
   ]);
 
+  // ─── FIX: write last price to sessionStorage + local state together ───
+  useEffect(() => {
+    if (productId && designId !== undefined && currencyCode) {
+      const cached = readLastDisplayPrice(productId, designId, currencyCode);
+      if (cached && isPriceForCurrency(cached, currencySymbol)) {
+        setLastDisplayPrice(cached);
+      }
+    }
+  }, [productId, designId, currencyCode, currencySymbol]);
+
   const markVariantInteraction = useCallback(() => {
     userVariantInteractionRef.current = true;
     setVariantEnabled(true);
@@ -704,7 +905,7 @@ export default function ProductCustomizer({
 
   const listingDefaults = useMemo(
     () => resolveListingDefaults(productDetails),
-    [productDetails]
+    [productDetails],
   );
   const listingDesign =
     productDetails?.design ??
@@ -775,15 +976,19 @@ export default function ProductCustomizer({
       listingDesign?.is_filter_available ??
       productDetails?.is_filter_available ??
       filterData?.is_filter_available ??
-      ""
+      "",
   );
   const hideCutSection =
     filterAvailabilityValue === "2" ||
     filterAvailabilityValue === "3" ||
     filterAvailabilityValue === "4";
   const allowCutInQuery = filterAvailabilityValue !== "0" && !hideCutSection;
-  const hideCaratSection = filterAvailabilityValue === "2" || filterAvailabilityValue === "3";
-  const allowCaratInQuery = filterAvailabilityValue !== "0" && filterAvailabilityValue !== "4" && !hideCaratSection;
+  const hideCaratSection =
+    filterAvailabilityValue === "2" || filterAvailabilityValue === "3";
+  const allowCaratInQuery =
+    filterAvailabilityValue !== "0" &&
+    filterAvailabilityValue !== "4" &&
+    !hideCaratSection;
   const hideClaritySection = filterAvailabilityValue === "3";
   const hideSizeSection = filterAvailabilityValue === "3";
   const hideEngravingSection = filterAvailabilityValue === "3";
@@ -808,7 +1013,7 @@ export default function ProductCustomizer({
       try {
         const { data } = await axiosClient.get(
           `/api/design/filter-dropdowns-ecom?${queryString}`,
-          { signal: controller.signal }
+          { signal: controller.signal },
         );
         const payload = data?.data ?? data;
         lastFilterQueryRef.current = queryString;
@@ -848,7 +1053,9 @@ export default function ProductCustomizer({
         const id = normalizeString(rawId);
         const label = normalizeString(rawLabel);
         if (!id && !label) return null;
-        const codeKey = String(item?.cut_code ?? item?.code ?? "").toUpperCase();
+        const codeKey = String(
+          item?.cut_code ?? item?.code ?? "",
+        ).toUpperCase();
         const nameKey = label.toUpperCase();
         const src =
           cutImageByCode[codeKey] ||
@@ -899,7 +1106,9 @@ export default function ProductCustomizer({
   }, [filterData]);
 
   const clarityOptions = useMemo(() => {
-    const list = Array.isArray(filterData?.clarities) ? filterData.clarities : [];
+    const list = Array.isArray(filterData?.clarities)
+      ? filterData.clarities
+      : [];
     return list
       .map((item) => {
         const rawValue =
@@ -939,7 +1148,8 @@ export default function ProductCustomizer({
     return clarityOptions.filter((opt) => opt.isLab);
   }, [clarityOptions, qualityOptions, quality]);
   const showQualitySelect = qualityOptions.length > 0;
-  const showClaritySelect = filteredClarityOptions.length > 0 && !hideClaritySection;
+  const showClaritySelect =
+    filteredClarityOptions.length > 0 && !hideClaritySection;
   const showDiamondTypeSection = showQualitySelect || showClaritySelect;
 
   const caratOptions = useMemo(() => {
@@ -947,11 +1157,7 @@ export default function ProductCustomizer({
     return list
       .map((item) => {
         const value =
-          item?.carat_name ??
-          item?.name ??
-          item?.carat ??
-          item?.value ??
-          item;
+          item?.carat_name ?? item?.name ?? item?.carat ?? item?.value ?? item;
         const label = normalizeString(value);
         return label ? label : null;
       })
@@ -971,14 +1177,14 @@ export default function ProductCustomizer({
           detail?.cut_master?.name ??
           detail?.cut_name ??
           detail?.cut ??
-          ""
+          "",
       );
       const caratValue = normalizeString(
         detail?.diamond_rate?.diamond_master?.carat ??
           detail?.diamond_rate?.diamond_master_id?.carat ??
           detail?.diamond_rate?.carat ??
           detail?.carat ??
-          ""
+          "",
       );
       if (!cutName || !caratValue) return;
       const key = cutName.toUpperCase();
@@ -1014,8 +1220,8 @@ export default function ProductCustomizer({
   }, [listingDesign, productDetails, variantDetails]);
   const diamondCaratLabel =
     filterAvailabilityValue === "4" && hasCenterDiamond
-    ? `CENTER ${labels.diamondCaratWeight}`
-    : labels.diamondCaratWeight;
+      ? `${labels.centerPrefix}`
+      : labels.diamondCaratWeight;
 
   const metalOptions = useMemo(() => {
     const list = Array.isArray(filterData?.metals) ? filterData.metals : [];
@@ -1037,9 +1243,10 @@ export default function ProductCustomizer({
         const value = normalizeString(rawValue);
         const label = normalizeString(rawLabel);
         if (!value && !label) return null;
-        const codeKey = String(item?.metal_code ?? item?.code ?? "").toUpperCase();
-        const color =
-          item?.color ?? metalColorByCode[codeKey] ?? "#e5e7eb";
+        const codeKey = String(
+          item?.metal_code ?? item?.code ?? "",
+        ).toUpperCase();
+        const color = item?.color ?? metalColorByCode[codeKey] ?? "#e5e7eb";
         return {
           value: value || label,
           label: label.toUpperCase() || "METAL",
@@ -1073,7 +1280,10 @@ export default function ProductCustomizer({
           rawId ??
           "";
         const label = normalizeString(rawLabel);
-        const value = rawId !== null && rawId !== undefined ? normalizeString(rawId) : label;
+        const value =
+          rawId !== null && rawId !== undefined
+            ? normalizeString(rawId)
+            : label;
         if (!value) return null;
         return {
           value,
@@ -1088,14 +1298,19 @@ export default function ProductCustomizer({
   }, [filterData]);
 
   const filteredMetalTypeOptions = useMemo(() => {
-    const selectedMetalOption = metalOptions.find((opt) => opt.value === metal) ?? null;
+    const selectedMetalOption =
+      metalOptions.find((opt) => opt.value === metal) ?? null;
     if (!selectedMetalOption) return metalTypeOptions;
     const isPlatinumMetal = Boolean(selectedMetalOption.isPlatinum);
-    return metalTypeOptions.filter((opt) => Boolean(opt.isPlatinum) === isPlatinumMetal);
+    return metalTypeOptions.filter(
+      (opt) => Boolean(opt.isPlatinum) === isPlatinumMetal,
+    );
   }, [metal, metalOptions, metalTypeOptions]);
 
   const sizeOptions = useMemo(() => {
-    const list = Array.isArray(filterData?.ring_sizes) ? filterData.ring_sizes : [];
+    const list = Array.isArray(filterData?.ring_sizes)
+      ? filterData.ring_sizes
+      : [];
     return list
       .map((item) => {
         const rawValue = item?.value ?? item?.size ?? item?.id ?? "";
@@ -1140,8 +1355,8 @@ export default function ProductCustomizer({
         backgroundColor: state.isSelected
           ? "var(--color-primary-soft)"
           : state.isFocused
-          ? "color-mix(in srgb, var(--color-primary), transparent 85%)"
-          : "transparent",
+            ? "color-mix(in srgb, var(--color-primary), transparent 85%)"
+            : "transparent",
         color: "var(--color-heading)",
         ":active": {
           backgroundColor: "var(--color-primary-soft)",
@@ -1164,7 +1379,7 @@ export default function ProductCustomizer({
         color: "var(--color-heading)",
       }),
     }),
-    []
+    [],
   );
   const qualityDropdownStyles = useMemo(
     () => ({
@@ -1174,13 +1389,16 @@ export default function ProductCustomizer({
         minWidth: 100,
       }),
     }),
-    [dropdownStyles]
+    [dropdownStyles],
   );
 
+  // edited on 07/05/2026 by NIRMIT - guard added so user-selected cut is not auto-reset when filter options reload
   useEffect(() => {
     if (hideCutSection) return;
     if (cutOptions.length && !cutOptions.some((opt) => opt.id === cut)) {
-      setCut(cutOptions[0].id);
+      if (!userSelectedCutRef.current) {
+        setCut(cutOptions[0].id);
+      }
     }
   }, [cutOptions, cut, hideCutSection]);
 
@@ -1220,55 +1438,49 @@ export default function ProductCustomizer({
 
   useEffect(() => {
     if (!filteredMetalTypeOptions.length) return;
-    if (metalType && filteredMetalTypeOptions.some((opt) => opt.value === metalType)) {
+    if (
+      metalType &&
+      filteredMetalTypeOptions.some((opt) => opt.value === metalType)
+    ) {
       return;
     }
     setMetalType(filteredMetalTypeOptions[0].value);
   }, [filteredMetalTypeOptions, metalType]);
 
   useEffect(() => {
-    if (size && sizeOptions.length && !sizeOptions.some((opt) => opt.value === size)) {
+    if (
+      size &&
+      sizeOptions.length &&
+      !sizeOptions.some((opt) => opt.value === size)
+    ) {
       setSize("");
     }
   }, [sizeOptions, size]);
 
-  const selectedCutId = cutOptions.find((opt) => opt.id === cut)?.id ?? "";
-  const selectedQualityId = qualityOptions.find((opt) => opt.value === quality)?.value ?? "";
-  const selectedClarityId =
-    filteredClarityOptions.find((opt) => opt.value === clarity)?.value ?? "";
-  const selectedMetalId = metalOptions.find((opt) => opt.value === metal)?.value ?? "";
-  const selectedKaratId =
-    filteredMetalTypeOptions.find((opt) => opt.value === metalType)?.value ?? "";
-  const selectedCarat = carat ? String(carat) : "";
+  const selectedCutId =
+    cutOptions.find((opt) => opt.id === cut)?.id ?? normalizeString(cut);
+  const selectedQualityId =
+    qualityOptions.find((opt) => opt.value === quality)?.value ??
+    normalizeString(quality);
 
-  const shouldSkipVariantFetch = useMemo(() => {
-    if (!hasPrefilledVariant || !listingDesign) return false;
-    if (designId && !matchesDesignId(listingDesign, designId)) return false;
-    const matchesField = (expected, actual) => {
-      const normalizedExpected = normalizeString(expected);
-      if (!normalizedExpected) return true;
-      return normalizedExpected === normalizeString(actual);
-    };
-    return (
-      matchesField(listingDefaults.metal, selectedMetalId) &&
-      matchesField(listingDefaults.karat, selectedKaratId) &&
-      matchesField(listingDefaults.cut, selectedCutId) &&
-      matchesField(listingDefaults.quality, selectedQualityId) &&
-      matchesField(listingDefaults.clarity, selectedClarityId) &&
-      matchesField(listingDefaults.carat, selectedCarat)
-    );
-  }, [
-    hasPrefilledVariant,
-    listingDesign,
-    listingDefaults,
-    selectedMetalId,
-    selectedKaratId,
-    selectedCutId,
-    selectedQualityId,
-    selectedClarityId,
-    selectedCarat,
-    designId,
-  ]);
+  // this is added for crical fix nirmit adde on 05/05/2026
+  const selectedClarityId =
+    filteredClarityOptions.find((opt) => opt.value === clarity)?.value ??
+      normalizeString(clarity);
+      // auto code removed
+    // (filteredClarityOptions.length > 0
+    //   ? filteredClarityOptions[0].value
+    //   : "");
+
+
+
+  const selectedMetalId =
+    metalOptions.find((opt) => opt.value === metal)?.value ??
+    normalizeString(metal);
+  const selectedKaratId =
+    filteredMetalTypeOptions.find((opt) => opt.value === metalType)?.value ??
+    normalizeString(metalType);
+  const selectedCarat = carat ? String(carat) : "";
 
   const variantTranslationSource =
     variantDetails?.design_translation ??
@@ -1286,11 +1498,10 @@ export default function ProductCustomizer({
       normalizeString(variantDetails?.design_variant_name) ||
       normalizeString(variantDetails?.product_name)
     : "";
-  const variantDescription =
-    variantEnabled
-      ? resolveTranslationDescription(variantTranslationSource, languageId) ||
-        normalizeString(variantDetails?.description ?? "")
-      : "";
+  const variantDescription = variantEnabled
+    ? resolveTranslationDescription(variantTranslationSource, languageId) ||
+      normalizeString(variantDetails?.description ?? "")
+    : "";
 
   const productTranslationSource =
     productDetails?.design?.design_translation ??
@@ -1310,10 +1521,13 @@ export default function ProductCustomizer({
     productDetails?.product_translations ??
     productDetails?.productTranslations ??
     null;
-  const translatedTitle = resolveTranslationName(productTranslationSource, languageId);
+  const translatedTitle = resolveTranslationName(
+    productTranslationSource,
+    languageId,
+  );
   const translatedDescription = resolveTranslationDescription(
     productTranslationSource,
-    languageId
+    languageId,
   );
 
   const productTitle =
@@ -1321,8 +1535,7 @@ export default function ProductCustomizer({
     translatedTitle ||
     normalizeString(productDetails?.design?.design_variant_name) ||
     normalizeString(productDetails?.product_name) ||
-    normalizeString(title) ||
-    "PRODUCT NAME";
+    normalizeString(title);
   const productDescription =
     variantDescription ||
     translatedDescription ||
@@ -1333,42 +1546,50 @@ export default function ProductCustomizer({
         productDetails?.design_translations ??
         productDetails?.design?.description ??
         productDetails?.description,
-      languageId
+      languageId,
     ) ||
     normalizeString(productDetails?.design?.design_variant_name) ||
     normalizeString(productDetails?.product_name) ||
     "";
   const productBasePrice =
-    // normalizeString(productDetails?.total_price) ||
-    normalizeString(productDetails?.design?.total_price) ||
+    pickTotalPrice(productDetails?.design) ||
+    pickTotalPrice(productDetails) ||
     "";
 
   useEffect(() => {
     let active = true;
-    
+
     if (!variantEnabled) {
       setVariantDetails(null);
       setVariantAdjustedFilters(null);
       setVariantDesignAvailable(null);
+      setDesignAvailable(true); // added on 07/05/2026 by NIRMIT - reset when variant disabled
       setVariantLoading(false);
-      variantFromCacheRef.current = false;
-      return () => {
-        active = false;
-      };
-    }
-    
-    if (!productId || !selectedMetalId || !selectedKaratId) {
-      setVariantDetails(null);
-      setVariantAdjustedFilters(null);
-      setVariantDesignAvailable(null);
-      setVariantLoading(false);
-      variantFromCacheRef.current = false;
       return () => {
         active = false;
       };
     }
 
-    // Skip variant API call when is_filter_available is 4 AND coming from listing page redirect (not user filtering)
+    if (!productId || !selectedMetalId || !selectedKaratId) {
+      setVariantDetails(null);
+      setVariantAdjustedFilters(null);
+      setVariantDesignAvailable(null);
+      setDesignAvailable(true); // added on 07/05/2026 by NIRMIT - reset when required params missing
+      setVariantLoading(false);
+      return () => {
+        active = false;
+      };
+    }
+    // // this is added by nirmit added on 05/05/2026
+    // // ─── CRITICAL: Skip fetch if clarity is invalid ───
+    // // This prevents sending invalid clarity_id to API which causes wrong pricing
+    // if (showClaritySelect && clarity && !filteredClarityOptions.some((opt) => opt.value === clarity)) {
+    //   setVariantLoading(false);
+    //   return () => {
+    //     active = false;
+    //   };
+    // }
+    //remove auto code
     if (
       filterAvailabilityValue === "4" &&
       hasPrefilledVariant &&
@@ -1379,7 +1600,6 @@ export default function ProductCustomizer({
       setVariantAdjustedFilters(null);
       setVariantDesignAvailable(null);
       setVariantLoading(false);
-      variantFromCacheRef.current = false;
       return () => {
         active = false;
       };
@@ -1387,56 +1607,30 @@ export default function ProductCustomizer({
 
     if (skipNextVariantFetchRef.current) {
       skipNextVariantFetchRef.current = false;
-      return () => {
-        active = false;
-      };
-    }
-
-    const languageToken = normalizeString(languageId);
-    const languageChanged =
-      Boolean(languageToken) &&
-      Boolean(lastVariantLanguageRef.current) &&
-      lastVariantLanguageRef.current !== languageToken;
-    if (languageChanged) {
-      lastVariantLanguageRef.current = languageToken;
       if (active) setVariantLoading(false);
       return () => {
         active = false;
       };
     }
-    lastVariantLanguageRef.current = languageToken;
 
     const params = new URLSearchParams({
       product_id: String(productId),
     });
     if (languageId) params.set("language_id", String(languageId));
+    if (currencyCode) params.set("currency", String(currencyCode));
+    if (currencySymbol) params.set("currency_symbol", String(currencySymbol));
     if (selectedMetalId) params.set("metal_id", String(selectedMetalId));
-    if (selectedQualityId) params.set("diamond_type_id", String(selectedQualityId));
+    if (selectedQualityId)
+      params.set("diamond_type_id", String(selectedQualityId));
     if (selectedClarityId) params.set("clarity_id", String(selectedClarityId));
-    if (selectedCarat && allowCaratInQuery) params.set("carat", String(selectedCarat));
-    if (selectedCutId && allowCutInQuery) params.set("cut_id", String(selectedCutId));
+    if (selectedCarat && allowCaratInQuery)
+      params.set("carat", String(selectedCarat));
+    if (selectedCutId && allowCutInQuery)
+      params.set("cut_id", String(selectedCutId));
     if (selectedKaratId) {
       params.set("karat_id", String(selectedKaratId));
     }
     const queryString = params.toString();
-    if (
-      shouldSkipVariantFetch &&
-      listingDesign &&
-      !languageChanged &&
-      !userVariantInteractionRef.current
-    ) {
-      variantFromCacheRef.current = true;
-      lastVariantQueryRef.current = queryString;
-      if (active) {
-        setVariantDetails((prev) => (prev === listingDesign ? prev : listingDesign));
-        setVariantAdjustedFilters(null);
-        setVariantDesignAvailable(null);
-        setVariantLoading(false);
-      }
-      return () => {
-        active = false;
-      };
-    }
     if (queryString === lastVariantQueryRef.current) {
       return () => {
         active = false;
@@ -1444,31 +1638,53 @@ export default function ProductCustomizer({
     }
     lastVariantQueryRef.current = queryString;
 
-    variantFromCacheRef.current = false;
     setVariantLoading(true);
     const loadVariant = async () => {
       try {
         const { data } = await axiosClient.get(
-          `/api/design/variant-details-ecom?${queryString}`
+          `/api/design/variant-details-ecom?${queryString}`,
         );
         if (active) {
           const response = data ?? null;
-          const payload = response?.data ?? response ?? null;
-          setVariantDetails(payload);
-          setVariantAdjustedFilters(
-            response?.adjusted_filters ??
-              payload?.adjusted_filters ??
-              response?.adjustedFilters ??
-              payload?.adjustedFilters ??
-              null
+          const payload = unwrapVariantPayload(
+            response?.data ?? response ?? null,
           );
-          setVariantDesignAvailable(
+          // added on 07/05/2026 by NIRMIT - check design availability before updating state
+          const rawAvailability =
             response?.is_design_avl ??
-              payload?.is_design_avl ??
-              response?.isDesignAvailable ??
-              payload?.isDesignAvailable ??
-              null
-          );
+            payload?.is_design_avl ??
+            response?.isDesignAvailable ??
+            payload?.isDesignAvailable ??
+            null;
+          const availStr = normalizeString(rawAvailability).toLowerCase();
+          const unavailable = availStr === "0" || availStr === "false";
+
+          if (unavailable && userVariantInteractionRef.current) {
+            // added on 07/05/2026 by NIRMIT - design not available for user's chosen combination:
+            // skip payload update so wrong cut images/price do not overwrite correct ones,
+            // set designAvailable=false so stableDisplayPrice is suppressed and enquire shows
+            setDesignAvailable(false);
+            setVariantDetails(null);
+            setVariantAdjustedFilters(null);
+            setVariantDesignAvailable(rawAvailability);
+          } else {
+            setDesignAvailable(true); // added on 07/05/2026 by NIRMIT
+            setVariantDetails(payload);
+            const updated = updateCacheWithVariant(productId, payload, {
+              userInitiated: userVariantInteractionRef.current,
+            });
+            if (updated) {
+              setProductDetails(updated);
+            }
+            setVariantAdjustedFilters(
+              response?.adjusted_filters ??
+                payload?.adjusted_filters ??
+                response?.adjustedFilters ??
+                payload?.adjustedFilters ??
+                null,
+            );
+            setVariantDesignAvailable(rawAvailability);
+          }
         }
       } catch (error) {
         if (active) {
@@ -1505,10 +1721,16 @@ export default function ProductCustomizer({
     languageId,
     allowCutInQuery,
     allowCaratInQuery,
-    shouldSkipVariantFetch,
     listingDesign,
     filterAvailabilityValue,
     hasPrefilledVariant,
+    currencyCode,
+    currencySymbol,
+    // this is added for critical fix nirmit added on 05/05/2026
+    // showClaritySelect,
+    // clarity,
+    // filteredClarityOptions,
+    // remove auto code 
   ]);
 
   useEffect(() => {
@@ -1526,6 +1748,9 @@ export default function ProductCustomizer({
       return;
     }
 
+    // added on 07/05/2026 by NIRMIT - if user has interacted, skip auto-adjustment so enquire shows for unavailable combos
+    if (userVariantInteractionRef.current) return;
+
     const adjusted = variantAdjustedFilters ?? {};
     const nextCut = normalizeString(adjusted.cut_id ?? adjusted.cutId ?? "");
     const nextQuality = normalizeString(
@@ -1533,12 +1758,20 @@ export default function ProductCustomizer({
         adjusted.diamondTypeId ??
         adjusted.type_id ??
         adjusted.typeId ??
-        ""
+        "",
     );
-    const nextClarity = normalizeString(adjusted.clarity_id ?? adjusted.clarityId ?? "");
-    const nextCarat = normalizeString(adjusted.carat ?? adjusted.carat_weight ?? adjusted.caratWeight ?? "");
-    const nextMetal = normalizeString(adjusted.metal_id ?? adjusted.metalId ?? "");
-    const nextKarat = normalizeString(adjusted.karat_id ?? adjusted.karatId ?? "");
+    const nextClarity = normalizeString(
+      adjusted.clarity_id ?? adjusted.clarityId ?? "",
+    );
+    const nextCarat = normalizeString(
+      adjusted.carat ?? adjusted.carat_weight ?? adjusted.caratWeight ?? "",
+    );
+    const nextMetal = normalizeString(
+      adjusted.metal_id ?? adjusted.metalId ?? "",
+    );
+    const nextKarat = normalizeString(
+      adjusted.karat_id ?? adjusted.karatId ?? "",
+    );
 
     const canUseOption = (value, options, matcher) => {
       if (!value) return false;
@@ -1546,49 +1779,77 @@ export default function ProductCustomizer({
       return options.some((opt) => matcher(opt, value));
     };
 
+    // added on 07/05/2026 by NIRMIT - track only actual state changes so skipNextVariantFetchRef
+    // is not set when the cut change was blocked by userSelectedCutRef
+    let anyFilterActuallyChanged = false;
+
     if (!hideCutSection) {
-      const canUseCut = canUseOption(nextCut, cutOptions, (opt, value) => opt.id === value);
-      if (nextCut && nextCut !== cut && canUseCut) {
+      const canUseCut = canUseOption(
+        nextCut,
+        cutOptions,
+        (opt, value) => opt.id === value,
+      );
+      // edited on 07/05/2026 by NIRMIT - skip cut override if user explicitly selected this cut
+      if (nextCut && nextCut !== cut && canUseCut && !userSelectedCutRef.current) {
         setCut(nextCut);
+        anyFilterActuallyChanged = true;
       }
     }
 
-    const canUseQuality = canUseOption(nextQuality, qualityOptions, (opt, value) => opt.value === value);
+    const canUseQuality = canUseOption(
+      nextQuality,
+      qualityOptions,
+      (opt, value) => opt.value === value,
+    );
     if (nextQuality && nextQuality !== quality && canUseQuality) {
       setQuality(nextQuality);
+      anyFilterActuallyChanged = true;
     }
 
-    const canUseClarity = canUseOption(nextClarity, clarityOptions, (opt, value) => opt.value === value);
+    const canUseClarity = canUseOption(
+      nextClarity,
+      clarityOptions,
+      (opt, value) => opt.value === value,
+    );
     if (nextClarity && nextClarity !== clarity && canUseClarity) {
       setClarity(nextClarity);
+      anyFilterActuallyChanged = true;
     }
 
     if (!hideCaratSection) {
-      const canUseCarat = nextCarat && (!caratOptions.length || caratOptions.includes(nextCarat));
+      const canUseCarat =
+        nextCarat && (!caratOptions.length || caratOptions.includes(nextCarat));
       if (nextCarat && nextCarat !== carat && canUseCarat) {
         setCarat(nextCarat);
+        anyFilterActuallyChanged = true;
       }
     }
 
-    const canUseMetal = canUseOption(nextMetal, metalOptions, (opt, value) => opt.value === value);
+    const canUseMetal = canUseOption(
+      nextMetal,
+      metalOptions,
+      (opt, value) => opt.value === value,
+    );
     if (nextMetal && nextMetal !== metal && canUseMetal) {
       setMetal(nextMetal);
+      anyFilterActuallyChanged = true;
     }
 
-    const metalTypeList = filteredMetalTypeOptions.length ? filteredMetalTypeOptions : metalTypeOptions;
-    const canUseKarat = canUseOption(nextKarat, metalTypeList, (opt, value) => opt.value === value);
+    const metalTypeList = filteredMetalTypeOptions.length
+      ? filteredMetalTypeOptions
+      : metalTypeOptions;
+    const canUseKarat = canUseOption(
+      nextKarat,
+      metalTypeList,
+      (opt, value) => opt.value === value,
+    );
     if (nextKarat && nextKarat !== metalType && canUseKarat) {
       setMetalType(nextKarat);
+      anyFilterActuallyChanged = true;
     }
 
-    if (
-      (!hideCutSection && nextCut && nextCut !== cut) ||
-      (nextQuality && nextQuality !== quality) ||
-      (nextClarity && nextClarity !== clarity) ||
-      (!hideCaratSection && nextCarat && nextCarat !== carat) ||
-      (nextMetal && nextMetal !== metal) ||
-      (nextKarat && nextKarat !== metalType)
-    ) {
+    // edited on 07/05/2026 by NIRMIT - only skip next fetch if a filter was actually changed
+    if (anyFilterActuallyChanged) {
       skipNextVariantFetchRef.current = true;
     }
   }, [
@@ -1613,48 +1874,64 @@ export default function ProductCustomizer({
     hideCaratSection,
   ]);
 
-  // Update sessionStorage cache when variantDetails changes
-  useEffect(() => {
-    if (variantDetails && productId && !variantFromCacheRef.current) {
-      updateCacheWithVariant(productId, variantDetails, {
-        userInitiated: userVariantInteractionRef.current,
-      });
-    }
-  }, [variantDetails, productId]);
-
-  // Check if current metal is Platinum
   const isPlatinum = useMemo(() => {
-    // First check from variantDetails or productDetails if available
     const metalRate = variantEnabled
       ? variantDetails?.metal_rate
-      : productDetails?.design?.metal_rate ?? productDetails?.design_variant?.metal_rate ?? productDetails?.designVariant?.metal_rate;
+      : (productDetails?.design?.metal_rate ??
+        productDetails?.design_variant?.metal_rate ??
+        productDetails?.designVariant?.metal_rate);
     const metalNameFromDetails = metalRate?.metal?.metal_name ?? "";
     if (metalNameFromDetails) {
       return normalizeString(metalNameFromDetails).toLowerCase() === "platinum";
     }
-    // Fallback: check from selected metal option
     const selectedMetalOption = metalOptions.find((opt) => opt.value === metal);
     const metalNameFromOption = selectedMetalOption?.label ?? "";
     return normalizeString(metalNameFromOption).toLowerCase() === "platinum";
   }, [variantEnabled, variantDetails, productDetails, metalOptions, metal]);
 
-  const variantPrice =
-    variantDetails?.total_price ??
-    variantDetails?.price ??
-    variantDetails?.rate ??
-    variantDetails?.metal_rate ??
-    null;
-  const displayPrice = variantPrice ?? (productBasePrice || null);
+  const variantPriceStr = pickTotalPrice(variantDetails);
+
+  // ─── FIX: Only use productBasePrice if it matches the current currency ───
+  const productBasePriceForCurrency = isPriceForCurrency(
+    productBasePrice,
+    currencySymbol,
+  )
+    ? productBasePrice
+    : "";
+
+  const displayPrice = variantPriceStr || productBasePriceForCurrency || null;
+
+  // ─── FIX: currentDisplayPrice — must match current currency ───
+  const currentDisplayPrice = isPriceForCurrency(displayPrice, currencySymbol)
+    ? displayPrice
+    : "";
+
+  // ─── FIX: only fall back to lastDisplayPrice if we have no current price
+  //          AND it matches the current currency (prevents stale cross-currency flash) ───
+  const previousDisplayPrice =
+    currentDisplayPrice === "" &&
+    isPriceForCurrency(lastDisplayPrice, currencySymbol)
+      ? lastDisplayPrice
+      : "";
+
+  // edited on 07/05/2026 by NIRMIT - suppress price when user's chosen combination is unavailable
+  const stableDisplayPrice = designAvailable
+    ? currentDisplayPrice || previousDisplayPrice
+    : "";
   const shouldShowPrice = true;
+
+  // ─── FIX: persist price keyed by currency ───
+  useEffect(() => {
+    if (currentDisplayPrice) {
+      const nextPrice = String(currentDisplayPrice);
+      setLastDisplayPrice(nextPrice);
+      writeLastDisplayPrice(productId, designId, currencyCode, nextPrice);
+    }
+  }, [currentDisplayPrice, productId, designId, currencyCode]);
 
   return (
     <aside className={styles.panel}>
       <h2 className={styles.title}>{productTitle}</h2>
-      {/* {variantLoading ? (
-        <p className={styles.variantStatus}>Updating selection...</p>
-      ) : variantPrice ? (
-        <p className={styles.variantStatus}>Price: {variantPrice}</p>
-      ) : null} */}
       {productDescription ? (
         <p className={styles.copy}>{productDescription}</p>
       ) : null}
@@ -1672,11 +1949,16 @@ export default function ProductCustomizer({
                   className={`${styles.cut} ${cut === item.id ? styles.cutActive : ""}`}
                   onClick={() => {
                     markVariantInteraction();
+                    userSelectedCutRef.current = true; // added on 07/05/2026 by NIRMIT
                     setCut(item.id);
                   }}
                 >
                   <div className={styles.cutIcon} aria-hidden>
-                    <img className={styles.cutIconImage} src={item.src} alt="" />
+                    <img
+                      className={styles.cutIconImage}
+                      src={item.src}
+                      alt=""
+                    />
                   </div>
                   <div className={styles.cutLabel}>{item.label}</div>
                 </button>
@@ -1690,7 +1972,9 @@ export default function ProductCustomizer({
           <>
             <div className={styles.gridFields}>
               <div className={styles.fieldTitle}>{labels.diamondQuality}</div>
-              <div style={{ display: "flex", flexDirection: "row", gap: "16px" }}>
+              <div
+                style={{ display: "flex", flexDirection: "row", gap: "16px" }}
+              >
                 {showQualitySelect ? (
                   <div>
                     <Select
@@ -1698,7 +1982,10 @@ export default function ProductCustomizer({
                       classNamePrefix="customizer"
                       instanceId={qualityId}
                       styles={qualityDropdownStyles}
-                      value={qualityOptions.find((opt) => opt.value === quality) ?? null}
+                      value={
+                        qualityOptions.find((opt) => opt.value === quality) ??
+                        null
+                      }
                       options={qualityOptions}
                       onChange={(option) => {
                         markVariantInteraction();
@@ -1715,7 +2002,11 @@ export default function ProductCustomizer({
                       classNamePrefix="customizer"
                       instanceId={clarityId}
                       styles={dropdownStyles}
-                      value={filteredClarityOptions.find((opt) => opt.value === clarity) ?? null}
+                      value={
+                        filteredClarityOptions.find(
+                          (opt) => opt.value === clarity,
+                        ) ?? null
+                      }
                       options={filteredClarityOptions}
                       onChange={(option) => {
                         markVariantInteraction();
@@ -1756,10 +2047,11 @@ export default function ProductCustomizer({
         {diamondDetailGroups.length ? (
           <>
             <div className={styles.diamondDetailGroups}>
-              {diamondDetailGroups.map((group) => (
+              {diamondDetailGroups.map((group) => {
+                return (
                 <div className={styles.diamondDetailGroup} key={group.cutName}>
                   <div className={styles.fieldTitle}>
-                    {group.cutName} {diamondCaratLabel}
+                    {group.cutName} {diamondCaratLabel} 
                   </div>
                   <div className={styles.pills}>
                     {group.carats.map((value) => (
@@ -1774,14 +2066,16 @@ export default function ProductCustomizer({
                     ))}
                   </div>
                 </div>
-              ))}
+              )})}
             </div>
             <div className={styles.divider} aria-hidden />
           </>
         ) : null}
 
         <div className={styles.fieldTitle}>{labels.selectMetalColor}</div>
-        <div className={`${styles.metalRow}${language === "fi" ? ` ${styles.metalRowWrap}` : ""}`}>
+        <div
+          className={`${styles.metalRow}${language === "fi" ? ` ${styles.metalRowWrap}` : ""}`}
+        >
           {metalOptions.map((item) => (
             <button
               key={item.value}
@@ -1792,7 +2086,11 @@ export default function ProductCustomizer({
                 setMetal(item.value);
               }}
             >
-              <span className={styles.dot} style={{ background: item.color }} aria-hidden />
+              <span
+                className={styles.dot}
+                style={{ background: item.color }}
+                aria-hidden
+              />
               <span className={styles.dotLabel}>{item.label}</span>
             </button>
           ))}
@@ -1820,7 +2118,9 @@ export default function ProductCustomizer({
                   ))}
                 </div>
               </div>
-              {showSizeSection ? <div className={styles.divider} aria-hidden /> : null}
+              {showSizeSection ? (
+                <div className={styles.divider} aria-hidden />
+              ) : null}
             </>
           ) : null}
           {showSizeSection ? (
@@ -1844,13 +2144,11 @@ export default function ProductCustomizer({
           <>
             <div className={styles.divider} aria-hidden />
             <div className={styles.priceBlock}>
-              {/* <div className={styles.priceLabel}>{labels.price}</div> */}
-              {variantLoading ? (
+              {stableDisplayPrice ? (
+                <div className={styles.priceValue}>{stableDisplayPrice}</div>
+              ) : variantLoading ? (
                 <div className={styles.variantStatus}>...</div>
-              ) : displayPrice ? (
-                <div className={styles.priceValue}>{displayPrice}</div>
               ) : null}
-              {/* <div className={styles.priceValue}>{variantPrice ?? "--"}</div> */}
             </div>
             <div className={styles.divider} aria-hidden />
           </>
@@ -1874,7 +2172,11 @@ export default function ProductCustomizer({
           </>
         ) : null}
 
-        <button className={styles.enquire} type="button" onClick={() => router.push("/appointment")}>
+        <button
+          className={styles.enquire}
+          type="button"
+          onClick={() => router.push("/appointment")}
+        >
           {labels.enquireNow}
         </button>
       </div>

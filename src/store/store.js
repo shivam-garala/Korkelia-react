@@ -18,7 +18,8 @@ import designVariantReducer from "./slices/designVariantSlice";
 import productReducer from "./slices/productSlice";
 import goldColorReducer from "./slices/goldColorSlice";
 import uiReducer from "./slices/uiSlice";
-
+import currencyRateReducer from "./slices/currencyRateSlice";
+import inquiryReducer from "./slices/inquirySlice";
 export const store = configureStore({
   reducer: {
     auth: loginReducer,
@@ -40,5 +41,7 @@ export const store = configureStore({
     product: productReducer,
     goldColor: goldColorReducer,
     ui: uiReducer,
+    currencyRates: currencyRateReducer,
+    inquiry: inquiryReducer,
   },
 });

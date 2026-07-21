@@ -1,0 +1,6 @@
+<svg xmlns="http://www.w3.org/2000/svg" width="64" height="48" viewBox="0 0 60 40" role="img" aria-label="Canada flag">
+  <rect width="15" height="40" fill="#ff0000"/>
+  <rect x="15" width="30" height="40" fill="#fff"/>
+  <rect x="45" width="15" height="40" fill="#ff0000"/>
+  <path fill="#ff0000" d="M30 12l1.5 4.5h4.8L32.4 19l1.5 4.5L30 21.5 26.1 23.5l1.5-4.5-4-2.5h4.8z"/>
+</svg>
