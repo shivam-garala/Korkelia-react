@@ -32,7 +32,7 @@ const introText = (
 
 
 export default function KihlasormusMiehelleCollectionClient() {
-  const { language, currencyCode, currencySymbol, t } = useI18n();
+  const { language, currencyCode, currencySymbol } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -273,10 +273,8 @@ export default function KihlasormusMiehelleCollectionClient() {
                 </div>
 
               ) : null}
-              <div
-                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
-                id="story-content"
-              >
+              {showAllContent ? (
+                <div className={styles.storyBody} id="story-content">
                   <p className={styles.intro}>For clients in Singapore who seek something extraordinary, a bespoke engagement ring offers the freedom to create a one-of-a-kind piece that embodies the essence of your story. Your proposal deserves more than a ready-made ring. It deserves craftsmanship, thought, and a design shaped entirely around you.</p>
                   
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
@@ -556,6 +554,7 @@ export default function KihlasormusMiehelleCollectionClient() {
 
                    
                 </div>
+              ) : null}
 
               {showAllContent ? (
 
@@ -610,7 +609,7 @@ export default function KihlasormusMiehelleCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter brandDescription={t("footer.ringBrandDescription")} />
+      <SiteFooter />
     </div>
   );
 }

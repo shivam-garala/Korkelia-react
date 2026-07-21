@@ -73,29 +73,8 @@ const faqs = [
   },
 ];
 
-const extractPlainText = (node) => {
-  if (node == null || typeof node === "boolean") return "";
-  if (typeof node === "string" || typeof node === "number") return String(node);
-  if (Array.isArray(node)) return node.map(extractPlainText).join(" ");
-  if (node?.props?.children != null) return extractPlainText(node.props.children);
-  return "";
-};
-
-const faqJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqs.map((faq) => ({
-    "@type": "Question",
-    name: faq.question,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: [extractPlainText(faq.answer), ...(faq.bullet ?? [])].filter(Boolean).join(" "),
-    },
-  })),
-};
-
 export default function KihlasormusMiehelleCollectionClient() {
-  const { language, currencyCode, currencySymbol, t } = useI18n();
+  const { language, currencyCode, currencySymbol } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -306,10 +285,6 @@ export default function KihlasormusMiehelleCollectionClient() {
 
   return (
     <div className={styles.page}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
       <SiteHeader />
       <main className={styles.main}>
         <section className={styles.storyWrap}>
@@ -339,14 +314,12 @@ export default function KihlasormusMiehelleCollectionClient() {
                 </div>
 
               ) : null}
-              <div
-                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
-                id="story-content"
-              >
+              {showAllContent ? (
+                <div className={styles.storyBody} id="story-content">
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
                       src="/link6/7abc622d-e0cd-4a99-8a18-1ea708672b51.jpeg"
-                      alt="Useita sormuksia pinottuna käsissä"
+                      alt="kihlasormukset, myös, sormuksen, sormukset, leveys, kuten, kohinoor, titaanista, lisäksi, kihlasormusta, lisää, myös, valita"
                       fill
                       sizes="(max-width: 720px) 80vw, 360px"
                     />
@@ -408,7 +381,7 @@ export default function KihlasormusMiehelleCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link6/9165c4c3-6b01-4b77-aceb-d5248af34693.jpeg"
-                      alt="Kaksi mattapintaista kultaista sormusta korurasiassa"
+                      alt="kihlasormukset, myös, sormuksen, sormukset, leveys, kuten, kohinoor, titaanista, lisäksi, kihlasormusta, valita, sormusta"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -477,7 +450,7 @@ export default function KihlasormusMiehelleCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link6/28ef6817-598f-4e82-917a-ee4431fe3da9.jpeg"
-                      alt="Timanttisormuksia valko- ja keltakultaa satiinikankaalla"
+                      alt="kihlasormukset, myös, sormuksen, sormukset, leveys, kuten, kohinoor, lisäksi, kihlasormusta, miesten kihlasormukset, myös, miehen,"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -502,7 +475,7 @@ export default function KihlasormusMiehelleCollectionClient() {
                     <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                       <Image
                         src="/link6/SunMatt5_0mm.jpg.jpeg"
-                        alt="Mattapintainen punakultainen kihlasormus miehelle"
+                        alt="Kihlasormus miehelle, kihlasormukset, myös, sormuksen, sormukset, leveys, miesten kihlasormukset, kuten, kohinoor, lisäksi, leveys, kihlasormukset, myös"
                         fill
                         sizes="(max-width: 720px) 80vw, 360px"
                       />
@@ -516,6 +489,7 @@ export default function KihlasormusMiehelleCollectionClient() {
                     </section>
                   </section>
                 </div>
+              ) : null}
 
               {showAllContent ? (
 
@@ -570,7 +544,7 @@ export default function KihlasormusMiehelleCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter brandDescription={t("footer.ringBrandDescription")} />
+      <SiteFooter />
     </div>
   );
 }

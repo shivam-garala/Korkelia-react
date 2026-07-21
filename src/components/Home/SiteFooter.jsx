@@ -15,7 +15,7 @@ const socials = [
   // { href: "#", src: "/icons/xtwitter.png", alt: "X" },
 ];
 
-export default function SiteFooter({ brandDescription }) {
+export default function SiteFooter() {
   const { t } = useI18n();
 
   return (
@@ -26,15 +26,9 @@ export default function SiteFooter({ brandDescription }) {
             <div>
               <p className={styles.brandTitle}>{t("footer.brandTitle")}</p>
               <p className={styles.brandCopy}>
-                {brandDescription ? (
-                  brandDescription
-                ) : (
-                  <>
-                    {t("footer.brandCopyLine1")}
-                    <br />
-                    {t("footer.brandCopyLine2")}
-                  </>
-                )}
+                {t("footer.brandCopyLine1")}
+                <br />
+                {t("footer.brandCopyLine2")}
               </p>
             </div>
 

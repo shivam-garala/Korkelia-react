@@ -240,17 +240,6 @@ export default function NavMenuOverlay({ open, onClose }) {
                 {t("menu.diamondDifference")}
               </Link>
             </li>
-           
-            <li className={styles.item}>
-              <Link
-                className={`${styles.link} ${isActive("/custom-jewelry") ? styles.activeLink : ""}`}
-                href="/custom-jewelry"
-                onClick={onClose}
-              >
-                {t("menu.customJewelry")}
-              </Link>
-            </li>
-       
             <li className={styles.item}>
               <Link
                 className={`${styles.link} ${isActive("/shipping-returns") ? styles.activeLink : ""}`}
@@ -258,15 +247,6 @@ export default function NavMenuOverlay({ open, onClose }) {
                 onClick={onClose}
               >
                 {t("menu.shippingReturns")}
-              </Link>
-            </li>
-            <li className={styles.item}>
-              <Link
-                className={`${styles.link} ${isActive("/faq") ? styles.activeLink : ""}`}
-                href="/faq"
-                onClick={onClose}
-              >
-                {t("menu.faq")}
               </Link>
             </li>
             <li className={styles.item}>

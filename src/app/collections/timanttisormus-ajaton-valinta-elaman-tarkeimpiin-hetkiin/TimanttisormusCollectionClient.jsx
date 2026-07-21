@@ -54,33 +54,12 @@ const faqs = [
       "Laboratoriotimantit ovat eettinen ja ekologinen vaihtoehto, ja ne tarjoavat erinomaisen hinta–laatusuhteen ilman kompromisseja säihkeessä tai kestävyydessä.",
     ],
   },
-
-
+  
+  
 ];
 
-const extractPlainText = (node) => {
-  if (node == null || typeof node === "boolean") return "";
-  if (typeof node === "string" || typeof node === "number") return String(node);
-  if (Array.isArray(node)) return node.map(extractPlainText).join(" ");
-  if (node?.props?.children != null) return extractPlainText(node.props.children);
-  return "";
-};
-
-const faqJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqs.map((faq) => ({
-    "@type": "Question",
-    name: faq.question,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: [extractPlainText(faq.answer), ...(faq.bullet ?? [])].filter(Boolean).join(" "),
-    },
-  })),
-};
-
 export default function TimanttisormusCollectionClient() {
-  const { language, currencyCode, currencySymbol, t } = useI18n();
+  const { language, currencyCode, currencySymbol } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -295,10 +274,6 @@ export default function TimanttisormusCollectionClient() {
 
   return (
     <div className={styles.page}>
-      <script
-        type="application/ld+json"
-        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
-      />
       <SiteHeader />
       <main className={styles.main}>
         <section className={styles.storyWrap}>
@@ -324,10 +299,8 @@ export default function TimanttisormusCollectionClient() {
                   </button>
                 </div>
               ) : null}
-              <div
-                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
-                id="story-content"
-              >
+              {showAllContent ? (
+                <div className={styles.storyBody} id="story-content">
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
                       src="/link1/Halo_sormus_emerald_-hiontaisella_timantilla.jpg"
@@ -637,6 +610,7 @@ export default function TimanttisormusCollectionClient() {
                     </p>
                   </section>
                 </div>
+              ) : null}
               {showAllContent ? (
                 <div className={styles.toggleRow}>
                   <button
@@ -691,7 +665,7 @@ export default function TimanttisormusCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter brandDescription={t("footer.ringBrandDescription")} />
+      <SiteFooter />
     </div>
   );
 }

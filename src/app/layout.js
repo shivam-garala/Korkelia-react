@@ -74,48 +74,8 @@ export async function generateMetadata() {
   };
 }
 
-const buildOrganizationJsonLd = (baseUrl) => ({
-  "@context": "https://schema.org",
-  "@type": "JewelryStore",
-  name: siteName,
-  legalName: "Korkeila Helsinki Oy",
-  url: baseUrl,
-  logo: `${baseUrl}/logo/logo.png`,
-  image: `${baseUrl}/logo/logo.png`,
-  telephone: "+358503270600",
-  email: "korkeila@korkeilahelsinki.fi",
-  address: {
-    "@type": "PostalAddress",
-    streetAddress: "Korkeavuorenkatu 6",
-    postalCode: "00150",
-    addressLocality: "Helsinki",
-    addressCountry: "FI",
-  },
-  openingHoursSpecification: [
-    {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Monday", "Tuesday", "Wednesday", "Thursday", "Friday"],
-      opens: "11:00",
-      closes: "18:00",
-    },
-    {
-      "@type": "OpeningHoursSpecification",
-      dayOfWeek: ["Saturday"],
-      opens: "10:00",
-      closes: "15:00",
-    },
-  ],
-  sameAs: [
-    "https://www.facebook.com/korkeilahelsinki",
-    "https://www.instagram.com/korkeilahelsinki/",
-    "https://www.threads.com/@korkeilahelsinki",
-  ],
-});
-
 export default async function RootLayout({ children }) {
   const language = await resolveLanguage();
-  const baseUrl = await resolveBaseUrl();
-  const organizationJsonLd = buildOrganizationJsonLd(baseUrl);
 
   return (
     <html lang={language}>
@@ -125,11 +85,6 @@ export default async function RootLayout({ children }) {
         <link
           rel="stylesheet"
           href="https://fonts.googleapis.com/css2?family=Marcellus&family=Nata+Sans:wght@300;400;500;600;700&display=swap"
-        />
-        <script
-          type="application/ld+json"
-          // eslint-disable-next-line react/no-danger
-          dangerouslySetInnerHTML={{ __html: JSON.stringify(organizationJsonLd) }}
         />
       </head>
       <body suppressHydrationWarning>
