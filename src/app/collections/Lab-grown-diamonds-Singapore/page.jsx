@@ -5,6 +5,9 @@ export const metadata = {
     "Lab Grown Diamonds Singapore | Korkeila Helsinki",
   description:
     "Shop lab grown diamonds. Sustainable, conflict-free brilliance with exceptional quality from Korkeila Helsinki.",
+  alternates: {
+    canonical: "/collections/Lab-grown-diamonds-Singapore",
+  },
 };
 
 export default function LabgrownDiamondSingaporePage() {

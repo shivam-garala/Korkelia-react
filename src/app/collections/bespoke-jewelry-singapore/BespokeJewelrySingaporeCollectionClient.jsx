@@ -97,7 +97,7 @@ const introText = (
 );
 
 export default function LabgrownDiamondSingaporeCollectionClient() {
-  const { language, currencyCode,currencySymbol } = useI18n();
+  const { language, currencyCode, currencySymbol, t } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [categories, setCategories] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState([]);
@@ -309,8 +309,10 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
                   </button>
                 </div>
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <p className={styles.intro}>
                     We believe jewellery can be refined, meaningful, and deeply personal. Each piece is a reflection of identity and emotion, brought to life through craftsmanship and design.
                   </p>
@@ -624,7 +626,6 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
                   </section>
 
                 </div>
-              ) : null}
 
               {showAllContent ? (
                 <div className={styles.toggleRow}>
@@ -676,7 +677,7 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }
