@@ -13,6 +13,7 @@ import {
   fetchSubCategoryHomePage,
 } from "../../../lib/productListingCache.js";
 import { useI18n } from "../../../providers/I18nProvider.jsx";
+import en from "../../../i18n/en.json";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
@@ -32,7 +33,7 @@ const introText = (
 
 
 export default function KihlasormusMiehelleCollectionClient() {
-  const { language, currencyCode, currencySymbol } = useI18n();
+  const { language, currencyCode, currencySymbol, t } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -244,7 +245,7 @@ export default function KihlasormusMiehelleCollectionClient() {
 
   return (
     <div className={styles.page}>
-      <SiteHeader />
+      <SiteHeader availableLanguages={["en"]} fixedLanguage="en" />
       <main className={styles.main}>
         <section className={styles.storyWrap}>
           <Container>
@@ -273,8 +274,10 @@ export default function KihlasormusMiehelleCollectionClient() {
                 </div>
 
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <p className={styles.intro}>A custom engagement ring is not simply a product. It is the creation of a piece that reflects the depth of your love story, the individuality of your relationship, and the promise of a lifetime together. We are honoured to guide you through this meaningful journey.</p>
                   
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
@@ -508,7 +511,6 @@ export default function KihlasormusMiehelleCollectionClient() {
                   </section>
                   
                 </div>
-              ) : null}
 
               {showAllContent ? (
 
@@ -563,7 +565,7 @@ export default function KihlasormusMiehelleCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={en.footer.ringBrandDescription} fixedLanguage="en" />
     </div>
   );
 }

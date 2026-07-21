@@ -70,6 +70,10 @@
   gap: 28px;
 }
 
+.storyBodyHidden {
+  display: none !important;
+}
+
 .storyImage {
   position: relative;
   width: 100%;

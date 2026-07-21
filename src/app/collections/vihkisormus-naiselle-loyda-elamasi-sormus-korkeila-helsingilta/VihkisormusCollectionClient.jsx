@@ -13,6 +13,7 @@ import {
   fetchSubCategoryHomePage,
 } from "../../../lib/productListingCache.js";
 import { useI18n } from "../../../providers/I18nProvider.jsx";
+import fi from "../../../i18n/fi.json";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
@@ -72,8 +73,29 @@ const faqs = [
   },
 ];
 
+const extractPlainText = (node) => {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractPlainText).join(" ");
+  if (node?.props?.children != null) return extractPlainText(node.props.children);
+  return "";
+};
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: [extractPlainText(faq.answer), ...(faq.bullet ?? [])].filter(Boolean).join(" "),
+    },
+  })),
+};
+
 export default function VihkisormusCollectionClient() {
-  const { language, currencyCode, currencySymbol } = useI18n();
+  const { language, currencyCode, currencySymbol, t } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -297,7 +319,11 @@ export default function VihkisormusCollectionClient() {
 
   return (
     <div className={styles.page}>
-      <SiteHeader />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <SiteHeader availableLanguages={["fi"]} fixedLanguage="fi" />
       <main className={styles.main}>
         <section className={styles.storyWrap}>
           <Container>
@@ -322,12 +348,14 @@ export default function VihkisormusCollectionClient() {
                   </button>
                 </div>
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
                       src="/link3/16d326f7-c99f-491b-8fbf-c2eb296625be.jpeg"
-                      alt="vihkisormus, vihkisormukset, myös, naisten, miesten"
+                      alt="Vihkisormus, jossa vihreä jalokivi, naisen kädessä"
                       fill
                       sizes="(max-width: 720px) 80vw, 360px"
                     />
@@ -364,7 +392,7 @@ export default function VihkisormusCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link3/8c061b8e-afe8-453c-b105-3a207640bc66.jpeg"
-                      alt="vihkisormus, vihkisormukset, myös, miesten, naisten, timanttisormukset"
+                      alt="Pinotut vihkisormus ja kihlasormus kaulakuopan lähellä"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -407,7 +435,7 @@ export default function VihkisormusCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link3/5ce16714-af3d-4a4d-8a51-68bed03209f6.jpeg"
-                      alt="vihkisormus, vihkisormukset, naisten, timanttisormukset"
+                      alt="Timanttinen vihkisormus korurasian kannella kukkien edessä"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -461,7 +489,7 @@ export default function VihkisormusCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link3/9c97a591-fcc4-43a8-9e42-cbd303654a01.jpeg"
-                      alt="hinta, vihkisormus naiselle, leveys, kihlasormus, vihkisormuksia, hinta"
+                      alt="Timanttisormus naisen kädessä lähikuvassa"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -487,7 +515,6 @@ export default function VihkisormusCollectionClient() {
                     <p className={styles.sectionCopy}>Korkeila Helsinki – Kaikki vihkisormukset valmistetaan rakkaudella, juuri sinulle.</p>
                   </section>
                 </div>
-              ) : null}
 
               {showAllContent ? (
 
@@ -535,7 +562,7 @@ export default function VihkisormusCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={fi.footer.ringBrandDescription} fixedLanguage="fi" />
     </div>
   );
 }

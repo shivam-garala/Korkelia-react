@@ -8,6 +8,7 @@ import SiteFooter from "../components/Home/SiteFooter.jsx";
 import SiteHeader from "../components/Home/SiteHeader.jsx";
 import { fetchCategoryHomePage } from "../lib/categoryHomeCache.js";
 import { useI18n } from "../providers/I18nProvider.jsx";
+import { useEffectiveLanguage } from "../hooks/useEffectiveLanguage.js";
 import styles from "./home.module.css";
 
 const buildCategoryHref = (id, label) => {
@@ -20,6 +21,7 @@ const buildCategoryHref = (id, label) => {
 
 export default function HomeClient() {
   const { t, language } = useI18n();
+  const effectiveLanguage = useEffectiveLanguage();
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -153,7 +155,7 @@ export default function HomeClient() {
           subtitle={t("home.diamondGuide.subtitle")}
           description={t("home.diamondGuide.description")}
           ctaLabel={t("home.cta.discover")}
-          href="/diamond-guide"
+          href={`/${effectiveLanguage}/diamond-guide`}
         />
 
         <FullMediaSection
@@ -173,7 +175,7 @@ export default function HomeClient() {
           subtitle={t("home.diamondDifference.subtitle")}
           description={t("home.diamondDifference.description")}
           ctaLabel={t("home.cta.discover")}
-          href="/diamond-difference"
+          href={`/${effectiveLanguage}/diamond-difference`}
         />
 
         {/* <FullMediaSection
@@ -205,10 +207,10 @@ export default function HomeClient() {
           subtitle={t("home.about.subtitle")}
           description={t("home.about.description")}
           ctaLabel={t("home.cta.discover")}
-          href="/about"
+          href={`/${effectiveLanguage}/about`}
         />
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }

@@ -13,6 +13,7 @@ import {
   fetchSubCategoryHomePage,
 } from "../../../lib/productListingCache.js";
 import { useI18n } from "../../../providers/I18nProvider.jsx";
+import fi from "../../../i18n/fi.json";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
@@ -121,8 +122,29 @@ const faqs = [
   },
 ];
 
+const extractPlainText = (node) => {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractPlainText).join(" ");
+  if (node?.props?.children != null) return extractPlainText(node.props.children);
+  return "";
+};
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: [extractPlainText(faq.answer), ...(faq.bullet ?? [])].filter(Boolean).join(" "),
+    },
+  })),
+};
+
 export default function ValkokultaKihlasormusCollectionClient() {
-  const { language, currencyCode, currencySymbol } = useI18n();
+  const { language, currencyCode, currencySymbol, t } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -327,7 +349,11 @@ export default function ValkokultaKihlasormusCollectionClient() {
 
   return (
     <div className={styles.page}>
-      <SiteHeader />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <SiteHeader availableLanguages={["fi"]} fixedLanguage="fi" />
       <main className={styles.main}>
         <section className={styles.storyWrap}>
           <Container>
@@ -357,12 +383,14 @@ export default function ValkokultaKihlasormusCollectionClient() {
                 </div>
 
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
                       src="/link4/5177722b-507c-4291-9443-07c947615d5b.jpeg"
-                      alt="myös, kihlasormukset, löydät, leveys, kulta, materiaali, kohinoor, timantti, myymälästä, helposti, koruja, verkkokaupasta, tilaa"
+                      alt="Kolmen kiven timanttisormus kangastaustalla"
                       fill
                       sizes="(max-width: 720px) 80vw, 360px"
                     />
@@ -407,7 +435,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link4/060a7952-53f1-48f1-9c6d-6de4e44fa1bc.jpeg"
-                      alt="valkokultainen kihlasormus, kihlasormukset, kulta, timantti, timantit, lisää,"
+                      alt="Valkokultainen halo-mallinen timanttisormus sormien välissä"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -506,7 +534,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link4/6a32fd56-b9ca-4427-bbca-708b6775a484.jpeg"
-                      alt="valkokulta kihlasormus, kihlasormus, myös, kihlasormukset, valkokultaiset,"
+                      alt="Valkokultainen timanttisormus valkoisten kukkien vierellä"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -531,7 +559,6 @@ export default function ValkokultaKihlasormusCollectionClient() {
                     </p>
                   </section>
                 </div>
-              ) : null}
 
               {showAllContent ? (
 
@@ -590,7 +617,7 @@ export default function ValkokultaKihlasormusCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={fi.footer.ringBrandDescription} fixedLanguage="fi" />
     </div>
   );
 }

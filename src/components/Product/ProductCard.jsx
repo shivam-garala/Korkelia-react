@@ -8,7 +8,7 @@ export default function ProductCard({ href, imageSrc, name, price }) {
   const displayPrice = hasPrice ? `${price}` : price ?? "";
   const content = (
     <>
-      <div className={styles.media} aria-hidden>
+      <div className={styles.media}>
         <Image
           className={styles.image}
           src={resolvedSrc}
