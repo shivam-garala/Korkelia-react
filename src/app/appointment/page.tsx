@@ -1,4 +1,4 @@
-import AppointmentClient from "./AppointmentClient.tsx";
+import AppointmentClient from "./AppointmentClient";
 
 export const metadata = {
   alternates: {
