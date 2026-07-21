@@ -28,6 +28,9 @@ function Icon({ path, className, style }) {
   );
 }
 
+/**
+ * @param {{ open: boolean, onClose: () => void, fixedLanguage?: "en" | "fi" }} props
+ */
 export default function NavMenuOverlay({ open, onClose, fixedLanguage }) {
   const [productsOpen, setProductsOpen] = useState(false);
   const [categories, setCategories] = useState([]);
