@@ -77,6 +77,10 @@
   border-top: none;
 }
 
+.panelHidden {
+  display: none !important;
+}
+
 .panelText {
   padding: 48px;
   background: #f6f6f6;

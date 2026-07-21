@@ -1,15 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import styles from "../../diamond-difference/page.module.css";
 
 export default function DiamondDifferenceTabs({ tabs, languageKey }) {
   const [activeKey, setActiveKey] = useState(tabs[0]?.key);
-  const activeTab = useMemo(
-    () => tabs.find((tab) => tab.key === activeKey) ?? tabs[0],
-    [activeKey, tabs]
-  );
 
   return (
     <>
@@ -23,7 +19,7 @@ export default function DiamondDifferenceTabs({ tabs, languageKey }) {
               id={`diamond-difference-tab-${tab.key}`}
               role="tab"
               aria-selected={isActive}
-              aria-controls="diamond-difference-panel"
+              aria-controls={`diamond-difference-panel-${tab.key}`}
               className={`${styles.tab} ${isActive ? styles.tabActive : ""}`}
               onClick={() => setActiveKey(tab.key)}
             >
@@ -33,42 +29,48 @@ export default function DiamondDifferenceTabs({ tabs, languageKey }) {
         })}
       </div>
 
-      <div
-        id="diamond-difference-panel"
-        role="tabpanel"
-        aria-labelledby={`diamond-difference-tab-${activeTab.key}`}
-        className={styles.panel}
-      >
-        <div className={styles.panelText}>
-          <p className={styles.panelTitle}>{activeTab.title[languageKey] ?? activeTab.title.en}</p>
-          {(languageKey === "fi" ? activeTab.body.fi : activeTab.body.en)?.map((paragraph) => (
-            <p key={paragraph} className={styles.panelBody}>
-              {paragraph}
-            </p>
-          ))}
-          {(languageKey === "fi" ? activeTab.body.fiList : activeTab.body.enList) ? (
-            <ul className={styles.panelList}>
-              {(languageKey === "fi" ? activeTab.body.fiList : activeTab.body.enList).map((item) => (
-                <li key={item}>{item}</li>
+      {tabs.map((tab) => {
+        const isActive = tab.key === activeKey;
+        return (
+          <div
+            key={tab.key}
+            id={`diamond-difference-panel-${tab.key}`}
+            role="tabpanel"
+            aria-labelledby={`diamond-difference-tab-${tab.key}`}
+            className={`${styles.panel} ${!isActive ? styles.panelHidden : ""}`}
+          >
+            <div className={styles.panelText}>
+              <p className={styles.panelTitle}>{tab.title[languageKey] ?? tab.title.en}</p>
+              {(languageKey === "fi" ? tab.body.fi : tab.body.en)?.map((paragraph) => (
+                <p key={paragraph} className={styles.panelBody}>
+                  {paragraph}
+                </p>
               ))}
-            </ul>
-          ) : null}
-          {(languageKey === "fi" ? activeTab.body.fiAfter : activeTab.body.enAfter) ? (
-            <p className={styles.panelBody}>
-              {languageKey === "fi" ? activeTab.body.fiAfter : activeTab.body.enAfter}
-            </p>
-          ) : null}
-        </div>
-        <div className={styles.panelMedia}>
-          <Image
-            className={styles.panelImage}
-            src={activeTab.image}
-            alt={activeTab.alt}
-            width={520}
-            height={360}
-          />
-        </div>
-      </div>
+              {(languageKey === "fi" ? tab.body.fiList : tab.body.enList) ? (
+                <ul className={styles.panelList}>
+                  {(languageKey === "fi" ? tab.body.fiList : tab.body.enList).map((item) => (
+                    <li key={item}>{item}</li>
+                  ))}
+                </ul>
+              ) : null}
+              {(languageKey === "fi" ? tab.body.fiAfter : tab.body.enAfter) ? (
+                <p className={styles.panelBody}>
+                  {languageKey === "fi" ? tab.body.fiAfter : tab.body.enAfter}
+                </p>
+              ) : null}
+            </div>
+            <div className={styles.panelMedia}>
+              <Image
+                className={styles.panelImage}
+                src={tab.image}
+                alt={tab.alt}
+                width={520}
+                height={360}
+              />
+            </div>
+          </div>
+        );
+      })}
     </>
   );
 }

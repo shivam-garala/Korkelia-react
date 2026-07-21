@@ -1,15 +1,11 @@
 "use client";
 
 import Image from "next/image";
-import { useMemo, useState } from "react";
+import { useState } from "react";
 import styles from "../../diamond-guide/page.module.css";
 
 export default function DiamondGuideTabs({ tabs, languageKey }) {
   const [activeKey, setActiveKey] = useState(tabs[0]?.key);
-  const activeTab = useMemo(
-    () => tabs.find((tab) => tab.key === activeKey) ?? tabs[0],
-    [activeKey, tabs]
-  );
 
   return (
     <>
@@ -23,7 +19,7 @@ export default function DiamondGuideTabs({ tabs, languageKey }) {
               id={`diamond-guide-tab-${tab.key}`}
               role="tab"
               aria-selected={isActive}
-              aria-controls="diamond-guide-panel"
+              aria-controls={`diamond-guide-panel-${tab.key}`}
               className={`${styles.tab} ${isActive ? styles.tabActive : ""}`}
               onClick={() => setActiveKey(tab.key)}
             >
@@ -33,28 +29,34 @@ export default function DiamondGuideTabs({ tabs, languageKey }) {
         })}
       </div>
 
-      <div
-        id="diamond-guide-panel"
-        role="tabpanel"
-        aria-labelledby={`diamond-guide-tab-${activeTab.key}`}
-        className={styles.panel}
-      >
-        <div className={styles.panelText}>
-          <p className={styles.panelTitle}>{activeTab.title[languageKey] ?? activeTab.title.en}</p>
-          <p className={styles.panelBody}>
-            {languageKey === "fi" ? activeTab.body.fi : activeTab.body.en}
-          </p>
-        </div>
-        <div className={styles.panelMedia}>
-          <Image
-            className={styles.panelImage}
-            src={activeTab.image}
-            alt={activeTab.alt}
-            width={520}
-            height={360}
-          />
-        </div>
-      </div>
+      {tabs.map((tab) => {
+        const isActive = tab.key === activeKey;
+        return (
+          <div
+            key={tab.key}
+            id={`diamond-guide-panel-${tab.key}`}
+            role="tabpanel"
+            aria-labelledby={`diamond-guide-tab-${tab.key}`}
+            className={`${styles.panel} ${!isActive ? styles.panelHidden : ""}`}
+          >
+            <div className={styles.panelText}>
+              <p className={styles.panelTitle}>{tab.title[languageKey] ?? tab.title.en}</p>
+              <p className={styles.panelBody}>
+                {languageKey === "fi" ? tab.body.fi : tab.body.en}
+              </p>
+            </div>
+            <div className={styles.panelMedia}>
+              <Image
+                className={styles.panelImage}
+                src={tab.image}
+                alt={tab.alt}
+                width={520}
+                height={360}
+              />
+            </div>
+          </div>
+        );
+      })}
     </>
   );
 }
