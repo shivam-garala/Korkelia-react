@@ -6,7 +6,7 @@ import SiteHeader from "../../components/Home/SiteHeader.jsx";
 import Container from "../../components/ui/Container.jsx";
 import { useI18n } from "../../providers/I18nProvider.jsx";
 import styles from "./page.module.css";
-
+//edit
 const contentByLanguage = {
   en: {
     heading: "ABOUT US",
