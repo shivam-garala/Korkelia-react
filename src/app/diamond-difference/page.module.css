@@ -75,6 +75,10 @@
   grid-template-columns: minmax(0, 1fr) minmax(0, 1fr);
 }
 
+.panelHidden {
+  display: none !important;
+}
+
 .panelText {
   padding: 46px;
   background: #f6f6f6;
