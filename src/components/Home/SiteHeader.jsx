@@ -16,6 +16,9 @@ import {
   optionFromPublicRateRow,
 } from "../../constants/currencyOptions.js";
 
+/**
+ * @param {{ availableLanguages?: Array<"en" | "fi">, fixedLanguage?: "en" | "fi" }} [props]
+ */
 export default function SiteHeader({
   availableLanguages = ["en", "fi"],
   fixedLanguage,

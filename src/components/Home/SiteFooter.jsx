@@ -15,7 +15,10 @@ const socials = [
   // { href: "#", src: "/icons/xtwitter.png", alt: "X" },
 ];
 
-export default function SiteFooter({ brandDescription, fixedLanguage }) {
+/**
+ * @param {{ brandDescription?: string, fixedLanguage?: "en" | "fi" }} [props]
+ */
+export default function SiteFooter({ brandDescription, fixedLanguage } = {}) {
   const { t, effectiveLanguage } = useEffectiveTranslation(fixedLanguage);
 
   return (
