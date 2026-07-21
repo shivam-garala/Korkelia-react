@@ -5,12 +5,12 @@ const DEFAULT_SITE_URL = "https://korkeilahelsinki.fi";
 const PAGE_SLUG = "valkokulta-kihlasormus-tyylikas-valinta-elaman-suurimpaan-lupaukseen";
 const PAGE_NAME = "Valkokulta kihlasormus";
 
+// Always https — see robots.js for why the x-forwarded-proto header isn't trusted.
 const resolveBaseUrl = async () => {
   const headerStore = await headers();
   const forwardedHost = headerStore.get("x-forwarded-host") || headerStore.get("host");
-  const forwardedProto = headerStore.get("x-forwarded-proto") || "https";
   if (forwardedHost) {
-    return `${forwardedProto}://${forwardedHost}`;
+    return `https://${forwardedHost}`;
   }
   return process.env.NEXT_PUBLIC_SITE_URL || DEFAULT_SITE_URL;
 };
