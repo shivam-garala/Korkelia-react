@@ -48,7 +48,7 @@ const cacheProductList = (items) => {
 };
 
 export default function ProductListingClient() {
-  const { language, currencyCode, currencySymbol } = useI18n();
+  const { language, currencyCode, currencySymbol, t } = useI18n();
   const searchParams = useSearchParams();
   const categoryIdParam = searchParams.get("category_id");
   const categoryNameFromParams = searchParams.get("category_name");
@@ -314,6 +314,8 @@ export default function ProductListingClient() {
     return list;
   }, [products, sortFilter, subCategoryFilter]);
 
+  const isRingCategory = String(categoryId) === "1";
+
   return (
     <div className={styles.page}>
       <SiteHeader />
@@ -346,7 +348,11 @@ export default function ProductListingClient() {
           </div>
         </Container>
       </main>
-      <SiteFooter />
+      <SiteFooter
+        brandDescription={
+          isRingCategory ? t("footer.ringBrandDescription") : t("footer.homeBrandDescription")
+        }
+      />
     </div>
   );
 }

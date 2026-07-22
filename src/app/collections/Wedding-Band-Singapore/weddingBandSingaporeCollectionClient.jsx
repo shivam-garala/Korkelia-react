@@ -33,7 +33,7 @@ const introText = (
 
 
 export default function KihlasormusMiehelleCollectionClient() {
-  const { language, currencyCode, currencySymbol} = useI18n();
+  const { language, currencyCode, currencySymbol, t } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -270,8 +270,10 @@ export default function KihlasormusMiehelleCollectionClient() {
                 </div>
 
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <p className={styles.intro}>Whether you are choosing your wedding rings in Singapore or selecting them from abroad, our collection is designed to honour the depth of your promise and the grace of your journey together.</p>
                   
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
@@ -429,7 +431,6 @@ export default function KihlasormusMiehelleCollectionClient() {
                     
                   </section>
                 </div>
-              ) : null}
 
               {showAllContent ? (
 

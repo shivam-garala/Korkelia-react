@@ -1,3 +1,4 @@
+﻿import { headers } from "next/headers";
 import TimanttisormusCollectionClient from "./TimanttisormusCollectionClient.jsx";
 import { resolveApiBaseUrl } from "../../../lib/productDefaultVariant.js";
 import { buildItemListJsonLd, fetchCollectionItemListProducts } from "../../../lib/collectionItemList.js";
@@ -38,6 +39,9 @@ export const metadata = {
   title: "Timanttisormus | Upeat mallit, hohto ja vinkit täydelliseen valintaan – Korkeila Helsinki",
   description:
     "Inspiroidu kauniista malleista ja löydä vinkit, joiden avulla valitset juuri sinulle sopivan sormuksen tärkeisiin hetkiin ja arjen eleganssiin.",
+  alternates: {
+    canonical: `/collections/${PAGE_SLUG}`,
+  },
 };
 
 export default async function TimanttisormusCollectionPage() {

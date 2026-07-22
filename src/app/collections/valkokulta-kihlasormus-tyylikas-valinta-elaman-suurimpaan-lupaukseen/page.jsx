@@ -1,3 +1,4 @@
+﻿import { headers } from "next/headers";
 import ValkokultaKihlasormusCollectionClient from "./ValkokultaKihlasormusCollectionClient.jsx";
 import { resolveApiBaseUrl } from "../../../lib/productDefaultVariant.js";
 import { buildItemListJsonLd, fetchCollectionItemListProducts } from "../../../lib/collectionItemList.js";
@@ -28,6 +29,9 @@ export const metadata = {
     "Valkokulta Kihlasormus – Elegantit mallit ja vinkit täydelliseen valintaan – Korkeila Helsinki",
   description:
     "Tutustu tyylikkäisiin malleihin ja asiantunteviin neuvoihin, joiden avulla löydät juuri oikean sormuksen ikimuistoiseen hetkeen.",
+  alternates: {
+    canonical: `/collections/${PAGE_SLUG}`,
+  },
 };
 
 export default async function ValkokultaKihlasormusCollectionPage() {

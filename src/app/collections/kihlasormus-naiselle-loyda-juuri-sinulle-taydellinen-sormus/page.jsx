@@ -1,3 +1,4 @@
+﻿import { headers } from "next/headers";
 import KihlasormusCollectionClient from "./KihlasormusCollectionClient.jsx";
 import { resolveApiBaseUrl } from "../../../lib/productDefaultVariant.js";
 import { buildItemListJsonLd, fetchCollectionItemListProducts } from "../../../lib/collectionItemList.js";
@@ -27,6 +28,9 @@ export const metadata = {
   title: "Kihlasormus Naiselle – Tyylikästä muotoilua ja täydellinen valinta – Korkeila Helsinki",
   description:
     "Tutustu upeisiin malleihin ja hyödyllisiiin vinkkeihin, joiden avulla löydät juuri oikean sormuksen tärkeään hetkeen ja kestävään rakkauteen.",
+  alternates: {
+    canonical: `/collections/${PAGE_SLUG}`,
+  },
 };
 
 export default async function KihlasormusCollectionPage() {

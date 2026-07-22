@@ -125,8 +125,29 @@ const faqs = [
   },
 ];
 
+const extractPlainText = (node) => {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractPlainText).join(" ");
+  if (node?.props?.children != null) return extractPlainText(node.props.children);
+  return "";
+};
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: [extractPlainText(faq.answer), ...(faq.bullet ?? [])].filter(Boolean).join(" "),
+    },
+  })),
+};
+
 export default function KultainenKihlasormusCollectionClient() {
-  const { language, currencyCode, currencySymbol } = useI18n();
+  const { language, currencyCode, currencySymbol, t } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -377,8 +398,10 @@ export default function KultainenKihlasormusCollectionClient() {
                 </div>
 
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
                       src="/link5/8a924f86-bdfb-4074-bbbc-a7f387f618fc.jpeg"
@@ -565,7 +588,7 @@ export default function KultainenKihlasormusCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link5/dae21270-658f-4119-8aff-6d688fa42cea.jpeg"
-                      alt="kultainen kihlasormus, kihlasormus, kulta, löydät, kohinoor, valikoimastamme, helposti, kulta, kihlasormus, kihlasormukset, myös, kultaa, keltakulta, timanttien"
+                      alt="Kultainen halo-mallinen timanttisormus kädessä"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -616,7 +639,6 @@ export default function KultainenKihlasormusCollectionClient() {
                     </p>
                   </section>
                 </div>
-              ) : null}
 
               {showAllContent ? (
 

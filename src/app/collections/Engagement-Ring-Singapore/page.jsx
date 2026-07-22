@@ -32,6 +32,9 @@ export const metadata = {
     "Engagement Rings Singapore | Korkeila Helsinki",
   description:
     "Discover elegant engagement rings by Korkeila Helsinki. Timeless Nordic design, ethical materials, and handcrafted quality.",
+  alternates: {
+    canonical: "/collections/Engagement-Ring-Singapore",
+  },
 };
 
 export default async function EngagementRingSingaporePage() {

@@ -20,6 +20,9 @@ export const metadata = {
     "Bespoke Jewelry Singapore | Korkeila Helsinki",
   description:
     "Discover bespoke jewelry by Korkeila Helsinki. Personalized designs crafted with precision, sustainability, and timeless Nordic style.",
+  alternates: {
+    canonical: "/collections/bespoke-jewelry-singapore",
+  },
 };
 
 export default async function BespokeJewelrySingaporePage() {

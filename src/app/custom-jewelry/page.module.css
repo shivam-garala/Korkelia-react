@@ -4,10 +4,8 @@
   font-family: var(--font-body);
 }
 
-.topLine {
-  height: 1px;
-  background: color-mix(in srgb, var(--color-primary), transparent 55%);
-  margin: 18px 0 40px;
+.main {
+  padding: 56px 0 90px;
 }
 
 .header {
@@ -25,14 +23,6 @@
   letter-spacing: 2.4px;
   color: #606062;
   text-transform: uppercase;
-}
-
-.copy {
-  display: grid;
-  gap: 16px;
-  color: var(--color-muted);
-  font-size: 15px;
-  line-height: 1.5;
 }
 
 .content {
@@ -73,6 +63,15 @@
   gap: 8px;
 }
 
+.orderedList {
+  margin: 0;
+  padding-left: 20px;
+  list-style: decimal;
+  color: var(--color-muted);
+  display: grid;
+  gap: 10px;
+}
+
 .listItem {
   font-size: 15px;
   line-height: 1.5;
@@ -80,17 +79,4 @@
 
 .listItem strong {
   color: var(--foreground);
-}
-
-
-.imageWrap {
-  display: flex;
-  justify-content: center;
-  margin-top: 30px;
-}
-
-.image {
-  width: min(520px, 80%);
-  height: auto;
-  display: block;
 }
