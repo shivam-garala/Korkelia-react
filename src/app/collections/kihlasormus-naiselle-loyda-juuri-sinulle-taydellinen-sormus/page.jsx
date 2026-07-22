@@ -1,9 +1,18 @@
 ﻿import { headers } from "next/headers";
 import KihlasormusCollectionClient from "./KihlasormusCollectionClient.jsx";
+import { resolveApiBaseUrl } from "../../../lib/productDefaultVariant.js";
+import { buildItemListJsonLd, fetchCollectionItemListProducts } from "../../../lib/collectionItemList.js";
 
 const DEFAULT_SITE_URL = "https://korkeilahelsinki.fi";
 const PAGE_SLUG = "kihlasormus-naiselle-loyda-juuri-sinulle-taydellinen-sormus";
 const PAGE_NAME = "Kihlasormus naiselle";
+const CATEGORY_ID = "1";
+
+const normalizeLabel = (value) => String(value ?? "").trim().toLowerCase();
+const matchesSubCategory = (label) => {
+  const normalized = normalizeLabel(label);
+  return normalized.includes("solitaire") || normalized.includes("halo");
+};
 
 // Always https — see robots.js for why the x-forwarded-proto header isn't trusted.
 const resolveBaseUrl = async () => {
@@ -35,12 +44,26 @@ export default async function KihlasormusCollectionPage() {
     ],
   };
 
+  const products = await fetchCollectionItemListProducts({
+    apiBaseUrl: resolveApiBaseUrl(),
+    siteBaseUrl: baseUrl,
+    categoryId: CATEGORY_ID,
+    matchesSubCategory,
+  });
+  const itemListJsonLd = buildItemListJsonLd(products);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      {itemListJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      ) : null}
       <KihlasormusCollectionClient />
     </>
   );
