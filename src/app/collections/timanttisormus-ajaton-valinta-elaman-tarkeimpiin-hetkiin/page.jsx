@@ -1,9 +1,29 @@
 ﻿import { headers } from "next/headers";
 import TimanttisormusCollectionClient from "./TimanttisormusCollectionClient.jsx";
+import { resolveApiBaseUrl } from "../../../lib/productDefaultVariant.js";
+import { buildItemListJsonLd, fetchCollectionItemListProducts } from "../../../lib/collectionItemList.js";
 
 const DEFAULT_SITE_URL = "https://korkeilahelsinki.fi";
 const PAGE_SLUG = "timanttisormus-ajaton-valinta-elaman-tarkeimpiin-hetkiin";
 const PAGE_NAME = "Timanttisormus";
+const CATEGORY_ID = "1";
+
+const normalizeLabel = (value) => String(value ?? "").trim().toLowerCase();
+const isThreeStone = (value) =>
+  /(^|\b)3\s*-?\s*stones?\b/.test(value) ||
+  value.includes("three stone") ||
+  value.includes("three-stone") ||
+  value.includes("three stones") ||
+  value.includes("three-stones");
+const matchesSubCategory = (label) => {
+  const normalized = normalizeLabel(label);
+  return (
+    normalized.includes("solitaire") ||
+    normalized.includes("halo") ||
+    normalized.includes("alliance") ||
+    isThreeStone(normalized)
+  );
+};
 
 // Always https — see robots.js for why the x-forwarded-proto header isn't trusted.
 const resolveBaseUrl = async () => {
@@ -35,12 +55,26 @@ export default async function TimanttisormusCollectionPage() {
     ],
   };
 
+  const products = await fetchCollectionItemListProducts({
+    apiBaseUrl: resolveApiBaseUrl(),
+    siteBaseUrl: baseUrl,
+    categoryId: CATEGORY_ID,
+    matchesSubCategory,
+  });
+  const itemListJsonLd = buildItemListJsonLd(products);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      {itemListJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      ) : null}
       <TimanttisormusCollectionClient />
     </>
   );

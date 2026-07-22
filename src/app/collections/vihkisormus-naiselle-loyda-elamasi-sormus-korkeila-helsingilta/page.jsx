@@ -1,9 +1,38 @@
 ﻿import { headers } from "next/headers";
 import VihkisormusCollectionClient from "./VihkisormusCollectionClient.jsx";
+import { resolveApiBaseUrl } from "../../../lib/productDefaultVariant.js";
+import { buildItemListJsonLd, fetchCollectionItemListProducts } from "../../../lib/collectionItemList.js";
 
 const DEFAULT_SITE_URL = "https://korkeilahelsinki.fi";
 const PAGE_SLUG = "vihkisormus-naiselle-loyda-elamasi-sormus-korkeila-helsingilta";
 const PAGE_NAME = "Vihkisormus naiselle";
+const CATEGORY_ID = "1";
+
+const normalizeLabel = (value) => String(value ?? "").trim().toLowerCase();
+const isThreeStone = (value) =>
+  /(^|\b)3\s*-?\s*stone\b/.test(value) ||
+  value.includes("three stone") ||
+  value.includes("three-stone");
+const matchesSubCategory = (label) => {
+  const normalized = normalizeLabel(label);
+  return (
+    normalized.includes("solitaire") ||
+    normalized.includes("halo") ||
+    normalized.includes("alliance") ||
+    normalized.includes("allianssi") ||
+    isThreeStone(normalized)
+  );
+};
+// Mirrors the client's extra narrowing step: if an alliance/allianssi option
+// exists among the matched sub-categories, show only that one; otherwise
+// show every matched sub-category.
+const pickSubCategoryIds = (options) => {
+  const allianceOption = options.find((option) => {
+    const label = normalizeLabel(option?.label);
+    return label.includes("alliance") || label.includes("allianssi");
+  });
+  return allianceOption ? [String(allianceOption.value)] : options.map((option) => option.value);
+};
 
 // Always https — see robots.js for why the x-forwarded-proto header isn't trusted.
 const resolveBaseUrl = async () => {
@@ -36,12 +65,27 @@ export default async function VihkisormusCollectionPage() {
     ],
   };
 
+  const products = await fetchCollectionItemListProducts({
+    apiBaseUrl: resolveApiBaseUrl(),
+    siteBaseUrl: baseUrl,
+    categoryId: CATEGORY_ID,
+    matchesSubCategory,
+    pickSubCategoryIds,
+  });
+  const itemListJsonLd = buildItemListJsonLd(products);
+
   return (
     <>
       <script
         type="application/ld+json"
         dangerouslySetInnerHTML={{ __html: JSON.stringify(breadcrumbJsonLd) }}
       />
+      {itemListJsonLd ? (
+        <script
+          type="application/ld+json"
+          dangerouslySetInnerHTML={{ __html: JSON.stringify(itemListJsonLd) }}
+        />
+      ) : null}
       <VihkisormusCollectionClient />
     </>
   );
