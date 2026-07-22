@@ -1,4 +1,3 @@
-﻿import { headers } from "next/headers";
 import VihkisormusCollectionClient from "./VihkisormusCollectionClient.jsx";
 import { resolveApiBaseUrl } from "../../../lib/productDefaultVariant.js";
 import { buildItemListJsonLd, fetchCollectionItemListProducts } from "../../../lib/collectionItemList.js";
@@ -49,9 +48,6 @@ export const metadata = {
     "Vihkisormus Naiselle – Täydellinen muotoilu ja vinkkejä – Korkeila Helsinki",
   description:
     "Löydä kauneimmat mallit ja asiantuntevat vinkit, jotka auttavat sinua valitsemaan täydellisen sormuksen elämän tärkeimpään juhlapäivään.",
-  alternates: {
-    canonical: `/collections/${PAGE_SLUG}`,
-  },
 };
 
 export default async function VihkisormusCollectionPage() {

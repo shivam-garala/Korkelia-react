@@ -300,9 +300,6 @@ export default function DesignVariantPage() {
   const [csvMenuOpen, setCsvMenuOpen] = useState(false);
   const [csvUploading, setCsvUploading] = useState("");
   const [csvInputKey, setCsvInputKey] = useState(0);
-  const [inlineEditIds, setInlineEditIds] = useState(() => new Set());
-  const [inlineEditValues, setInlineEditValues] = useState({});
-  const [inlineSaving, setInlineSaving] = useState(() => new Set());
   const fallbackImage = "/productlisting/no_image.jpg";
   const csvMenuRef = useRef(null);
   const csvUploadInputRef = useRef(null);
@@ -348,91 +345,6 @@ export default function DesignVariantPage() {
       }),
     );
   }, [dispatch, loadingMore, loading, currentPage, totalPages, activeSearch]);
-
-  const handleInlineEdit = useCallback((row) => {
-    const id = row.id;
-    setInlineEditValues((prev) => ({
-      ...prev,
-      [id]: {
-        weight: row.weight !== "-" ? String(row.weight) : "",
-        mark_up: row.mark_up !== "-" ? String(row.mark_up) : "",
-      },
-    }));
-    setInlineEditIds((prev) => new Set([...prev, id]));
-  }, []);
-
-  const handleInlineCancel = useCallback((id) => {
-    setInlineEditIds((prev) => {
-      const next = new Set(prev);
-      next.delete(id);
-      return next;
-    });
-    setInlineEditValues((prev) => {
-      const next = { ...prev };
-      delete next[id];
-      return next;
-    });
-  }, []);
-
-  const handleSaveAll = useCallback(
-    async () => {
-      const ids = [...inlineEditIds];
-      if (!ids.length) return;
-
-      for (const id of ids) {
-        const values = inlineEditValues[id];
-        if (!values?.weight || String(values.weight).trim() === "") {
-          toast.error("Please enter weight for all edited rows");
-          return;
-        }
-        if (!values?.mark_up || String(values.mark_up).trim() === "") {
-          toast.error("Please enter mark up for all edited rows");
-          return;
-        }
-      }
-
-      setInlineSaving(new Set(ids));
-      try {
-        const results = await Promise.allSettled(
-          ids.map((id) =>
-            axiosClient.patch(`/api/design/quick-update/${id}`, {
-              weight: inlineEditValues[id].weight,
-              mark_up: inlineEditValues[id].mark_up,
-            }),
-          ),
-        );
-
-        const succeededIds = ids.filter((_, i) => results[i].status === "fulfilled");
-        const failedCount = ids.length - succeededIds.length;
-
-        if (succeededIds.length) {
-          setInlineEditIds((prev) => {
-            const next = new Set(prev);
-            succeededIds.forEach((id) => next.delete(id));
-            return next;
-          });
-          setInlineEditValues((prev) => {
-            const next = { ...prev };
-            succeededIds.forEach((id) => delete next[id]);
-            return next;
-          });
-          toast.success(`${succeededIds.length} row(s) saved successfully`);
-          fetchFirstPage(activeSearch);
-        }
-        if (failedCount) {
-          toast.error(`${failedCount} row(s) failed to save`);
-        }
-      } finally {
-        setInlineSaving(new Set());
-      }
-    },
-    [inlineEditIds, inlineEditValues, fetchFirstPage, activeSearch],
-  );
-
-  const handleCancelAllEdits = useCallback(() => {
-    setInlineEditIds(new Set());
-    setInlineEditValues({});
-  }, []);
 
   const resolveExportFileName = useCallback((headers = {}) => {
     const disposition =
@@ -1528,36 +1440,6 @@ export default function DesignVariantPage() {
       filterable: false,
       filterPlaceholder: "Search Weight",
       filterInputStyle: { width: 120 },
-      render: (row) =>
-        inlineEditIds.has(row.id) ? (
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={inlineEditValues[row.id]?.weight ?? ""}
-            onChange={(e) =>
-              setInlineEditValues((prev) => ({
-                ...prev,
-                [row.id]: { ...prev[row.id], weight: e.target.value },
-              }))
-            }
-            style={{
-              width: 90,
-              padding: "4px 6px",
-              border: "1px solid var(--color-border)",
-              borderRadius: 6,
-              fontSize: "inherit",
-            }}
-          />
-        ) : (
-          <span
-            onClick={() => handleInlineEdit(row)}
-            style={{ cursor: "pointer", textDecoration: "underline dotted", textUnderlineOffset: 3 }}
-            title="Click to edit"
-          >
-            {row.weight}
-          </span>
-        ),
     },
     {
       key: "mark_up",
@@ -1565,36 +1447,6 @@ export default function DesignVariantPage() {
       filterable: false,
       filterPlaceholder: "Search Mark Up",
       filterInputStyle: { width: 120 },
-      render: (row) =>
-        inlineEditIds.has(row.id) ? (
-          <input
-            type="number"
-            step="0.01"
-            min="0"
-            value={inlineEditValues[row.id]?.mark_up ?? ""}
-            onChange={(e) =>
-              setInlineEditValues((prev) => ({
-                ...prev,
-                [row.id]: { ...prev[row.id], mark_up: e.target.value },
-              }))
-            }
-            style={{
-              width: 90,
-              padding: "4px 6px",
-              border: "1px solid var(--color-border)",
-              borderRadius: 6,
-              fontSize: "inherit",
-            }}
-          />
-        ) : (
-          <span
-            onClick={() => handleInlineEdit(row)}
-            style={{ cursor: "pointer", textDecoration: "underline dotted", textUnderlineOffset: 3 }}
-            title="Click to edit"
-          >
-            {row.mark_up}
-          </span>
-        ),
     },
     {
       key: "price",
@@ -1617,7 +1469,6 @@ export default function DesignVariantPage() {
             icon="edit"
             iconOnly
             onClick={() => openEdit(row._raw)}
-            disabled={inlineEditIds.has(row.id)}
           >
             Edit
           </Button>
@@ -1627,7 +1478,6 @@ export default function DesignVariantPage() {
             icon="delete"
             iconOnly
             onClick={() => handleDelete(row.id)}
-            disabled={inlineSaving.has(row.id)}
           >
             Delete
           </Button>
@@ -1678,24 +1528,6 @@ export default function DesignVariantPage() {
                   >
                     {loading ? "Refreshing..." : "Refresh"}
                   </Button>
-                  {inlineEditIds.size > 0 && (
-                    <>
-                      <Button
-                        variant="primary"
-                        onClick={handleSaveAll}
-                        disabled={inlineSaving.size > 0}
-                      >
-                        {inlineSaving.size > 0 ? "Saving..." : `Save Changes (${inlineEditIds.size})`}
-                      </Button>
-                      <Button
-                        variant="secondary"
-                        onClick={handleCancelAllEdits}
-                        disabled={inlineSaving.size > 0}
-                      >
-                        Cancel Edits
-                      </Button>
-                    </>
-                  )}
                   {selectedIds.length > 0 && (
                     <Button
                       variant="danger"

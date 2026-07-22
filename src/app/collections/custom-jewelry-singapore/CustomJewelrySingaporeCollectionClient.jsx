@@ -98,7 +98,7 @@ const introText = (
 );
 
 export default function LabgrownDiamondSingaporeCollectionClient() {
-  const { language, currencyCode, currencySymbol, t } = useI18n();
+  const { language, currencyCode,currencySymbol } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [categories, setCategories] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState([]);
@@ -310,10 +310,8 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
                   </button>
                 </div>
               ) : null}
-              <div
-                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
-                id="story-content"
-              >
+              {showAllContent ? (
+                <div className={styles.storyBody} id="story-content">
                   <p className={styles.intro}>
                    In Singapore, discerning clients seek more than ready-made collections. They want a piece that is personal, one of a kind, and crafted with intention. Our approach to jewellery design is rooted in refinement, precision, and a deep respect for craftsmanship.
                   </p>
@@ -591,6 +589,7 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
                  
 
                 </div>
+              ) : null}
 
               {showAllContent ? (
                 <div className={styles.toggleRow}>

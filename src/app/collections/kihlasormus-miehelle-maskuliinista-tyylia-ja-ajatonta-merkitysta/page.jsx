@@ -1,4 +1,3 @@
-﻿import { headers } from "next/headers";
 import KihlasormusMiehelleCollectionClient from "./KihlasormusMiehelleCollectionClient.jsx";
 import { resolveApiBaseUrl } from "../../../lib/productDefaultVariant.js";
 import { buildItemListJsonLd, fetchCollectionItemListProducts } from "../../../lib/collectionItemList.js";
@@ -35,9 +34,6 @@ export const metadata = {
     "Kihlasormus Miehelle – maskuliinista tyyliä ja ajatonta merkitystä – Korkeila Helsinki",
   description:
     "Kihlasormus miehelle ei ole vain koru – se on lupaus, sitoumus ja osa tärkeää elämänvaihetta. Korkeila Helsingillä suunnittelemme ja valmistamme miesten kihlasormukset käsityönä, yksilöllisesti ja laadukkaista materiaaleista. Valikoimastamme löydät ajattoman tyylikkäitä vaihtoehtoja miehille, jotka arvostavat huolitelt",
-  alternates: {
-    canonical: `/collections/${PAGE_SLUG}`,
-  },
 };
 
 export default async function KihlasormusMiehelleCollectionPage() {

@@ -29,15 +29,9 @@ export default function SiteFooter({ brandDescription, fixedLanguage } = {}) {
             <div>
               <p className={styles.brandTitle}>{t("footer.brandTitle")}</p>
               <p className={styles.brandCopy}>
-                {brandDescription ? (
-                  brandDescription
-                ) : (
-                  <>
-                    {t("footer.brandCopyLine1")}
-                    <br />
-                    {t("footer.brandCopyLine2")}
-                  </>
-                )}
+                {t("footer.brandCopyLine1")}
+                <br />
+                {t("footer.brandCopyLine2")}
               </p>
             </div>
 

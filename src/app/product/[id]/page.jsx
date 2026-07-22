@@ -1,6 +1,3 @@
-import { cache } from "react";
-import { cookies, headers } from "next/headers";
-import { permanentRedirect } from "next/navigation";
 import SiteFooter from "../../../components/Home/SiteFooter.jsx";
 import SiteHeader from "../../../components/Home/SiteHeader.jsx";
 import Container from "../../../components/ui/Container.jsx";
@@ -268,7 +265,7 @@ export default async function ProductDetailsPage({ params, searchParams }) {
           <RelatedProducts productId={id ?? ""} designId={designId} />
         </Container>
       </main>
-      <SiteFooter brandDescription={footerBrandDescription} />
+      <SiteFooter />
     </div>
   );
 }

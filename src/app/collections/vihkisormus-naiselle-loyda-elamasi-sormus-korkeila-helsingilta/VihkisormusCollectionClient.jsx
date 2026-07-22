@@ -73,29 +73,8 @@ const faqs = [
   },
 ];
 
-const extractPlainText = (node) => {
-  if (node == null || typeof node === "boolean") return "";
-  if (typeof node === "string" || typeof node === "number") return String(node);
-  if (Array.isArray(node)) return node.map(extractPlainText).join(" ");
-  if (node?.props?.children != null) return extractPlainText(node.props.children);
-  return "";
-};
-
-const faqJsonLd = {
-  "@context": "https://schema.org",
-  "@type": "FAQPage",
-  mainEntity: faqs.map((faq) => ({
-    "@type": "Question",
-    name: faq.question,
-    acceptedAnswer: {
-      "@type": "Answer",
-      text: [extractPlainText(faq.answer), ...(faq.bullet ?? [])].filter(Boolean).join(" "),
-    },
-  })),
-};
-
 export default function VihkisormusCollectionClient() {
-  const { language, currencyCode, currencySymbol, t } = useI18n();
+  const { language, currencyCode, currencySymbol } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -348,14 +327,12 @@ export default function VihkisormusCollectionClient() {
                   </button>
                 </div>
               ) : null}
-              <div
-                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
-                id="story-content"
-              >
+              {showAllContent ? (
+                <div className={styles.storyBody} id="story-content">
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
                       src="/link3/16d326f7-c99f-491b-8fbf-c2eb296625be.jpeg"
-                      alt="Vihkisormus, jossa vihreä jalokivi, naisen kädessä"
+                      alt="vihkisormus, vihkisormukset, myös, naisten, miesten"
                       fill
                       sizes="(max-width: 720px) 80vw, 360px"
                     />
@@ -392,7 +369,7 @@ export default function VihkisormusCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link3/8c061b8e-afe8-453c-b105-3a207640bc66.jpeg"
-                      alt="Pinotut vihkisormus ja kihlasormus kaulakuopan lähellä"
+                      alt="vihkisormus, vihkisormukset, myös, miesten, naisten, timanttisormukset"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -435,7 +412,7 @@ export default function VihkisormusCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link3/5ce16714-af3d-4a4d-8a51-68bed03209f6.jpeg"
-                      alt="Timanttinen vihkisormus korurasian kannella kukkien edessä"
+                      alt="vihkisormus, vihkisormukset, naisten, timanttisormukset"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -489,7 +466,7 @@ export default function VihkisormusCollectionClient() {
                   <figure className={styles.storyImage}>
                     <Image
                       src="/link3/9c97a591-fcc4-43a8-9e42-cbd303654a01.jpeg"
-                      alt="Timanttisormus naisen kädessä lähikuvassa"
+                      alt="hinta, vihkisormus naiselle, leveys, kihlasormus, vihkisormuksia, hinta"
                       fill
                       sizes="(max-width: 960px) 100vw, 720px"
                     />
@@ -515,6 +492,7 @@ export default function VihkisormusCollectionClient() {
                     <p className={styles.sectionCopy}>Korkeila Helsinki – Kaikki vihkisormukset valmistetaan rakkaudella, juuri sinulle.</p>
                   </section>
                 </div>
+              ) : null}
 
               {showAllContent ? (
 

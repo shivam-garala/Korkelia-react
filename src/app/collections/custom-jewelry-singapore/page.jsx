@@ -20,9 +20,6 @@ export const metadata = {
     "Custom Jewelry Singapore | Korkeila Helsinki",
   description:
     "Create custom jewelry with Korkeila Helsinki. Tailored pieces designed with care, ethical sourcing, and refined craftsmanship.",
-  alternates: {
-    canonical: "/collections/custom-jewelry-singapore",
-  },
 };
 
 export default async function CustomJewelrySingaporePage() {

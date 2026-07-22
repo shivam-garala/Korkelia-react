@@ -33,7 +33,7 @@ const introText = (
 
 
 export default function KihlasormusMiehelleCollectionClient() {
-  const { language, currencyCode, currencySymbol, t } = useI18n();
+  const { language, currencyCode, currencySymbol } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -274,10 +274,8 @@ export default function KihlasormusMiehelleCollectionClient() {
                 </div>
 
               ) : null}
-              <div
-                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
-                id="story-content"
-              >
+              {showAllContent ? (
+                <div className={styles.storyBody} id="story-content">
                   <p className={styles.intro}>In Singapore, couples are increasingly choosing lab-grown diamonds for engagement rings and meaningful jewellery pieces. With advances in lab technology, lab-grown diamonds are now indistinguishable from mined diamonds in brilliance, clarity, and durability.</p>
                   
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
@@ -484,6 +482,7 @@ export default function KihlasormusMiehelleCollectionClient() {
 
 
                 </div>
+              ) : null}
 
               {showAllContent ? (
 
