@@ -119,8 +119,9 @@ export default async function LocalizedCustomJewelryPage({ params }) {
       <SiteHeader />
       <Hero
         videoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Rings_in_Motion.mp4"
-        mobileVideoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Ring_in_motion_mobile.mp4"
         posterSrc="/homepage/poster_default.png"
+        mobileHeight="50vh"
+        mobileMinHeight="420px"
       />
       <main className={styles.main}>
         <Container>

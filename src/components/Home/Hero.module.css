@@ -154,8 +154,8 @@
 
 @media (max-width: 720px) {
   .hero {
-    height: 80vh;
-    min-height: 620px;
+    height: var(--mobile-hero-height, 80vh);
+    min-height: var(--mobile-hero-min-height, 620px);
   }
 
   .muteBtn {

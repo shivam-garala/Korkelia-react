@@ -166,6 +166,62 @@ export async function fetchAllCategoriesItemListProducts({
   }
 }
 
+// Mirrors the product listing page's own default behavior: no sub-category
+// narrowing at all (that only happens once a visitor picks a filter chip),
+// so this just returns every product in the given category.
+export async function fetchCategoryItemListProducts({
+  apiBaseUrl,
+  siteBaseUrl,
+  categoryId,
+  languageId = "1",
+}) {
+  if (!apiBaseUrl || !categoryId) return [];
+  try {
+    const params = new URLSearchParams({
+      language_id: String(languageId),
+      category_id: String(categoryId),
+      currency: "EU",
+      currency_symbol: "€",
+      prefer_white: "0",
+    });
+    const response = await fetch(`${apiBaseUrl}/api/product/listEcom?${params.toString()}`, {
+      cache: "no-store",
+    });
+    if (!response.ok) return [];
+    const json = await response.json();
+    const list = Array.isArray(json) ? json : json?.data ?? [];
+    return list.map((item) => mapToSchemaProduct(item, languageId, apiBaseUrl, siteBaseUrl)).filter(Boolean);
+  } catch {
+    return [];
+  }
+}
+
+// Mirrors the listing page's own category resolution: if a category_id is
+// already known, use it directly; otherwise look up the category whose name
+// matches the category_name query param (same lookup, same fallback to "1").
+export async function resolveListingCategoryId({ apiBaseUrl, categoryId, categoryName, languageId = "1" }) {
+  if (categoryId) return String(categoryId);
+  if (!categoryName || !apiBaseUrl) return "1";
+  try {
+    const response = await fetch(
+      `${apiBaseUrl}/api/categoryMaster/home-page?language_id=${encodeURIComponent(languageId)}`,
+      { cache: "no-store" }
+    );
+    if (!response.ok) return "1";
+    const json = await response.json();
+    const list = Array.isArray(json) ? json : json?.data ?? [];
+    const normalizedName = String(categoryName).trim().toLowerCase();
+    const match = list.find((item) => {
+      const label = item?.category_name ?? item?.name ?? "";
+      return String(label).trim().toLowerCase() === normalizedName;
+    });
+    const resolvedId = match?.id ?? match?.category_id ?? null;
+    return resolvedId ? String(resolvedId) : "1";
+  } catch {
+    return "1";
+  }
+}
+
 export function buildItemListJsonLd(products) {
   if (!products.length) return null;
   return {

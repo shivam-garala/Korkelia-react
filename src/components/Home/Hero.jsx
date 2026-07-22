@@ -15,6 +15,8 @@ export default function Hero({
   subcopy,
   primaryCta,
   secondaryCta,
+  mobileHeight,
+  mobileMinHeight,
 }) {
   const mobileVideoRef = useRef(null);
   const [isMuted, setIsMuted] = useState(true);
@@ -43,8 +45,13 @@ export default function Hero({
     setIsMuted(video.muted);
   };
 
+  const heroStyle = {
+    ...(mobileHeight ? { "--mobile-hero-height": mobileHeight } : {}),
+    ...(mobileMinHeight ? { "--mobile-hero-min-height": mobileMinHeight } : {}),
+  };
+
   return (
-    <section className={styles.hero}>
+    <section className={styles.hero} style={heroStyle}>
       <div className={styles.media} aria-hidden>
         {videoSrc ? (
           <>
