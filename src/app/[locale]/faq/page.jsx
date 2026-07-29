@@ -40,6 +40,11 @@ const contentByLanguage = {
         answer:
           "We offer complete peace of mind. Korkeila Helsinki provides free resizing within 6 months of purchase. Furthermore, we offer a flexible proposal policy: you can propose with one ring from our collection, and if your partner prefers a different design, they can exchange the original ring to ensure they get exactly what they want.",
       },
+      {
+        question: "Do you use recycled gold and platinum in your jewelry?",
+        answer:
+          "Yes, our rings and fine jewelry are crafted using 100% recycled 14K gold, 18K gold, and Platinum 950. Recycled precious metals are chemically, structurally, and visually identical to newly mined metals. They offer the exact same durability and premium luxury finish without the heavy environmental toll of raw extraction.\n\nBy utilizing refined, pre-existing metals, we drastically reduce our carbon footprint and avoid the ecological disruption associated with traditional mining. This commitment to a circular economy perfectly complements the sustainable nature of our laboratory-grown diamonds. It also aligns seamlessly with the strict ethical standards of our natural diamonds, which are fully certified and sourced exclusively from suppliers adhering to the Kimberley Process. Whether you select a lab-grown diamond or a certified natural diamond, your piece is engineered with uncompromising environmental and ethical integrity from the metal up.",
+      },
     ],
   },
   fi: {
@@ -70,6 +75,11 @@ const contentByLanguage = {
           "Entä jos arvioin sormuksen koon väärin, tai kumppanini haluaa kosinnan jälkeen vaihtaa sormuksen tyyliä?",
         answer:
           "Tarjoamme täydellisen mielenrauhan. Korkeila Helsinki tarjoaa ilmaisen koonmuutoksen 6 kuukauden sisällä ostopäivästä. Lisäksi tarjoamme joustavan kosintakäytännön: voit kosia yhdellä valikoimamme sormuksista, ja mikäli kumppanisi toivoo erilaista designia, alkuperäinen sormus voidaan vaihtaa. Näin varmistamme, että lopputulos on täydellinen.",
+      },
+      {
+        question: "Käytättekö koruissanne kierrätettyä kultaa ja platinaa?",
+        answer:
+          "Kyllä, sormuksemme ja muut hienokorumme valmistetaan 100-prosenttisesti kierrätetystä 14K kullasta, 18K kullasta sekä 950-platinasta. Kierrätetyt jalometallit ovat kemiallisilta, rakenteellisilta ja visuaalisilta ominaisuuksiltaan täysin identtisiä juuri louhitun metallin kanssa. Ne tarjoavat täsmälleen saman kestävyyden ja ensiluokkaisen viimeistelyn ilman raaka-aineiden louhintaan liittyvää raskasta ympäristökuormitusta.\n\nHyödyntämällä puhdistettuja, jo olemassa olevia metalleja pienennämme hiilijalanjälkeämme merkittävästi ja vältämme perinteiseen kaivostoimintaan liittyvät ekologiset haitat. Tämä sitoutuminen kiertotalouteen täydentää täydellisesti laboratoriotimanttiemme kestävää luonnetta. Se sopii saumattomasti yhteen myös luonnontimanttiemme tiukkojen eettisten standardien kanssa: hankimme luonnontimanttimme yksinomaan Kimberleyn prosessia noudattavilta toimittajilta, ja jokainen timanttimme on luotettavasti sertifioitu. Valitsitpa sitten laboratoriotimantin tai sertifioidun luonnontimantin, korusi on valmistettu alusta alkaen ehdottoman eettisesti ja ympäristöä kunnioittaen.",
       },
     ],
   },
