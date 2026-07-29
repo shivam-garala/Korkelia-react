@@ -1,6 +1,5 @@
 import { NextResponse } from "next/server";
 import { isProtectedPath } from "./src/routes/routes";
-import legacyRedirectPaths from "./src/lib/legacyRedirectPaths.js";
 
 const LANGUAGE_COOKIE = "siteLang";
 const COUNTRY_COOKIE = "siteCountry";
@@ -8,7 +7,39 @@ const COUNTRY_COOKIE = "siteCountry";
 const DEFAULT_LANGUAGE = "en";
 const FINNISH_COUNTRY_CODES = new Set(["FI"]);
 const SUPPORTED_LANGUAGES = new Set(["en", "fi"]);
-const REDIRECT_HOME_PATHS = new Set(legacyRedirectPaths);
+const REDIRECT_HOME_PATHS = new Set([
+  "/pages/timantin-puhtausluokittelu",
+  "/products/kukkasormus",
+  "/pages/timantin-hiontamuodot",
+  "/pages/timantin-vari",
+  "/pages/jalometallit-ja-niiden-ominaisuudet",
+  "/pages/tietoa-laboratoriossa-valmistetuista-timanteista",
+  "/pages/karaattipaino-selitettyna",
+  "/pages/timanttikorujen-huolto",
+  "/pages/meidan-liike",
+  "/pages/milloin-ja-miten-kosia",
+  "/pages/timanttitietoutta",
+  "/products/kopio-puoliallianssi-sormus-0-33ct-3",
+  "/collections/frontpage",
+  "/products/timanttikorvakorut",
+  "/collections/sileat-kivettomat-sormukset",
+  "/products/kopio-kapea-taysallianssisormus-briljanteilla-0-50ct",
+  "/collections/sormukset",
+  "/products/kopio-kihlasormus-3mm-bombe-court-premium",
+  "/products/kopio-kihlasormus-3mm-bombe-court",
+  "/pages/nain-tilaat-verkkokaupasta",
+  "/products/kopio-kopio-puoliallianssi-sormus-0-33ct",
+  "/products/kopio-briljantti-hiontainen-halosormus-yht-0-35ct",
+  "/pages/ota-yhteytta",
+  "/pages/tilaustyopalvelu",
+  "/products/kopio-kihlasormus-4mm-bombe-court-premium",
+  "/products/kopio-puoliallianssi-sormus-0-33ct-1",
+  "/products/sun-matt-kihlasormus-5-mm",
+  "/products/criss-cross-kihlasormus-4-5mm",
+  "/products/ice-matt-kihlasormus-4-5-mm-1",
+  "/pages/tilaustyot",
+  "/pages/koru-opas",
+]);
 
 const normalizeLanguage = (value) => {
   if (!value) return "";
@@ -73,6 +104,22 @@ export function middleware(request) {
   const existingCountry = request.cookies.get(COUNTRY_COOKIE)?.value;
   const shouldSetCountry = countryCode && countryCode !== existingCountry;
   const normalizedPathname = normalizePathname(pathname);
+  console.log("[middleware] country detection", {
+    ip: request.ip ?? request.headers.get("x-real-ip") ?? null,
+    forwardedFor: request.headers.get("x-forwarded-for") ?? null,
+    geoCountry: request.geo?.country ?? null,
+    headerCountries: {
+      vercel: request.headers.get("x-vercel-ip-country") ?? null,
+      cf: request.headers.get("cf-ipcountry") ?? null,
+      xCountryCode: request.headers.get("x-country-code") ?? null,
+    },
+    countryCode,
+    existingCountry,
+    resolvedLanguage,
+    fallbackLanguage,
+    queryLanguage,
+    path: pathname,
+  });
   let response;
 
   if (normalizedPathname === "/collections/kihlasormus-naiselle-taydellinen-sormus") {
