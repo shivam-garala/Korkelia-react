@@ -121,9 +121,10 @@ export default function HomeClient() {
       <SiteHeader />
       <main className={styles.main}>
         <Hero
-          videoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Rings_in_Motion.mp4"
+          // videoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Rings_in_Motion.mp4"
+          videoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/home_video_desktop.mp4"
           mobileVideoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Ring_in_motion_mobile.mp4"
-          posterSrc="/homepage/poster_default.png"
+          // posterSrc="/homepage/poster_default.png"
           eyebrow={t("home.hero.eyebrow")}
           title={t("home.hero.title")}
           subcopy={t("home.hero.subcopy")}
