@@ -25,6 +25,21 @@ export default function Hero({
 
   const MOBILE_START = 4;
   const MOBILE_END = 31;
+  const DESKTOP_START = 3;
+
+  const handleDesktopLoaded = () => {
+    const video = desktopVideoRef.current;
+    if (!video) return;
+    video.currentTime = DESKTOP_START;
+  };
+
+  const handleDesktopTimeUpdate = () => {
+    const video = desktopVideoRef.current;
+    if (!video) return;
+    if (video.currentTime < DESKTOP_START) {
+      video.currentTime = DESKTOP_START;
+    }
+  };
 
   const handleMobileLoaded = () => {
     const video = mobileVideoRef.current;
@@ -76,6 +91,8 @@ export default function Hero({
               playsInline
               preload="metadata"
               poster={posterSrc}
+              onLoadedMetadata={handleDesktopLoaded}
+              onTimeUpdate={handleDesktopTimeUpdate}
             >
               <source src={videoSrc} />
             </video>

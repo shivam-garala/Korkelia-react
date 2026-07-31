@@ -179,6 +179,22 @@ export default function HomeClient() {
           href={`/${effectiveLanguage}/diamond-difference`}
         />
 
+        <FullMediaSection
+          mediaType="video"
+          mediaSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Rings_in_Motion.mp4"
+          mediaPosition="center"
+          sectionClassName={styles.customJewelrySection}
+          mediaClassName={styles.customJewelryMedia}
+          contentClassName={styles.customJewelryContent}
+          videoClassName={styles.customJewelryVideo}
+          eyebrow={t("home.customJewelry.eyebrow")}
+          title={t("home.customJewelry.title")}
+          subtitle={t("home.customJewelry.subtitle")}
+          description={t("home.customJewelry.description")}
+          ctaLabel={t("home.cta.discover")}
+          href={`/${effectiveLanguage}/custom-jewelry`}
+        />
+
         {/* <FullMediaSection
           mediaType="image"
           mediaSrc="/homepage/banner_1.jpg"
