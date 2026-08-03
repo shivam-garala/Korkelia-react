@@ -6,6 +6,7 @@ import { useEffect, useMemo, useRef, useState } from "react";
 import { usePathname } from "next/navigation";
 import styles from "./NavMenuOverlay.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
+import { useEffectiveTranslation } from "../../hooks/useEffectiveLanguage.js";
 import { fetchCategoryHomePage } from "../../lib/categoryHomeCache.js";
 import ShareProductModal from "../Product/ShareProductModal.jsx";
 
@@ -27,12 +28,16 @@ function Icon({ path, className, style }) {
   );
 }
 
-export default function NavMenuOverlay({ open, onClose }) {
+/**
+ * @param {{ open: boolean, onClose: () => void, fixedLanguage?: "en" | "fi" }} props
+ */
+export default function NavMenuOverlay({ open, onClose, fixedLanguage }) {
   const [productsOpen, setProductsOpen] = useState(false);
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(false);
   const { t, language } = useI18n();
   const pathname = usePathname();
+  const { t: effectiveT, effectiveLanguage } = useEffectiveTranslation(fixedLanguage);
   const languageId = language === "fi" ? "2" : "1";
   const categoriesLoadedRef = useRef({});
   const isActive = (href) =>
@@ -161,16 +166,16 @@ export default function NavMenuOverlay({ open, onClose }) {
                 href="/"
                 onClick={onClose}
               >
-                {t("menu.home")}
+                {effectiveT("menu.home")}
               </Link>
             </li>
             <li className={styles.item}>
               <Link
                 className={`${styles.link} ${isActive("/about") ? styles.activeLink : ""}`}
-                href="/about"
+                href={`/${effectiveLanguage}/about`}
                 onClick={onClose}
               >
-                {t("menu.about")}
+                {effectiveT("menu.about")}
               </Link>
             </li>
             <li className={styles.item}>
@@ -182,7 +187,7 @@ export default function NavMenuOverlay({ open, onClose }) {
                   aria-expanded={productsOpen}
                   aria-controls="products-submenu"
                 >
-                  {t("menu.products")}
+                  {effectiveT("menu.products")}
                 </button>
                 <button
                   type="button"
@@ -225,37 +230,57 @@ export default function NavMenuOverlay({ open, onClose }) {
             <li className={styles.item}>
               <Link
                 className={`${styles.link} ${isActive("/diamond-guide") ? styles.activeLink : ""}`}
-                href="/diamond-guide"
+                href={`/${effectiveLanguage}/diamond-guide`}
                 onClick={onClose}
               >
-                {t("menu.diamondGuide")}
+                {effectiveT("menu.diamondGuide")}
               </Link>
             </li>
             <li className={styles.item}>
               <Link
                 className={`${styles.link} ${isActive("/diamond-difference") ? styles.activeLink : ""}`}
-                href="/diamond-difference"
+                href={`/${effectiveLanguage}/diamond-difference`}
                 onClick={onClose}
               >
-                {t("menu.diamondDifference")}
+                {effectiveT("menu.diamondDifference")}
+              </Link>
+            </li>
+           
+            <li className={styles.item}>
+              <Link
+                className={`${styles.link} ${isActive("/custom-jewelry") ? styles.activeLink : ""}`}
+                href={`/${effectiveLanguage}/custom-jewelry`}
+                onClick={onClose}
+              >
+                {effectiveT("menu.customJewelry")}
+              </Link>
+            </li>
+       
+            <li className={styles.item}>
+              <Link
+                className={`${styles.link} ${isActive("/shipping-returns") ? styles.activeLink : ""}`}
+                href="/en/shipping-returns"
+                onClick={onClose}
+              >
+                {effectiveT("menu.shippingReturns")}
               </Link>
             </li>
             <li className={styles.item}>
               <Link
-                className={`${styles.link} ${isActive("/shipping-returns") ? styles.activeLink : ""}`}
-                href="/shipping-returns"
+                className={`${styles.link} ${isActive("/faq") ? styles.activeLink : ""}`}
+                href={`/${effectiveLanguage}/faq`}
                 onClick={onClose}
               >
-                {t("menu.shippingReturns")}
+                {effectiveT("menu.faq")}
               </Link>
             </li>
             <li className={styles.item}>
               <Link
                 className={`${styles.link} ${isActive("/contact") ? styles.activeLink : ""}`}
-                href="/contact"
+                href={`/${effectiveLanguage}/contact`}
                 onClick={onClose}
               >
-                {t("menu.contact")}
+                {effectiveT("menu.contact")}
               </Link>
             </li>
           </ul>
@@ -275,11 +300,11 @@ export default function NavMenuOverlay({ open, onClose }) {
                       width={14}
                       height={14}
                     />
-                    <span>{t("header.share")}</span>
+                    <span>{effectiveT("header.share")}</span>
                   </>
                 }
               />
-              <Link className={styles.topLink} href="/appointment" onClick={onClose}>
+              <Link className={styles.topLink} href={`/${effectiveLanguage}/appointment`} onClick={onClose}>
                 <Image
                   className={styles.topIcon}
                   src="/icons/appointment.png"
@@ -287,9 +312,9 @@ export default function NavMenuOverlay({ open, onClose }) {
                   width={14}
                   height={14}
                 />
-                <span>{t("header.appointment")}</span>
+                <span>{effectiveT("header.appointment")}</span>
               </Link>
-              <Link className={styles.topLink} href="/contact" onClick={onClose}>
+              <Link className={styles.topLink} href={`/${effectiveLanguage}/contact`} onClick={onClose}>
                 <Image
                   className={styles.topIcon}
                   src="/icons/contact_header_icon.png"
@@ -297,7 +322,7 @@ export default function NavMenuOverlay({ open, onClose }) {
                   width={14}
                   height={14}
                 />
-                <span>{t("header.ambassador")}</span>
+                <span>{effectiveT("header.ambassador")}</span>
               </Link>
             </div>
           </div>

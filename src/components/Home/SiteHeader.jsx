@@ -1,12 +1,14 @@
 "use client";
-
+//edit
 import Link from "next/link";
 import Image from "next/image";
+import { usePathname, useRouter } from "next/navigation";
 import { useEffect, useMemo, useState } from "react";
 import Dropdown from "./Dropdown";
 import NavMenuOverlay from "./NavMenuOverlay";
 import styles from "./SiteHeader.module.css";
 import { useI18n } from "../../providers/I18nProvider.jsx";
+import { useEffectiveTranslation } from "../../hooks/useEffectiveLanguage.js";
 import ShareProductModal from "../Product/ShareProductModal.jsx";
 import axiosClient from "../../lib/axiosClient.js";
 import {
@@ -14,10 +16,37 @@ import {
   optionFromPublicRateRow,
 } from "../../constants/currencyOptions.js";
 
-export default function SiteHeader() {
+/**
+ * @param {{ availableLanguages?: Array<"en" | "fi">, fixedLanguage?: "en" | "fi" }} [props]
+ */
+export default function SiteHeader({
+  availableLanguages = ["en", "fi"],
+  fixedLanguage,
+} = {}) {
   const [menuOpen, setMenuOpen] = useState(false);
-  const { language, setLanguage, currency, setCurrency, t } = useI18n();
+  const { language, setLanguage, currency, setCurrency } = useI18n();
+  const { t } = useEffectiveTranslation(fixedLanguage);
   const [publicRates, setPublicRates] = useState([]);
+  const pathname = usePathname();
+  const router = useRouter();
+
+  // On locale-prefixed URLs (/en/about, /fi/about), the page's language is
+  // determined by the URL itself, not the cookie — so switching language here
+  // must navigate to the sibling URL instead of just updating client state,
+  // otherwise the URL and page content go out of sync with the dropdown.
+  // Single-language pages (e.g. a Finnish-only collection) pass fixedLanguage
+  // instead, which always wins over the URL/cookie.
+  const localeUrlMatch = pathname?.match(/^\/(en|fi)(\/.*)?$/);
+  const urlLocale = localeUrlMatch?.[1];
+  const effectiveLanguage = fixedLanguage ?? urlLocale ?? language;
+
+  const handleLanguageChange = (nextLanguage) => {
+    setLanguage(nextLanguage);
+    if (localeUrlMatch) {
+      const rest = localeUrlMatch[2] ?? "";
+      router.push(`/${nextLanguage}${rest}`);
+    }
+  };
 
   useEffect(() => {
     let cancelled = false;
@@ -52,9 +81,28 @@ export default function SiteHeader() {
   }, [publicRates]);
 
   const languageLabels =
-    language === "fi"
+    effectiveLanguage === "fi"
       ? { en: "Englanti", fi: "Suomi" }
       : { en: "English", fi: "Finnish" };
+
+  const languageOptions = useMemo(
+    () =>
+      [
+        {
+          value: "en",
+          label: languageLabels.en,
+          icon: "/icons/uk.svg",
+          iconAlt: "United Kingdom flag",
+        },
+        {
+          value: "fi",
+          label: languageLabels.fi,
+          icon: "/icons/finland.svg",
+          iconAlt: "Finland flag",
+        },
+      ].filter((option) => availableLanguages.includes(option.value)),
+    [availableLanguages, languageLabels.en, languageLabels.fi]
+  );
 
   const topBarContent = (
     <>
@@ -62,22 +110,9 @@ export default function SiteHeader() {
         <Dropdown
           ariaLabel={t("common.language")}
           leadingIcon="globe"
-          value={language}
-          onChange={setLanguage}
-          options={[
-            {
-              value: "en",
-              label: languageLabels.en,
-              icon: "/icons/uk.svg",
-              iconAlt: "United Kingdom flag",
-            },
-            {
-              value: "fi",
-              label: languageLabels.fi,
-              icon: "/icons/finland.svg",
-              iconAlt: "Finland flag",
-            },
-          ]}
+          value={effectiveLanguage}
+          onChange={handleLanguageChange}
+          options={languageOptions}
         />
         <div className={styles.currencyRow}>
           <Dropdown
@@ -101,11 +136,11 @@ export default function SiteHeader() {
             </>
           }
         />
-        <Link className={styles.topLink} href="/appointment">
+        <Link className={styles.topLink} href={`/${effectiveLanguage}/appointment`}>
           <Image className={styles.topIcon} src="/icons/appointment.png" alt="" width={14} height={14} />
           <span>{t("header.appointment")}</span>
         </Link>
-        <Link className={styles.topLink} href="/contact">
+        <Link className={styles.topLink} href={`/${effectiveLanguage}/contact`}>
           <Image
             className={styles.topIcon}
             src="/icons/contact_header_icon.png"
@@ -156,7 +191,11 @@ export default function SiteHeader() {
         </div>
       </header>
 
-      <NavMenuOverlay open={menuOpen} onClose={() => setMenuOpen(false)} />
+      <NavMenuOverlay
+        open={menuOpen}
+        onClose={() => setMenuOpen(false)}
+        fixedLanguage={fixedLanguage}
+      />
     </>
   );
 }

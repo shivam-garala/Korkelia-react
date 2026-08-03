@@ -3,7 +3,7 @@
 import Link from "next/link";
 import Image from "next/image";
 import styles from "./SiteFooter.module.css";
-import { useI18n } from "../../providers/I18nProvider.jsx";
+import { useEffectiveTranslation } from "../../hooks/useEffectiveLanguage.js";
 import CookieBanner from "../ui/CookieBanner.jsx";
 
 const socials = [
@@ -15,8 +15,11 @@ const socials = [
   // { href: "#", src: "/icons/xtwitter.png", alt: "X" },
 ];
 
-export default function SiteFooter() {
-  const { t } = useI18n();
+/**
+ * @param {{ brandDescription?: string, fixedLanguage?: "en" | "fi" }} [props]
+ */
+export default function SiteFooter({ brandDescription, fixedLanguage } = {}) {
+  const { t, effectiveLanguage } = useEffectiveTranslation(fixedLanguage);
 
   return (
     <>
@@ -26,28 +29,34 @@ export default function SiteFooter() {
             <div>
               <p className={styles.brandTitle}>{t("footer.brandTitle")}</p>
               <p className={styles.brandCopy}>
-                {t("footer.brandCopyLine1")}
-                <br />
-                {t("footer.brandCopyLine2")}
+                {brandDescription ? (
+                  brandDescription
+                ) : (
+                  <>
+                    {t("footer.brandCopyLine1")}
+                    <br />
+                    {t("footer.brandCopyLine2")}
+                  </>
+                )}
               </p>
             </div>
 
             <div>
               <p className={styles.infoTitle}>{t("footer.infoTitle")}</p>
               <nav className={styles.infoLinks} aria-label={t("footer.infoTitle")}>
-                <Link className={styles.link} href="/privacy-policy">
+                <Link className={styles.link} href="/en/privacy-policy">
                   {t("footer.links.privacy")}
                 </Link>
-                <Link className={styles.link} href="/shipping-returns">
+                <Link className={styles.link} href="/en/shipping-returns">
                   {t("footer.links.shippingReturns")}
                 </Link>
-                <Link className={styles.link} href="/cookie-policy">
+                <Link className={styles.link} href="/en/cookie-policy">
                   {t("footer.links.cookiePolicy")}
                 </Link>
-                <Link className={styles.link} href="/disclaimer">
+                <Link className={styles.link} href="/en/disclaimer">
                   {t("footer.links.disclaimer")}
                 </Link>
-                <Link className={styles.link} href="/contact">
+                <Link className={styles.link} href={`/${effectiveLanguage}/contact`}>
                   {t("footer.links.contact")}
                 </Link>
               </nav>

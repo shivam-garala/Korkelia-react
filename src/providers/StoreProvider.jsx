@@ -18,7 +18,8 @@ export default function StoreProvider({ children }) {
       pathname.startsWith("/dashboard") ||
       pathname.startsWith("/product") ||
       pathname === "/login" ||
-      pathname === "/appointment"
+      pathname === "/appointment" ||
+      pathname.endsWith("/appointment")
     );
   }, [pathname]);
 

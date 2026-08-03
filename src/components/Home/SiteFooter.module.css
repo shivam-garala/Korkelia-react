@@ -33,6 +33,7 @@
   margin: 0;
   font-size: 15px;
   line-height: 1.5;
+  max-width: 80%;
 }
 
 .infoTitle {
@@ -129,6 +130,10 @@
 
   .infoLinks {
     justify-items: start;
+  }
+
+  .brandCopy {
+    max-width: 100%;
   }
 
   .bottomRow {

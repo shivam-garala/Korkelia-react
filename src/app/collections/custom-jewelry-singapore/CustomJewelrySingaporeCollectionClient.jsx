@@ -14,6 +14,7 @@ import {
   fetchSubCategoryHomePage,
 } from "../../../lib/productListingCache.js";
 import { useI18n } from "../../../providers/I18nProvider.jsx";
+import en from "../../../i18n/en.json";
 import styles from "./page.module.css";
 
 const buildSortOptions = (labels) => [
@@ -97,7 +98,7 @@ const introText = (
 );
 
 export default function LabgrownDiamondSingaporeCollectionClient() {
-  const { language, currencyCode,currencySymbol } = useI18n();
+  const { language, currencyCode, currencySymbol, t } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [categories, setCategories] = useState([]);
   const [categoryFilter, setCategoryFilter] = useState([]);
@@ -286,7 +287,7 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
 
   return (
     <div className={styles.page}>
-      <SiteHeader />
+      <SiteHeader availableLanguages={["en"]} fixedLanguage="en" />
       <main className={styles.main}>
         <section className={styles.storyWrap}>
           <Container>
@@ -309,8 +310,10 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
                   </button>
                 </div>
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <p className={styles.intro}>
                    In Singapore, discerning clients seek more than ready-made collections. They want a piece that is personal, one of a kind, and crafted with intention. Our approach to jewellery design is rooted in refinement, precision, and a deep respect for craftsmanship.
                   </p>
@@ -588,7 +591,6 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
                  
 
                 </div>
-              ) : null}
 
               {showAllContent ? (
                 <div className={styles.toggleRow}>
@@ -640,7 +642,7 @@ export default function LabgrownDiamondSingaporeCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={en.footer.homeBrandDescription} fixedLanguage="en" />
     </div>
   );
 }

@@ -16,7 +16,9 @@
     "products": "Tuotteet",
     "diamondDifference": "Korkeila Helsinki timanttien ominaisuudet ja erot",
     "diamondGuide": "Korkeila Helsinki Timanttiopas",
+    "customJewelry": "Tilaustyöt",
     "shippingReturns": "Toimitus ja palautukset",
+    "faq": "UKK",
     "contact": "Ota yhteyttä",
     "productsSub": {
       "rings": "Sormukset",
@@ -50,9 +52,15 @@
     },
     "diamondGuide": {
       "eyebrow": "",
-      "title": "Korkeila Helsinki\nTimantin ero",
+      "title": "Korkeila Helsinki\ntimanttiopas",
       "subtitle": "Johdatus timanttien ainutlaatuiseen loistoon",
       "description": ""
+    },
+    "customJewelry": {
+      "eyebrow": "",
+      "title": "Tilaustyöt",
+      "subtitle": "",
+      "description": "Korkeila Helsingissä uniikin korun teettäminen on yhteistyötä asiantuntijan kanssa."
     },
     "about": {
       "eyebrow": "",
@@ -68,6 +76,8 @@
     "brandTitle": "KORKEILA HELSINKI",
     "brandCopyLine1": "Kultasepänliike Helsingissä. Tilaustyöt, kulta- ja hopeakorut.",
     "brandCopyLine2": "Laboratorio- ja luonnontimantit.",
+    "homeBrandDescription": "Korkeila Helsinki on ensiluokkainen koruasiantuntijasi, joka on erikoistunut kihla- ja vihkisormuksiin sekä hienokoruihin, kuten riipuksiin, kaulakoruihin, korvakoruihin ja rannekoruihin. Tarjoamme huolella valikoidun, heti saatavilla olevan valikoiman luonnon- ja huippuluokan laboratoriotimantteja. Jokainen korumme on teknisesti huippuunsa hiottu: kynsien tarkka symmetria takaa täydellisyyden niin saumattomasti istuvissa sormuksissa kuin kauniisti tasapainotetuissa riipuksissakin. Etsitpä sitten yksilöllistä tilaustyötä, harvinaista Hamilton- tai samppanjakultaa, tai tarvitset korun lyhyellä varoitusajalla, Helsingin myymälämme tarjoaa maailmanluokan käsityötaitoa ja läpinäkyvää hinta-laatusuhdetta.",
+    "ringBrandDescription": "Tutustu laajaan kihla- ja vihkisormusten valikoimaamme, jossa yhdistyvät tekninen täydellisyys ja suomalainen perinne. Asiantuntijavetoinen lähestymistapamme varmistaa, että löydät optimaalisen tasapainon tyylin, istuvuuden ja budjetin välillä. Olemme erikoistuneet sormuksiin, jotka istuvat täydellisen saumattomasti yhteen – suositpa sitten aktiiviseen arkeen sopivaa matalaa istutusta tai maksimaalista säihkettä tuovaa korkeaa istutusta. Valitse eettisesti tuotettu luonnontimantti tai poikkeuksellinen laboratoriotimantti, joka istutetaan tarkasti kierrätettyyn platina 950:een, kierrätettyyn 14K tai 18K valko- tai keltakultaan, ja valinnaisesti uniikkeihin Hamilton- tai samppanjakullan sävyihin. Mielenrauhasi takaamiseksi tarjoamme ilmaisen koonmuutoksen 6 kuukauden ajan sekä joustavan vaihto-oikeuden kosinnan jälkeen.",
     "infoTitle": "TIEDOT",
     "links": {
       "privacy": "Tietosuojakäytäntö",

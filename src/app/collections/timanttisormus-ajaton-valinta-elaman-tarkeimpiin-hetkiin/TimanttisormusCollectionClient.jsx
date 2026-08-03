@@ -13,6 +13,7 @@ import {
   fetchSubCategoryHomePage,
 } from "../../../lib/productListingCache.js";
 import { useI18n } from "../../../providers/I18nProvider.jsx";
+import fi from "../../../i18n/fi.json";
 import styles from "./page.module.css";
 
 const CATEGORY_ID = "1";
@@ -54,12 +55,33 @@ const faqs = [
       "Laboratoriotimantit ovat eettinen ja ekologinen vaihtoehto, ja ne tarjoavat erinomaisen hinta–laatusuhteen ilman kompromisseja säihkeessä tai kestävyydessä.",
     ],
   },
-  
-  
+
+
 ];
 
+const extractPlainText = (node) => {
+  if (node == null || typeof node === "boolean") return "";
+  if (typeof node === "string" || typeof node === "number") return String(node);
+  if (Array.isArray(node)) return node.map(extractPlainText).join(" ");
+  if (node?.props?.children != null) return extractPlainText(node.props.children);
+  return "";
+};
+
+const faqJsonLd = {
+  "@context": "https://schema.org",
+  "@type": "FAQPage",
+  mainEntity: faqs.map((faq) => ({
+    "@type": "Question",
+    name: faq.question,
+    acceptedAnswer: {
+      "@type": "Answer",
+      text: [extractPlainText(faq.answer), ...(faq.bullet ?? [])].filter(Boolean).join(" "),
+    },
+  })),
+};
+
 export default function TimanttisormusCollectionClient() {
-  const { language, currencyCode, currencySymbol } = useI18n();
+  const { language, currencyCode, currencySymbol, t } = useI18n();
   const [showAllContent, setShowAllContent] = useState(false);
   const [subCategories, setSubCategories] = useState([]);
   const [subCategoryFilter, setSubCategoryFilter] = useState([]);
@@ -274,7 +296,11 @@ export default function TimanttisormusCollectionClient() {
 
   return (
     <div className={styles.page}>
-      <SiteHeader />
+      <script
+        type="application/ld+json"
+        dangerouslySetInnerHTML={{ __html: JSON.stringify(faqJsonLd) }}
+      />
+      <SiteHeader availableLanguages={["fi"]} fixedLanguage="fi" />
       <main className={styles.main}>
         <section className={styles.storyWrap}>
           <Container>
@@ -299,8 +325,10 @@ export default function TimanttisormusCollectionClient() {
                   </button>
                 </div>
               ) : null}
-              {showAllContent ? (
-                <div className={styles.storyBody} id="story-content">
+              <div
+                className={`${styles.storyBody} ${!showAllContent ? styles.storyBodyHidden : ""}`}
+                id="story-content"
+              >
                   <figure className={`${styles.storyImage} ${styles.storyImageSmall}`}>
                     <Image
                       src="/link1/Halo_sormus_emerald_-hiontaisella_timantilla.jpg"
@@ -610,7 +638,6 @@ export default function TimanttisormusCollectionClient() {
                     </p>
                   </section>
                 </div>
-              ) : null}
               {showAllContent ? (
                 <div className={styles.toggleRow}>
                   <button
@@ -665,7 +692,7 @@ export default function TimanttisormusCollectionClient() {
           </Container>
         </section>
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={fi.footer.ringBrandDescription} fixedLanguage="fi" />
     </div>
   );
 }

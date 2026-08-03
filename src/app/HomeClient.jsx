@@ -8,6 +8,7 @@ import SiteFooter from "../components/Home/SiteFooter.jsx";
 import SiteHeader from "../components/Home/SiteHeader.jsx";
 import { fetchCategoryHomePage } from "../lib/categoryHomeCache.js";
 import { useI18n } from "../providers/I18nProvider.jsx";
+import { useEffectiveLanguage } from "../hooks/useEffectiveLanguage.js";
 import styles from "./home.module.css";
 
 const buildCategoryHref = (id, label) => {
@@ -20,6 +21,7 @@ const buildCategoryHref = (id, label) => {
 
 export default function HomeClient() {
   const { t, language } = useI18n();
+  const effectiveLanguage = useEffectiveLanguage();
   const [categories, setCategories] = useState([]);
   const [categoriesLoading, setCategoriesLoading] = useState(true);
   const [isDesktop, setIsDesktop] = useState(false);
@@ -119,9 +121,10 @@ export default function HomeClient() {
       <SiteHeader />
       <main className={styles.main}>
         <Hero
-          videoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Rings_in_Motion.mp4"
+          // videoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Rings_in_Motion.mp4"
+          videoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/home_video_desktop.mp4"
           mobileVideoSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Ring_in_motion_mobile.mp4"
-          posterSrc="/homepage/poster_default.png"
+          // posterSrc="/homepage/poster_default.png"
           eyebrow={t("home.hero.eyebrow")}
           title={t("home.hero.title")}
           subcopy={t("home.hero.subcopy")}
@@ -153,7 +156,7 @@ export default function HomeClient() {
           subtitle={t("home.diamondGuide.subtitle")}
           description={t("home.diamondGuide.description")}
           ctaLabel={t("home.cta.discover")}
-          href="/diamond-guide"
+          href={`/${effectiveLanguage}/diamond-guide`}
         />
 
         <FullMediaSection
@@ -173,7 +176,23 @@ export default function HomeClient() {
           subtitle={t("home.diamondDifference.subtitle")}
           description={t("home.diamondDifference.description")}
           ctaLabel={t("home.cta.discover")}
-          href="/diamond-difference"
+          href={`/${effectiveLanguage}/diamond-difference`}
+        />
+
+        <FullMediaSection
+          mediaType="video"
+          mediaSrc="https://imagesweb2026.s3.eu-north-1.amazonaws.com/Rings_in_Motion.mp4"
+          mediaPosition="center"
+          sectionClassName={styles.customJewelrySection}
+          mediaClassName={styles.customJewelryMedia}
+          contentClassName={styles.customJewelryContent}
+          videoClassName={styles.customJewelryVideo}
+          eyebrow={t("home.customJewelry.eyebrow")}
+          title={t("home.customJewelry.title")}
+          subtitle={t("home.customJewelry.subtitle")}
+          description={t("home.customJewelry.description")}
+          ctaLabel={t("home.cta.discover")}
+          href={`/${effectiveLanguage}/custom-jewelry`}
         />
 
         {/* <FullMediaSection
@@ -205,10 +224,10 @@ export default function HomeClient() {
           subtitle={t("home.about.subtitle")}
           description={t("home.about.description")}
           ctaLabel={t("home.cta.discover")}
-          href="/about"
+          href={`/${effectiveLanguage}/about`}
         />
       </main>
-      <SiteFooter />
+      <SiteFooter brandDescription={t("footer.homeBrandDescription")} />
     </div>
   );
 }

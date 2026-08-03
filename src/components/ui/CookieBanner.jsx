@@ -43,8 +43,8 @@ export default function CookieBanner() {
   const preferencesEnabled = currentSelection.preferences;
   const analyticsEnabled = currentSelection.analytics;
   const marketingEnabled = currentSelection.marketing;
-  const cookiePolicyHref = "/cookie-policy";
-  const policyHref = "/privacy-policy";
+  const cookiePolicyHref = "/en/cookie-policy";
+  const policyHref = "/en/privacy-policy";
 
   const labels =
     language === "fi"
