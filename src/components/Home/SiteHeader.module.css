@@ -147,8 +147,9 @@
 
 .promoBtn {
   display: inline-block;
-  background: #F0A48B;
-  border: none;
+  /* background: #F0A48B;
+  border: none; */
+  border-bottom: 1px solid #F0A48B;
   padding: 8px 16px;
   color: #373435;
   font-family: var(--font-marcellus);
@@ -156,10 +157,10 @@
   text-decoration: none;
 }
 
-.promoBtn:hover {
+/* .promoBtn:hover {
   text-decoration: underline;
   text-decoration-color: var(--color-primary);
-}
+} */
 
 .brand {
   display: grid;

@@ -12,7 +12,7 @@ const dictionaries = { en, fi };
 
 const headerByLanguage = {
   en: {
-    heading: "Design and Manufactured in Finland",
+    heading: "Designed and Manufactured in Finland",
     subtitle: "The Korkeila Helsinki Diamond Difference: Your personal diamond sourcing Concierge",
     intro:
       "When it comes to diamonds—whether natural or laboratory-grown—finding the perfect stone requires more than just luck. It requires a dedicated global network, deep expertise, and a commitment to quality and ethics. At Korkeila Helsinki, we don't just sell diamonds; we are your personal concierge and sourcing partner.",
