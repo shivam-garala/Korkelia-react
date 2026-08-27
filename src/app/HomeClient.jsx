@@ -171,6 +171,7 @@ export default function HomeClient() {
           mediaClassName={styles.diamondDifferenceMedia}
           contentClassName={styles.diamondDifferenceContent}
           videoClassName={styles.diamondDifferenceVideo}
+          startTimeSeconds={4}
           eyebrow={t("home.diamondDifference.eyebrow")}
           title={t("home.diamondDifference.title")}
           subtitle={t("home.diamondDifference.subtitle")}
