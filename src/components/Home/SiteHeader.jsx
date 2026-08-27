@@ -189,6 +189,15 @@ export default function SiteHeader({
           <div className={styles.right} />
 
         </div>
+
+        <div className={styles.promoRow}>
+          <Link
+            className={styles.promoBtn}
+            href={`/${effectiveLanguage}/diamond-difference`}
+          >
+            {t("header.designManufactured")}
+          </Link>
+        </div>
       </header>
 
       <NavMenuOverlay

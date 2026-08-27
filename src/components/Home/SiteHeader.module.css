@@ -124,6 +124,43 @@
   justify-self: end;
 }
 
+.promoRow {
+  max-width: var(--container-width);
+  margin: 0 auto;
+  display: flex;
+  justify-content: flex-start;
+  padding: 0 20px 16px;
+}
+
+@media (min-width: 561px) {
+  .promoRow {
+    margin-top: -55px;
+  }
+}
+
+@media (min-width: 561px) and (max-width: 900px) {
+  .promoRow {
+    justify-content: center;
+    margin-top: 0;
+  }
+}
+
+.promoBtn {
+  display: inline-block;
+  background: #F0A48B;
+  border: none;
+  padding: 8px 16px;
+  color: #373435;
+  font-family: var(--font-marcellus);
+  font-size: 14px;
+  text-decoration: none;
+}
+
+.promoBtn:hover {
+  text-decoration: underline;
+  text-decoration-color: var(--color-primary);
+}
+
 .brand {
   display: grid;
   justify-items: center;
@@ -180,5 +217,14 @@
 
   .brandLogo {
     height: 100px;
+  }
+
+  .promoRow {
+    justify-content: center;
+  }
+
+  .promoBtn {
+    padding: 4px 10px;
+    font-size: 12px;
   }
 }

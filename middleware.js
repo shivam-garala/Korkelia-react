@@ -43,6 +43,12 @@ const resolveDefaultLanguage = (request) => {
 };
 
 export function middleware(request) {
+ const host = request.headers.get("host") || "";
+  if (host.startsWith("www.")) {
+    const url = new URL(request.url);
+    url.host = host.slice(4); // remove "www." prefix
+    return NextResponse.redirect(url, 301);
+  }
   const token = request.cookies.get("authToken")?.value;
   const { pathname } = request.nextUrl;
   const queryLanguage = normalizeLanguage(request.nextUrl.searchParams.get("lang"));

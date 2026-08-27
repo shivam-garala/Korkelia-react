@@ -1,5 +1,8 @@
+"use client";
+
 import Image from "next/image";
 import Link from "next/link";
+import { useRef } from "react";
 import styles from "./FullMediaSection.module.css";
 
 export default function FullMediaSection({
@@ -20,8 +23,26 @@ export default function FullMediaSection({
   href = "#",
   tone = "dark",
   align = "left",
+  startTimeSeconds,
 }) {
   const isVideo = mediaType === "video";
+  const videoRef = useRef(null);
+
+  const handleLoadedMetadata = () => {
+    if (!startTimeSeconds) return;
+    const video = videoRef.current;
+    if (!video) return;
+    video.currentTime = startTimeSeconds;
+  };
+
+  const handleTimeUpdate = () => {
+    if (!startTimeSeconds) return;
+    const video = videoRef.current;
+    if (!video) return;
+    if (video.currentTime < startTimeSeconds) {
+      video.currentTime = startTimeSeconds;
+    }
+  };
 
   return (
     <section
@@ -36,6 +57,7 @@ export default function FullMediaSection({
         {isVideo ? (
           <video
             key={mediaSrc}
+            ref={videoRef}
             className={[styles.video, videoClassName].join(" ")}
             autoPlay
             muted
@@ -44,6 +66,8 @@ export default function FullMediaSection({
             preload="metadata"
             poster={posterSrc}
             style={{ objectPosition: mediaPosition }}
+            onLoadedMetadata={handleLoadedMetadata}
+            onTimeUpdate={handleTimeUpdate}
           >
             <source src={mediaSrc} />
           </video>
