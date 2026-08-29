@@ -13,15 +13,13 @@ const dictionaries = { en, fi };
 const headerByLanguage = {
   en: {
     heading: "Designed and Manufactured in Finland",
-    subtitle: "The Korkeila Helsinki Diamond Difference: Your personal diamond sourcing Concierge",
-    intro:
-      "When it comes to diamonds—whether natural or laboratory-grown—finding the perfect stone requires more than just luck. It requires a dedicated global network, deep expertise, and a commitment to quality and ethics. At Korkeila Helsinki, we don't just sell diamonds; we are your personal concierge and sourcing partner.",
+    //subtitle: "The Korkeila Helsinki Diamond Difference: Your personal diamond sourcing Concierge",
+    //intro:      "When it comes to diamonds—whether natural or laboratory-grown—finding the perfect stone requires more than just luck. It requires a dedicated global network, deep expertise, and a commitment to quality and ethics. At Korkeila Helsinki, we don't just sell diamonds; we are your personal concierge and sourcing partner.",
   },
   fi: {
-    heading: "Suunniteltu ja valmistettuSuomessa",
-    subtitle: "Henkilökohtainen timanttien hankintakonsulttisi",
-    intro:
-      "Timantin valinta, olipa kyseessä luonnontimantti tai laboratoriossa kasvatettu kivi, vaatii enemmän kuin pelkkää onnea. Se vaatii laajan kansainvälisen verkoston, syvällistä asiantuntemusta sekä tinkimätöntä sitoutumista laatuun ja eettisyyteen. Me Korkeila Helsingillä emme vain myy timantteja, olemme henkilökohtainen hankintakumppanisi ja concierge-palvelusi timanttien maailmassa.",
+    heading: "Suunniteltu ja valmistettu Suomessa",
+    //subtitle: "Henkilökohtainen timanttien hankintakonsulttisi",
+    //intro:  "Timantin valinta, olipa kyseessä luonnontimantti tai laboratoriossa kasvatettu kivi, vaatii enemmän kuin pelkkää onnea. Se vaatii laajan kansainvälisen verkoston, syvällistä asiantuntemusta sekä tinkimätöntä sitoutumista laatuun ja eettisyyteen. Me Korkeila Helsingillä emme vain myy timantteja, olemme henkilökohtainen hankintakumppanisi ja concierge-palvelusi timanttien maailmassa.",
   },
 };
 
