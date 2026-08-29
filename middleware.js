@@ -46,7 +46,8 @@ export function middleware(request) {
  const host = request.headers.get("host") || "";
   if (host.startsWith("www.")) {
     const url = new URL(request.url);
-    url.host = host.slice(4); // remove "www." prefix
+    url.hostname = host.slice(4).split(":")[0]; // remove "www." prefix and any port
+    url.port = "";
     return NextResponse.redirect(url, 301);
   }
   const token = request.cookies.get("authToken")?.value;
