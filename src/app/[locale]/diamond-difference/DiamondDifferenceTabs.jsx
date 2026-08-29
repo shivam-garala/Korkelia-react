@@ -48,9 +48,16 @@ export default function DiamondDifferenceTabs({ tabs, languageKey }) {
               ))}
               {(languageKey === "fi" ? tab.body.fiList : tab.body.enList) ? (
                 <ul className={styles.panelList}>
-                  {(languageKey === "fi" ? tab.body.fiList : tab.body.enList).map((item) => (
-                    <li key={item}>{item}</li>
-                  ))}
+                  {(languageKey === "fi" ? tab.body.fiList : tab.body.enList).map((item, index) =>
+                    typeof item === "object" && item !== null ? (
+                      <li key={index}>
+                        <strong>{item.bold}</strong>
+                        {item.text}
+                      </li>
+                    ) : (
+                      <li key={item}>{item}</li>
+                    )
+                  )}
                 </ul>
               ) : null}
               {(languageKey === "fi" ? tab.body.fiAfter : tab.body.enAfter) ? (

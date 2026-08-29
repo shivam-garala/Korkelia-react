@@ -12,16 +12,14 @@ const dictionaries = { en, fi };
 
 const headerByLanguage = {
   en: {
-    heading: "THE KORKEILA HELSINKI DIAMOND DIFFERENCE",
-    subtitle: "The Korkeila Helsinki Diamond Difference: Your personal diamond sourcing Concierge",
-    intro:
-      "When it comes to diamonds—whether natural or laboratory-grown—finding the perfect stone requires more than just luck. It requires a dedicated global network, deep expertise, and a commitment to quality and ethics. At Korkeila Helsinki, we don't just sell diamonds; we are your personal concierge and sourcing partner.",
+    heading: "Designed and Manufactured in Finland",
+    //subtitle: "The Korkeila Helsinki Diamond Difference: Your personal diamond sourcing Concierge",
+    //intro:      "When it comes to diamonds—whether natural or laboratory-grown—finding the perfect stone requires more than just luck. It requires a dedicated global network, deep expertise, and a commitment to quality and ethics. At Korkeila Helsinki, we don't just sell diamonds; we are your personal concierge and sourcing partner.",
   },
   fi: {
-    heading: "Mikä tekee timanteistamme ainutlaatuisia?",
-    subtitle: "Henkilökohtainen timanttien hankintakonsulttisi",
-    intro:
-      "Timantin valinta, olipa kyseessä luonnontimantti tai laboratoriossa kasvatettu kivi, vaatii enemmän kuin pelkkää onnea. Se vaatii laajan kansainvälisen verkoston, syvällistä asiantuntemusta sekä tinkimätöntä sitoutumista laatuun ja eettisyyteen. Me Korkeila Helsingillä emme vain myy timantteja, olemme henkilökohtainen hankintakumppanisi ja concierge-palvelusi timanttien maailmassa.",
+    heading: "Suunniteltu ja valmistettu Suomessa",
+    //subtitle: "Henkilökohtainen timanttien hankintakonsulttisi",
+    //intro:  "Timantin valinta, olipa kyseessä luonnontimantti tai laboratoriossa kasvatettu kivi, vaatii enemmän kuin pelkkää onnea. Se vaatii laajan kansainvälisen verkoston, syvällistä asiantuntemusta sekä tinkimätöntä sitoutumista laatuun ja eettisyyteen. Me Korkeila Helsingillä emme vain myy timantteja, olemme henkilökohtainen hankintakumppanisi ja concierge-palvelusi timanttien maailmassa.",
   },
 };
 
@@ -29,38 +27,58 @@ const tabs = [
   {
     key: "global",
     label: {
-      en: "GLOBAL SOURCING NETWORK",
-      fi: "GLOBAALI HANKINTAVERKOSTO",
+      en: "Transparent Nordic Craftsmanship",
+      fi: "Läpinäkyvää Pohjoismaista Käsityötaitoa",
     },
     title: {
-      en: "GLOBAL SOURCING NETWORK",
-      fi: "GLOBAALI HANKINTAVERKOSTO",
+      en: "Transparent Nordic Craftsmanship",
+      fi: "Läpinäkyvää Pohjoismaista Käsityötaitoa",
     },
     image: "/diamonddifference/global_sourcing.jpg",
     alt: "Global sourcing network",
     body: {
       en: [
-        "Our ability to find precisely the right diamond for every client—from a flawless round brilliant to the most uniquely shaped, rare fancy color stone—is powered by our established global network. This infrastructure gives us direct access to the world’s leading diamond hubs, ensuring we can deliver on virtually any request.",
+        "True luxury requires complete transparency. We manage our supply chain meticulously to ensure ethical production, utilizing recycled precious metals and maintaining exceptional quality standards.",
       ],
       enList: [
-        "The USA, for both established certification standards and cutting-edge lab-grown innovation.",
-        "Hong Kong, a gateway to diverse Asian markets and a key center for specialized stones.",
-        "Germany and Belgium, historical and modern centers of diamond cutting, trading, and expertise.",
-        "India, the world’s largest cutting and polishing center, offering unparalleled access to a vast array of polished goods.",
+        {
+          bold: "Design & Engineering: ",
+          text: "Every bespoke engagement ring and fine jewelry piece is conceptualized by our advisors at our Korkeavuorenkatu boutique.",
+        },
+        {
+          bold: "Precision Casting (Kirkkonummi): ",
+          text: "We utilize recycled 14K gold, 18K gold, and Platinum 950, with the complete casting process executed in Kirkkonummi, Finland.",
+        },
+        {
+          bold: "Polishing, Setting & Inspection (Helsinki): ",
+          text: "The final polishing, precision diamond setting, and rigorous quality inspection are all executed locally in Helsinki.",
+        },
+        {
+          bold: "Ethical Diamond Sourcing: ",
+          text: "We source exceptional lab-grown stones and strictly Kimberley Process-compliant natural diamonds through established, vetted partners in the USA, Belgium, Germany, and Finland. We ensure our diamonds are fully certified by the world's most recognized gemological laboratories, primarily the GIA and IGI.",
+        },
       ],
-      enAfter:
-        "This comprehensive network allows us to bypass middlemen, secure the highest quality stones at competitive values, and, most importantly, find the exact diamond that meets your vision and budget.",
       fi: [
-        "Tavoitteemme on löytää jokaiselle asiakkaalle juuri oikea timantti – aina virheettömästä pyöreästä briljantista harvinaisiin, erikoismuotoisiin ja värillisiin kiviin. Vakiintuneen kansainvälisen verkostomme ansiosta meillä on suora yhteys maailman johtaviin timanttimarkkinoihin.",
+        "Todellinen ylellisyys vaatii täydellistä läpinäkyvyyttä. Hallitsemme toimitusketjuamme huolellisesti varmistaaksemme eettisen tuotannon, hyödyntäen kierrätettyjä jalometalleja ja ylläpitäen poikkeuksellisia laatustandardeja.",
       ],
       fiList: [
-        "Yhdysvallat – tunnettu sekä vahvoista sertifiointistandardeistaan että huippuluokan laboratoriotimanttiteknologiasta.",
-        "Hongkong – portti monimuotoisille Aasian markkinoille ja keskus erikoiskiville.",
-        "Saksa ja Belgia – perinteikkäitä ja nykyaikaisia timanttien hionnan, kaupan ja asiantuntemuksen keskuksia.",
-        "Intia – maailman suurin timanttien hionta- ja kiillotusmaa, joka tarjoaa vertaansa vailla olevan valikoiman jalostettuja kiviä.",
+        {
+          bold: "Suunnittelu: ",
+          text: "Jokainen tilaustyönä tehtävä sormus ja hienokoru suunnitellaan asiantuntijoidemme toimesta Korkeavuorenkadun myymälässämme.",
+        },
+        {
+          bold: "Valu (Kirkkonummi): ",
+          text: "Käytämme kierrätettyä 14K ja 18K kultaa sekä platina 950:tä, ja koko valamisprosessi toteutetaan Kirkkonummella, Suomessa.",
+        },
+        {
+          bold: "Kiillotus, Istutus ja Tarkastus (Helsinki): ",
+          text: "Lopullinen kiillotus, tarkka timanttien istutus ja tiukka laaduntarkastus toteutetaan kaikki paikallisesti Helsingissä.",
+        },
+        {
+          bold: "Eettinen Timanttien Hankinta: ",
+          text: "Hankimme poikkeuksellisia laboratoriotimantteja sekä tarkasti Kimberley-prosessin mukaisia luonnontimantteja luotettavien kumppaneidemme kautta Yhdysvalloista, Belgiasta, Saksasta ja Suomesta. Varmistamme, että timanttimme ovat täysin sertifioituja maailman arvostetuimpien gemologisten laboratorioiden, ensisijaisesti GIA:n ja IGI:n, toimesta.",
+        },
       ],
-      fiAfter:
-        "Tämän verkoston ansiosta voimme ohittaa välikädet, tarjota korkealaatuisia timantteja kilpailukykyisin hinnoin ja ennen kaikkea löytää juuri sinun toiveitasi ja budjettiasi vastaavan kiven.",
     },
   },
   {

@@ -8,13 +8,14 @@
     "detectedRegion": "Alue",
     "share": "JAA",
     "appointment": "VARAA AIKA",
-    "ambassador": "OTA YHTEYTTÄ"
+    "ambassador": "OTA YHTEYTTÄ",
+    "designManufactured": "Suunniteltu ja valmistettu Suomessa"
   },
   "menu": {
     "home": "Kotiin",
     "about": "Tietoa meistä",
     "products": "Tuotteet",
-    "diamondDifference": "Korkeila Helsinki timanttien ominaisuudet ja erot",
+    "diamondDifference": "Suunniteltu ja valmistettu Suomessa",
     "diamondGuide": "Korkeila Helsinki Timanttiopas",
     "customJewelry": "Tilaustyöt",
     "shippingReturns": "Toimitus ja palautukset",
@@ -46,8 +47,8 @@
     },
     "diamondDifference": {
       "eyebrow": "",
-      "title": "Mikä tekee\ntimanteistamme ainutlaatuisia?",
-      "subtitle": "Henkilökohtainen timanttien hankintakonsulttisi",
+      "title": "Suunniteltu ja valmistettuSuomessa",
+      "subtitle": "Läpinäkyvää Pohjoismaista Käsityötaitoa",
       "description": ""
     },
     "diamondGuide": {
@@ -76,8 +77,8 @@
     "brandTitle": "KORKEILA HELSINKI",
     "brandCopyLine1": "Kultasepänliike Helsingissä. Tilaustyöt, kulta- ja hopeakorut.",
     "brandCopyLine2": "Laboratorio- ja luonnontimantit.",
-    "homeBrandDescription": "Korkeila Helsinki on ensiluokkainen koruasiantuntijasi, joka on erikoistunut kihla- ja vihkisormuksiin sekä hienokoruihin, kuten riipuksiin, kaulakoruihin, korvakoruihin ja rannekoruihin. Tarjoamme huolella valikoidun, heti saatavilla olevan valikoiman luonnon- ja huippuluokan laboratoriotimantteja. Jokainen korumme on teknisesti huippuunsa hiottu: kynsien tarkka symmetria takaa täydellisyyden niin saumattomasti istuvissa sormuksissa kuin kauniisti tasapainotetuissa riipuksissakin. Etsitpä sitten yksilöllistä tilaustyötä, harvinaista Hamilton- tai samppanjakultaa, tai tarvitset korun lyhyellä varoitusajalla, Helsingin myymälämme tarjoaa maailmanluokan käsityötaitoa ja läpinäkyvää hinta-laatusuhdetta.",
-    "ringBrandDescription": "Tutustu laajaan kihla- ja vihkisormusten valikoimaamme, jossa yhdistyvät tekninen täydellisyys ja suomalainen perinne. Asiantuntijavetoinen lähestymistapamme varmistaa, että löydät optimaalisen tasapainon tyylin, istuvuuden ja budjetin välillä. Olemme erikoistuneet sormuksiin, jotka istuvat täydellisen saumattomasti yhteen – suositpa sitten aktiiviseen arkeen sopivaa matalaa istutusta tai maksimaalista säihkettä tuovaa korkeaa istutusta. Valitse eettisesti tuotettu luonnontimantti tai poikkeuksellinen laboratoriotimantti, joka istutetaan tarkasti kierrätettyyn platina 950:een, kierrätettyyn 14K tai 18K valko- tai keltakultaan, ja valinnaisesti uniikkeihin Hamilton- tai samppanjakullan sävyihin. Mielenrauhasi takaamiseksi tarjoamme ilmaisen koonmuutoksen 6 kuukauden ajan sekä joustavan vaihto-oikeuden kosinnan jälkeen.",
+    "homeBrandDescription": "Korkeila Helsinki on ensiluokkainen koruasiantuntijasi, joka on erikoistunut kihla- ja vihkisormuksiin sekä hienokoruihin. Korumme on ylpeydellä suunniteltu ja valmistettu Suomessa. Tarjoamme huolella valikoidun, heti saatavilla olevan valikoiman luonnon- ja laboratoriotimantteja. Jokainen korumme on teknisesti huippuunsa hiottu. Etsitpä sitten yksilöllistä tilaustyötä, harvinaista Hamilton- tai samppanjakultaa, tai tarvitset korun lyhyellä varoitusajalla, Helsingin myymälämme tarjoaa maailmanluokan käsityötaitoa ja läpinäkyvää hinta-laatusuhdetta.",
+    "ringBrandDescription": "Tutustu laajaan kihla- ja vihkisormusvalikoimaamme, jossa yhdistyvät tekninen täydellisyys ja suomalainen perintö. Suomessa valetut ja valmistetut korumme sekä asiantunteva palvelumme takaavat, että löydät tyyliisi ja budjettiisi sopivan sormuksen. Valitse eettisesti tuotettu luonnontimantti tai huippuluokan laboratoriotimantti, joka on istutettu tarkasti kierrätettyyn platina 950:een tai 14K/18K kultaan. Mielenrauhasi takaamiseksi tarjoamme 6 kuukauden ilmaisen koonmuutoksen ja joustavan vaihto-oikeuden kosinnan jälkeen.",
     "infoTitle": "TIEDOT",
     "links": {
       "privacy": "Tietosuojakäytäntö",
